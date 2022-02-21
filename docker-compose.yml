@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  nest:
+    build: ./Nest
+    restart: always
+    volumes:
+      - ./nest/vol:/vol
+    ports:
+      - 3000:3000
