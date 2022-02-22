@@ -1,9 +1,7 @@
 FROM alpine:3.15.0
 
-RUN apk update; apk add nodejs npm; npm i -g @nestjs/cli;
-
-RUN npm install --save @nestjs/typeorm typeorm pg
+RUN apk update; apk add nodejs npm;
 
 EXPOSE 3000
 
-CMD npm run start:dev --prefix /vol/project
+CMD npm install --prefix /vol/project; npm run start:dev --prefix /vol/project
