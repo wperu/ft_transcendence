@@ -10,7 +10,7 @@ function AppRoute() : JSX.Element
 			<Routes>
 				<Route path="/" element={<Home/>}/>
 				<Route path="/profile" element={<Profile/>}/>
-				<Route path="*" element={<NoMatch />}>
+				<Route path="*" element={<NoMatch />}/>
 			</Routes>
 		</BrowserRouter>;
 	return element;
