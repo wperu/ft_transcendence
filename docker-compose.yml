@@ -11,10 +11,16 @@ services:
     ports:
       - 8080:8080
 
+  react:
+    build: ./React
+    restart: always
+    volumes:
+      - ./react/vol:/vol
+    ports:
+      - 3000:3000
+    
   nest:
     build: ./Nest
     restart: always
     volumes:
-      - ./nest/vol:/vol
-    ports:
-      - 3000:3000
+      - ./Nest/vol:/vol
