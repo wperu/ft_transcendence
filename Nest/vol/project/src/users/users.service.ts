@@ -22,6 +22,7 @@ export class UsersService {
 		{
 			return user
 		}
+		this.usersRepository.find
 	}
 
 	async createUser(

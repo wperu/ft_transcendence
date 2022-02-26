@@ -1,7 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { User } from 'src/entity/user.entity';
 import { ConfigService } from '@nestjs/config';
 import FormData = require("form-data")
 import { UsersService } from 'src/users/users.service';
@@ -11,6 +10,7 @@ export class AuthService {
     constructor (
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
+        @Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService,
     ) {}
 
@@ -32,8 +32,6 @@ export class AuthService {
                     { headers: form.getHeaders() }
                 )
             );
-            console.log("validation:");
-            console.log(response.data);
 			if(!response.data["access_token"])
 			{
 				console.log("no access_token");
@@ -50,13 +48,11 @@ export class AuthService {
 					}
             	)
 			);
-			console.log(info.data);
+            // TODO verify if client is already in database
 			this.usersService.createUser(info.data.id, info.data.login, access_token);
-
         }
         catch (e)
         {
-            console.log(e);
             throw new UnauthorizedException();
         }
         return ("");
