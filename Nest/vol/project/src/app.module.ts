@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [TypeOrmModule.forRoot(
@@ -17,7 +19,7 @@ import { User } from './users/user.entity';
 		entities: [User],
 		synchronize: true,
 	  }
-  ), UsersModule],
+  ), UsersModule, AuthModule ],
   controllers: [AppController],
   providers: [AppService],
 })
