@@ -15,6 +15,6 @@ services:
     build: ./Nest
     restart: always
     volumes:
-      - ./nest/vol:/vol
+      - ./Nest/vol:/vol
     ports:
       - 3000:3000

@@ -1,26 +1,31 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
 import { json } from 'stream/consumers';
 import { get } from 'superagent';
-import { UserDto } from './user.dto';
-import { User } from './user.entity';
+import { isArrayBuffer } from 'util/types';
+import { User } from '../entity/user.entity';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController
 {
-	constructor(private readonly userService: UsersService) {}
+	constructor(
+		private readonly userService: UsersService
+	) {}
 	
-	@Get()
+	@Get("/all")
 	async findAll(): Promise<User[]>
 	{
 		return await this.userService.findAll();
 	}
 
-	@Post()
-	async postUser(@Body() newUser: UserDto )
+	@Get("/:id")
+	async findOne(@Param('id') param): Promise<User | undefined>
 	{
-		
-		return await this.userService.addOne(newUser);
+		let id: number = parseInt(param);
+		if(isNaN(id))
+			throw new NotFoundException();
+		return await this.userService.findOne(id);
 	}
+
 
 }

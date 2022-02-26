@@ -1,15 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/entity/user.entity';
 import { ConfigService } from '@nestjs/config';
 import FormData = require("form-data")
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {
     constructor (
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
+		private readonly usersService: UsersService,
     ) {}
 
     async validate (access_code: string) : Promise<string>
@@ -24,7 +26,7 @@ export class AuthService {
             form.append('redirect_uri', 'http://localhost:3000/auth/intra42/callback');
 
             const response = await firstValueFrom(this.httpService
-                .post(
+				.post(
                     this.configService.get<string>('AUTHTOKEN_URL'),
                     form,
                     { headers: form.getHeaders() }
@@ -32,10 +34,29 @@ export class AuthService {
             );
             console.log("validation:");
             console.log(response.data);
-            // TODO access token here, add user to db, or pick user from db
+			if(!response.data["access_token"])
+			{
+				console.log("no access_token");
+				throw new UnauthorizedException();
+			}
+			let access_token = response.data.access_token;
+            const info = await firstValueFrom(this.httpService
+				.get(
+					"https://api.intra.42.fr/v2/me",
+					{ 
+						headers: {
+							'Authorization': `Bearer ${access_token}`
+						}
+					}
+            	)
+			);
+			console.log(info.data);
+			this.usersService.createUser(info.data.id, info.data.login, access_token);
+
         }
         catch (e)
         {
+            console.log(e);
             throw new UnauthorizedException();
         }
         return ("");

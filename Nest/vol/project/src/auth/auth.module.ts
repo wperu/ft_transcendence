@@ -3,6 +3,7 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { ConfigModule } from '@nestjs/config'
+import { UsersService } from 'src/users/users.service';
 
 @Module({
 imports: [
@@ -12,7 +13,7 @@ imports: [
 				maxRedirects: 5,
 			})
 		 ],
-providers: [AuthService],
+providers: [AuthService, UsersService],
 controllers: [AuthController]
 })
 export class AuthModule {}
