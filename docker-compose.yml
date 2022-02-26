@@ -24,3 +24,11 @@ services:
     restart: always
     volumes:
       - ./Nest/vol:/vol
+
+  proxy:
+    build: ./Proxy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+
