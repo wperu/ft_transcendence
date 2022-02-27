@@ -4,7 +4,7 @@ RUN apk update ;\
 apk add nginx ;\
 mkdir -p /run/nginx ;
 
-COPY ./srcs/default.conf /etc/nginx/conf.d/
+COPY ./srcs/default.conf /etc/nginx/http.d/
 
 EXPOSE 80
 EXPOSE 443

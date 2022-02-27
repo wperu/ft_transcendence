@@ -16,8 +16,6 @@ services:
     restart: always
     volumes:
       - ./react/vol:/vol
-    ports:
-      - 3000:3000
     
   nest:
     build: ./Nest
