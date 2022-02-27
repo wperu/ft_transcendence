@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
 import { json } from 'stream/consumers';
 import { get } from 'superagent';
 import { isArrayBuffer } from 'util/types';
@@ -12,7 +12,7 @@ export class UsersController
 		private readonly userService: UsersService
 	) {}
 	
-	@Get("/all")
+	@Get("")
 	async findAll(): Promise<User[]>
 	{
 		return await this.userService.findAll();
@@ -21,10 +21,11 @@ export class UsersController
 	@Get("/:id")
 	async findOne(@Param('id') param): Promise<User | undefined>
 	{
+		// TODO find a better way than parseInt to check for "1672FGGF" cases
 		let id: number = parseInt(param);
 		if(isNaN(id))
 			throw new NotFoundException();
-		return await this.userService.findOne(id);
+		return await this.userService.findUserByID(id);
 	}
 
 

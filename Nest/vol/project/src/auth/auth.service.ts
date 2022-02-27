@@ -32,24 +32,31 @@ export class AuthService {
                     { headers: form.getHeaders() }
                 )
             );
-			if(!response.data["access_token"])
+			if(!response.data["access_token"] || !response.data["refresh_token"] || !response.data["expires_in"])
 			{
 				console.log("no access_token");
 				throw new UnauthorizedException();
 			}
-			let access_token = response.data.access_token;
+            console.log("got access token");
+            let token = {
+                access: response.data.access_token,
+                refresh: response.data.refresh_token,
+                expires_in: response.data.expires_in,
+            }
             const info = await firstValueFrom(this.httpService
 				.get(
 					"https://api.intra.42.fr/v2/me",
 					{ 
 						headers: {
-							'Authorization': `Bearer ${access_token}`
+							'Authorization': `Bearer ${token.access}`
 						}
 					}
             	)
 			);
+
+            console.log("got intranet informations, creating user");
             // TODO verify if client is already in database
-			this.usersService.createUser(info.data.id, info.data.login, access_token);
+			this.usersService.createUser(info.data.id, info.data.login, token);
         }
         catch (e)
         {
