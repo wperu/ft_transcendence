@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import FormData = require("form-data")
 import { UsersService } from 'src/users/users.service';
+import { User } from 'src/entity/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,15 @@ export class AuthService {
 		private readonly usersService: UsersService,
     ) {}
 
-    async validate (access_code: string) : Promise<string>
+    // TODO add mechanism for refreshing the token        
+    // TODO add guard to protect routes with access_token 
+
+    async validate (access_code: string)
+    : Promise<{
+        access_token: string,
+        refresh_token: string,
+        expires_in: number,
+    }> | undefined
     {
         try
         {
@@ -34,34 +43,45 @@ export class AuthService {
             );
 			if(!response.data["access_token"] || !response.data["refresh_token"] || !response.data["expires_in"])
 			{
-				console.log("no access_token");
+				console.log("no access token");
 				throw new UnauthorizedException();
 			}
             console.log("got access token");
-            let token = {
-                access: response.data.access_token,
-                refresh: response.data.refresh_token,
-                expires_in: response.data.expires_in,
-            }
-            const info = await firstValueFrom(this.httpService
-				.get(
-					"https://api.intra.42.fr/v2/me",
-					{ 
-						headers: {
-							'Authorization': `Bearer ${token.access}`
-						}
-					}
-            	)
-			);
-
-            console.log("got intranet informations, creating user");
-            // TODO verify if client is already in database
-			this.usersService.createUser(info.data.id, info.data.login, token);
+            return (response.data);
         }
         catch (e)
         {
             throw new UnauthorizedException();
         }
-        return ("");
+    }
+
+
+
+    async login(token: {
+        access_token: string,
+        refresh_token: string,
+        expires_in: number,
+    }): Promise<User> | undefined
+    {
+        const info = await firstValueFrom(this.httpService
+            .get(
+                "https://api.intra.42.fr/v2/me",
+                { 
+                    headers: {
+                        'Authorization': `Bearer ${token.access_token}`
+                    }
+                }
+            )
+        );
+
+        let user: User = await this.usersService.findUserByReferenceID(info.data.id)
+        if (user == undefined)
+        {
+            console.log("Unknown user, creating it...");
+            user = await this.usersService.createUser(info.data.id, info.data.login, token);
+        }
+        else
+            console.log("User " + user.username + " logged in");
+        return (user);
     }
 }

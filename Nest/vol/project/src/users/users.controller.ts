@@ -1,7 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, Post, UseGuards } from '@nestjs/common';
-import { json } from 'stream/consumers';
-import { get } from 'superagent';
-import { isArrayBuffer } from 'util/types';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { User } from '../entity/user.entity';
 import { UsersService } from './users.service';
 
@@ -19,13 +16,16 @@ export class UsersController
 	}
 
 	@Get("/:id")
-	async findOne(@Param('id') param): Promise<User | undefined>
+	async findOne(@Param('id') param): Promise<User>
 	{
-		// TODO find a better way than parseInt to check for "1672FGGF" cases
 		let id: number = parseInt(param);
-		if(isNaN(id))
+		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
-		return await this.userService.findUserByID(id);
+
+		let user = await this.userService.findUserByID(id);
+		if (user === undefined)
+			throw new NotFoundException();
+		return (user);
 	}
 
 

@@ -1,5 +1,4 @@
-import { restElement } from '@babel/types';
-import { Controller, Redirect, Get, Post, Query, Param, Res, Req } from '@nestjs/common';
+import { Controller, Redirect, Get, Query, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -21,7 +20,10 @@ export class AuthController
     @Get('/intra42/callback')
     async callback(@Query("code") code: string)
     {
-        console.log("callback: " + code);
-        await this.authService.validate(code);
+        let token = await this.authService.validate(code);
+        if (token === undefined)
+            throw new UnauthorizedException();
+        
+        let user = await this.authService.login(token);
     }
 }

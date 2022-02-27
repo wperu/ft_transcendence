@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Timestamp } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 
 @Injectable()
@@ -15,29 +15,38 @@ export class UsersService {
 		return await this.usersRepository.find();
 	}
 
-	async findUserByID(id: number): Promise<User>
+	async findUserByID(id: number): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne(id);
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				id: In([id])
+			},
+		});
 
 		if (user)
-		{
 			return user
-		}
-		this.usersRepository.find
+		return (undefined)
 	}
 
 	async findUserByReferenceID(reference_id: number): Promise<User | undefined>
 	{
-		// TODO 
-		return (undefined);
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				reference_id: In([reference_id])
+			},
+		});
+
+		if (user)
+			return user
+		return (undefined)
 	}
 
 	async createUser(
 		reference_id: number,
 		username: string,
 		token : {
-			access: string,
-			refresh: string,
+			access_token: string,
+			refresh_token: string,
 			expires_in: number
 		}
 	): Promise<User>
@@ -45,8 +54,8 @@ export class UsersService {
 		let user: User = new User();
 		user.reference_id = reference_id;
 		user.username = username;
-		user.access_token_42 = token.access;
-		user.refresh_token_42 = token.refresh;
+		user.access_token_42 = token.access_token;
+		user.refresh_token_42 = token.refresh_token;
 
 		await this.usersRepository.create(user);
 		let newUser = await this.usersRepository.save(user);
