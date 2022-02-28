@@ -25,5 +25,7 @@ export class AuthController
             throw new UnauthorizedException();
         
         let user = await this.authService.login(token);
+
+        return (user); // return here data of /auth/login
     }
 }

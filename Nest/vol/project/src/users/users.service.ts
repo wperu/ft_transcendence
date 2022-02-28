@@ -1,19 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { format } from 'date-fns';
+import { In, LessThan, MoreThan, Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 
 @Injectable()
 export class UsersService {
+	
 	constructor(
 		@InjectRepository(User)
 		private usersRepository: Repository<User>,
 	) {}
 
+
+
 	async findAll(): Promise<User[]> 
 	{
 		return await this.usersRepository.find();
 	}
+
+
 
 	async findUserByID(id: number): Promise<User | undefined>
 	{
@@ -23,10 +29,12 @@ export class UsersService {
 			},
 		});
 
-		if (user)
+		if (user !== undefined)
 			return user
 		return (undefined)
 	}
+
+
 
 	async findUserByReferenceID(reference_id: number): Promise<User | undefined>
 	{
@@ -36,10 +44,29 @@ export class UsersService {
 			},
 		});
 
-		if (user)
+		if (user !== undefined)
 			return user
 		return (undefined)
 	}
+
+
+
+
+	async findUserByAccessToken(access_token: string): Promise<User | undefined>
+	{
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				access_token_42: access_token
+			},
+		});
+
+		if (user !== undefined)
+			return user
+		return (undefined)
+	}
+
+
+
 
 	async createUser(
 		reference_id: number,
@@ -68,6 +95,23 @@ export class UsersService {
 			.where(`id = ${newUser.id}`)
 			.execute();
 		return newUser;
+	}
+
+
+
+
+	async checkAccessTokenExpiration(user: User) : Promise<boolean>
+	{
+		const u = await this.usersRepository.findOne({ 
+			where: {
+				id: user.id,
+				token_expiration_date_42: MoreThan(format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
+			},
+		});
+
+		if (u === undefined)
+			return (false);
+		return (true);
 	}
 
 	async remove(id: string): Promise<void>

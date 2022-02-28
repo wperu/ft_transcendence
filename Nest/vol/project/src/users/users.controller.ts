@@ -1,4 +1,5 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, Inject, NotFoundException, Param, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entity/user.entity';
 import { UsersService } from './users.service';
 
@@ -9,7 +10,8 @@ export class UsersController
 		private readonly userService: UsersService
 	) {}
 	
-	@Get("")
+	@Get()
+	@UseGuards(AuthGuard)
 	async findAll(): Promise<User[]>
 	{
 		return await this.userService.findAll();
@@ -27,6 +29,4 @@ export class UsersController
 			throw new NotFoundException();
 		return (user);
 	}
-
-
 }

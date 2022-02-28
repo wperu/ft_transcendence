@@ -16,7 +16,6 @@ export class AuthService {
     ) {}
 
     // TODO add mechanism for refreshing the token        
-    // TODO add guard to protect routes with access_token 
 
     async validate (access_code: string)
     : Promise<{
@@ -61,7 +60,7 @@ export class AuthService {
         access_token: string,
         refresh_token: string,
         expires_in: number,
-    }): Promise<User> | undefined
+    }): Promise<User>
     {
         const info = await firstValueFrom(this.httpService
             .get(
