@@ -43,7 +43,7 @@ export class AuthService {
 			if(!response.data["access_token"] || !response.data["refresh_token"] || !response.data["expires_in"])
 			{
 				console.log("no access token");
-				throw new UnauthorizedException();
+				throw new UnauthorizedException(401, "api response did not contain access_token or refresh_token or expires_in fields");
 			}
             console.log("got access token");
             return (response.data);
