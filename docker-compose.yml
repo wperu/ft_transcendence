@@ -15,7 +15,7 @@ services:
     build: ./React
     restart: always
     volumes:
-      - ./react/vol:/vol
+      - ./React/vol:/vol
     
   nest:
     build: ./Nest
