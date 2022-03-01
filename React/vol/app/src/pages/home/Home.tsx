@@ -1,18 +1,13 @@
 import "./Home.css"
 import SignInButton from  "../../components/SignInButton"
-
-function SignInClick ()
-{
-	alert("allo");
-}
+import PongLogo from  "../../components/PongLogo/PongLogo"
+import InfoButton from "../../components/InfoButton";
 
 function Home() {
 	return (
 		<div id="homepage">
-			<header>
-				<h1>PONG</h1>
-			</header>
-			<button onClick={SignInClick}>Sign In</button>
+			<PongLogo />
+			<SignInButton />
 		</div>
 	);
 }

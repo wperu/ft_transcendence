@@ -1,0 +1,13 @@
+@import url("../../ressources/base.css");
+
+header
+{
+	margin-top: 15vmin;
+	margin-bottom: 10vmin;
+	font-size: 25vmin;
+	font-family: "NonFiction", sans-serif;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
