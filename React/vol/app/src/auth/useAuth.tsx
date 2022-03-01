@@ -1,13 +1,11 @@
 import React, { createContext, useContext, useState } from "react";
-
-interface IUser
-{
-
-}
+import { Route } from "react-router-dom";
 
 interface IContext
 {
-	IUser
+	user: string,
+	signin?: any,
+	signout?: any,
 }
 
 const fakeAuth = {
@@ -22,22 +20,22 @@ const fakeAuth = {
 	}
   };
 
-const authContext = createContext(null);
+const authContext = createContext<IContext>({user: ''});
 
 function useAuth()
 {
 	return useContext(authContext);
 }
 
-function useProvideAuth()
+function useProvideAuth(): IContext
 {
-	const [user, setUser] = useState<IUser | null>(null);
+	const [user, setUser] = useState<string>("");
 
 	const signin = (cb: () => void) =>
 	{
 		return fakeAuth.signin(() => 
 		{
-			setUser("user");
+			setUser("auth");
 			cb();
 		});
 	}
@@ -46,7 +44,7 @@ function useProvideAuth()
 	{
 		return fakeAuth.signin(() => 
 		{
-			setUser(null);
+			setUser("");
 			cb();
 		});
 	}
@@ -57,7 +55,7 @@ function useProvideAuth()
 	};
 }
 
-function ProvideAuth(children: JSX.Element): JSX.Element
+function ProvideAuth( {children}: {children: JSX.Element} ): JSX.Element
 {
 	const auth = useProvideAuth();
 
@@ -67,3 +65,40 @@ function ProvideAuth(children: JSX.Element): JSX.Element
 		</authContext.Provider>
 		);
 }
+
+interface IProps
+{
+	element: JSX.Element,
+}
+
+
+function NoAcces() {
+	const auth = useAuth();
+	
+	let login = () =>
+	{
+		auth?.signin();
+	}
+
+	return (
+	  <div>
+		<h3>
+		  No right for <code>{location.pathname}</code>
+		  <button onClick={login}>signin</button>
+		</h3>
+	  </div>
+	);
+  }
+
+function PrivateRoute(props: IProps) : JSX.Element
+{
+	const auth = useAuth();
+
+	if (auth.user)
+		return (props.element);
+	else
+		return <NoAcces />;
+}
+//<Route path="/profile" element={<PrivateRoute element={<Profile/>}/>}/>
+
+export { PrivateRoute, ProvideAuth };
