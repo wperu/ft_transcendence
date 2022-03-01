@@ -1,9 +1,15 @@
+import "./Home.css"
+import SignInButton from  "../../components/SignInButton"
+import PongLogo from  "../../components/PongLogo/PongLogo"
+import InfoButton from "../../components/InfoButton";
 
 function Home() {
 	return (
-	  <h1>Hello World</h1>
+		<div id="homepage">
+			<PongLogo />
+			<SignInButton />
+		</div>
 	);
-  }
-  
-  export default Home;
-  
+}
+
+export default Home;
