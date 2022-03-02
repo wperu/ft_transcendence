@@ -5,8 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import FormData = require("form-data")
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/entity/user.entity';
-import { format } from 'date-fns';
-import { da } from 'date-fns/locale';
 
 @Injectable()
 export class AuthService {

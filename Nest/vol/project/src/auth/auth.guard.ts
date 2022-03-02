@@ -1,6 +1,5 @@
 
 import { Injectable, CanActivate, ExecutionContext, Req, UnauthorizedException, BadRequestException, ForbiddenException, Inject, InjectableOptions } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { UsersService } from 'src/users/users.service';
 import { AuthService } from './auth.service';
 

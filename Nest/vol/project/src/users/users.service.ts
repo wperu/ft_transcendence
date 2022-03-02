@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
-import { In, LessThan, MoreThan, Repository } from 'typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entity/user.entity';
 
 @Injectable()
@@ -117,7 +117,7 @@ export class UsersService {
 
 
 
-	
+
 	async saveUser(user: User): Promise<User>
 	{
 		return (await this.usersRepository.save(user));
