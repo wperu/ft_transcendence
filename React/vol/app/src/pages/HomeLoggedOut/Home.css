@@ -1,0 +1,15 @@
+@import url("../../ressources/base.css");
+
+#homepage
+{
+	text-align: center;
+	color: #ffffff;
+}
+
+body
+{
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+	background-color: #282c34;
+}
