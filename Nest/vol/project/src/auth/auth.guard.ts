@@ -25,9 +25,10 @@ export class AuthGuard implements CanActivate {
 	): Promise<boolean>
 	{
 		const req: Request = context.switchToHttp().getRequest();
-		if (req.headers['access_token'] === undefined)
-			throw new BadRequestException("no access_token field in request header");
-		const target_user = await this.usersService.findUserByAccessToken(req.headers['access_token']);
+		console.log(req.headers);
+		if (req.headers['authorization'] === undefined)
+			throw new BadRequestException("no Authorization field in request header");
+		const target_user = await this.usersService.findUserByAccessToken(req.headers['authorization']);
 		if (target_user === undefined)
 			throw new ForbiddenException("Invalid access token");
 		if (!await this.usersService.checkAccessTokenExpiration(target_user))

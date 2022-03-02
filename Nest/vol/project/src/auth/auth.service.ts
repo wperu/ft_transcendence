@@ -29,7 +29,7 @@ export class AuthService {
             form.append('client_id', this.configService.get<string>("CLIENT_ID"));
             form.append('client_secret', this.configService.get<string>("CLIENT_SECRET"));
             form.append('code', access_code);
-            form.append('redirect_uri', 'http://localhost:3000/auth/intra42/callback');
+            form.append('redirect_uri', 'http://localhost/api/auth/intra42/callback');
 
             const response = await firstValueFrom(this.httpService
 				.post(
