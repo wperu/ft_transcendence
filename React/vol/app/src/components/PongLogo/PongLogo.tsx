@@ -3,9 +3,9 @@ import "./PongLogo.css";
 
 function PongLogo() {
 	return (
-		<header>
+		<div id="logo">
 			<h1>PONG</h1>
-		</header>
+		</div>
 	);
 }
 

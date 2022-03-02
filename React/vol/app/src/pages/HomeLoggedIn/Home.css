@@ -1,5 +1,11 @@
 @import url("../../ressources/base.css");
 
+header
+{
+	margin: 0;
+	margin-bottom: 10vmin;
+}
+
 #homepage
 {
 	text-align: center;
