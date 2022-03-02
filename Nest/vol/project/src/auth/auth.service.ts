@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import FormData = require("form-data")
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/entity/user.entity';
+import { format } from 'date-fns';
+import { da } from 'date-fns/locale';
 
 @Injectable()
 export class AuthService {
@@ -15,9 +17,7 @@ export class AuthService {
 		private readonly usersService: UsersService,
     ) {}
 
-    // TODO add mechanism for refreshing the token        
-
-    async validate (access_code: string)
+    async validate (access_code: string, grant: string = 'authorization_code')
     : Promise<{
         access_token: string,
         refresh_token: string,
@@ -27,7 +27,7 @@ export class AuthService {
         try
         {
             var form = new FormData();
-            form.append('grant_type', 'authorization_code');
+            form.append('grant_type', grant);
             form.append('client_id', this.configService.get<string>("CLIENT_ID"));
             form.append('client_secret', this.configService.get<string>("CLIENT_SECRET"));
             form.append('code', access_code);
@@ -43,7 +43,7 @@ export class AuthService {
 			if(!response.data["access_token"] || !response.data["refresh_token"] || !response.data["expires_in"])
 			{
 				console.log("no access token");
-				throw new UnauthorizedException(401, "api response did not contain access_token or refresh_token or expires_in fields");
+				throw new UnauthorizedException("api response did not contain access_token or refresh_token or expires_in fields");
 			}
             console.log("got access token");
             return (response.data);
@@ -74,13 +74,19 @@ export class AuthService {
         );
 
         let user: User = await this.usersService.findUserByReferenceID(info.data.id)
-        if (user == undefined)
+        if (user === undefined)
         {
             console.log("Unknown user, creating it...");
             user = await this.usersService.createUser(info.data.id, info.data.login, token);
         }
         else
+        {
+            user.access_token_42 = token.access_token;
+            user.refresh_token_42 = token.refresh_token;
+            user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
+            this.usersService.saveUser(user);
             console.log("User " + user.username + " logged in");
+        }
         return (user);
     }
 }

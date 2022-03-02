@@ -83,17 +83,10 @@ export class UsersService {
 		user.username = username;
 		user.access_token_42 = token.access_token;
 		user.refresh_token_42 = token.refresh_token;
+		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
 
 		await this.usersRepository.create(user);
 		let newUser = await this.usersRepository.save(user);
-
-		await this.usersRepository.createQueryBuilder()
-			.update(newUser)
-			.set({
-				token_expiration_date_42: () => `token_expiration_date_42 + INTERVAL '${token.expires_in}' SECOND`
-			})
-			.where(`id = ${newUser.id}`)
-			.execute();
 		return newUser;
 	}
 
@@ -108,14 +101,25 @@ export class UsersService {
 				token_expiration_date_42: MoreThan(format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
 			},
 		});
-
+		
 		if (u === undefined)
 			return (false);
 		return (true);
 	}
 
+
+
+
 	async remove(id: string): Promise<void>
 	{
 		await this.usersRepository.delete(id);
+	}
+
+
+
+	
+	async saveUser(user: User): Promise<User>
+	{
+		return (await this.usersRepository.save(user));
 	}
 }
