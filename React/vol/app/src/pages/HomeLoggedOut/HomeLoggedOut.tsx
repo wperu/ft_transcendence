@@ -1,9 +1,8 @@
 import "./Home.css"
-import SignInButton from  "../../components/SignInButton"
+import SignInButton from  "../../components/MainMenuButtons/SignInButton"
 import PongLogo from  "../../components/PongLogo/PongLogo"
-import InfoButton from "../../components/InfoButton";
 
-function Home() {
+function HomeLoggedOut() {
 	return (
 		<div id="homepage">
 			<PongLogo />
@@ -12,4 +11,4 @@ function Home() {
 	);
 }
 
-export default Home;
+export default HomeLoggedOut;

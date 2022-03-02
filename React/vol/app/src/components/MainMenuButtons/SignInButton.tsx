@@ -1,14 +1,14 @@
 import React from "react";
-import "../ressources/MainMenuButton.css";
+import "./MainMenuButton.css";
 
 function SignInClick ()
 {
-	alert("allo");
+	alert("Connexion");
 }
 
 function SignInButton ()
 {
-	return <button onClick={SignInClick}>Sign In</button>;
+	return <button onClick={SignInClick}>Se connecter</button>;
 }
 
 export default SignInButton;

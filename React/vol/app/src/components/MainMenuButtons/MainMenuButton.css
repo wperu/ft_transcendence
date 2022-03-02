@@ -1,20 +1,22 @@
-@import url("base.css");
+@import url("../../ressources/base.css");
 
 button
 {
-	-webkit-box-sizing: border-box;
+	/* -webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
-	box-sizing: border-box;
+	box-sizing: border-box; */
 	margin: 0;
+	width: 100%;
 	color: white;
-	background-color: #077ca3;
-	padding: 2vmin 4vmin;
+	background-color: #537896;/* #077ca3 */
+	padding: 2vmin 3.5vmin;
 	border-style: none;
 	border-radius: 10px;
 	font-size: 4vmin;
 	text-transform: uppercase;
 	box-shadow: 5px 10px #242424;
-	transition: 0.1s;
+	transition: 0.2s cubic-bezier(.23,1,.32,1);
+	margin-bottom: 5vmin;
 }
 
 button:hover
