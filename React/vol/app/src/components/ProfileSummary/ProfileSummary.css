@@ -9,29 +9,36 @@
 {
 	#profile
 	{
-		width: 10vmin;
+		width: max-content;
 		left: 0px;
 		top: 0px;
-		margin: 0;
-		padding: 10px;
+		margin: 8px;
+		padding: 20px;
 		position: absolute;
 		display: flex;
 		flex-direction: row;
+		background-color: #21242b;
+		box-sizing: border-box;
+		border-radius: 20px;
 	}
 	
 	#infos
 	{
-		width: 15vmin;
+		margin: 0;
+		margin-left: 3vmin;
+		margin-right: 6vmin;
 		display: flex;
 		flex-direction: column;
-		/* justify-content: left; */
 		text-align: left;
-		margin-left: 10px;
+		font-size: 2.5vmin;
 	}
 
 	img
 	{
-		width: 15vmin;
-		height: 15vmin;
+		border-color: whitesmoke;
+		border-style: solid;
+		border-width: 4px;
+		width: 11vmin;
+		height: 11vmin;
 	}
 }
