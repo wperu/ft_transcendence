@@ -95,21 +95,54 @@ function ShowAuthWindow(this: any, options :any)
 
 
 
-function NoAcces() {
+function NoAcces()
+{
 	const auth = useAuth();
 	
-	let login = () =>
-	{
+	let login = () => {
 		//auth?.signin();
-		//const url = "http://localhost/api/auth/login";
-		//window.open(url, 'authWindow', "toolbar=no,scrollbars=yes,resizable=no,width=500,height=864");
-		ShowAuthWindow({
-			path: "http://localhost/api/auth/login",
-			callback: function()
-			{
-				console.log('callback');
-			}
-		});
+		const url = "http://localhost/api/auth/login";
+		let win = window.open(url, 'authWindow', "toolbar=no,scrollbars=yes,resizable=no,width=500,height=600");
+		if (win instanceof Window)
+		{
+			
+			console.log('Window created');
+			/*win.setInterval(() : void => {
+				/*let href : any ;
+				
+				try
+				{
+					href = win?.location.href;
+				}
+				catch(e)
+				{
+					console.log(e);
+				}
+				console.log("href : " + href);
+				
+				console.log('Win inter');
+			}, 1000);*/
+			
+			console.log(win.location.href);
+
+
+			let loginInterval = window.setInterval(function() {
+				if (win instanceof Window)
+				{
+					console.log(win.closed);
+					console.log(win.location.toString());
+					const url =  win.location.toString(); 
+					if (win.closed)
+					{
+						win.close();
+						window.clearInterval(loginInterval);
+					}
+				}
+			}, 1000);
+		}
+
+		/*let isClose = win?.closed();
+		*/
 
 	}
 
