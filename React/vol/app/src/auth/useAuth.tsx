@@ -18,7 +18,7 @@ const fakeAuth = {
 	  fakeAuth.isAuthenticated = false;
 	  setTimeout(cb, 100);
 	}
-  };
+ };
 
 const authContext = createContext<IContext>({user: ''});
 
@@ -71,13 +71,46 @@ interface IProps
 	element: JSX.Element,
 }
 
+import axios from "axios";
+
+
+function ShowAuthWindow(this: any, options :any)
+{
+  console.log('Option set');
+    options.windowName = options.windowName ||  'ConnectWithOAuth'; // should not include space for IE
+    options.windowOptions = options.windowOptions || 'location=0,status=0,width=800,height=400';
+    //options.callback = options.callback || function(){ window.location.reload(); };
+    var that = this;
+    console.log(options.path);
+    that._oauthWindow = window.open(options.path, options.windowName, options.windowOptions);
+   /* that._oauthInterval = window.setInterval(function(){
+        if (that._oauthWindow.closed) {
+            window.clearInterval(that._oauthInterval);
+            options.callback();
+        }
+    }, 1000);*/
+} 
+
+//create new oAuth popup window and monitor it
+
+
 
 function NoAcces() {
 	const auth = useAuth();
 	
 	let login = () =>
 	{
-		auth?.signin();
+		//auth?.signin();
+		//const url = "http://localhost/api/auth/login";
+		//window.open(url, 'authWindow', "toolbar=no,scrollbars=yes,resizable=no,width=500,height=864");
+		ShowAuthWindow({
+			path: "http://localhost/api/auth/login",
+			callback: function()
+			{
+				console.log('callback');
+			}
+		});
+
 	}
 
 	return (
