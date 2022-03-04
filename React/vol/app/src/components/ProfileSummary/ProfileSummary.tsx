@@ -7,8 +7,8 @@ function ProfileSummary() {
 		<aside id="profile">
 			<img src={defaultLogo} alt="truc" />
 			<div id="infos">
-				<p>Username</p>
-				<p>Level</p>
+				<p> {'> '} Username</p>
+				<p> {'> '} Level</p>
 			</div>
 		</aside>
 	);

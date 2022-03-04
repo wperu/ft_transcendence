@@ -8,8 +8,8 @@
 
 body
 {
-	display: flex;
+	/* display: flex;
 	justify-content: center;
-	align-items: flex-end;
+	align-items: flex-end; */
 	background-color: #282c34;
 }
