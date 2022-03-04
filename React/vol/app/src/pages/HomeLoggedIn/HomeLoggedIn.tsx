@@ -4,6 +4,7 @@ import ProfileButton from  "../../components/MainMenuButtons/ProfileButton"
 import PongLogo from  "../../components/PongLogo/PongLogo"
 import ProfileSummary from  "../../components/ProfileSummary/ProfileSummary"
 import LogOutButton from  "../../components/LogOutButton/LogOutButton"
+import Sidebar from  "../../components/Sidebar/Sidebar"
 // import InfoButton from "../../components/InfoButton/InfoButton";
 
 function HomeLoggedIn() {
@@ -17,6 +18,7 @@ function HomeLoggedIn() {
 				<li><MatchmakingButton /></li>
 				<li><ProfileButton /></li>
 			</ul>
+			<Sidebar />
 			<footer>
 				<LogOutButton />
 			</footer>

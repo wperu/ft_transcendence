@@ -1,0 +1,61 @@
+@import url("../../ressources/base.css");
+
+#sidebar
+{
+	--open-sidebar-size: 60vmin;
+	--closed-sidebar-size: 0;
+	--transition: 0.5s;
+}
+
+#actual_bar
+{
+	background-color: #40444d;
+	position: fixed;
+	right: 0;
+	top: 0;
+	height: 100%;
+	width: var(--open-sidebar-size);
+	transition: var(--transition);
+}
+
+#actual_bar > header
+{
+	display: flex;
+	justify-content: space-around;
+}
+
+.tab_button
+{
+	display: none;
+}
+
+.tab_button + label
+{
+	width: 100%;
+	height: 5vmin;
+	opacity: 50%;
+	background-color:cadetblue;
+}
+
+.tab_button:checked + label
+{
+	opacity: 1;
+}
+
+#toggle
+{
+	transition: var(--transition);
+	position: fixed;
+	right: var(--open-sidebar-size);
+	bottom: 50%;
+}
+
+#toggle:checked
+{
+	right: var(--closed-sidebar-size);
+}
+
+#toggle:checked + #actual_bar
+{
+	width: var(--closed-sidebar-size);
+}
