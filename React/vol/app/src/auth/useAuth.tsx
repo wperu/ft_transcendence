@@ -1,18 +1,18 @@
 import React, { createContext, useContext, useState } from "react";
-import { Route } from "react-router-dom";
+import { Navigate, Route, useLocation } from "react-router-dom";
+import { authProvider, openLoginPopup } from "./authProvider";
 
 interface IContext
 {
 	user: string,
-	signin?: any,
-	signout?: any,
+	signin: (callback: VoidFunction) => void,
+	signout: (callback: VoidFunction) => void,
 	isAuth: boolean,
 }
 
+const authContext = createContext<IContext>(null!);
 
-const authContext = createContext<IContext>({user: '', isAuth: false});
-
-function useAuth()
+function useAuth() : IContext
 {
 	return useContext(authContext);
 }
@@ -22,13 +22,13 @@ function useProvideAuth(): IContext
 	const [user, setUser] = useState<string>("");
 	const [isAuth, setIsAuth] = useState<boolean>(false);
 
-	const signin = (cb: () => void) =>
+	const signin = (cb: VoidFunction) =>
 	{
 		setIsAuth(true);
 		cb();
 	}
 
-	const signout = (cb: () => void) =>
+	const signout = (cb: VoidFunction) =>
 	{
 		setIsAuth(false);
 		cb();
@@ -51,51 +51,23 @@ function ProvideAuth( {children}: {children: JSX.Element} ): JSX.Element
 			{children}
 		</authContext.Provider>
 		);
-}
+};
 
 interface IProps
 {
-	element: JSX.Element,
+  element: JSX.Element,
 }
 
-function NoAccess()
+function RequireAuth({ children }: {children: JSX.Element}): JSX.Element
 {
-	const auth = useAuth();
-	
-	let login = () => {
-		auth.signin();
-	}
+	let auth		= useAuth();
+	let location	= useLocation();
 
-	return (
-	  <div>
-		<h3>
-		  No right for <code>{location.pathname}</code>
-		  <button onClick={login}>signin</button>
-		</h3>
-	  </div>
-	);
-  }
-
-function PrivateRoute(props: IProps) : JSX.Element
-{
-	const auth = useAuth();
-
-	const logout = () => {
-		auth.signout();
-	}
-
-	if (auth.isAuth)
+	if (!auth.isAuth)
 	{
-		return (
-			<div>
-				<button onClick={logout}>signout</button>
-				{ props.element }
-			</div>
-		);
+		return <Navigate to="/" state={{ from: location }} replace/>;
 	}
-	else
-		return <NoAccess />;
+	return children;
 }
-//<Route path="/profile" element={<PrivateRoute element={<Profile/>}/>}/>
 
-export { PrivateRoute, ProvideAuth };
+export { useAuth, ProvideAuth, RequireAuth };

@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Profile from '../pages/profile/Profile';
 import HomeLoggedIn from '../pages/HomeLoggedIn/HomeLoggedIn';
 import HomeLoggedOut from '../pages/HomeLoggedOut/HomeLoggedOut';
-import { PrivateRoute, ProvideAuth } from '../auth/useAuth';
+import { ProvideAuth, RequireAuth } from '../auth/useAuth';
 
 function AppRoute() : JSX.Element
 {
@@ -12,7 +12,7 @@ function AppRoute() : JSX.Element
 			<Routes>
 				<Route index element={<HomeLoggedOut />}/>
 				<Route path="/logged_in" element={<HomeLoggedIn />}/>
-				<Route path="/profile" element={<PrivateRoute element={<Profile/>}/>}/>
+				<Route path="/profile" element={<RequireAuth children={<Profile/>}/>}/>
 				<Route path="*" element={<NoMatch />}/>
 			</Routes>
 		</BrowserRouter>

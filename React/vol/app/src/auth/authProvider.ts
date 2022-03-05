@@ -14,23 +14,27 @@ function openLoginPopup() : void
 			{
 				window.clearInterval(loginInterval);
 			}
+			else
+			{
+				winPopupRef.close();
+			}
 		}
-	});
+	}, 3000);
 	
 }
 
 const authProvider =
 {
-	isAuth: false,
-	signin(callback: VoidFunction) {
-		this.isAuth = true;
-		setTimeout(callback, 100); // fake async
+	//isAuth: false,
+	signin() {
+		//this.isAuth = true;
+		setTimeout(openLoginPopup, 100); // fake async
 	},
 	sigout(callback : VoidFunction) {
-		this.isAuth = false;
-		setTimeout(callback, 100); // fake async
+		//this.isAuth = false;
+		//setTimeout(callback, 100); // fake async
 	},
 };
 
 
-export { authProvider };
+export { authProvider, openLoginPopup };
