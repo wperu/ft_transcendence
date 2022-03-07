@@ -25,7 +25,7 @@ function useProvideAuth(): IContext
 	const signin = (cb: VoidFunction) =>
 	{
 		setIsAuth(true);
-		cb();
+		openLoginPopup();
 	}
 
 	const signout = (cb: VoidFunction) =>

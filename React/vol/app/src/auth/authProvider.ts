@@ -1,26 +1,30 @@
-import Login from "../components/Login/Login";
 
+function getAccessCode(event : any)
+{
+	console.log('Event trigger' + event.accessCode);
+}
 
 function openLoginPopup() : void
 {
-	const apiUrl 		= "http://localhost/api/auth/login";
+	const apiUrl 		= process.env.REACT_APP_API_URL || "/";
 	const winOptions	= "toolbar=no,scrollbars=yes,resizable=no,width=500,height=600";
 	let winPopupRef		= window.open(apiUrl, 'authWindow', winOptions);
 
-	let loginInterval = window.setInterval(function() {
+	/*let loginInterval = window.setInterval(function() {
 		if (winPopupRef instanceof Window)
 		{
 			if (winPopupRef.closed || !winPopupRef)
 			{
-				window.clearInterval(loginInterval);
+				//window.clearInterval(loginInterval);
 			}
 			else
 			{
 				winPopupRef.close();
 			}
 		}
-	}, 3000);
-	
+	}, 3000);*/
+	console.log("Window open");
+	addEventListener('getAccessCode', getAccessCode);
 }
 
 const authProvider =

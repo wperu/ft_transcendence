@@ -3,6 +3,7 @@ import Profile from '../pages/profile/Profile';
 import HomeLoggedIn from '../pages/HomeLoggedIn/HomeLoggedIn';
 import HomeLoggedOut from '../pages/HomeLoggedOut/HomeLoggedOut';
 import { ProvideAuth, RequireAuth } from '../auth/useAuth';
+import Callback from '../pages/Callback/Callback';
 
 function AppRoute() : JSX.Element
 {
@@ -13,6 +14,7 @@ function AppRoute() : JSX.Element
 				<Route index element={<HomeLoggedOut />}/>
 				<Route path="/logged_in" element={<HomeLoggedIn />}/>
 				<Route path="/profile" element={<RequireAuth children={<Profile/>}/>}/>
+				<Route path="/login/callback" element={<Callback />}/>
 				<Route path="*" element={<NoMatch />}/>
 			</Routes>
 		</BrowserRouter>

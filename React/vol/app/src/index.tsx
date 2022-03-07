@@ -5,6 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import AppRoutes from './routes/AppRoutes';
 
+
+
+
 ReactDOM.render(
   <React.StrictMode>
 		<AppRoutes />
