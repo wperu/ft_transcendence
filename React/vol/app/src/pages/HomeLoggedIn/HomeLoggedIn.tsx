@@ -3,6 +3,7 @@ import MatchmakingButton from  "../../components/MainMenuButtons/MatchmakingButt
 import ProfileButton from  "../../components/MainMenuButtons/ProfileButton"
 import PongLogo from  "../../components/PongLogo/PongLogo"
 import ProfileSummary from  "../../components/ProfileSummary/ProfileSummary"
+import LogOutButton from  "../../components/LogOutButton/LogOutButton"
 // import InfoButton from "../../components/InfoButton/InfoButton";
 
 function HomeLoggedIn() {
@@ -16,6 +17,9 @@ function HomeLoggedIn() {
 				<li><MatchmakingButton /></li>
 				<li><ProfileButton /></li>
 			</ul>
+			<footer>
+				<LogOutButton />
+			</footer>
 		</div>
 	);
 }
