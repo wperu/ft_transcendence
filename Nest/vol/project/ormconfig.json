@@ -5,6 +5,6 @@
 	"username": "postgres",
 	"password": "example",
 	"database": "postgres",
-	"entities": ["./src/users/user.entity.ts"],
+	"entities": ["./src/entities/*.*"],
 	"synchronize": true
-  }
+}
