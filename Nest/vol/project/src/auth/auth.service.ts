@@ -2,20 +2,26 @@ import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/c
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
-import FormData = require("form-data")
+import FormData from "form-data"
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/entity/user.entity';
+import { User } from 'src/entities/user.entity';
+import { JwtService } from './jwt/jwt.service';
 
 @Injectable()
 export class AuthService {
     constructor (
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
+
         @Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService,
+
+        @Inject(forwardRef(() => JwtService))
+        private readonly jwtService: JwtService,
     ) {}
 
-    async validate (access_code: string, grant: string = 'authorization_code')
+
+    async validate (access_code: string, grant: string = 'authorization_code', data: string = 'code')
     : Promise<{
         access_token: string,
         refresh_token: string,
@@ -28,7 +34,7 @@ export class AuthService {
             form.append('grant_type', grant);
             form.append('client_id', this.configService.get<string>("CLIENT_ID"));
             form.append('client_secret', this.configService.get<string>("CLIENT_SECRET"));
-            form.append('code', access_code);
+            form.append(data, access_code);
             form.append('redirect_uri', 'http://localhost/api/auth/intra42/callback');
 
             const response = await firstValueFrom(this.httpService
@@ -87,5 +93,23 @@ export class AuthService {
         }
         return (user);
     }
+
+
+
+    async generateAuthorizationCode(access_token: string) : Promise<string>
+    {
+        return (await this.jwtService.generateCode(access_token));
+    }
+
+
+
+    async getAccessToken(code: string) : Promise<string | undefined>
+    {
+        let access_token = await this.jwtService.getAccessToken(code);
+        this.jwtService.deleteAccessCode(code);
+        return (access_token);
+    }
 }
+
+
 

@@ -14,9 +14,9 @@ header
 
 body
 {
-	display: flex;
-	justify-content: center;
-	align-items: flex-end;
+	/* display: flex; */
+	/* justify-content: center; */
+	/* align-items: flex-end; */
 	background-color: #282c34;
 }
 
@@ -31,4 +31,11 @@ body
 	list-style: none;
 	display: block;
 	width: 100%;
+}
+
+footer
+{
+	position: fixed;
+	bottom: 2vmin;
+	left: 2vmin;
 }

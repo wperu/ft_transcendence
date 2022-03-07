@@ -25,7 +25,6 @@ export class AuthGuard implements CanActivate {
 	): Promise<boolean>
 	{
 		const req: Request = context.switchToHttp().getRequest();
-		console.log(req.headers);
 		if (req.headers['authorization'] === undefined)
 			throw new BadRequestException("no Authorization field in request header");
 		const target_user = await this.usersService.findUserByAccessToken(req.headers['authorization']);
@@ -35,11 +34,12 @@ export class AuthGuard implements CanActivate {
 		{
 			try {
 				console.log("token expired, trying to refresh the token");
- 				const new_token = await this.authService.validate(target_user.refresh_token_42, 'refresh_token');
+ 				const new_token = await this.authService.validate(target_user.refresh_token_42, 'refresh_token', 'refresh_token');
 				target_user.access_token_42 = new_token.access_token;
 				target_user.refresh_token_42 = new_token.refresh_token;
 				target_user.token_expiration_date_42 = new Date(Date.now() + new_token.expires_in * 1000);
 				this.usersService.saveUser(target_user);
+				console.log("retrieved new access_token");
 			}
 			catch(e)
 				{ throw new ForbiddenException("Token expired"); }
