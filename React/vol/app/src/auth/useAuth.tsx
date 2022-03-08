@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
-import { Navigate, Route, useLocation } from "react-router-dom";
-import { authProvider, openLoginPopup } from "./authProvider";
+import { Navigate, useLocation } from "react-router-dom";
+import openLoginPopup from "./authProvider";
 
 interface IContext
 {
@@ -24,8 +24,11 @@ function useProvideAuth(): IContext
 
 	const signin = (cb: VoidFunction) =>
 	{
-		setIsAuth(true);
+		//FIXME
+		//wait end of rcv event to check connexion
 		openLoginPopup();
+		if (localStorage.getItem('user') !== null)
+			setIsAuth(true);
 	}
 
 	const signout = (cb: VoidFunction) =>

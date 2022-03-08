@@ -1,8 +1,10 @@
 import React from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 function Callback() : JSX.Element
 {
+	let location		= useLocation();
 	const urlParams		= location.search;
 	const searchParams	= new URLSearchParams(urlParams);
 	let accessCode		= searchParams.get("code");
