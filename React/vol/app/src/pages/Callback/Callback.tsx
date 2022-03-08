@@ -3,43 +3,45 @@ import axios from "axios";
 
 function Callback() : JSX.Element
 {
-
 	const urlParams		= location.search;
-	let searchParams	= new URLSearchParams(urlParams);
-	
+	const searchParams	= new URLSearchParams(urlParams);
+	let accessCode		= searchParams.get("code");
 
-	console.log("url is : " + urlParams);
-	let accessCode = searchParams.get("code");
-	
-		
-	if ( accessCode !== null)
+	function authUser()
 	{
-		try
-		{
-			const response = axios({
-				method: 'post',
-				url: 'http://localhost/api/auth/token',
-				headers: {
-					'grant-type': 'authorization-code',
-					'authorization-code': accessCode
-				},
-			})
-			.then(res => {				
-				window.opener.postMessage(res.data, "http://localhost");
-				window.close();
-			});
+		if (window.opener === null)
+			return ;
 
-		}
-		catch(e)
+		if ( accessCode !== null)
 		{
-			console.log(e);
-		}
-	}
-	else
-	{
-		console.log('no code in query');
-	}
+			try
+			{
+				const response = axios({
+					method: 'post',
+					url: 'http://localhost/api/auth/token',
+					headers: {
+						'grant-type': 'authorization-code',
+						'authorization-code': accessCode
+					},
+				})
+				.then(res => {				
+					window.opener.postMessage(res.data, "http://localhost");
+					window.close();
+				});
 
+			}
+			catch(e)
+			{
+				console.log(e);
+			}
+		}
+		else
+		{
+			console.log('no code in query');
+		}
+	}	
+	
+	authUser();
 	return <div></div>;
 }
 

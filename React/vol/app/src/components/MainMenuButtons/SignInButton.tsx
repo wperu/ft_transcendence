@@ -3,6 +3,12 @@ import "./MainMenuButton.css";
 import { useAuth } from "../../auth/useAuth";
 import { useLocation, useNavigate } from "react-router-dom";
 
+const isObjectWithKey = <T extends string>(
+	given: unknown,
+	key: T
+  ): given is Partial<Record<T, unknown>> =>
+	typeof given === 'object' && given !== null && key in given
+
 function SignInButton ()
 {
 	let	auth		= useAuth();
@@ -10,13 +16,18 @@ function SignInButton ()
 	let navigate 	= useNavigate();
 
 	//Redirect to request request URL
-	let from = location.state?.from?.pathname || '/';
+
+	const redirectTo =	isObjectWithKey(location.state, 'from')
+ 					&&	isObjectWithKey(location.state.from, 'pathname')
+  					&&	typeof location.state.from.pathname === 'string'
+    				?	location.state.from.pathname
+    				:	"/";
 
 	function signInClick ()
 	{
 		alert("Connexion");
 		auth.signin(() => {});
-		navigate(from, { replace: true});
+		navigate(redirectTo, { replace: true});
 	}
 
 	return <button onClick={signInClick}>Se connecter</button>;
