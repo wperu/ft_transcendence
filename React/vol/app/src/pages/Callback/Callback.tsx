@@ -1,6 +1,5 @@
 import React from "react";
 import axios from "axios";
-import { firstValueFrom } from "rxjs";
 
 function Callback() : JSX.Element
 {
@@ -11,6 +10,7 @@ function Callback() : JSX.Element
 
 	console.log("url is : " + urlParams);
 	let accessCode = searchParams.get("code");
+	
 		
 	if ( accessCode !== null)
 	{
@@ -18,13 +18,15 @@ function Callback() : JSX.Element
 		{
 			const response = axios({
 				method: 'post',
-				url: 'http://localhost/api/users',
+				url: 'http://localhost/api/auth/token',
 				headers: {
+					'grant-type': 'authorization-code',
 					'authorization-code': accessCode
 				},
 			})
-			.then(res => {
-				console.log(res);
+			.then(res => {				
+				window.opener.postMessage(res.data, "http://localhost");
+				window.close();
 			});
 
 		}

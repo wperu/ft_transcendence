@@ -1,30 +1,32 @@
 
-function getAccessCode(event : any)
+function receiveMessage(event : any)
 {
-	console.log('Event trigger' + event.accessCode);
+	console.log('Messeng recv from ' + event.origin);
+	console.log(event.data);
+	if (event.origin !== 'http://localhost/callback')
+		return ;
+	console.log('Messeng :');
 }
 
 function openLoginPopup() : void
 {
 	const apiUrl 		= process.env.REACT_APP_API_URL || "/";
 	const winOptions	= "toolbar=no,scrollbars=yes,resizable=no,width=500,height=600";
+	let listener		= window.addEventListener('message', receiveMessage, false);
 	let winPopupRef		= window.open(apiUrl, 'authWindow', winOptions);
 
-	/*let loginInterval = window.setInterval(function() {
+	console.log("Window open");
+	let loginInterval = window.setInterval(function() {
 		if (winPopupRef instanceof Window)
 		{
 			if (winPopupRef.closed || !winPopupRef)
 			{
-				//window.clearInterval(loginInterval);
-			}
-			else
-			{
-				winPopupRef.close();
+				window.removeEventListener('message', receiveMessage, false);
+				window.clearInterval(loginInterval);
 			}
 		}
-	}, 3000);*/
-	console.log("Window open");
-	addEventListener('getAccessCode', getAccessCode);
+	}, 1000);
+	
 }
 
 const authProvider =

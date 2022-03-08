@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/c
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
-import FormData from "form-data"
+import FormData = require("form-data");
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/entities/user.entity';
 import { JwtService } from './jwt/jwt.service';
@@ -30,7 +30,7 @@ export class AuthService {
     {
         try
         {
-            var form = new FormData();
+            var form = new FormData(undefined);
             form.append('grant_type', grant);
             form.append('client_id', this.configService.get<string>("CLIENT_ID"));
             form.append('client_secret', this.configService.get<string>("CLIENT_SECRET"));
@@ -54,7 +54,7 @@ export class AuthService {
         }
         catch (e)
         {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException("unauthorized from 42intra");
         }
     }
 

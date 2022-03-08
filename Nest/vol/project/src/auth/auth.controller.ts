@@ -1,4 +1,4 @@
-import { Controller, Redirect, Get, Query, UnauthorizedException, Res, UseGuards, Req, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Controller, Redirect, Get, Query, UnauthorizedException, Res, UseGuards, Req, ForbiddenException, BadRequestException, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { resolveSoa } from 'dns';
@@ -41,7 +41,7 @@ export class AuthController
     }
 
 
-    @Get('/token')
+    @Post('/token')
     async   getAccessToken(@Req() req) : Promise<User | undefined>
     {
         console.log(req.headers);
