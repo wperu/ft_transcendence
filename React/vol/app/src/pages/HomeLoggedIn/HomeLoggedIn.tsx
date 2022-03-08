@@ -10,7 +10,7 @@ import Sidebar from  "../../components/Sidebar/Sidebar"
 function HomeLoggedIn() {
 	return (
 		<div id="homepage">
-			<header>
+			<header id="home_header">
 				<ProfileSummary />
 				<PongLogo />
 			</header>
@@ -19,7 +19,7 @@ function HomeLoggedIn() {
 				<li><ProfileButton /></li>
 			</ul>
 			<Sidebar />
-			<footer>
+			<footer id="home_footer">
 				<LogOutButton />
 			</footer>
 		</div>

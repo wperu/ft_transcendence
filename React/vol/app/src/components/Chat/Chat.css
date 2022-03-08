@@ -1,2 +1,28 @@
 @import url("../../ressources/base.css");
 
+#msg_footer
+{
+	position: absolute;
+	bottom: 0;
+	/* padding: 10px; */
+	background-color: #34373f;
+	width: 100%;
+	height: max-content;
+}
+
+#message_input
+{
+	position: relative;
+	border-radius: 7px;
+	border-style: none;
+	padding: 0.4em 0.8em;
+	width: 90%;
+	margin-bottom: 10px;
+}
+
+#send_button
+{
+	border-width: 0;
+	border-style: none;
+	background-color: blue;
+}

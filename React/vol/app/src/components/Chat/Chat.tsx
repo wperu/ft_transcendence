@@ -4,7 +4,13 @@ import "./Chat.css";
 function Chat() {
 	return (
 		<div id="chat">
-			chate
+			<div id="messages_list">
+				les messages
+			</div>
+			<footer id="msg_footer">
+				<input type="text" id="message_input" placeholder="placeholder" />
+				{/*<label htmlFor="send_button">Envoyer</label>*/}
+			</footer>
 		</div>
 	);
 }

@@ -5,6 +5,7 @@
 	--open-sidebar-size: 60vmin;
 	--closed-sidebar-size: 0px;
 	--transition: 0.5s;
+	height: 0;
 }
 
 #actual_bar
