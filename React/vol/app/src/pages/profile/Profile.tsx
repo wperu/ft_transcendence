@@ -1,6 +1,6 @@
 import axios from "axios";
 import UserFrom from "../../components/UserForm";
-
+import LogOutButton from "../../components/LogOutButton/LogOutButton";
 
 function Profile() {
 	
@@ -29,6 +29,9 @@ function Profile() {
 		<div>
 	  		<h1>Profile</h1>
 	  		<UserFrom />
+			 <footer>
+				<LogOutButton />
+			</footer>
 		</div>
 	);
   }

@@ -35,6 +35,7 @@ function useProvideAuth(): IContext
 
 	const signout = (cb: VoidFunction) =>
 	{
+		setIsAuth(false);
 		cb();
 	}
 

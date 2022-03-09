@@ -1,13 +1,24 @@
 import React from "react";
 import "./LogOutButton.css";
+import { useAuth } from "../../auth/useAuth";
 
-function LogOutClick ()
+function LogOutButton () : JSX.Element
 {
-	alert("déConnexion");
-}
+	let	auth		= useAuth();
 
-function LogOutButton ()
-{
+
+	function delUser()
+	{
+		localStorage.removeItem('user');
+	}
+
+	function LogOutClick ()
+	{
+		alert("déConnexion");
+		auth.signout(delUser);
+	}
+
+
 	return <button id="LogOut" onClick={LogOutClick}>Se déconnecter</button>;
 }
 
