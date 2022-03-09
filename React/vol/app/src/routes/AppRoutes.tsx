@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Profile from '../pages/profile/Profile';
 import HomeLoggedIn from '../pages/HomeLoggedIn/HomeLoggedIn';
 import HomeLoggedOut from '../pages/HomeLoggedOut/HomeLoggedOut';
-import { ProvideAuth, RequireAuth } from '../auth/useAuth';
+import { ProvideAuth } from '../auth/useAuth';
+import { RequireAuth } from '../auth/RequireAuth';
 import Callback from '../pages/Callback/Callback';
 
 function AppRoute() : JSX.Element

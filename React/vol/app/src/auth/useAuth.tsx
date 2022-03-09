@@ -1,50 +1,54 @@
 import React, { createContext, useContext, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import openLoginPopup from "./authProvider";
+import openLoginPopup from "./openLoginPopup";
 
 interface IContext
 {
-	user: string,
-	signin: (callback: VoidFunction) => void,
-	signout: (callback: VoidFunction) => void,
-	isAuth: boolean,
+	signin:		(callback: () => void) => void,
+	signout:	(callback: () => void) => void,
+	isAuth:		boolean,
+	setIsAuth:	(auth : boolean) => void,
 }
 
 const authContext = createContext<IContext>(null!);
 
+/**
+ * /!\ component must be in \<ProvideAuth\>
+ * 
+ * @returns authContext : IContext
+ */
 function useAuth() : IContext
 {
 	return useContext(authContext);
 }
 
+/**
+ * Set auth context
+*/
 function useProvideAuth(): IContext
 {
-	const [user, setUser] = useState<string>("");
 	const [isAuth, setIsAuth] = useState<boolean>(false);
 
-	const signin = (cb: VoidFunction) =>
+	const signin = (cb: () => void) =>
 	{
-		//FIXME
-		//wait end of rcv event to check connexion
-		openLoginPopup();
-		if (localStorage.getItem('user') !== null)
-			setIsAuth(true);
+		openLoginPopup(cb);
 	}
 
 	const signout = (cb: VoidFunction) =>
 	{
-		setIsAuth(false);
 		cb();
 	}
 
 	return {
-		user,
 		signin,
 		signout,
 		isAuth,
+		setIsAuth,
 	};
 }
 
+/**
+ * Init context for children
+ */
 function ProvideAuth( {children}: {children: JSX.Element} ): JSX.Element
 {
 	const auth = useProvideAuth();
@@ -56,21 +60,4 @@ function ProvideAuth( {children}: {children: JSX.Element} ): JSX.Element
 		);
 };
 
-interface IProps
-{
-  element: JSX.Element,
-}
-
-function RequireAuth({ children }: {children: JSX.Element}): JSX.Element
-{
-	let auth		= useAuth();
-	let location	= useLocation();
-
-	if (!auth.isAuth)
-	{
-		return <Navigate to="/" state={{ from: location }} replace/>;
-	}
-	return children;
-}
-
-export { useAuth, ProvideAuth, RequireAuth };
+export { useAuth, ProvideAuth };

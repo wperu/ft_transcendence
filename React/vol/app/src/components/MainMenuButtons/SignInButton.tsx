@@ -15,19 +15,28 @@ function SignInButton ()
 	let	location	= useLocation();
 	let navigate 	= useNavigate();
 
-	//Redirect to request request URL
+	/**
+	 * Callback fct for signin
+	 * 
+	 * setAuth and Redirect to request Url
+	 */
+	function useRedirectToAuthPage()
+	{
+		const redirectTo	=	isObjectWithKey(location.state, 'from')
+							&&	isObjectWithKey(location.state.from, 'pathname')
+							&&	typeof location.state.from.pathname === 'string'
+					   		?	location.state.from.pathname
+					   		:	"/";
 
-	const redirectTo =	isObjectWithKey(location.state, 'from')
- 					&&	isObjectWithKey(location.state.from, 'pathname')
-  					&&	typeof location.state.from.pathname === 'string'
-    				?	location.state.from.pathname
-    				:	"/";
+		console.log("Redirect");
+		auth.setIsAuth(true);
+		navigate(redirectTo, { replace: true});
+	};
 
 	function signInClick ()
 	{
 		alert("Connexion");
-		auth.signin(() => {});
-		navigate(redirectTo, { replace: true});
+		auth.signin(useRedirectToAuthPage);
 	}
 
 	return <button onClick={signInClick}>Se connecter</button>;

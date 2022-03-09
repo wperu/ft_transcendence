@@ -1,21 +1,21 @@
 import IUser from "../interface/User";
 
 /**
-	Open login popup
-
-	set 'user' in localstorage
-
-	//fixme
-	wait end of event to send auth's response
-*/
-function openLoginPopup()
+ * 	Open login popup
+ * 	
+ *  if auth is success
+ * 	set 'user' in localstorage and launch cb()
+ * 	
+ * @param cb : callback fct
+ */
+function openLoginPopup(cb: () => void)
 {
+	window.addEventListener('message', messageListener, false);
 	const apiUrl 		= process.env.REACT_APP_API_URL || "/";
 	const winOptions	= "toolbar=no,scrollbars=yes,resizable=no,width=500,height=600";
-	let listener		= window.addEventListener('message', receiveMessage, false);
 	let winPopupRef		= window.open(apiUrl, 'authWindow', winOptions);
 
-	function receiveMessage(event : any)
+	function messageListener(event : any)
 	{
 		console.log('Messeng recv from ' + event.origin);
 		console.log(event.data);
@@ -23,13 +23,14 @@ function openLoginPopup()
 		
 		if (event.origin !== process.env.REACT_APP_ORIGIN)
 			return ;
-
-		const user : IUser	= event.data;
 		
+		console.log("Get IUser");
+		const user : IUser	= event.data;
 
 		//todo
 		//do stuff with user
 		localStorage.setItem("user", JSON.stringify(user));
+		cb();
 	}
 
 
@@ -39,7 +40,7 @@ function openLoginPopup()
 		{
 			if (winPopupRef.closed || !winPopupRef)
 			{
-				window.removeEventListener('message', receiveMessage, false);
+				window.removeEventListener('message', messageListener, false);
 				window.clearInterval(loginInterval);
 			}
 		}
