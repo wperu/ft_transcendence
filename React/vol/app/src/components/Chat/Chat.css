@@ -4,7 +4,6 @@
 {
 	position: absolute;
 	bottom: 0;
-	/* padding: 10px; */
 	background-color: #34373f;
 	width: 100%;
 	height: max-content;
@@ -25,4 +24,10 @@
 	border-width: 0;
 	border-style: none;
 	background-color: blue;
+}
+
+#messages_list
+{
+	overflow: auto;
+	height: 100%;
 }
