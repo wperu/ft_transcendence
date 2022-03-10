@@ -12,21 +12,15 @@
 	border-color: white;
 }
 
+.msg_content
+{
+	font-size: 0.7em;
+}
 
-.msg_src
+.message > header
 {
 	font-size: 0.4em;
-}
-.msg_time
-{
-	font-size: 0.3em;
+	display: flex;
+	justify-content: space-between;
 }
 
-.message > header > div
-{
-	display: inline;
-}
-
-.msg_src
-{
-}

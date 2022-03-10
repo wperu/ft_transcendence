@@ -2,6 +2,7 @@
 
 #sidebar
 {
+	--tab_button_height: 5vmin;
 	--open-sidebar-size: 60vmin;
 	--closed-sidebar-size: 0px;
 	--transition: 0.5s;
@@ -33,7 +34,7 @@
 .tab_button + label
 {
 	width: 100%;
-	height: 5vmin;
+	height: var(--tab_button_height);
 	opacity: 50%;
 	background-color:cadetblue;
 }

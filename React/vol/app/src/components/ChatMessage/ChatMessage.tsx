@@ -1,15 +1,22 @@
 // import React from "react";
 import "./ChatMessage.css";
 
-function ChatMessage()
+interface MessageProps
+{
+	time: string;
+	src_name: string;
+	content: string;
+}
+
+function ChatMessage(props: MessageProps)
 {
 	return (
-		<div class="message">
+		<div className="message">
 			<header>
-				<div class="msg_src">Ta sœur</div>
-				<div class="msg_time">12/34/56 à 12h78</div>
+				<div className="msg_src">{props.src_name}</div>
+				<div className="msg_time">{props.time}</div>
 			</header>
-			<div class="msg_content">Lorem Ipsum</div>
+			<div className="msg_content">{props.content}</div>
 		</div>
 	);
 }
