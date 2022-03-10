@@ -12,19 +12,22 @@
 	background-color: #34373f;
 	width: 100%;
 	height: var(--message_footer_height);
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 #message_input
 {
 	background-color: #52565f;
 	color: whitesmoke;
-	font-size: 0.4em;
+	font-size: 2.3vmin;
 	position: relative;
-	border-radius: 7px;
+	border-radius: 14px;
 	border-style: none;
-	padding: 0.4em 0.8em;
+	padding: 0.5vmin 1.5vmin;
 	width: 90%;
-	margin-bottom: 15px;
+	/* margin-bottom: 15px; */
 }
 
 #send_button
