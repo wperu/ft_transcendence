@@ -1,0 +1,86 @@
+@import url("../../ressources/base.css");
+
+#sidebar
+{
+	--tab_button_height: 5vmin;
+	--open-sidebar-size: 60vmin;
+	--closed-sidebar-size: 0px;
+	--transition: 0.5s;
+	height: 0;
+}
+
+#actual_bar
+{
+	background-color: #40444d;
+	position: fixed;
+	right: 0;
+	top: 0;
+	height: 100%;
+	width: var(--open-sidebar-size);
+	transition: var(--transition);
+}
+
+#actual_bar > header
+{
+	display: flex;
+	justify-content: space-around;
+}
+
+.tab_button
+{
+	display: none;
+}
+
+.tab_button + label
+{
+	width: 100%;
+	height: var(--tab_button_height);
+	opacity: 50%;
+	background-color:cadetblue;
+}
+
+.tab_button:checked + label
+{
+	opacity: 1;
+}
+
+#toggle
+{
+	opacity: 0;
+	/* transition: var(--transition);
+	position: fixed;
+	right: var(--open-sidebar-size);
+	bottom: 50%; */
+}
+
+#toggle + label
+{
+	padding: 0.18em;
+	margin: 7px;
+	background-color: cadetblue;
+	border-width: 5px 5px 0 0;
+	border-style: solid;
+	border-color: whitesmoke;
+	border-radius: 3px;
+	transition: var(--transition);
+	position: fixed;
+	right: calc(var(--open-sidebar-size));
+	transform: rotate(45deg);
+	top: 50%;
+}
+
+#toggle:checked
+{
+	right: var(--closed-sidebar-size);
+}
+
+#toggle:checked + label
+{
+	right: calc(var(--closed-sidebar-size));
+	transform: rotate(225deg);
+}
+
+#toggle:checked + label + #actual_bar
+{
+	width: var(--closed-sidebar-size);
+}

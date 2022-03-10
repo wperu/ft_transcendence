@@ -1,0 +1,42 @@
+@import url("../../ressources/base.css");
+
+#chat
+{
+	--message_footer_height: 6.5vmin;
+}
+
+#msg_footer
+{
+	position: absolute;
+	bottom: 0;
+	background-color: #34373f;
+	width: 100%;
+	height: var(--message_footer_height);
+}
+
+#message_input
+{
+	background-color: #52565f;
+	color: whitesmoke;
+	font-size: 0.4em;
+	position: relative;
+	border-radius: 7px;
+	border-style: none;
+	padding: 0.4em 0.8em;
+	width: 90%;
+	margin-bottom: 15px;
+}
+
+#send_button
+{
+	border-width: 0;
+	border-style: none;
+	background-color: blue;
+}
+
+#messages_list
+{
+	scroll-behavior: auto;
+	overflow: auto;
+	height: calc(100vh - var(--message_footer_height) - var(--tab_button_height));
+}
