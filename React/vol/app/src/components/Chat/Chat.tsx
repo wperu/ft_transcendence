@@ -1,9 +1,22 @@
 import React, {KeyboardEvent} from "react";
+import { io } from "socket.io-client";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import "./Chat.css";
 
 function Chat()
 {
+
+	const socket = io("http://localhost/api");
+	console.log("Connection status : " + socket.connected);
+		// client-side
+	socket.on("connect", () => {
+		console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+	});
+
+	socket.on("disconnect", () => {
+		console.log(socket.id); // undefined
+	});
+
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
 	{
 		if (event.key === "Enter")
@@ -11,6 +24,7 @@ function Chat()
 			console.log("sending: " + event.currentTarget.value);
 			event.currentTarget.value = '';
 		}
+		
 	};
 
 	return (
