@@ -11,7 +11,8 @@
 
 #actual_bar
 {
-	background-color: #40444d;
+	background-color: #454a53a9;
+	backdrop-filter: blur(20px);
 	position: fixed;
 	right: 0;
 	top: 0;

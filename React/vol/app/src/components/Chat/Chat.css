@@ -9,22 +9,25 @@
 {
 	position: absolute;
 	bottom: 0;
-	background-color: #34373f;
+	background-color: #52565f;
 	width: 100%;
 	height: var(--message_footer_height);
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 #message_input
 {
+	padding: 0;
 	background-color: #52565f;
 	color: whitesmoke;
-	font-size: 0.4em;
+	font-size: 2.3vmin;
 	position: relative;
-	border-radius: 7px;
+	border-radius: 14px;
 	border-style: none;
-	padding: 0.4em 0.8em;
 	width: 90%;
-	margin-bottom: 15px;
+	outline: none;
 }
 
 #send_button
@@ -37,6 +40,7 @@
 #messages_list
 {
 	scroll-behavior: auto;
-	overflow: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
 	height: calc(100vh - var(--message_footer_height) - var(--tab_button_height));
 }
