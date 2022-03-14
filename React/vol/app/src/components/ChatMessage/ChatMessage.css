@@ -15,15 +15,14 @@
 
 .msg_content
 {
-	font-size: 0.7em;
-	margin: 0 0.8em;
+	font-size: 3vmin;
+	margin: 0 0.7em;
 }
 
 .message > header
 {
-	font-size: 0.4em;
+	font-size: 2.5vmin;
 	display: flex;
 	justify-content: space-between;
 	margin: 0 1.1em;
 }
-
