@@ -6,11 +6,11 @@ import "./Chat.css";
 function Chat()
 {
 
-	const socket = io("http://localhost/api");
+	const socket = io("http://localhost/", { path: "/api/socket.io/", transports: ['websocket'] });
 	console.log("Connection status : " + socket.connected);
 		// client-side
 	socket.on("connect", () => {
-		console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+		console.log("[CHAT] " + socket.id); // x8WIv7-mJelg7on_ALbx
 	});
 
 	socket.on("disconnect", () => {
@@ -21,7 +21,7 @@ function Chat()
 	{
 		if (event.key === "Enter")
 		{
-			console.log("sending: " + event.currentTarget.value);
+			console.log("[CHAT] sending: " + event.currentTarget.value);
 			event.currentTarget.value = '';
 		}
 		

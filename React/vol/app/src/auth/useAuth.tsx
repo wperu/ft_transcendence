@@ -26,7 +26,7 @@ function useAuth() : IContext
 */
 function useProvideAuth(): IContext
 {
-	const [isAuth, setIsAuth] = useState<boolean>(false);
+	const [isAuth, setIsAuth] = useState<boolean>(true);
 
 	const signin = (cb: () => void) =>
 	{
