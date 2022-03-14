@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
+import { th } from 'date-fns/locale';
 import { Server, Socket } from 'socket.io';
 
 /* CONNTECT W/ WSCAT : wscat -c 'ws://localhost:4000/socket.io/chat?EIO=4&transport=websocket'*/
@@ -27,23 +28,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage('message')
-	handleMessage(client: Socket, payload: any): string
+	handleMessage(client: Socket, payload: any): WsResponse<string>
 	{
-		return 'ws: Hello world!';
+		this.logger.log("[Socket io] new message: " + payload);
+		return {
+			event: 'message',
+			data: payload,
+		};
 	}
 
 	@SubscribeMessage('error')
 	handleError(err: any): void
 	{
-		console.log('error occured: ' + err);
+		this.logger.log('error occured: ' + err);
 	}
 	
-	handleConnection(client: Socket, ...args: any[]) : void//: WsResponse<string>
+	handleConnection(client: Socket, ...args: any[]) : WsResponse<string>
 	{
 		this.logger.log(`Client connected: ${client.id}`);
-		console.log("[Socket io] new connection: " + client);
 
-		client.emit( "hello" );
+		return {
+			event: 'connect',
+			data: client.id,
+		};
 	}
 
 	handleDisconnect(client: Socket)
