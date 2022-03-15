@@ -35,7 +35,7 @@ function SignInButton ()
 
 	function signInClick ()
 	{
-		alert("Connexion");
+		// alert("Connexion");
 		auth.signin(useRedirectToAuthPage);
 	}
 

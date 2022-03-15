@@ -24,6 +24,7 @@
 #actual_bar > header
 {
 	display: flex;
+	font-size: 4vmin;
 	justify-content: space-around;
 }
 
@@ -37,7 +38,7 @@
 	width: 100%;
 	height: var(--tab_button_height);
 	opacity: 50%;
-	background-color:cadetblue;
+	background-color:lightskyblue;
 }
 
 .tab_button:checked + label
@@ -83,5 +84,6 @@
 
 #toggle:checked + label + #actual_bar
 {
+	font-size: 0;
 	width: var(--closed-sidebar-size);
 }

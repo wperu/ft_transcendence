@@ -1,0 +1,29 @@
+@import url("../../ressources/base.css");
+
+.joined_chan
+{
+	width: var(--open-sidebar-size);
+	font-size: 4vmin;
+	box-sizing: border-box;
+}
+
+.joined_chan > input
+{
+	display: none;
+}
+
+.joined_chan > label
+{
+	box-sizing: border-box;
+	margin: 8px;
+	padding: 5px;
+	border-radius: 15px;
+	display: block;
+	width: var(--open-sidebar-size);
+	text-align: left;
+}
+
+.joined_chan > label:hover
+{
+	background-color: rgba(255, 255, 255, 0.288);
+}
