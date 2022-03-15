@@ -29,9 +29,9 @@ function Chat()
 	function addMsg(content : any) : void
 	{
 		const newChat = <ChatMessage src_name="a" content={content} time="12/34/56 à 12h34" />;
-		setMsgLst(prevMsgLst => {
-			return [...prevMsgLst , newChat];
-		});
+		let newMsglst : Array<JSX.Element> = [...msgLst];
+		newMsglst.push(newChat);
+		setMsgLst(newMsglst);
 	};
 
 	useEffect(() => {
@@ -57,7 +57,7 @@ function Chat()
 			});
 		}
 
-		return function cleanup() { if (socket !== undefined) socket.disconnect() };
+		//return function cleanup() { if (socket !== undefined) socket.disconnect() };
 	});
 
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
@@ -73,11 +73,11 @@ function Chat()
 		}
 		
 	};
-
+	
 	return (
 		<div id="chat">
-			<div id="messages_list">
-				{msgLst}
+			<div id="messages_list" >
+			{msgLst.map((el, i) => <div key={i}>{el}</div>)}
 			</div>
 			<footer id="msg_footer">
 				<input type="text" id="message_input" placeholder="placeholder" onKeyPress={pressedSend}/>
