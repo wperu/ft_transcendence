@@ -41,7 +41,7 @@ function Chat()
 		{
 			console.log("Connection status : " + socket.connected);
 
-			socket.on('message', (data : any) => {
+			socket.on('RECEIVE_MSG', (data : any) => {
 				console.log("[CHAT] rcv: " + data); // x8WIv7-mJelg7on_ALbx
 				addMsg(data);
 			});
@@ -55,7 +55,7 @@ function Chat()
 		{
 			console.log("[CHAT] sending: " + event.currentTarget.value);
 			if (socket !== undefined)
-				socket.emit('message', event.currentTarget.value);
+				socket.emit('SEND_MESSAGE', event.currentTarget.value);
 			console.log("msg : " + msgLst.length);
 			event.currentTarget.value = '';
 		}
