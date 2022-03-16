@@ -110,9 +110,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
 		}
 
-		let is_user = local_room.users.find(c => c === client);
-		if (is_user !== undefined)
-			throw new BadRequestException(`Client ${client.id} has aready joined ${payoad.room_name}`)
+		if (local_room !== undefined)
+		{
+			let is_user = local_room.users.find(c => c === client);
+			if (is_user !== undefined)
+				throw new BadRequestException(`Client ${client.id} has aready joined ${payoad.room_name}`)
+		}
 
 		this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
 		client.join(payoad.room_name);
