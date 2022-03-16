@@ -12,11 +12,19 @@ function Channels()
 	{
 		if (event.key === "Enter")
 		{
-			let data : JoinRoomDto = {
-				room_name: event.currentTarget.value, 
+			let room = chatCtx.rooms.find(o => (o.room_name === event.currentTarget.value));
+
+			if (room === undefined)
+			{
+				let data : JoinRoomDto = {
+					room_name: event.currentTarget.value, 
+				}
+				socket.emit('JOIN_ROOM', data);
+				chatCtx.addRoom(data.room_name);
 			}
-			socket.emit('JOIN_ROOM', data);
-			chatCtx.setCurrentRoom(data.room_name);
+			
+			chatCtx.setCurrentRoom(event.currentTarget.value);
+			event.currentTarget.value = '';
 		}
 	};
 

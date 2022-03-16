@@ -16,8 +16,14 @@ function Chat()
 {
 	const [socket, setSocket] = useState(useChatContext().socket);
 	const [room, setRoom] = useState<string | undefined>(useChatContext().currentRoom);
-	const [msgLst, setMsgLst] = useState<Array<string>>([]);
+	
+
+	
 	const chatCtx = useChatContext();
+	//const roomchatCtx.rooms.find(o => (o.room_name === room))?.room_message |
+	const [msgLst, setMsgLst] = useState<Array<string>>( []);
+
+	
 
 	//Todo array of msg
 	function addMsg(content : any) : void
@@ -28,10 +34,13 @@ function Chat()
 	};
 
 	//todo cancel socket.on() in cleanup()
+	//refaire context
 	useEffect(() => {
 		console.log("useEffect");
 
-		
+		let rooms = chatCtx.rooms.find(o => (o.room_name === room));
+		if (rooms !== undefined && rooms.room_message)
+			setMsgLst(rooms.room_message);
 		if (socket !== undefined)
 		{
 			
@@ -42,6 +51,9 @@ function Chat()
 				addMsg(data.message);
 			});
 		}
+		/*return function cleanup() {
+			socket.off('RECEIVE_MSG');
+		};*/
 
 	}, []);
 
