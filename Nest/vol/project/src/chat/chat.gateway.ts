@@ -94,27 +94,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				owner: client,
 			})
 		}
-		else if (local_room.protection === RoomProtection.NONE)
-		{
-			local_room.users.push(client);
-		}
-		else if (local_room.protection === RoomProtection.PRIVATE)
-		{
-			if (local_room.password === payoad.password)
-				local_room.users.push(client);
-			else
-				throw new UnauthorizedException("Wrong password");
-		}
-		else 
-		{
-			throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
-		}
-
-		if (local_room !== undefined)
+		else
 		{
 			let is_user = local_room.users.find(c => c === client);
 			if (is_user !== undefined)
 				throw new BadRequestException(`Client ${client.id} has aready joined ${payoad.room_name}`)
+			
+			if (local_room.protection === RoomProtection.NONE)
+			{
+				local_room.users.push(client);
+			}
+			else if (local_room.protection === RoomProtection.PRIVATE)
+			{
+				if (local_room.password === payoad.password)
+					local_room.users.push(client);
+				else
+					throw new UnauthorizedException("Wrong password");
+			}
+			else 
+			{
+				throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
+			}
 		}
 
 		this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
