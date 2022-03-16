@@ -19,6 +19,7 @@
 	height: 100%;
 	width: var(--open-sidebar-size);
 	transition: var(--transition);
+	font-size: 4vmin;
 }
 
 #actual_bar > header

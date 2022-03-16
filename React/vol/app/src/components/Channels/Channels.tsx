@@ -27,9 +27,14 @@ class Channels extends Component {
 		return (
 			<div id="channels">
 				<header>
-					<input className="channels_tab_button" type="radio" name="channels_tab" id="global_chans" value="global_chans" onChange={this.handleChange}/>
+					<input className="channels_tab_button" type="radio"
+						name="channels_tab" id="global_chans"
+						value="global_chans" onChange={this.handleChange}/>
 					<label htmlFor="global_chans">Global chans</label>
-					<input className="channels_tab_button" type="radio" name="channels_tab" id="joined_chans" value="joined_chans" onChange={this.handleChange}  defaultChecked/>
+					<input className="channels_tab_button" type="radio"
+						name="channels_tab" id="joined_chans"
+						value="joined_chans" onChange={this.handleChange}
+						defaultChecked/>
 					<label htmlFor="joined_chans">Joined chans</label>
 				</header>
 				<Content tab={this.state.tab} />

@@ -6,6 +6,13 @@
 	justify-content: space-around;
 }
 
+#channels
+{
+	box-sizing: border-box;
+	--channel_margin: 8px;
+	--channel_padding: 5px;
+}
+
 .channels_tab_button
 {
 	display: none;
@@ -17,7 +24,7 @@
 	height: var(--tab_button_height);
 	opacity: 50%;
 	background-color: cornflowerblue;
-	
+
 	display: flex;
     align-items: center;
 	justify-content: center;

@@ -1,1 +1,41 @@
 @import url("../../ressources/base.css");
+
+.unjoined_chan
+{
+	width: var(--open-sidebar-size);
+	text-align: left;
+	font-size: 4vmin;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: space-between;
+	padding: calc(var(--channel_margin) + var(--channel_padding));
+}
+
+.chan_name
+{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 90%;
+}
+
+.join_chan
+{
+	display: none;
+}
+
+.join_chan + label
+{
+	text-align: right;
+	font-size: 0.65em;
+	background-color: limegreen;
+	opacity: 85%;
+	/* margin-right: 4px; */
+	padding: 4px;
+	border-radius: 10px;
+}
+
+.join_chan + label:hover
+{
+	opacity: 70%;
+}

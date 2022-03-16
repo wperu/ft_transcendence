@@ -7,23 +7,49 @@
 	box-sizing: border-box;
 }
 
-.joined_chan > input
+.connect_chan
+{
+	display: none;
+	box-sizing: border-box;
+}
+
+.connect_chan + label
+{
+	text-align: left;
+	box-sizing: border-box;
+	margin: var(--channel_margin);
+	padding: var(--channel_padding);
+	border-radius: 15px;
+	width: calc(var(--open-sidebar-size) - var(--channel_margin) - var(--channel_padding));
+	display: block;
+	justify-content: space-between;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.connect_chan + label:hover
+{
+	background-color: rgba(255, 255, 255, 0.1);
+}
+/*
+.leave_chan
 {
 	display: none;
 }
 
-.joined_chan > label
+.leave_chan + label
 {
-	box-sizing: border-box;
-	margin: 8px;
-	padding: 5px;
-	border-radius: 15px;
-	display: block;
-	width: var(--open-sidebar-size);
-	text-align: left;
+	text-align: right;
+	font-size: 0.65em;
+	background-color: firebrick;
+	opacity: 85%;
+	margin-right: 4px;
+	padding: 4px;
+	border-radius: 10px;
 }
 
-.joined_chan > label:hover
+.leave_chan + label:hover
 {
-	background-color: rgba(255, 255, 255, 0.288);
-}
+	opacity: 1;
+} */
