@@ -52,7 +52,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('SEND_MESSAGE')
 	handleMessage(client: Socket, payload: {
 		message: string,
-		room: string
+		room_name: string
 	}) : void
 	{
 		let msg_obj = {
@@ -64,7 +64,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		// TODO check if user is actually in room
 
 		/* this.logger.log("[Socket io] new message: " + msg_obj.message); */
-		this.server.to(payload.room).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		this.server.to(payload.room_name).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
 	}
 
 
@@ -79,16 +79,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * upgrade room protection using 'PROTECT_ROOM' event
 	 */
 	@SubscribeMessage('JOIN_ROOM')
-	joinRoom(client: Socket, room: {
-		name: string,
+	joinRoom(client: Socket, payoad: {
+		room_name: string,
 		password?: string
 	}): void
 	{
-		let local_room = this.rooms.find(o => o.name === room.name);
+		let local_room = this.rooms.find(o => o.name === payoad.room_name);
 		if (local_room === undefined)
 		{
 			this.rooms.push({
-				name: room.name,
+				name: payoad.room_name,
 				protection: RoomProtection.NONE,
 				users: [client],
 				owner: client,
@@ -100,15 +100,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else if (local_room.protection === RoomProtection.PRIVATE)
 		{
-			if (local_room.password === room.password)
+			if (local_room.password === payoad.password)
 				local_room.users.push(client);
 			else
 				throw new UnauthorizedException("Wrong password");
 		}
+		else 
+		{
+			throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
+		}
 
-		this.logger.log(`Client ${client.id} joined room ${room.name}`);
-		client.join(room.name);
+		let is_user = local_room.users.find(c => c === client);
+		if (is_user !== undefined)
+			throw new BadRequestException(`Client ${client.id} has aready joined ${payoad.room_name}`)
+
+		this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
+		client.join(payoad.room_name);
 	}
+
+
 
 
 	// TODO what happens if owner leaves ? 
@@ -118,9 +128,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @param room: the room name to leave.
 	 */
 	@SubscribeMessage('LEAVE_ROOM')
-	leaveRoom(client: Socket, room_name: string): void
+	leaveRoom(client: Socket, payload: string): void
 	{
-		let local_room = this.rooms.find(o => o.name === room_name);
+		let local_room = this.rooms.find(o => o.name === payload);
 		if (local_room === undefined)
 		{
 			console.error("Left an undefined room ??");
@@ -131,8 +141,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			local_room.users.splice(user_idx, 1);
 		}
 
-		this.logger.log(`Client ${client.id} left room ${room_name}`);
-		client.leave(room_name);
+		this.logger.log(`Client ${client.id} left room ${payload}`);
+		client.leave(payload);
 		if (local_room.users.length === 0)
 			this.rooms.splice(this.rooms.indexOf(local_room), 1);
 	}
@@ -164,21 +174,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field opt: optional field, used to store the password when protection_mode is PRIVATE
 	 */
 	@SubscribeMessage('PROTECT_ROOM')
-	protectRoom(client: Socket, room_protection: {
+	protectRoom(client: Socket, payload: {
 		room_name: string,
 		protection_mode: string,
 		opt?: string,
 	})
 	{
-		let local_room = this.rooms.find(o => o.name === room_protection.room_name);
+		let local_room = this.rooms.find(o => o.name === payload.room_name);
 		if (local_room === undefined)
 		{
-			console.error(`Cannot set protection to unknown room: ${room_protection.room_name}`);
+			console.error(`Cannot set protection to unknown room: ${payload.room_name}`);
+			throw new BadRequestException(`Unknown room ${payload.room_name}`);
 		}
 
 		if (client === local_room.owner)
 		{
-			switch (room_protection.protection_mode)
+			switch (payload.protection_mode)
 			{
 				case "NONE":
 					local_room.protection = RoomProtection.NONE;
@@ -188,15 +199,49 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					break;
 				case "PRIVATE":
 					local_room.protection = RoomProtection.PRIVATE;
-					if (room_protection["opt"] === undefined)
+					if (payload["opt"] === undefined)
 						throw new BadRequestException("No opt parameter: Cannot set a room protection mode \
 to private without sending a password")
-					local_room.password = room_protection.opt;
+					local_room.password = payload.opt;
 					break;
 				default:
-					console.log(`Unknown protection mode: ${room_protection.protection_mode}`);
+					console.log(`Unknown protection mode: ${payload.protection_mode}`);
 			}
 		}
+	}
+
+
+	/**
+	 * Emit on this event to change the name of a room
+	 * 
+	 * @field old_name: the old name of the room that will be changed
+	 * @field new_name: the new name for the room
+	 */
+	@SubscribeMessage('RENAME_ROOM')
+	renameRoom(client: Socket, payload: {
+		old_name: string,
+		new_name: string,
+	})
+	{
+		let local_room = this.rooms.find(o => o.name === payload.old_name);
+		if (local_room === undefined)
+		{
+			console.error(`Cannot rename unknown room: ${payload.old_name}`);
+			throw new BadRequestException(`Unknown room ${payload.old_name}`);
+		}
+		if (client !== local_room.owner)
+		{
+			throw new UnauthorizedException("Only the room owner can rename the room !");
+		}
+
+		let is_new_name = this.rooms.find(o => o.name === payload.new_name);
+		if (is_new_name !== undefined)
+		{
+			console.error(`Cannot rename room ${payload.old_name} to  ${payload.new_name}: A room with that name already exists`);
+			throw new BadRequestException(`Bad name: ${payload.new_name} (try again with another name)`);
+		}
+
+		local_room.name = payload.new_name;
 	}
 
 
