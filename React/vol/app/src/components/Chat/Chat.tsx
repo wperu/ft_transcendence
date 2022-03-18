@@ -53,7 +53,7 @@ function Chat()
 				{messages}
 			</div>
 			<footer id="msg_footer">
-				<input type="text" id="message_input" placeholder={"send to " + chatCtx.currentRoom} onKeyPress={pressedSend}/>
+				<input type="text" id="message_input" placeholder={"send"} onKeyPress={pressedSend}/>
 				
 			</footer>
 		</div>

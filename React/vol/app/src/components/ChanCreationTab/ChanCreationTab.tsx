@@ -1,8 +1,6 @@
 import React from "react";
 import "./ChanCreationTab.css";
 
-
-
 function ChanCreationTab()
 {
 	function CreateChanClick ()

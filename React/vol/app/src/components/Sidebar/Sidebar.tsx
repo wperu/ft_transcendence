@@ -37,11 +37,17 @@ class Sidebar extends Component
 					<label htmlFor="toggle"></label>
 					<div id="actual_bar">
 						<header>
-							<input className="tab_button" type="radio" name="tab" id="friends" value="friends" onChange={this.handleChange}/>
+							<input className="tab_button" type="radio"
+								name="tab" id="friends" value="friends"
+								onChange={this.handleChange} />
 							<label htmlFor="friends"></label>
-							<input className="tab_button" type="radio" name="tab" id="channels" value="channels" onChange={this.handleChange} />
+							<input className="tab_button" type="radio" 
+								name="tab" id="channels" value="channels" 
+								onChange={this.handleChange} defaultChecked/>
 							<label htmlFor="channels"></label>
-							<input className="tab_button" type="radio" name="tab" id="chats" value="chats" onChange={this.handleChange}  defaultChecked/>
+							<input className="tab_button" type="radio" 
+								name="tab" id="chats" value="chats" 
+								onChange={this.handleChange} />
 							<label htmlFor="chats"></label>
 						</header>
 						<Content tab={this.state.tab} />
