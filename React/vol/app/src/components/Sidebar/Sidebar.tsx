@@ -13,15 +13,15 @@ function Content(content: tabProp)
 {
 	if (content.tab === "chats")
 		return (<Chat />);
-	else if (content.tab === "channels")
-		return (<Channels />);
+	else if (content.tab === "friends")
+		return (<Friends />);
 	else
-		return (<Friends />)
+	return (<Channels />);
 }
 
 class Sidebar extends Component
 {
-	state = {tab: "chats"};
+	state = {tab: "channels"};
 
 	handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		this.setState({tab: event.target.value});
@@ -30,6 +30,7 @@ class Sidebar extends Component
 	render()
 	{
 		return (
+
 			<ProvideChat>
 				<div id="sidebar">
 					<input id="toggle" type="checkbox" />

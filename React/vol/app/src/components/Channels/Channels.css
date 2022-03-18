@@ -1,2 +1,45 @@
 @import url("../../ressources/base.css");
 
+#channels > header
+{
+	display: flex;
+	justify-content: space-around;
+}
+
+#channels
+{
+	box-sizing: border-box;
+	--channel_margin: 8px;
+	--channel_padding: 5px;
+}
+
+.channels_tab_button
+{
+	display: none;
+}
+
+.channels_tab_button + label
+{
+	width: 100%;
+	height: var(--tab_button_height);
+	opacity: 50%;
+	background-color: cornflowerblue;
+
+	display: flex;
+    align-items: center;
+	justify-content: center;
+	font-size: 0.5em;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+
+#create_chan + label
+{
+	width: 30%;
+	font-size: 0.4em;
+}
+
+.channels_tab_button:checked + label
+{
+	opacity: 1;
+}

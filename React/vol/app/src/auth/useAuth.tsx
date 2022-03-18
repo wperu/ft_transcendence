@@ -13,7 +13,7 @@ const authContext = createContext<IContext>(null!);
 
 /**
  * /!\ component must be in \<ProvideAuth\>
- * 
+ *
  * @returns authContext : IContext
  */
 function useAuth() : IContext

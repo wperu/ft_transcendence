@@ -1,6 +1,4 @@
-import React, {KeyboardEvent, useEffect, useState} from "react";
-import { io, Socket } from "socket.io-client";
-import { JoinRoomDto, RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
+import React, {KeyboardEvent, useState, useEffect} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./Chat.css";
@@ -14,75 +12,45 @@ interface IState
 
 function Chat()
 {
-	const [socket, setSocket] = useState(useChatContext().socket);
-	const [room, setRoom] = useState<string | undefined>(useChatContext().currentRoom);
+	const [messages, setMessages] = useState<JSX.Element[]>([]);
+	let msg_list_ref = React.createRef<HTMLDivElement>();
 	
-
-	
-	const chatCtx = useChatContext();
-	//const roomchatCtx.rooms.find(o => (o.room_name === room))?.room_message |
-	const [msgLst, setMsgLst] = useState<Array<string>>( []);
-
-	
-
-	//Todo array of msg
-	function addMsg(content : any) : void
-	{
-		setMsgLst(prevMsgLst => (
-			[...prevMsgLst, content]
-		));
-	};
-
-	//todo cancel socket.on() in cleanup()
-	//refaire context
-	useEffect(() => {
-		console.log("useEffect");
-
-		let rooms = chatCtx.rooms.find(o => (o.room_name === room));
-		if (rooms !== undefined && rooms.room_message)
-			setMsgLst(rooms.room_message);
-		if (socket !== undefined)
-		{
-			
-			console.log("Connection status : " + socket.connected);
-
-			socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-				console.log("[CHAT] rcv: ", data);
-				addMsg(data.message);
-			});
-		}
-		/*return function cleanup() {
-			socket.off('RECEIVE_MSG');
-		};*/
-
-	}, []);
-
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
 	{
-		
-		if (event.key === "Enter" && chatCtx.currentRoom !== undefined)
+		if (event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
-			console.log("[CHAT] sending: " + event.currentTarget.value);
+			const new_msg =  <ChatMessage src_name="toi" content={event.currentTarget.value} time="12/34/56 à 12h34" />;
+			let new_msg_list :JSX.Element[] = [...messages, new_msg];
+			setMessages(new_msg_list);
 			
-			let data : SendMessageDto = {
-				message: event.currentTarget.value,
-				room_name: chatCtx.currentRoom,
-			};
-
-			if (socket !== undefined)
-				socket.emit('SEND_MESSAGE', data);
-			console.log("msg : " + msgLst.length);
+			console.log("added: ", event.currentTarget.value);
+			console.log(messages.length);
 			event.currentTarget.value = '';
 		}
 		
 	};
+
+	useEffect( () => 
+	{
+		if (msg_list_ref.current)
+		{
+			console.log("scrolling");
+			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
+		}
+	} );
 	
 	return (
 		<div id="chat">
-			<div id="messages_list" >
-			<ul>
-				{msgLst.map((el, i) => <li key={i}>{<ChatMessage src_name="a" content={el} time="12/34/56 à 12h34" />}</li>)}
-			</ul>
+			<header id="chat_quick_options">
+				<input type="button"
+					name="chat_quick_leave" id="chat_quick_leave"
+					value="Quitter" />
+				<input type="button"
+					name="chat_quick_invite" id="chat_quick_invite"
+					value="Inviter à jouer" />
+			</header>
+			<div id="messages_list" ref={msg_list_ref}>
+				{messages}
 			</div>
 			<footer id="msg_footer">
 				<input type="text" id="message_input" placeholder={"send to " + chatCtx.currentRoom} onKeyPress={pressedSend}/>

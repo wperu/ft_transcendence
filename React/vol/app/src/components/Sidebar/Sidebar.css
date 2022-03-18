@@ -5,24 +5,27 @@
 	--tab_button_height: 5vmin;
 	--open-sidebar-size: 60vmin;
 	--closed-sidebar-size: 0px;
-	--transition: 0.5s;
+	--transition: 0.2s;
 	height: 0;
 }
 
 #actual_bar
 {
-	background-color: #40444d;
+	background-color: #454a53a9;
+	backdrop-filter: blur(20px);
 	position: fixed;
 	right: 0;
 	top: 0;
 	height: 100%;
 	width: var(--open-sidebar-size);
 	transition: var(--transition);
+	font-size: 4vmin;
 }
 
 #actual_bar > header
 {
 	display: flex;
+	font-size: 4vmin;
 	justify-content: space-around;
 }
 
@@ -36,7 +39,7 @@
 	width: 100%;
 	height: var(--tab_button_height);
 	opacity: 50%;
-	background-color:cadetblue;
+	background-color:lightskyblue;
 }
 
 .tab_button:checked + label
@@ -62,7 +65,7 @@
 	border-style: solid;
 	border-color: whitesmoke;
 	border-radius: 3px;
-	transition: var(--transition);
+	/* transition: var(--transition); */
 	position: fixed;
 	right: calc(var(--open-sidebar-size));
 	transform: rotate(45deg);
@@ -80,7 +83,13 @@
 	transform: rotate(225deg);
 }
 
+/* #toggle:checked + label + #actual_bar
+{
+	font-size: 0;
+	width: var(--closed-sidebar-size);
+} */
+
 #toggle:checked + label + #actual_bar
 {
-	width: var(--closed-sidebar-size);
+	display: none;
 }

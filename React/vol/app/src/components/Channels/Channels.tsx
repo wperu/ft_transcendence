@@ -1,42 +1,52 @@
-import React, { useState, KeyboardEvent, useEffect } from "react";
-import { JoinRoomDto } from "../../interface/chat/chatDto";
-import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import React, { Component } from "react";
+import GlobalChansList from "../GlobalChansList/GlobalChansList";
+import JoinedChansList from "../JoinedChansList/JoinedChansList";
+import ChanCreationTab from "../ChanCreationTab/ChanCreationTab";
 import "./Channels.css";
 
-function Channels()
+type tabProp = {
+	tab: string;
+}
+
+function Content(content: tabProp)
 {
-	const [socket, setSocket] = useState(useChatContext().socket);
-	const chatCtx = useChatContext();
+	if (content.tab === "joined_chans")
+		return (<JoinedChansList />);
+	else if (content.tab === "global_chans")
+		return (<GlobalChansList />);
+	else
+		return (<ChanCreationTab />);
+}
 
-	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
+class Channels extends Component {
+	state = {tab: "joined_chans"};
+
+	handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		this.setState({tab: event.target.value});
+	}
+
+	render()
 	{
-		if (event.key === "Enter")
-		{
-			let room = chatCtx.rooms.find(o => (o.room_name === event.currentTarget.value));
-
-			if (room === undefined)
-			{
-				let data : JoinRoomDto = {
-					room_name: event.currentTarget.value, 
-				}
-				socket.emit('JOIN_ROOM', data);
-				chatCtx.addRoom(data.room_name);
-			}
-			
-			chatCtx.setCurrentRoom(event.currentTarget.value);
-			event.currentTarget.value = '';
-		}
-	};
-
-
-	return (
-		<div id="Channels">
-			chans
-			<footer id="msg_footer">
-				<input type="text" id="message_input" placeholder="placeholder" onKeyPress={pressedSend}/>
-			</footer>
-		</div>
-	);
+		return (
+			<div id="channels">
+				<header>
+					<input className="channels_tab_button" type="radio"
+						name="channels_tab" id="global_chans"
+						value="global_chans" onChange={this.handleChange} />
+					<label htmlFor="global_chans">Global chans</label>
+					<input className="channels_tab_button" type="radio"
+						name="channels_tab" id="joined_chans"
+						value="joined_chans" onChange={this.handleChange} defaultChecked/>
+					<label htmlFor="joined_chans">Joined chans</label>
+					<input className="channels_tab_button" type="radio"
+						name="channels_tab" id="create_chan"
+						value="create_chan" onChange={this.handleChange} />
+					<label htmlFor="create_chan">Create chan</label>
+				</header>
+				<Content tab={this.state.tab} />
+			</div>
+		);
+	}
 }
 
 export default Channels;
