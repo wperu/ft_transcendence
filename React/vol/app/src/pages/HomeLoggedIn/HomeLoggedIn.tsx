@@ -5,6 +5,7 @@ import PongLogo from  "../../components/PongLogo/PongLogo"
 import ProfileSummary from  "../../components/ProfileSummary/ProfileSummary"
 import LogOutButton from  "../../components/LogOutButton/LogOutButton"
 import Sidebar from  "../../components/Sidebar/Sidebar"
+import { Link } from "react-router-dom"
 // import InfoButton from "../../components/InfoButton/InfoButton";
 
 function HomeLoggedIn() {
@@ -16,7 +17,7 @@ function HomeLoggedIn() {
 			</header>
 			<ul id="buttons">
 				<li><MatchmakingButton /></li>
-				<li><ProfileButton /></li>
+				<li><Link to='/profile'><ProfileButton /></Link></li>
 			</ul>
 			<Sidebar />
 			<footer id="home_footer">
