@@ -20,7 +20,7 @@
 	margin: var(--channel_margin);
 	padding: var(--channel_padding);
 	border-radius: 15px;
-	width: calc(var(--open-sidebar-size) - var(--channel_margin) - var(--channel_padding));
+	width: calc(0.98 * (var(--open-sidebar-size) - var(--channel_margin) - var(--channel_padding)));
 	display: block;
 	justify-content: space-between;
 	white-space: nowrap;

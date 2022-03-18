@@ -28,9 +28,15 @@
 	display: flex;
     align-items: center;
 	justify-content: center;
-	font-size: 0.65em;
+	font-size: 0.5em;
 	text-transform: uppercase;
 	font-weight: bold;
+}
+
+#create_chan + label
+{
+	width: 30%;
+	font-size: 0.4em;
 }
 
 .channels_tab_button:checked + label

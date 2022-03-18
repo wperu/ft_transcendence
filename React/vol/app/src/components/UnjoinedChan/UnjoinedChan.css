@@ -2,7 +2,7 @@
 
 .unjoined_chan
 {
-	width: var(--open-sidebar-size);
+	width: calc(var(--open-sidebar-size) * 0.98);
 	text-align: left;
 	font-size: 4vmin;
 	box-sizing: border-box;
