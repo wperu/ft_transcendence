@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { JwtEntity } from './entities/jwt.entity';
 import { JwtModule } from './auth/jwt/jwt.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
 	imports: [TypeOrmModule.forRoot(
@@ -20,7 +21,7 @@ import { JwtModule } from './auth/jwt/jwt.module';
 			entities: [User, JwtEntity],
 			synchronize: true,
 		}
-	), UsersModule, AuthModule, JwtModule],
+	), UsersModule, AuthModule, JwtModule, ChatModule],
 	controllers: [AppController],
 	providers: [AppService],
 })

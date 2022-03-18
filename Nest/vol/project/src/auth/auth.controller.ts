@@ -44,7 +44,6 @@ export class AuthController
     @Post('/token')
     async   getAccessToken(@Req() req) : Promise<User | undefined>
     {
-        console.log(req.headers);
         if (req.headers['authorization-code'] === undefined)
             throw new BadRequestException("no authorization_code in request header");
 

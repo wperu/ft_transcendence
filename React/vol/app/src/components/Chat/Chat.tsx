@@ -1,6 +1,14 @@
 import React, {KeyboardEvent, useState, useEffect} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
+import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./Chat.css";
+
+
+
+interface IState
+{
+	data : Array<JSX.Element>;
+}
 
 function Chat()
 {
@@ -19,6 +27,7 @@ function Chat()
 			console.log(messages.length);
 			event.currentTarget.value = '';
 		}
+		
 	};
 
 	useEffect( () => 
@@ -44,8 +53,8 @@ function Chat()
 				{messages}
 			</div>
 			<footer id="msg_footer">
-				<input type="text" id="message_input" placeholder="placeholder" onKeyPress={pressedSend}/>
-				{/*<label htmlFor="send_button">Envoyer</label>*/}
+				<input type="text" id="message_input" placeholder={"send to " + chatCtx.currentRoom} onKeyPress={pressedSend}/>
+				
 			</footer>
 		</div>
 	);

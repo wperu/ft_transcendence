@@ -22,6 +22,10 @@ services:
     restart: always
     volumes:
       - ./Nest/vol:/vol
+    ports:
+      - 4000:4000
+    expose:
+      - 4000:4000
 
   proxy:
     build: ./Proxy
