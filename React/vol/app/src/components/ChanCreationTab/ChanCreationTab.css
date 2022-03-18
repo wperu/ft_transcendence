@@ -1,0 +1,114 @@
+@import url("../../ressources/base.css");
+
+#visibility_options input
+{
+	display: none;
+}
+
+#channel_name_input
+{
+	color: white;
+	background-color: #636772;
+	border-style: none;
+	font-size: 0.8em;
+	padding: 0.8vmin 2vmin;
+	margin-bottom: 4vmin;
+}
+
+#create_chan
+{
+	height: 100%;
+	text-transform: uppercase;
+}
+
+#visibility_options
+{
+	height: max-content;
+	margin: 4vmin;
+	display: flex;
+	justify-content: space-evenly;
+}
+
+#visibility_options > label
+{
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	font-size: 0.8em;
+	color: white;
+	border-style: none;
+	border-radius: 7px;
+	background-color: #5e8eb6;
+	padding: 1vmin;
+	opacity: 50%;
+}
+
+
+#visibility_options > input:checked + label
+{
+	opacity: 100%;
+}
+
+#password_options
+{
+	font-size: 0.5em;
+}
+
+#password_options > *
+{
+	display: block;
+}
+
+#password_options > div
+{
+	margin: 2vmin 0;
+}
+
+#protected
+{
+	transform: scale(1.8);
+	margin: 1vmin 2vmin;
+}
+
+#password_options > input
+{
+	width: calc(var(--open-sidebar-size) * 0.6);
+	margin: 2vmin auto;
+	color: white;
+	background-color: #636772;
+	border-style: none;
+	font-size: 1em;
+	padding: 0.8vmin 1vmin;
+	margin-bottom: 4vmin;
+}
+
+#create_chan_validation
+{
+	position: absolute;
+	height: 8vmin;
+	bottom: 0;
+	width: 100%;
+	align-items: center;
+}
+
+#create_chan_button
+{
+	font-size: 0.8em;
+	color: white;
+	width: max-content;
+	border-style: none;
+	border-radius: 7px;
+	background-color: #537896;
+	padding: 1vmin;
+	margin-bottom: 4vmin;
+	text-transform: uppercase;
+	transition: 0.2s cubic-bezier(.23,1,.32,1);
+}
+
+#create_chan_button:hover
+{
+	transform: scale(1.05,1.05);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.05,1.05);
+}

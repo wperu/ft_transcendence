@@ -32,6 +32,14 @@ function Chat()
 	
 	return (
 		<div id="chat">
+			<header id="chat_quick_options">
+				<input type="button"
+					name="chat_quick_leave" id="chat_quick_leave"
+					value="Quitter" />
+				<input type="button"
+					name="chat_quick_invite" id="chat_quick_invite"
+					value="Inviter à jouer" />
+			</header>
 			<div id="messages_list" ref={msg_list_ref}>
 				{messages}
 			</div>

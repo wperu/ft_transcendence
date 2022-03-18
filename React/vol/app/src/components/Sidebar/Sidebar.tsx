@@ -12,15 +12,15 @@ function Content(content: tabProp)
 {
 	if (content.tab === "chats")
 		return (<Chat />);
-	else if (content.tab === "channels")
-		return (<Channels />);
+	else if (content.tab === "friends")
+		return (<Friends />);
 	else
-		return (<Friends />)
+	return (<Channels />);
 }
 
 class Sidebar extends Component
 {
-	state = {tab: "chats"};
+	state = {tab: "channels"};
 
 	handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		this.setState({tab: event.target.value});
@@ -36,9 +36,9 @@ class Sidebar extends Component
 					<header>
 						<input className="tab_button" type="radio" name="tab" id="friends" value="friends" onChange={this.handleChange}/>
 						<label htmlFor="friends"></label>
-						<input className="tab_button" type="radio" name="tab" id="channels" value="channels" onChange={this.handleChange} />
+						<input className="tab_button" type="radio" name="tab" id="channels" value="channels" onChange={this.handleChange} defaultChecked />
 						<label htmlFor="channels"></label>
-						<input className="tab_button" type="radio" name="tab" id="chats" value="chats" onChange={this.handleChange}  defaultChecked/>
+						<input className="tab_button" type="radio" name="tab" id="chats" value="chats" onChange={this.handleChange} />
 						<label htmlFor="chats"></label>
 					</header>
 					<Content tab={this.state.tab} />

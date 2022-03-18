@@ -13,7 +13,7 @@ const authContext = createContext<IContext>(null!);
 
 /**
  * /!\ component must be in \<ProvideAuth\>
- * 
+ *
  * @returns authContext : IContext
  */
 function useAuth() : IContext
@@ -26,7 +26,7 @@ function useAuth() : IContext
 */
 function useProvideAuth(): IContext
 {
-	const [isAuth, setIsAuth] = useState<boolean>(false);
+	const [isAuth, setIsAuth] = useState<boolean>(true);
 
 	const signin = (cb: () => void) =>
 	{
