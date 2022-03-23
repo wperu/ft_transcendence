@@ -1,34 +1,19 @@
-import React from "react";
+import React, {useState} from "react";
 import JoinedChan from "../JoinedChan/JoinedChan";
+import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./JoinedChansList.css";
 
 
 
 function Joined_chans_list()
 {
+	const chatCtx = useChatContext();
+	const [currentRoom, setCurrentRoom] = useState<string | undefined>(chatCtx.currentRoom);
+	const [socket, setSocket] = useState(chatCtx.socket);
+
 	return (
 		<div id="joined_chans_list">
-			<JoinedChan name="chan debut"/>
-			<JoinedChan name="chan bfsajfhuyFGDSAKYUFGVDWABHJGLIBFXHFDSBVZHJbesbfhj"/>
-			<JoinedChan name="chan c"/>
-			<JoinedChan name="chan d"/>
-			<JoinedChan name="chan e"/>
-			<JoinedChan name="chan f"/>
-			<JoinedChan name="chan g"/>
-			<JoinedChan name="chan h"/>
-			<JoinedChan name="chan j"/>
-			<JoinedChan name="chan k"/>
-			<JoinedChan name="chan l"/>
-			<JoinedChan name="chan m"/>
-			<JoinedChan name="chan n"/>
-			<JoinedChan name="chan o"/>
-			<JoinedChan name="chan p"/>
-			<JoinedChan name="chan q"/>
-			<JoinedChan name="chan r"/>
-			<JoinedChan name="chan s"/>
-			<JoinedChan name="chan t"/>
-			<JoinedChan name="chan u"/>
-			<JoinedChan name="chan fin"/>
+			{chatCtx.rooms.map(({room_name}) => <JoinedChan name={room_name}/> )}
 		</div>
 	);
 }

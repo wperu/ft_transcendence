@@ -59,6 +59,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			message: payload.message,
 			sender: "getUserBySocket",
 			send_date: format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+			room_name: payload.room_name
 		};
 
 		// TODO check if user is actually in room

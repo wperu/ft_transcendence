@@ -7,8 +7,10 @@
 
 #chat_quick_options
 {
-	background-color: #2e3035;
-	height: var(--tab_button_height);
+	border-color: white;
+	border-style: solid;
+	border-bottom-width: 3px;
+	height: calc(var(--tab_button_height) - 3px);
 	display: flex;
 	justify-content: space-evenly;
 	/* border-style: solid;
