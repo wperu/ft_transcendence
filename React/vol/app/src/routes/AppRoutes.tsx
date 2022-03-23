@@ -6,16 +6,30 @@ import { ProvideAuth } from '../auth/useAuth';
 import { RequireAuth } from '../auth/RequireAuth';
 import Callback from '../pages/Callback/Callback';
 
+
+interface Props{
+	element:any;
+	path:string;
+	children?:any;
+  }
+
+function ProtectedRoute({element, path, children}:Props)
+{
+
+}
+
+
 function AppRoute() : JSX.Element
 {
 	const element =
 	<ProvideAuth>
 		<BrowserRouter>
 			<Routes>
-				<Route index element={<HomeLoggedOut />}/>
-				<Route path="/logged_in" element={<HomeLoggedIn />}/>
-				<Route path="/profile" element={<RequireAuth children={<Profile/>}/>}/>
-				<Route path="/profile/:id" element={<RequireAuth children={<Profile/>}/>}/>
+				<Route path="/" element={<HomeLoggedOut />}/>
+				<Route element={<RequireAuth/>}>
+					<Route path="/profile" element={<Profile/>}/>
+					<Route path="/example" element={<Profile/>}/>
+				</Route>
 				<Route path="/login/callback" element={<Callback />}/>
 				<Route path="*" element={<NoMatch />}/>
 			</Routes>
