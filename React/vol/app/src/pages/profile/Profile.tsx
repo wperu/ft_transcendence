@@ -1,18 +1,37 @@
 //import axios from "axios";
 import LogOutButton from "../../components/LogOutButton/LogOutButton";
 import ProfileSummary from "../../components/ProfileSummary/ProfileSummary";
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
+import IUser from "../../interface/User";
+import axios from "axios";
 
 function Profile() {
 	
-	let id = useParams<"id">();
-	const auth = useAuth();
-	
+	let { id }				= useParams<"id">();
+	const auth				= useAuth();
+	const [user, setUser]	= useState<IUser>(null!);
+
 	if (!id)
 	{
+		if (auth.user)
+			setUser(auth.user);
+	}
+	else
+	{
+		const url : string	= process.env.REACT_APP_API_USER || "/";
 
+		axios.get(url + "/" + id).then( resp => {
+			let data : IUser = resp.data;
+			//JSON.parse(resp.data);
+			//setUser(data);
+			console.log(data);
+		})
+		.catch(error => {
+			console.log(error.response.status);
+			//console.log(resp);
+		});
 	}
 
 	return (

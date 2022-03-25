@@ -4,14 +4,6 @@ import defaultLogo from "../../ressources/images/user-icon-0.png";
 import IUser from "../../interface/User";
 import { useAuth } from "../../auth/useAuth";
 
-function parsUserData(userData: string | null) : IUser | null
-{
-	if (userData === null)
-		return null;
-	
-	return (JSON.parse(userData));
-}
-
 function ProfileSummary() {
 
 	const user : IUser | null = useAuth().user;

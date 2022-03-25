@@ -11,7 +11,7 @@ import IUser from "../interface/User";
 function openLoginPopup(cb: () => void)
 {
 	window.addEventListener('message', messageListener, false);
-	const apiUrl 		= process.env.REACT_APP_API_URL || "/";
+	const apiUrl 		= process.env.REACT_APP_API_LOGIN || "/";
 	const winOptions	= "toolbar=no,scrollbars=yes,resizable=no,width=500,height=600";
 	let winPopupRef		= window.open(apiUrl, 'authWindow', winOptions);
 
