@@ -28,7 +28,7 @@ function AppRoute() : JSX.Element
 				<Route path="/" element={<HomeLoggedOut />}/>
 				<Route element={<RequireAuth/>}>
 					<Route path="/profile" element={<Profile/>}/>
-					<Route path="/example" element={<Profile/>}/>
+					<Route path="/profile/:id" element={<Profile/>}/>
 				</Route>
 				<Route path="/login/callback" element={<Callback />}/>
 				<Route path="*" element={<NoMatch />}/>

@@ -1,10 +1,19 @@
 //import axios from "axios";
 import LogOutButton from "../../components/LogOutButton/LogOutButton";
 import ProfileSummary from "../../components/ProfileSummary/ProfileSummary";
+import React from "react";
+import { useParams } from 'react-router-dom';
+import { useAuth } from "../../auth/useAuth";
 
 function Profile() {
 	
+	let id = useParams<"id">();
+	const auth = useAuth();
 	
+	if (!id)
+	{
+
+	}
 
 	return (
 		<div>

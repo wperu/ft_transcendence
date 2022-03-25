@@ -29,7 +29,14 @@ function SignInButton ()
 					   		:	"/";
 
 		console.log("Redirect");
-		auth.setIsAuth(true);
+
+		let rawUser : string | null = localStorage.getItem('user');
+
+		if (rawUser !== null)
+		{
+			auth.setUser(JSON.parse(rawUser));
+			auth.setIsAuth(true);
+		}
 		navigate(redirectTo, { replace: true});
 	};
 
