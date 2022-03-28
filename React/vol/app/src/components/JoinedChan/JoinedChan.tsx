@@ -13,7 +13,7 @@ function JoinedChan(props: chan_props)
 
 	function joinChan()
 	{
-		chatCtx.setCurrentRoom(props.name);
+		chatCtx.setCurrentRoomByName(props.name);
 	}
 
 	return (

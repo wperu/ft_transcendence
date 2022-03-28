@@ -8,7 +8,6 @@ import "./JoinedChansList.css";
 function Joined_chans_list()
 {
 	const chatCtx = useChatContext();
-	const [currentRoom, setCurrentRoom] = useState<string | undefined>(chatCtx.currentRoom);
 	const [socket, setSocket] = useState(chatCtx.socket);
 
 	return (

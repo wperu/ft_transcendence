@@ -64,7 +64,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		// TODO check if user is actually in room
 
-		/* this.logger.log("[Socket io] new message: " + msg_obj.message); */
+		this.logger.log("[Socket io] new message: " + msg_obj.message);
 		this.server.to(payload.room_name).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
 	}
 

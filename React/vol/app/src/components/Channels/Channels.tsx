@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import GlobalChansList from "../GlobalChansList/GlobalChansList";
+import UnjoinedChansTab from "../UnjoinedChansTab/UnjoinedChansTab";
 import JoinedChansList from "../JoinedChansList/JoinedChansList";
 import ChanCreationTab from "../ChanCreationTab/ChanCreationTab";
 import "./Channels.css";
@@ -13,7 +13,7 @@ function Content(content: tabProp)
 	if (content.tab === "joined_chans")
 		return (<JoinedChansList />);
 	else if (content.tab === "global_chans")
-		return (<GlobalChansList />);
+		return (<UnjoinedChansTab />);
 	else
 		return (<ChanCreationTab />);
 }

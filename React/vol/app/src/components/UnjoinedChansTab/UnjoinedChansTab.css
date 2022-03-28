@@ -1,0 +1,74 @@
+@import url("../../ressources/base.css");
+
+#globlal_chans_list
+{
+	scroll-behavior: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: calc(100vh - (var(--tab_button_height) * 5));
+}
+
+#join_chan_by_name
+{
+	background-color: #373a41c7;
+	height: calc((3 * var(--tab_button_height)));
+	/* border-style: solid;
+	border-color: white;
+	border-bottom-width: 1px; */
+}
+
+#join_chan_by_name > form
+{
+	margin-top: 1vmin;
+	height: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+}
+
+
+
+#join_chan_by_name_inputs
+{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.join_chan_input
+{
+	font-size: 0.4em;
+	color: white;
+	border: none;
+	background-color: #52565f;
+	margin: 0.5vmin;
+	padding: 0.5vmin;
+	border-radius: 5px;
+}
+
+#join_chan_button
+{
+	height: max-content;
+	font-size: 0.8em;
+	color: white;
+	width: max-content;
+	border-style: none;
+	border-radius: 7px;
+	background-color: #537896;
+	padding: 1vmin;
+	text-transform: uppercase;
+	transition: 0.2s cubic-bezier(.23,1,.32,1);
+}
+
+#join_chan_button:hover
+{
+	transform: scale(1.05,1.05);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.05,1.05);
+}
+
+.title
+{
+	text-transform: uppercase;
+	font-size: 0.8em;
+}

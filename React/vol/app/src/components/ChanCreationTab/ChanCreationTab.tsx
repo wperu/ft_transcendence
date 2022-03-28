@@ -1,7 +1,7 @@
 import React from "react";
 import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
-import { JoinRoomDto } from "../../interface/chat/chatDto";
 import "./ChanCreationTab.css";
+import { JoinRoomDto } from "../../interface/chat/chatDto";
 import { channel } from "diagnostics_channel";
 
 function ChanCreationTab()
@@ -36,8 +36,7 @@ function ChanCreationTab()
 				var data: JoinRoomDto = { room_name: target.channel_name.value };
 			}
 			chatCtx.socket.emit("JOIN_ROOM", data);
-			chatCtx.rooms.push({room_name: target.channel_name.value, room_message: []});
-			chatCtx.currentRoom = target.channel_name.value;
+			chatCtx.addRoom(target.channel_name.value);
 			alert("Channel " + target.channel_name.value + " créé");
 			console.log("channel created. name: " + target.channel_name.value + " visibility: " + target.channel_visibility.value);
 			target.channel_name.value = '';
