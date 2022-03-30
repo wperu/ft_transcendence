@@ -1,12 +1,20 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
+import { EnumType } from "typescript";
 
 
 export interface IRoom
 {
 	room_name: string;
 	room_message: RcvMessageDto[];
+}
+
+export enum ECurrentTab
+{
+	friends = "friends",
+	channels = "channels",
+	chat = "chat",
 }
 
 interface IChatContext
@@ -19,6 +27,8 @@ interface IChatContext
 	rooms: IRoom[];
 	addRoom: (room_name: string) => void;
 
+	currentTab: ECurrentTab;
+	setCurrentTab: (tab: ECurrentTab) => void;
 }
 
 function useChatProvider() : IChatContext
@@ -27,6 +37,7 @@ function useChatProvider() : IChatContext
 		{ path: "/api/socket.io/", transports: ['websocket'] }));
     const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
     const [rooms, setRooms] = useState<IRoom[]>([]);
+	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
 
 	
     function addRoom(room_name: string)
@@ -57,10 +68,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-			console.log(rooms);
-			console.log(data.room_name);
 			let targetRoom = findRoomByName(data.room_name);
-			console.log(targetRoom);
 			if (targetRoom !== undefined)
 			{
 				console.log("[CHAT] rcv: ", data);
@@ -90,6 +98,8 @@ function useChatProvider() : IChatContext
         currentRoom,
         setCurrentRoom,
 		setCurrentRoomByName,
+		currentTab,
+		setCurrentTab,
         rooms,
         addRoom,
     });

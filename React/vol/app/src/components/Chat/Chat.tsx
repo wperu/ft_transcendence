@@ -1,9 +1,29 @@
-import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
+import React, {KeyboardEvent, useState, useEffect, useRef, useCallback } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
 import { RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
 import "./Chat.css";
-import { cursorTo } from "readline";
+
+function useInterval(callback: () => void, delay: number) {
+	const savedCallback = useRef(callback);
+
+	// Remember the latest callback.
+	useEffect(() => {
+	savedCallback.current = callback;
+	}, [callback]);
+
+	// Set up the interval.
+	useEffect(() => {
+	function tick() {
+		if (savedCallback !== undefined)
+			savedCallback.current();
+	}
+	if (delay !== null) {
+		let id = setInterval(tick, delay);
+		return () => clearInterval(id);
+	}
+	}, [delay]);
+}
 
 function Chat()
 {
@@ -24,7 +44,6 @@ function Chat()
 				message: event.currentTarget.value,
 				room_name: chatCtx.currentRoom.room_name
 			};
-			console.log(chatCtx.rooms);
 			socket.emit('SEND_MESSAGE', data);
 			console.log("[CHAT] sending: " + event.currentTarget.value);
 			event.currentTarget.value = '';
@@ -40,18 +59,16 @@ function Chat()
 			chatCtx.rooms.splice(chatCtx.rooms.findIndex((o) => {
 				return (o.room_name === chatCtx.currentRoom?.room_name);
 			}), 1);
-			console.log(chatCtx.rooms.length);
 			chatCtx.setCurrentRoom(undefined);
 		}
 	};
 
-	function update () {return (chatCtx.currentRoom?.room_message.length);}
-
-	useEffect( () =>
+	useInterval(() =>
 	{
+			console.log("truc");
 		if (chatCtx.currentRoom !== undefined)
 			setMessages([...chatCtx.currentRoom.room_message]);
-	}, [update]);
+	}, 200);
 
 	useEffect( () =>
 	{
@@ -72,7 +89,7 @@ function Chat()
 					value="Inviter à jouer" />
 			</header>
 			<div id="messages_list" ref={msg_list_ref}>
-				{messages.map(({message, sender, send_date}) => (<ChatMessage src_name={sender} content={message} time={send_date} />))}
+				{chatCtx.currentRoom?.room_message.map(({message, sender, send_date}) => (<ChatMessage src_name={sender} content={message} time={send_date} />))}
 			</div>
 			<footer id="msg_footer">
 				<input type="text" id="message_input" onKeyPress={pressedSend} 

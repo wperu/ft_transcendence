@@ -1,5 +1,5 @@
 import React from "react";
-import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import { ECurrentTab, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./JoinedChan.css";
 
 interface	chan_props
@@ -14,6 +14,7 @@ function JoinedChan(props: chan_props)
 	function joinChan()
 	{
 		chatCtx.setCurrentRoomByName(props.name);
+		chatCtx.setCurrentTab(ECurrentTab["chat"]);
 	}
 
 	return (

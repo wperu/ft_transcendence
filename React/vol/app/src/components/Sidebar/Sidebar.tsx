@@ -3,28 +3,31 @@ import "./Sidebar.css";
 import Chat from "../Chat/Chat";
 import Channels from "../Channels/Channels";
 import Friends from "../Friends/Friends";
+import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 
-type tabProp = {
-	tab: string;
+interface prop
+{
+	currentTab: ECurrentTab;
 }
 
-function Content(content: tabProp)
+function Content(props: prop)
 {
-	if (content.tab === "chats")
+	if (props.currentTab === ECurrentTab.chat)
 		return (<Chat />);
-	else if (content.tab === "friends")
+	else if (props.currentTab === ECurrentTab.friends)
 		return (<Friends />);
 	else
-	return (<Channels />);
+		return (<Channels />);
 }
 
 function Sidebar()
 {
-	const [state, setState] = useState<string>("channels");
+	const chatCtx = useChatContext();
 
 	function handleChange(event: React.ChangeEvent<HTMLInputElement>)
 	{
-		setState(event.target.value);
+		let tmp: ECurrentTab = ECurrentTab[event.target.value as keyof typeof ECurrentTab];
+		chatCtx.setCurrentTab(tmp);
 	};
 
 	return (
@@ -34,19 +37,22 @@ function Sidebar()
 			<div id="actual_bar">
 				<header>
 					<input className="tab_button" type="radio"
-						name="tab" id="friends" value="friends"
+						checked={chatCtx.currentTab == ECurrentTab.friends}
+						name="tab" id="friends" value={ECurrentTab.friends}
 						onChange={handleChange} />
-					<label htmlFor="friends"></label>
+					<label htmlFor="friends"> Friends</label>
+					<input className="tab_button" type="radio"
+						checked={chatCtx.currentTab == ECurrentTab.channels}
+						name="tab" id="channels" value={ECurrentTab.channels} 
+						onChange={handleChange}/>
+					<label htmlFor="channels">Channels</label>
 					<input className="tab_button" type="radio" 
-						name="tab" id="channels" value="channels" 
-						onChange={handleChange} defaultChecked/>
-					<label htmlFor="channels"></label>
-					<input className="tab_button" type="radio" 
-						name="tab" id="chats" value="chats" 
+						checked={chatCtx.currentTab == ECurrentTab.chat}
+						name="tab" id="chats" value={ECurrentTab.chat}
 						onChange={handleChange} />
-					<label htmlFor="chats"></label>
+					<label htmlFor="chats">Chat</label>
 				</header>
-				<Content tab={state} />
+				<Content currentTab={chatCtx.currentTab} />
 			</div>
 		</div>
 	);

@@ -1,5 +1,5 @@
 import React from "react";
-import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
+import { useChatContext, IRoom, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChanCreationTab.css";
 import { JoinRoomDto } from "../../interface/chat/chatDto";
 import { channel } from "diagnostics_channel";
@@ -24,7 +24,7 @@ function ChanCreationTab()
 		{
 			if (target.is_protected)
 			{			
-				console.log("protected by pass: " + target.password.value);
+				// console.log("protected by pass: " + target.password.value);
 				var data: JoinRoomDto =
 				{
 					room_name: target.channel_name.value,
@@ -38,7 +38,7 @@ function ChanCreationTab()
 			chatCtx.socket.emit("JOIN_ROOM", data);
 			chatCtx.addRoom(target.channel_name.value);
 			alert("Channel " + target.channel_name.value + " créé");
-			console.log("channel created. name: " + target.channel_name.value + " visibility: " + target.channel_visibility.value);
+			// console.log("channel created. name: " + target.channel_name.value + " visibility: " + target.channel_visibility.value);
 			target.channel_name.value = '';
 			target.channel_visibility.value = '';
 			target.password.value = '';
