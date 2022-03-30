@@ -2,6 +2,7 @@ import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/comm
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
+import { isInt8Array } from 'util/types';
 
 enum RoomProtection {
 	NONE,
@@ -98,7 +99,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			let is_user = local_room.users.find(c => c === client);
 			if (is_user !== undefined)
-				throw new BadRequestException(`Client ${client.id} has aready joined ${payoad.room_name}`)
+				throw new BadRequestException(`Client ${client.id} has already joined ${payoad.room_name}`)
 			
 			if (local_room.protection === RoomProtection.NONE)
 			{
@@ -157,8 +158,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		room_name: string,
 		invited_user: string,
 
-	})
+	}): void
 	{
+		let local_room = this.rooms.find(o => o.name === room_invite.room_name);
+		if (local_room === undefined)
+		{
+			console.log("you invite in room undefined ???");
+		}
+		else 
+		{
+			if (local_room.protection !== RoomProtection.PROTECTED)
+			{
+				throw new UnauthorizedException(`Cannot join room : ${room_invite.room_name}`)
+			}
+			else
+			{
+				let is_user = local_room.users.find(c => c === client);
+				if (is_user !== undefined)
+					throw new BadRequestException(`Client ${client.id} has already joined ${room_invite.room_name}`)
+				local_room.users.push(client);
+			}
+			
+		}
+		
+		this.logger.log(`Client ${client.id} joined room ${room_invite.room_name}`);
+		client.join(room_invite.room_name);
 
 	}
 
