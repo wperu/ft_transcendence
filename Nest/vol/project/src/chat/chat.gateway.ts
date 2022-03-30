@@ -5,6 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
+import room from './interface/room';
 
 enum RoomProtection {
 	NONE,
@@ -29,14 +30,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	constructor(
-		private rooms: {
-			name: string,
-			protection: RoomProtection,
-			owner: Socket,
-			users: Array<Socket>,
-			invited : Array<string>,
-			password?: string
-		}[]
+		private rooms: room[]
 	) { }
 
 
@@ -282,6 +276,13 @@ to private without sending a password")
 		local_room.name = payload.new_name;
 	}
 
+	@SubscribeMessage('ROOM_LIST')
+	room_list(client:Socket): void
+	{
+		let lists;
+		this.rooms.forEach(room => {lists.push(room.name)});
+		client.emit('ROOM_LIST',lists);
+	}
 
 	
 	handleConnection(client: Socket, ...args: any[]) : void
