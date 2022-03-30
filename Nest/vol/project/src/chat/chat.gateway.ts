@@ -2,6 +2,8 @@ import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/comm
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
+import { User } from 'src/entities/user.entity';
+import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
 
 enum RoomProtection {
@@ -32,6 +34,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			protection: RoomProtection,
 			owner: Socket,
 			users: Array<Socket>,
+			invited : Array<string>,
 			password?: string
 		}[]
 	) { }
@@ -92,6 +95,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				name: payoad.room_name,
 				protection: RoomProtection.NONE,
 				users: [client],
+				invited : [],
 				owner: client,
 			})
 		}
@@ -105,14 +109,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			{
 				local_room.users.push(client);
 			}
-			else if (local_room.protection === RoomProtection.PRIVATE)
+			else if (local_room.protection === RoomProtection.PROTECTED)
 			{
 				if (local_room.password === payoad.password)
 					local_room.users.push(client);
 				else
 					throw new UnauthorizedException("Wrong password");
 			}
-			else 
+			else if (local_room.protection === RoomProtection.PRIVATE)
+			{
+				if(local_room.invited.find(string => string === User.name))
+					local_room.users.push(client);
+				else
+					throw new UnauthorizedException("No invited in room");
+			}
+			else
 			{
 				throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
 			}
@@ -167,7 +178,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else 
 		{
-			if (local_room.protection !== RoomProtection.PROTECTED)
+			if (local_room.protection !== RoomProtection.PRIVATE)
 			{
 				throw new UnauthorizedException(`Cannot join room : ${room_invite.room_name}`)
 			}
