@@ -6,6 +6,10 @@ import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
 import room from './interface/room';
+import room_invite from './interface/room_invite';
+import room_protect from './interface/room_protect';
+import room_join from './interface/room_join';
+import room_rename from './interface/room_rename';
 
 enum RoomProtection {
 	NONE,
@@ -77,10 +81,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * upgrade room protection using 'PROTECT_ROOM' event
 	 */
 	@SubscribeMessage('JOIN_ROOM')
-	joinRoom(client: Socket, payoad: {
-		room_name: string,
-		password?: string
-	}): void
+	joinRoom(client: Socket, payoad: room_join): void
 	{
 		let local_room = this.rooms.find(o => o.name === payoad.room_name);
 		if (local_room === undefined)
@@ -159,11 +160,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	@SubscribeMessage("INVITE_USER")
-	inviteUser(client: Socket, room_invite : {
-		room_name: string,
-		invited_user: string,
-
-	}): void
+	inviteUser(client: Socket, room_invite : room_invite 
+	): void
 	{
 		let local_room = this.rooms.find(o => o.name === room_invite.room_name);
 		if (local_room === undefined)
@@ -206,11 +204,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field opt: optional field, used to store the password when protection_mode is PRIVATE
 	 */
 	@SubscribeMessage('PROTECT_ROOM')
-	protectRoom(client: Socket, payload: {
-		room_name: string,
-		protection_mode: string,
-		opt?: string,
-	})
+	protectRoom(client: Socket, payload: room_protect)
 	{
 		let local_room = this.rooms.find(o => o.name === payload.room_name);
 		if (local_room === undefined)
@@ -250,10 +244,7 @@ to private without sending a password")
 	 * @field new_name: the new name for the room
 	 */
 	@SubscribeMessage('RENAME_ROOM')
-	renameRoom(client: Socket, payload: {
-		old_name: string,
-		new_name: string,
-	})
+	renameRoom(client: Socket, payload: room_rename)
 	{
 		let local_room = this.rooms.find(o => o.name === payload.old_name);
 		if (local_room === undefined)
