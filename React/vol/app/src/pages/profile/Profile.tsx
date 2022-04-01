@@ -1,42 +1,50 @@
 import LogOutButton from "../../components/LogOutButton/LogOutButton";
 import ProfileSummary from "../../components/ProfileSummary/ProfileSummary";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../interface/User";
 import axios from "axios";
+import ProfileSummarySettings from "../../components/ProfileSummarySettings/ProfileSummarySettings";
 
 function Profile() {
 	
-	let { id }				= useParams<"id">();
-	const auth				= useAuth();
-	const [user, setUser]	= useState<IUser>(null!);
+	let { id }						= useParams<"id">();
+	const auth						= useAuth();
+	const [user, setUser]			= useState<IUser>(null!);
+	const [profilSum, setProfilSum] = useState<JSX.Element>(<ProfileSummary/>);
 
-	if (!id)
+	useEffect(() =>
 	{
-		if (auth.user)
-			setUser(auth.user);
-	}
-	else
-	{
-		const url : string	= process.env.REACT_APP_API_USER || "/";
+		if (!id)
+		{
+			//me
+			if (auth.user)
+				setUser(auth.user);
 
-		axios.get(url + "/" + id).then( resp => {
-			let data : IUser = resp.data;
-			//JSON.parse(resp.data);
-			//setUser(data);
-			console.log(data);
-		})
-		.catch(error => {
-			console.log(error.response.status);
-			//console.log(resp);
-		});
-	}
+			setProfilSum(<ProfileSummarySettings/>);	
+		}
+		else
+		{
+			const url : string	= process.env.REACT_APP_API_USER || "/";
+
+			axios.get(url + "/" + id).then( resp => {
+				let data : IUser = resp.data;
+				//JSON.parse(resp.data);
+				//setUser(data);
+				console.log(data);
+			})
+			.catch(error => {
+				console.log(error.response.status);
+				//console.log(resp);
+			});
+		}
+	}, []);
 
 	return (
 		<div>
 			<header id="home_header">
-				<ProfileSummary />
+				{profilSum}
 				<h1>Profile</h1>
 			</header>
 			 <footer>
