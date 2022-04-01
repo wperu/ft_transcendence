@@ -20,7 +20,7 @@ function HomeLoggedIn() {
 				<li><MatchmakingButton /></li>
 				<li><Link to='/profile'><ProfileButton /></Link></li>
 			</ul>
-			<SidebarWithContext />
+			
 			<footer id="home_footer">
 				<LogOutButton />
 			</footer>
