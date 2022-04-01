@@ -91,6 +91,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				protection: RoomProtection.NONE,
 				users: [client],
 				invited : [],
+				muted: [],
 				owner: client,
 			})
 		}
@@ -124,8 +125,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 		}
 
-		this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
-		client.join(payoad.room_name);
+		//this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
+		if(client.join(payoad.room_name))
+			client.emit("COMFIRM_ROOM: " + local_room.name +" socket: " + client);
+		else
+			throw new UnauthorizedException(`Cannot join room : ${payoad.room_name},
+				Socket client: ${client}`);
 	}
 
 
@@ -266,6 +271,9 @@ to private without sending a password")
 
 		local_room.name = payload.new_name;
 	}
+
+	@SubscribeMessage('ROOM_C')
+
 
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client:Socket): void
