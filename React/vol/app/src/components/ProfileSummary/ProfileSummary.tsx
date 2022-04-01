@@ -25,7 +25,7 @@ function ProfileSummary() {
 
 	return (
 		<aside id="profile">
-			<img src={defaultLogo} alt="truc" />
+			<img id="profile_summary_img" src={defaultLogo} alt="truc" />
 			<div id="infos">
 				<p> {'> '} {getUserName()}</p>
 				<p> {'> '} Level</p>

@@ -1,0 +1,15 @@
+.user_bar_button img
+{
+	max-width: 100%;
+	height: auto;
+	vertical-align: middle;
+}
+
+.user_bar_button
+{
+	margin: 0.25vmin;
+	width: 20%;
+	background-color: rgb(235, 41, 41);
+	border: none;
+	/* border-radius: 50%; */
+}

@@ -8,6 +8,7 @@
 
 #channels
 {
+	height: 100%;
 	box-sizing: border-box;
 	--channel_margin: 8px;
 	--channel_padding: 5px;

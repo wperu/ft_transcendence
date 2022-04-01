@@ -1,6 +1,6 @@
 @import url("../../ressources/base.css");
 
-button
+.main_menu_button
 {
 	margin: 0;
 	width: 40vmin;
@@ -16,7 +16,7 @@ button
 	margin-bottom: 5vmin;
 }
 
-button:hover
+.main_menu_button:hover
 {
 	transform: scale(1.05,1.05);
 	-webkit-transform: scale(1.05,1.05);

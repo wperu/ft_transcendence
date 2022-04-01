@@ -8,7 +8,7 @@ function MatchmakingClick ()
 
 function MatchmakingButton ()
 {
-	return <button onClick={MatchmakingClick}>Partie rapide</button>;
+	return <button className="main_menu_button" onClick={MatchmakingClick}>Partie rapide</button>;
 }
 
 export default MatchmakingButton;

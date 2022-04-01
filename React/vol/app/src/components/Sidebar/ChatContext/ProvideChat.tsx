@@ -3,9 +3,16 @@ import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
 import { EnumType } from "typescript";
 
+export enum ELevelInRoom
+{
+	casual = "casual",
+	admin = "admin",
+	owner = "owner",
+}
 
 export interface IRoom
 {
+	user_level: ELevelInRoom;
 	room_name: string;
 	room_message: RcvMessageDto[];
 }
@@ -43,6 +50,7 @@ function useChatProvider() : IChatContext
     function addRoom(room_name: string)
     {
 		const newRoom : IRoom = {
+			user_level: ELevelInRoom.owner,
 			room_name: room_name,
             room_message: []
         };
@@ -85,6 +93,16 @@ function useChatProvider() : IChatContext
 	}, [rooms]);
 
 	useEffect(() => {
+
+		// socket.on('JOINED_ROOM', (data : JoinChatDto) => { //A REVOIR
+		// 	setRooms([...rooms, ])
+		// 	if (targetRoom !== undefined)
+		// 	{
+		// 		console.log("[CHAT] rcv: ", data);
+		// 		targetRoom.room_message.push(data);
+		// 	}
+		// });
+
 		return function cleanup() {
 			if (socket !== undefined)
 			{
