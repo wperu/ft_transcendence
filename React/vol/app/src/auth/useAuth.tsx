@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import IUser from "../interface/User";
 import openLoginPopup from "./openLoginPopup";
 
 interface IContext
@@ -7,6 +8,8 @@ interface IContext
 	signout:	(callback: () => void) => void,
 	isAuth:		boolean,
 	setIsAuth:	(auth : boolean) => void,
+	user: 		IUser | null;
+	setUser:	(user: IUser | null) => void,
 }
 
 const authContext = createContext<IContext>(null!);
@@ -27,6 +30,7 @@ function useAuth() : IContext
 function useProvideAuth(): IContext
 {
 	const [isAuth, setIsAuth] = useState<boolean>(false);
+	const [user, setUser] = useState<IUser | null>(null);
 
 	const signin = (cb: () => void) =>
 	{
@@ -39,11 +43,14 @@ function useProvideAuth(): IContext
 		cb();
 	}
 
+
 	return {
 		signin,
 		signout,
 		isAuth,
 		setIsAuth,
+		user,
+		setUser,
 	};
 }
 

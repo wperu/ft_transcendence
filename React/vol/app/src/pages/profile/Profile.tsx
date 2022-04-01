@@ -1,32 +1,44 @@
-import axios from "axios";
 import LogOutButton from "../../components/LogOutButton/LogOutButton";
+import ProfileSummary from "../../components/ProfileSummary/ProfileSummary";
+import React, { useState } from "react";
+import { useParams } from 'react-router-dom';
+import { useAuth } from "../../auth/useAuth";
+import IUser from "../../interface/User";
+import axios from "axios";
 
 function Profile() {
 	
-	axios({
-		method: 'get',
-		url: 'http://localhost/api',
-		headers: {},
-	  }).then(function (response) {
-		console.log(response);
-	  })
-	  .catch(function (error) {
-		console.log(error);
-	  });
+	let { id }				= useParams<"id">();
+	const auth				= useAuth();
+	const [user, setUser]	= useState<IUser>(null!);
 
-	  
-	  console.log("Profile log");
-	 /* axios('http://nest:3000/users')
-	  .then(function (response) {
-		console.log(response.data);
-	  })
-	  .catch(function (error) {
-		console.log(error);
-	  });*/
+	if (!id)
+	{
+		if (auth.user)
+			setUser(auth.user);
+	}
+	else
+	{
+		const url : string	= process.env.REACT_APP_API_USER || "/";
+
+		axios.get(url + "/" + id).then( resp => {
+			let data : IUser = resp.data;
+			//JSON.parse(resp.data);
+			//setUser(data);
+			console.log(data);
+		})
+		.catch(error => {
+			console.log(error.response.status);
+			//console.log(resp);
+		});
+	}
 
 	return (
 		<div>
-	  		<h1>Profile</h1>
+			<header id="home_header">
+				<ProfileSummary />
+				<h1>Profile</h1>
+			</header>
 			 <footer>
 				<LogOutButton />
 			</footer>
