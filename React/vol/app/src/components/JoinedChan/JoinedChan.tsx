@@ -1,4 +1,5 @@
 import React from "react";
+import { ECurrentTab, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./JoinedChan.css";
 
 interface	chan_props
@@ -8,10 +9,19 @@ interface	chan_props
 
 function JoinedChan(props: chan_props)
 {
+	const chatCtx = useChatContext();
+
+	function joinChan()
+	{
+		chatCtx.setCurrentRoomByName(props.name);
+		chatCtx.setCurrentTab(ECurrentTab["chat"]);
+	}
+
 	return (
 		<div className="joined_chan">
-			<input className="connect_chan" id={"connect_chan" + props.name} type="button"/>
-			<label htmlFor={"connect_chan" + props.name}>
+			<input className="connect_chan" id={"connect_chan" + props.name} 
+				type="button" onClick={joinChan}/>
+			<label htmlFor={"connect_chan" + props.name} >
 				{props.name}
 				{/*<input className="leave_chan" id={"leave_chan" + props.name} type="button"/>
 				<label htmlFor={"leave_chan" + props.name}>Leave</label>*/}

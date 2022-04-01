@@ -1,4 +1,3 @@
-//import axios from "axios";
 import LogOutButton from "../../components/LogOutButton/LogOutButton";
 import ProfileSummary from "../../components/ProfileSummary/ProfileSummary";
 import React, { useState } from "react";

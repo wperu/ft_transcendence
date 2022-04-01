@@ -4,8 +4,8 @@
 {
 	--tab_button_height: 5vmin;
 	--open-sidebar-size: 60vmin;
-	--closed-sidebar-size: 0px;
-	--transition: 0.2s;
+	--closed-sidebar-size: -60vmin;
+	--transition: 0.7s;
 	height: 0;
 }
 
@@ -40,6 +40,12 @@
 	height: var(--tab_button_height);
 	opacity: 50%;
 	background-color:lightskyblue;
+	display: flex;
+    align-items: center;
+	justify-content: center;
+	font-size: 0.5em;
+	text-transform: uppercase;
+	font-weight: bold;
 }
 
 .tab_button:checked + label
@@ -49,7 +55,7 @@
 
 #toggle
 {
-	opacity: 0;
+	display: none;
 	/* transition: var(--transition);
 	position: fixed;
 	right: var(--open-sidebar-size);
@@ -65,7 +71,7 @@
 	border-style: solid;
 	border-color: whitesmoke;
 	border-radius: 3px;
-	/* transition: var(--transition); */
+	transition: var(--transition);
 	position: fixed;
 	right: calc(var(--open-sidebar-size));
 	transform: rotate(45deg);
@@ -79,17 +85,11 @@
 
 #toggle:checked + label
 {
-	right: calc(var(--closed-sidebar-size));
+	right: 0px;
 	transform: rotate(225deg);
 }
 
-/* #toggle:checked + label + #actual_bar
-{
-	font-size: 0;
-	width: var(--closed-sidebar-size);
-} */
-
 #toggle:checked + label + #actual_bar
 {
-	display: none;
+	right: var(--closed-sidebar-size);
 }

@@ -1,59 +1,108 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
+import { EnumType } from "typescript";
 
 
-interface IRoom
+export interface IRoom
 {
 	room_name: string;
-	room_message: string[];
+	room_message: RcvMessageDto[];
+}
+
+export enum ECurrentTab
+{
+	friends = "friends",
+	channels = "channels",
+	chat = "chat",
 }
 
 interface IChatContext
 {
 	socket: Socket;
-	currentRoom?: string;
-	setCurrentRoom: (room_name: string) => void;
+	currentRoom?: IRoom;
+	setCurrentRoom: (room: IRoom | undefined) => void;
+	setCurrentRoomByName: (rname: string) => void;
 	
 	rooms: IRoom[];
 	addRoom: (room_name: string) => void;
 
+	currentTab: ECurrentTab;
+	setCurrentTab: (tab: ECurrentTab) => void;
 }
 
-const socket = io("http://localhost/", { path: "/api/socket.io/", transports: ['websocket'] });
-
-
-function useChatProvider(input_socket: Socket) : IChatContext
+function useChatProvider() : IChatContext
 {
-	const [socket, setSocket] = useState<Socket>(input_socket);
-	const [currentRoom, setCurrentRoom] = useState<string | undefined>();
-	const [rooms, setRooms] = useState<IRoom[]>([]);
+    const [socket, setSocket] = useState<Socket>(io("http://localhost/",
+		{ path: "/api/socket.io/", transports: ['websocket'] }));
+    const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
+    const [rooms, setRooms] = useState<IRoom[]>([]);
+	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
+
+	
+    function addRoom(room_name: string)
+    {
+		const newRoom : IRoom = {
+			room_name: room_name,
+            room_message: []
+        };
+		
+        setRooms([...rooms, newRoom]);
+		if (currentRoom !== undefined)
+			setCurrentRoomByName(currentRoom.room_name);
+    };
+	
+	function setCurrentRoomByName (name: string)
+	{
+		setCurrentRoom(rooms.find(o => {
+			return (o.room_name === name);
+		}));
+	};
+
+	function findRoomByName (name: string)
+	{
+		return (rooms.find(o => {
+			return (o.room_name === name);
+		}));
+	}
+
+	useEffect(() => {
+		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
+			let targetRoom = findRoomByName(data.room_name);
+			if (targetRoom !== undefined)
+			{
+				console.log("[CHAT] rcv: ", data);
+				targetRoom.room_message.push(data);
+			}
+		});
+			
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('RECEIVE_MSG');
+			}
+		};
+	}, [rooms]);
 
 	useEffect(() => {
 		return function cleanup() {
-			if (socket != undefined)
-				socket.close();
+			if (socket !== undefined)
+			{
+				socket.disconnect();
+			}
 		};
-	}, [socket]);
-
-	function addRoom (room_name: string)
-	{
-		let newRoom : IRoom = {
-			room_name: room_name,
-			room_message: []
-		};
-
-		const nextRooms = [...rooms, newRoom];
-
-		setRooms(nextRooms);
-	};
-
-	return({
+	}, []);
+	
+    return({
 		socket,
-		currentRoom,
-		setCurrentRoom,
-		rooms,
-		addRoom,
-	});
+        currentRoom,
+        setCurrentRoom,
+		setCurrentRoomByName,
+		currentTab,
+		setCurrentTab,
+        rooms,
+        addRoom,
+    });
 }
 
 const chatContext = createContext<IChatContext>(null!);
@@ -81,7 +130,7 @@ export function ProvideChat( {children}: {children: JSX.Element} ): JSX.Element
 	
 
 	return(
-		<chatContext.Provider value={useChatProvider(socket)}>
+		<chatContext.Provider value={useChatProvider()}>
 			{children}
 		</chatContext.Provider>
 		);
