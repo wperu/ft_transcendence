@@ -5,7 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import room from './interface/room';
+import room from '../../../../../Common/Dto/chat/room';
 import room_invite from './interface/room_invite';
 import room_protect from './interface/room_protect';
 import room_join from './interface/room_join';

@@ -14,6 +14,7 @@ interface room
 	owner: Socket,
 	users: Array<Socket>
 	invited : Array<string>,
+	muted : Array<string>,
 	password?: string
 }
 
