@@ -4,4 +4,11 @@ interface room_rename
     new_name: string
 }
 
-export default room_rename;
+interface room_change_pass
+{
+    room_name: string,
+    new_pass: string
+}
+
+
+export {room_rename,room_change_pass};

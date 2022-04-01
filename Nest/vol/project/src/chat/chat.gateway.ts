@@ -6,10 +6,10 @@ import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
 import room from '../../../../../Common/Dto/chat/room';
-import room_invite from './interface/room_invite';
-import room_protect from './interface/room_protect';
-import room_join from './interface/room_join';
-import room_rename from './interface/room_rename';
+import room_invite from '../../../../../Common/Dto/chat/room_invite';
+import room_protect from '../../../../../Common/Dto/chat/room_protect';
+import room_join from '../../../../../Common/Dto/chat/room_join';
+import {room_rename,room_change_pass} from '../../../../../Common/Dto/chat/room_rename';
 
 enum RoomProtection {
 	NONE,
@@ -127,7 +127,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		//this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
 		if(client.join(payoad.room_name))
-			client.emit("COMFIRM_ROOM: " + local_room.name +" socket: " + client);
+			client.emit("COMFIRM_JOIN: " + local_room.name +" socket: " + client);
 		else
 			throw new UnauthorizedException(`Cannot join room : ${payoad.room_name},
 				Socket client: ${client}`);
@@ -163,7 +163,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
-
+	// TODO  a revoir
 	@SubscribeMessage("INVITE_USER")
 	inviteUser(client: Socket, room_invite : room_invite 
 	): void
@@ -272,8 +272,36 @@ to private without sending a password")
 		local_room.name = payload.new_name;
 	}
 
-	@SubscribeMessage('ROOM_C')
-
+	/**
+	 * Emit on this event to change the password of a room
+	 * @field name_room: the name of room
+	 * @field old_pass: the old password of the room that will be changed
+	 * @field new_pass: the new password for the room
+	 */
+	@SubscribeMessage('ROOM_CHANGE_PASS')
+	room_change_pass(client:Socket, payload: room_change_pass)
+	{
+		let local_room = this.rooms.find(o => o.name === payload.room_name);
+		if (local_room === undefined)
+		{
+			console.error(`Cannot change password unknown room: ${payload.room_name}`);
+			throw new BadRequestException(`Unknown room ${payload.room_name}`);
+		}
+		//if (local_room.password === undefined)
+		//OPTIMIZE if room no password change protection room in PROTECT or no change password and emit error 
+		if (client !== local_room.owner)
+		{
+			throw new UnauthorizedException("Only the room owner can rename the room !");
+		}
+		let is_new_pass = this.rooms.find(o => o.password === payload.new_pass);
+		if (is_new_pass !== undefined)
+		{
+			console.error(`Cannot change password `);
+			throw new BadRequestException(`Bad password (try again with another password)`);
+		}
+		
+		local_room.password = payload.new_pass;
+	}
 
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client:Socket): void
