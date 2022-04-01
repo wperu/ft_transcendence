@@ -42,7 +42,7 @@ function Callback() : JSX.Element
 			console.log('no code in query');
 		}
 	}	
-	
+	//todo in with useEffect() try
 	authUser();
 	return <div></div>;
 }

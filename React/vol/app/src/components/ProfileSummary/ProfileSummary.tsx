@@ -2,19 +2,11 @@ import React from "react";
 import "./ProfileSummary.css";
 import defaultLogo from "../../ressources/images/user-icon-0.png";
 import IUser from "../../interface/User";
-
-function parsUserData(userData: string | null) : IUser | null
-{
-	if (userData === null)
-		return null;
-	
-	return (JSON.parse(userData));
-}
+import { useAuth } from "../../auth/useAuth";
 
 function ProfileSummary() {
 
-	const userData = localStorage.getItem('user');
-	const user : IUser | null = parsUserData(userData);
+	const user : IUser | null = useAuth().user;
 
 	function getUserName() : string
 	{
