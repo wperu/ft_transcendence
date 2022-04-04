@@ -107,6 +107,8 @@ function ProfileSummarySettings() {
         return () => URL.revokeObjectURL(objectUrl);
     }, [file]);
 
+
+	//fix MaxLength username
 	return (
 		<aside id="profile">
 			<div id="img-upload">
@@ -117,7 +119,7 @@ function ProfileSummarySettings() {
 			</div>
 
 			<div id="infos">
-				<p> {'> '} <input type="text" id="user-name" onKeyPress={pressedSend} placeholder={getUserName()}/> </p>
+				<p> {'> '} <input type="text" maxLength={20} id="user-name" onKeyPress={pressedSend} placeholder={getUserName()}  /> </p>
 				<p> {'> '} Level</p>
 				<p> {'Two factor'} 
 					<label id='switch'>
