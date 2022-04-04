@@ -1,5 +1,5 @@
 import {ELevelInRoom} from "../Sidebar/ChatContext/ProvideChat"
-import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton} from "../UserBarButtons/UserBarButtons"
+import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton, PromoteUserButton} from "../UserBarButtons/UserBarButtons"
 import "./ChatUser.css"
 
 interface	props
@@ -20,11 +20,23 @@ function ChatUser (data: props)
 				</div>
 			);
 		}
+		else if (data.currentUserLvl === ELevelInRoom.admin)
+		{
+			return (
+				<div className="chat_user_button_div">
+					<InviteUserButton />
+					<BlockUserButton />
+					<MuteUserButton />
+					<BanUserButton />
+				</div>
+			);
+		}
 		else
 		{
 			return (
 				<div className="chat_user_button_div">
 					<InviteUserButton />
+					<PromoteUserButton />
 					<BlockUserButton />
 					<MuteUserButton />
 					<BanUserButton />

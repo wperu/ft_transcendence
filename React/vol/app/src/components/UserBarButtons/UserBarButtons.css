@@ -7,9 +7,26 @@
 
 .user_bar_button
 {
-	margin: 0.25vmin;
-	width: 20%;
-	background-color: rgb(235, 41, 41);
+	height: max-content;
+	margin: 0.3vmin;
+	width: 17%;
 	border: none;
-	/* border-radius: 50%; */
+	padding: 4px;
+	border-radius: 10px;
+	font-size: 0;
+}
+
+.user_bar_button:hover
+{
+	font-size: 0.3em;
+}
+
+.positive_user_button
+{
+	background-color: rgb(90, 204, 45);
+}
+
+.negative_user_button
+{
+	background-color: rgb(235, 41, 41);
 }

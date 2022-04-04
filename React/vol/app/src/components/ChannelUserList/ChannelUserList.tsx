@@ -1,5 +1,6 @@
 import ChatUser from "../ChatUser/ChatUser";
 import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
+import "./ChannelUserList.css"
 
 function ChannelUserList ()
 {
@@ -10,6 +11,36 @@ function ChannelUserList ()
 		user_lvl = chatCtx.currentRoom.user_level;
 	return (
 		<div id="channel_users_list">
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
+			<ChatUser currentUserLvl={user_lvl}/>
 			<ChatUser currentUserLvl={user_lvl}/>
 			<ChatUser currentUserLvl={user_lvl}/>
 			<ChatUser currentUserLvl={user_lvl}/>

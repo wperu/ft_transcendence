@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import ChatTab from "../ChatTab/ChatTab";
 import OwnerChannelSettings from "../OwnerChannelSettings/OwnerChannelSettings";
-import AdminChannelSettings from "../AdminChannelSettings/AdminChannelSettings";
-import CasualChannelSettings from "../CasualChannelSettings/CasualChannelSettings";
+import ChannelSettings from "../ChannelSettings/ChannelSettings";
 import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";
 import "./Chat.css";
 
@@ -24,10 +23,8 @@ function Chat()
 			{
 				if (chatCtx.currentRoom.user_level === ELevelInRoom.owner)
 					return (<OwnerChannelSettings />);
-				else if (chatCtx.currentRoom.user_level === ELevelInRoom.admin)
-					return (<AdminChannelSettings />);
 				else
-					return (<CasualChannelSettings />)
+					return (<ChannelSettings />);
 			}
 		}
 		else

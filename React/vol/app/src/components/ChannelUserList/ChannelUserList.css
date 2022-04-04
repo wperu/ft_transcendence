@@ -1,0 +1,9 @@
+#channel_users_list
+{
+	/* padding: 0 2vh; */
+	background-color: #525863a9;
+	scroll-behavior: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+	height: calc(100vh - (var(--tab_button_height) * 2) - var(--additional_settings_space));
+}
