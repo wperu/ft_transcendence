@@ -303,6 +303,14 @@ to private without sending a password")
 		local_room.password = payload.new_pass;
 	}
 
+	@SubscribeMessage('USER_LIST')
+	user_list(client: Socket , payload : room) : void
+	{
+		let listuse;
+		payload.users.forEach(users => {listuse.push(payload.users)});
+		client.emit('USER_LIST',listuse);
+	}
+
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client:Socket): void
 	{
