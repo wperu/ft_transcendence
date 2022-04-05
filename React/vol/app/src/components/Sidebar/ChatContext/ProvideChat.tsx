@@ -10,14 +10,6 @@ export enum ELevelInRoom
 	owner = "owner",
 }
 
-export enum ERoomVisibility
-{
-	public = "public",
-	private = "private",
-	protected = "protected",
-}
-
-
 export enum ECurrentTab
 {
 	friends = "friends",
@@ -27,8 +19,8 @@ export enum ECurrentTab
 
 export interface IRoom
 {
-	visibility: ERoomVisibility;
-	password?: string;
+	private: boolean;
+	protected: boolean;
 	user_level: ELevelInRoom;
 	room_name: string;
 	room_message: RcvMessageDto[];
@@ -42,7 +34,7 @@ interface IChatContext
 	setCurrentRoomByName: (rname: string) => void;
 	
 	rooms: IRoom[];
-	addRoom: (room_name: string) => void;
+	addRoom: (room_name: string, is_protected: boolean) => void;
 
 	currentTab: ECurrentTab;
 	setCurrentTab: (tab: ECurrentTab) => void;
@@ -57,14 +49,14 @@ function useChatProvider() : IChatContext
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
 
 	
-    function addRoom(room_name: string, password?: string)
+    function addRoom(room_name: string, is_protected: boolean)
     {
 		const newRoom : IRoom = {
 			user_level: ELevelInRoom.owner,
 			room_name: room_name,
             room_message: [],
-			visibility: ERoomVisibility.public,
-			password: password
+			private: false,
+			protected: is_protected,
         };
 		
         setRooms([...rooms, newRoom]);

@@ -36,7 +36,7 @@ function ChanCreationTab()
 				var data: JoinRoomDto = { room_name: target.channel_name.value };
 			}
 			chatCtx.socket.emit("JOIN_ROOM", data);
-			chatCtx.addRoom(target.channel_name.value);
+			chatCtx.addRoom(target.channel_name.value, target.is_protected.value);
 			alert("Channel " + target.channel_name.value + " créé");
 			// console.log("channel created. name: " + target.channel_name.value + " visibility: " + target.channel_visibility.value);
 			target.channel_name.value = '';

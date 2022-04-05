@@ -1,7 +1,6 @@
-@import url("../../ressources/base.css");
-
 #chat
 {
+	height: 100%;
 	--message_footer_height: 6.5vmin;
 	box-sizing: border-box;
 	--channel_margin: 8px;

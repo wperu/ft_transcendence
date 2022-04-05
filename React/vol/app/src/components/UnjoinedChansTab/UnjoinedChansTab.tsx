@@ -32,7 +32,7 @@ function UnjoinedChansTab()
 				var data: JoinRoomDto = { room_name: target.name.value };
 			}
 			chatCtx.socket.emit("JOIN_ROOM", data);
-			chatCtx.addRoom(target.name.value);
+			chatCtx.addRoom(target.name.value, (target.password.value.length > 0));
 			alert("Channel " + target.name.value + " rejoint");
 			console.log("channel joined. name: " + target.name.value);
 			target.name.value = '';
