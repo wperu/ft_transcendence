@@ -1,12 +1,13 @@
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import ChannelUserList from "../ChannelUserList/ChannelUserList";
 import "./OwnerChannelSettings.css"
+import { useState } from "react";
 
 function OwnerChannelSettings ()
 {
 	const chatCtx = useChatContext();
 	const style = { "--additional_settings_space": "30vh" } as React.CSSProperties;
-
+	const [update, setUpdate] = useState<boolean>(false);
 
 	function passwordSubmit(event: React.SyntheticEvent)
 	{
@@ -23,9 +24,10 @@ function OwnerChannelSettings ()
 		{
 			if (chatCtx.currentRoom)
 				chatCtx.currentRoom.protected = true;
-			console.log("password changed/added : \"" + target.password.value + '\"');
 			target.password.value = "";
 			target.password_repeat.value = "";
+			setUpdate(!update);
+			alert("Password modification successfull");
 		}
 	}
 
@@ -33,7 +35,8 @@ function OwnerChannelSettings ()
 	{
 		if (chatCtx.currentRoom !== undefined)
 			chatCtx.currentRoom.protected = false;
-		console.log("Password removed");
+		setUpdate(!update);
+		alert("Password removed");
 	}
 
 	function PasswordSettings()
