@@ -8,6 +8,20 @@ enum RoomProtection {
 	PRIVATE,
 }
 
+interface room_protect
+{
+    room_name : string,
+    protection_mode: RoomProtection,
+    opt?: string
+}
+
+interface create_room
+{
+	room_name: string,
+	proctection: RoomProtection,
+	password?: string
+}
+
 interface room
 {
     name: string,
@@ -19,4 +33,4 @@ interface room
 	password?: string
 }
 
-export default room;
+export {room,create_room,room_protect};
