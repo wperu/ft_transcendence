@@ -5,9 +5,8 @@ import { Server, Socket } from 'socket.io';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import room from '../../../../../Common/Dto/chat/room';
+import {room,create_room,room_protect} from '../../../../../Common/Dto/chat/room';
 import room_invite from '../../../../../Common/Dto/chat/room_invite';
-import room_protect from '../../../../../Common/Dto/chat/room_protect';
 import room_join from '../../../../../Common/Dto/chat/room_join';
 import {room_rename,room_change_pass} from '../../../../../Common/Dto/chat/room_rename';
 
@@ -69,7 +68,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.server.to(payload.room_name).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
 	}
 
-
+	@SubscribeMessage('CREATE_ROOM')
+	createRoom(client: Socket, payload: create_room): void 
+	{
+		let local_room = this.rooms.find(o => o.name === payload.room_name);
+		if (local_room === undefined)
+		{
+			this.rooms.push({
+				name: payload.room_name,
+				protection: payload.proctection,
+				users: [client],
+				invited : [],
+				muted: [],
+				owner: client,
+			})
+		}
+		else
+		{
+			throw new BadRequestException(`room exist impossible create with same name`)	
+		}
+	}
 	/**
 	 * Emit to this event to join a room
 	 * 
@@ -85,16 +103,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let local_room = this.rooms.find(o => o.name === payoad.room_name);
 		if (local_room === undefined)
-		{
-			this.rooms.push({
-				name: payoad.room_name,
-				protection: RoomProtection.NONE,
-				users: [client],
-				invited : [],
-				muted: [],
-				owner: client,
-			})
-		}
+			throw new BadRequestException(`no exist room with this name: ${payoad.room_name}`);
 		else
 		{
 			let is_user = local_room.users.find(c => c === client);
@@ -222,14 +231,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			switch (payload.protection_mode)
 			{
-				case "NONE":
+				case RoomProtection.NONE:
 					local_room.protection = RoomProtection.NONE;
 					break;
-				case "PROTECTED":
-					local_room.protection = RoomProtection.PROTECTED;
-					break;
-				case "PRIVATE":
+				case RoomProtection.PRIVATE:
 					local_room.protection = RoomProtection.PRIVATE;
+					break;
+				case RoomProtection.PROTECTED:
+					local_room.protection = RoomProtection.PROTECTED;
 					if (payload["opt"] === undefined)
 						throw new BadRequestException("No opt parameter: Cannot set a room protection mode \
 to private without sending a password")
@@ -273,9 +282,8 @@ to private without sending a password")
 	}
 
 	/**
-	 * Emit on this event to change the password of a room
+	 * Emit on this event to change the password of a room and set password
 	 * @field name_room: the name of room
-	 * @field old_pass: the old password of the room that will be changed
 	 * @field new_pass: the new password for the room
 	 */
 	@SubscribeMessage('ROOM_CHANGE_PASS')
@@ -287,19 +295,16 @@ to private without sending a password")
 			console.error(`Cannot change password unknown room: ${payload.room_name}`);
 			throw new BadRequestException(`Unknown room ${payload.room_name}`);
 		}
-		//if (local_room.password === undefined)
-		//OPTIMIZE if room no password change protection room in PROTECT or no change password and emit error 
 		if (client !== local_room.owner)
 		{
-			throw new UnauthorizedException("Only the room owner can rename the room !");
+			throw new UnauthorizedException("Only the room owner can change password the room !");
 		}
 		let is_new_pass = this.rooms.find(o => o.password === payload.new_pass);
-		if (is_new_pass !== undefined)
+		if (is_new_pass === undefined)
 		{
 			console.error(`Cannot change password `);
 			throw new BadRequestException(`Bad password (try again with another password)`);
 		}
-		
 		local_room.password = payload.new_pass;
 	}
 
