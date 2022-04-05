@@ -30,7 +30,7 @@ interface IChatContext
 	setCurrentTab: (tab: ECurrentTab) => void;
 }
 
-const cltSocket = io("ws://localhost/", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false});
+const cltSocket = io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false});
 
 function useChatProvider() : IChatContext
 {
