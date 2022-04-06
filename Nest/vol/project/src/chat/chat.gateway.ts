@@ -2,6 +2,14 @@ import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/comm
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
+import { User } from 'src/entities/user.entity';
+import { useContainer } from 'typeorm';
+import { isInt8Array } from 'util/types';
+import room from './interface/room';
+import room_invite from './interface/room_invite';
+import room_protect from './interface/room_protect';
+import room_join from './interface/room_join';
+import room_rename from './interface/room_rename';
 
 enum RoomProtection {
 	NONE,
@@ -26,13 +34,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	constructor(
-		private rooms: {
-			name: string,
-			protection: RoomProtection,
-			owner: Socket,
-			users: Array<Socket>,
-			password?: string
-		}[]
+		private rooms: room[]
 	) { }
 
 
@@ -80,10 +82,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * upgrade room protection using 'PROTECT_ROOM' event
 	 */
 	@SubscribeMessage('JOIN_ROOM')
-	joinRoom(client: Socket, payoad: {
-		room_name: string,
-		password?: string
-	}): void
+	joinRoom(client: Socket, payoad: room_join): void
 	{
 		let local_room = this.rooms.find(o => o.name === payoad.room_name);
 		if (local_room === undefined)
@@ -92,6 +91,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				name: payoad.room_name,
 				protection: RoomProtection.NONE,
 				users: [client],
+				invited : [],
 				owner: client,
 			})
 		}
@@ -99,20 +99,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			let is_user = local_room.users.find(c => c === client);
 			if (is_user !== undefined)
-				throw new BadRequestException(`Client ${client.id} has aready joined ${payoad.room_name}`)
+				throw new BadRequestException(`Client ${client.id} has already joined ${payoad.room_name}`)
 			
 			if (local_room.protection === RoomProtection.NONE)
 			{
 				local_room.users.push(client);
 			}
-			else if (local_room.protection === RoomProtection.PRIVATE)
+			else if (local_room.protection === RoomProtection.PROTECTED)
 			{
 				if (local_room.password === payoad.password)
 					local_room.users.push(client);
 				else
 					throw new UnauthorizedException("Wrong password");
 			}
-			else 
+			else if (local_room.protection === RoomProtection.PRIVATE)
+			{
+				if(local_room.invited.find(string => string === User.name))
+					local_room.users.push(client);
+				else
+					throw new UnauthorizedException("No invited in room");
+			}
+			else
 			{
 				throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
 			}
@@ -154,12 +161,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	@SubscribeMessage("INVITE_USER")
-	inviteUser(client: Socket, room_invite : {
-		room_name: string,
-		invited_user: string,
-
-	})
+	inviteUser(client: Socket, room_invite : room_invite 
+	): void
 	{
+		let local_room = this.rooms.find(o => o.name === room_invite.room_name);
+		if (local_room === undefined)
+		{
+			console.log("you invite in room undefined ???");
+		}
+		else 
+		{
+			if (local_room.protection !== RoomProtection.PRIVATE)
+			{
+				throw new UnauthorizedException(`Cannot join room : ${room_invite.room_name}`)
+			}
+			else
+			{
+				let is_user = local_room.users.find(c => c === client);
+				if (is_user !== undefined)
+					throw new BadRequestException(`Client ${client.id} has already joined ${room_invite.room_name}`)
+				local_room.users.push(client);
+			}
+			
+		}
+		
+		this.logger.log(`Client ${client.id} joined room ${room_invite.room_name}`);
+		client.join(room_invite.room_name);
 
 	}
 
@@ -178,11 +205,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field opt: optional field, used to store the password when protection_mode is PRIVATE
 	 */
 	@SubscribeMessage('PROTECT_ROOM')
-	protectRoom(client: Socket, payload: {
-		room_name: string,
-		protection_mode: string,
-		opt?: string,
-	})
+	protectRoom(client: Socket, payload: room_protect)
 	{
 		let local_room = this.rooms.find(o => o.name === payload.room_name);
 		if (local_room === undefined)
@@ -222,10 +245,7 @@ to private without sending a password")
 	 * @field new_name: the new name for the room
 	 */
 	@SubscribeMessage('RENAME_ROOM')
-	renameRoom(client: Socket, payload: {
-		old_name: string,
-		new_name: string,
-	})
+	renameRoom(client: Socket, payload: room_rename)
 	{
 		let local_room = this.rooms.find(o => o.name === payload.old_name);
 		if (local_room === undefined)
@@ -248,6 +268,13 @@ to private without sending a password")
 		local_room.name = payload.new_name;
 	}
 
+	@SubscribeMessage('ROOM_LIST')
+	room_list(client:Socket): void
+	{
+		let lists;
+		this.rooms.forEach(room => {lists.push(room.name)});
+		client.emit('ROOM_LIST',lists);
+	}
 
 	
 	handleConnection(client: Socket, ...args: any[]) : void
