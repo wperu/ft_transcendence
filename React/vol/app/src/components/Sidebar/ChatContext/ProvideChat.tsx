@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
-import { EnumType } from "typescript";
 
 export enum ELevelInRoom
 {
@@ -40,10 +39,11 @@ interface IChatContext
 	setCurrentTab: (tab: ECurrentTab) => void;
 }
 
+const cltSocket = io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false});
+
 function useChatProvider() : IChatContext
 {
-    const [socket, setSocket] = useState<Socket>(io("http://localhost/",
-		{ path: "/api/socket.io/", transports: ['websocket'] }));
+	const [socket, setSocket] = useState(cltSocket);
     const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
     const [rooms, setRooms] = useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
@@ -79,6 +79,7 @@ function useChatProvider() : IChatContext
 	}
 
 	useEffect(() => {
+		
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
 			let targetRoom = findRoomByName(data.room_name);
 			if (targetRoom !== undefined)
@@ -89,6 +90,8 @@ function useChatProvider() : IChatContext
 		});
 			
 		return function cleanup() {
+			
+
 			if (socket !== undefined)
 			{
 				socket.off('RECEIVE_MSG');
@@ -97,7 +100,6 @@ function useChatProvider() : IChatContext
 	}, [rooms]);
 
 	useEffect(() => {
-
 		// socket.on('JOINED_ROOM', (data : JoinChatDto) => { //A REVOIR
 		// 	setRooms([...rooms, ])
 		// 	if (targetRoom !== undefined)
@@ -106,6 +108,7 @@ function useChatProvider() : IChatContext
 		// 		targetRoom.room_message.push(data);
 		// 	}
 		// });
+		socket.connect();
 
 		return function cleanup() {
 			if (socket !== undefined)
@@ -146,13 +149,10 @@ export function useChatContext()
  */
 export function ProvideChat( {children}: {children: JSX.Element} ): JSX.Element
 {
-	//const [context, setContext] =  useState(useChatProvider(socket));
-
-	//todo close() socket
-	
+	const chatCtx = useChatProvider();
 
 	return(
-		<chatContext.Provider value={useChatProvider()}>
+		<chatContext.Provider value={chatCtx}>
 			{children}
 		</chatContext.Provider>
 		);

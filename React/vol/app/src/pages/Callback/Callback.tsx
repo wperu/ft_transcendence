@@ -18,16 +18,17 @@ function Callback() : JSX.Element
 		{
 			try
 			{
+				const url = process.env.REACT_APP_API_URL + '/auth/token';
 				const response = axios({
 					method: 'post',
-					url: 'http://localhost/api/auth/token',
+					url: url,
 					headers: {
 						'grant-type': 'authorization-code',
 						'authorization-code': accessCode
 					},
 				})
 				.then(res => {				
-					window.opener.postMessage(res.data, "http://localhost");
+					window.opener.postMessage(res.data, process.env.REACT_APP_ORIGIN);
 					window.close();
 				});
 
