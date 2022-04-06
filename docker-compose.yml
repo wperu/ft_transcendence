@@ -15,13 +15,15 @@ services:
     build: ./React
     restart: always
     volumes:
-      - ./React/vol:/vol
+      - ./React/vol/app:/vol/app
+      - ./Common:/vol/Common
     
   nest:
     build: ./Nest
     restart: always
     volumes:
-      - ./Nest/vol:/vol
+      - ./Nest/vol/app:/vol/app
+      - ./Common:/vol/Common
     ports:
       - 4000:4000
     expose:

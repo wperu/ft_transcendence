@@ -5,16 +5,11 @@ import { Server, Socket } from 'socket.io';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import {room,create_room,room_protect} from '../../../../../Common/Dto/chat/room';
-import room_invite from '../../../../../Common/Dto/chat/room_invite';
-import room_join from '../../../../../Common/Dto/chat/room_join';
-import {room_rename,room_change_pass} from '../../../../../Common/Dto/chat/room_rename';
-
-enum RoomProtection {
-	NONE,
-	PROTECTED,
-	PRIVATE,
-}
+import { create_room,room_protect, RoomProtection} from '../Common/Dto/chat/room';
+import room_invite from '../Common/Dto/chat/room_invite';
+import room_join from '../Common/Dto/chat/room_join';
+import {room_rename,room_change_pass} from '../Common/Dto/chat/room_rename';
+import {room} from "./interface/room";
 
 
 // Todo fixe origin
