@@ -18,8 +18,8 @@ enum RoomProtection {
 }
 
 
-// Todo ADD Port to .env
-@WebSocketGateway(4000, {
+// Todo fixe origin
+@WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
 	/*namespace: "/chat/", */
 	cors: {
