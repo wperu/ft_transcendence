@@ -46,7 +46,7 @@ function SignInButton ()
 		auth.signin(useRedirectToAuthPage);
 	}
 
-	return <button onClick={signInClick}>Se connecter</button>;
+	return <button className="main_menu_button" onClick={signInClick}>Se connecter</button>;
 }
 
 export default SignInButton;

@@ -1,0 +1,17 @@
+.chat_user
+{
+	height: 5vmin;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 0 0.8vmin 0 1.2vmin;
+}
+
+.chat_user_button_div
+{
+	display: flex;
+	justify-content: right;
+	align-items: center;
+	width: 35%;
+	height: 100%;
+}

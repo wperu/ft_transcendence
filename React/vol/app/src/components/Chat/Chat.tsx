@@ -1,101 +1,54 @@
-import React, {KeyboardEvent, useState, useEffect, useRef, useCallback } from "react";
-import ChatMessage from "../ChatMessage/ChatMessage";
-import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
-import { RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
+import { useState } from "react";
+import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
+import ChatTab from "../ChatTab/ChatTab";
+import OwnerChannelSettings from "../OwnerChannelSettings/OwnerChannelSettings";
+import ChannelSettings from "../ChannelSettings/ChannelSettings";
+import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";
 import "./Chat.css";
 
-function useInterval(callback: () => void, delay: number) {
-	const savedCallback = useRef(callback);
-
-	// Remember the latest callback.
-	useEffect(() => {
-	savedCallback.current = callback;
-	}, [callback]);
-
-	// Set up the interval.
-	useEffect(() => {
-	function tick() {
-		if (savedCallback !== undefined)
-			savedCallback.current();
-	}
-	if (delay !== null) {
-		let id = setInterval(tick, delay);
-		return () => clearInterval(id);
-	}
-	}, [delay]);
-}
 
 function Chat()
 {
 	const chatCtx = useChatContext();
-	const chatCtxRef = useRef(useChatContext());
-	const [socket, setSocket] = useState(chatCtx.socket);
-	const [messages, setMessages] = useState<RcvMessageDto[] >([]);
+	const [currentTab, setCurrentTab] = useState<string>("chat");
 
-	let msg_list_ref = React.createRef<HTMLDivElement>();
-	
-	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
+
+	function Content() : JSX.Element
 	{
-		if (socket !== undefined && chatCtx.currentRoom !== undefined 
-			&& event.key === "Enter" && event.currentTarget.value.length > 0)
+		if (chatCtx.currentRoom !== undefined)
 		{
-			let data : SendMessageDto =
+			if (currentTab === "chat")
+				return (<ChatTab />);
+			else
 			{
-				message: event.currentTarget.value,
-				room_name: chatCtx.currentRoom.room_name
-			};
-			socket.emit('SEND_MESSAGE', data);
-			console.log("[CHAT] sending: " + event.currentTarget.value);
-			event.currentTarget.value = '';
+				if (chatCtx.currentRoom.user_level === ELevelInRoom.owner)
+					return (<OwnerChannelSettings />);
+				else
+					return (<ChannelSettings />);
+			}
 		}
-	};
+		else
+			return (<ThisListIsEmpty text="Tu n'es pas dans un channel" />);
+	}
 
-	function pressedQuit()
+	function handleChange(event: React.ChangeEvent<HTMLInputElement>)
 	{
-		if (chatCtx.currentRoom !== undefined)
-		{
-			socket.emit("LEAVE_ROOM", chatCtx.currentRoom.room_name);
-			setMessages([]);
-			chatCtx.rooms.splice(chatCtx.rooms.findIndex((o) => {
-				return (o.room_name === chatCtx.currentRoom?.room_name);
-			}), 1);
-			chatCtx.setCurrentRoom(undefined);
-		}
-	};
+		setCurrentTab(event.target.value);
+	}
 
-	useInterval(() =>
-	{
-			console.log("truc");
-		if (chatCtx.currentRoom !== undefined)
-			setMessages([...chatCtx.currentRoom.room_message]);
-	}, 200);
-
-	useEffect( () =>
-	{
-		if (msg_list_ref.current)
-		{
-			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
-		}
-	});
-	
 	return (
 		<div id="chat">
-			<header id="chat_quick_options">
-				<input type="button"
-					name="chat_quick_leave" id="chat_quick_leave"
-					value="Quitter" onClick={pressedQuit} />
-				<input type="button"
-					name="chat_quick_invite" id="chat_quick_invite"
-					value="Inviter à jouer" />
+			<header>
+				<input className="chat_tab_button" type="radio"
+					name="channels_tab" id="chat_tab"
+					value="chat" onChange={handleChange} defaultChecked />
+				<label htmlFor="chat_tab">Chat</label>
+				<input className="chat_tab_button" type="radio"
+					name="channels_tab" id="chat_settings"
+					value="settings" onChange={handleChange} />
+				<label htmlFor="chat_settings">settings</label>
 			</header>
-			<div id="messages_list" ref={msg_list_ref}>
-				{chatCtx.currentRoom?.room_message.map(({message, sender, send_date}) => (<ChatMessage src_name={sender} content={message} time={send_date} />))}
-			</div>
-			<footer id="msg_footer">
-				<input type="text" id="message_input" onKeyPress={pressedSend} 
-					placeholder={chatCtx.currentRoom === undefined ? "t'es pas dans une room :/" : "Envoyer un message dans " + chatCtx.currentRoom.room_name}/>
-				
-			</footer>
+			<Content />
 		</div>
 	);
 }

@@ -2,11 +2,11 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
 
-
-export interface IRoom
+export enum ELevelInRoom
 {
-	room_name: string;
-	room_message: RcvMessageDto[];
+	casual = "casual",
+	admin = "admin",
+	owner = "owner",
 }
 
 export enum ECurrentTab
@@ -14,6 +14,15 @@ export enum ECurrentTab
 	friends = "friends",
 	channels = "channels",
 	chat = "chat",
+}
+
+export interface IRoom
+{
+	private: boolean;
+	protected: boolean;
+	user_level: ELevelInRoom;
+	room_name: string;
+	room_message: RcvMessageDto[];
 }
 
 interface IChatContext
@@ -24,7 +33,7 @@ interface IChatContext
 	setCurrentRoomByName: (rname: string) => void;
 	
 	rooms: IRoom[];
-	addRoom: (room_name: string) => void;
+	addRoom: (room_name: string, is_protected: boolean) => void;
 
 	currentTab: ECurrentTab;
 	setCurrentTab: (tab: ECurrentTab) => void;
@@ -40,11 +49,14 @@ function useChatProvider() : IChatContext
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
 
 	
-    function addRoom(room_name: string)
+    function addRoom(room_name: string, is_protected: boolean)
     {
 		const newRoom : IRoom = {
+			user_level: ELevelInRoom.owner,
 			room_name: room_name,
-            room_message: []
+            room_message: [],
+			private: false,
+			protected: is_protected,
         };
 		
         setRooms([...rooms, newRoom]);
@@ -88,6 +100,14 @@ function useChatProvider() : IChatContext
 	}, [rooms]);
 
 	useEffect(() => {
+		// socket.on('JOINED_ROOM', (data : JoinChatDto) => { //A REVOIR
+		// 	setRooms([...rooms, ])
+		// 	if (targetRoom !== undefined)
+		// 	{
+		// 		console.log("[CHAT] rcv: ", data);
+		// 		targetRoom.room_message.push(data);
+		// 	}
+		// });
 		socket.connect();
 
 		return function cleanup() {

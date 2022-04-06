@@ -8,7 +8,7 @@ function ProfileClick ()
 
 function ProfileButton ()
 {
-	return <button onClick={ProfileClick}>Mon Profil</button>;
+	return <button className="main_menu_button" onClick={ProfileClick}>Mon Profil</button>;
 }
 
 export default ProfileButton;

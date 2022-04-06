@@ -28,7 +28,7 @@
 	text-overflow: ellipsis;
 }
 
-.connect_chan + label:hover
+.connect_chan + label:hover, .selected_chan
 {
 	background-color: rgba(255, 255, 255, 0.1);
 }

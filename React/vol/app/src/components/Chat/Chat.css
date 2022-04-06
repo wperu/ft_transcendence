@@ -1,89 +1,45 @@
-@import url("../../ressources/base.css");
-
 #chat
 {
+	height: 100%;
 	--message_footer_height: 6.5vmin;
+	box-sizing: border-box;
+	--channel_margin: 8px;
+	--channel_padding: 5px;
 }
 
-#chat_quick_options
+#chat > header
 {
-	border-color: white;
-	border-style: solid;
-	border-bottom-width: 3px;
-	height: calc(var(--tab_button_height) - 3px);
 	display: flex;
-	justify-content: space-evenly;
-	/* border-style: solid;
-	border-width: 0;
-	border-bottom-width: 1px; */
+	justify-content: space-around;
 }
 
-#chat_quick_options input[type="button"]
+.chat_tab_button
 {
-	color: white;
-	border-style: none;
-	border-radius: 10px;
-	width: max-content;
-	margin: 0.8vmin;
-	text-transform: uppercase;
-	font-size: 0.4em;
-	font-weight: bold;
-	transition: 0.2s cubic-bezier(.23,1,.32,1);
+	display: none;
 }
 
-#chat_quick_options input[type="button"]:hover
+.chat_tab_button + label
 {
-	transform: scale(1.05,1.05);
-	-webkit-transform: scale(1.05,1.05);
-	-moz-transform: scale(1.05,1.05);
-}
-
-#chat_quick_leave
-{
-	background-color: #963737;
-}
-
-#chat_quick_invite
-{
-	background-color: #349739;
-}
-
-#msg_footer
-{
-	position: absolute;
-	bottom: 0;
-	background-color: #52565f;
 	width: 100%;
-	height: var(--message_footer_height);
+	height: var(--tab_button_height);
+	opacity: 50%;
+	background-color: cornflowerblue;
+
 	display: flex;
+    align-items: center;
 	justify-content: center;
-	align-items: center;
+	font-size: 0.5em;
+	text-transform: uppercase;
+	font-weight: bold;
 }
 
-#message_input
+#chat_settings + label
 {
-	padding: 0;
-	background-color: #52565f;
-	color: whitesmoke;
-	font-size: 2.3vmin;
-	position: relative;
-	border-radius: 14px;
-	border-style: none;
-	width: 90%;
-	outline: none;
+	width: 15%;
+	font-size: 0.3em;
 }
 
-#send_button
+.chat_tab_button:checked + label
 {
-	border-width: 0;
-	border-style: none;
-	background-color: blue;
-}
-
-#messages_list
-{
-	scroll-behavior: auto;
-	overflow-x: hidden;
-	overflow-y: auto;
-	height: calc(100vh - var(--message_footer_height) - (var(--tab_button_height) * 2));
+	opacity: 1;
 }

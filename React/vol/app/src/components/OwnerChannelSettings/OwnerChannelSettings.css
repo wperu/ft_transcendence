@@ -1,0 +1,75 @@
+#channel_owner_settings
+{
+	height: 100%;
+}
+
+#no_password_channel_settings
+{
+	height: var(--additional_settings_space);
+	width: 100%;
+	font-size: 0.8em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#password_channel_settings
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-evenly;
+	font-size: 0.8em;
+	width: 100%;
+	height: var(--additional_settings_space);
+}
+
+#password_form
+{
+	/* height: 100%; */
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: end;
+	flex-direction: column;
+}
+
+#password_form input
+{
+	width: 60%;
+	font-size: 0.6em;
+	color: white;
+	background-color: #636772;
+	border-style: none;
+	padding: 5px;
+	border-radius: 5px;
+	margin: 0.8vmin 0;
+}
+
+#password_form input[type="submit"], #password_channel_settings input[type="button"]
+{
+	font-size: 0.8em;
+	color: white;
+	width: max-content;
+	border-style: none;
+	border-radius: 7px;
+	background-color: #537896;
+	padding: 0.8vmin;
+	text-transform: uppercase;
+	transition: 0.2s cubic-bezier(.23,1,.32,1);
+}
+
+#password_form input[type="submit"]:hover, #password_channel_settings input[type="button"]:hover
+{
+	transform: scale(1.05,1.05);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.05,1.05);
+}
+
+#password_form span
+{
+	text-transform: uppercase;
+	justify-self: start;
+	margin-bottom: 2vmin;
+}
