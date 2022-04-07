@@ -64,6 +64,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.server.to(payload.room_name).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
 	}
 
+
+
+
 	@SubscribeMessage('CREATE_ROOM')
 	createRoom(client: Socket, payload: create_room): void 
 	{
@@ -84,6 +87,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			throw new BadRequestException(`room exist impossible create with same name`)	
 		}
 	}
+
+
+
 	/**
 	 * Emit to this event to join a room
 	 * 
@@ -99,13 +105,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let local_room = this.rooms.find(o => o.name === payoad.room_name);
 		if (local_room === undefined)
-			throw new BadRequestException(`no exist room with this name: ${payoad.room_name}`);
+		{
+			client.emit("JOINED_ROOM", { status: 1, status_message: " no such room" });
+			this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: no such room`);
+			return ;
+		}
 		else
 		{
+			/* Already joined check */
 			let is_user = local_room.users.find(c => c === client);
 			if (is_user !== undefined)
-				throw new BadRequestException(`Client ${client.id} has already joined ${payoad.room_name}`)
+			{
+				client.emit("JOINED_ROOM", { status: 1, status_message: " you are already in that room" });
+				this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: Client ${client.id} has already joined room`);
+				return ;
+			}
 			
+			/* Protection check */
 			if (local_room.protection === RoomProtection.NONE)
 			{
 				local_room.users.push(client);
@@ -115,33 +131,52 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				if (local_room.password === payoad.password)
 					local_room.users.push(client);
 				else
-					throw new UnauthorizedException("Wrong password");
+				{
+					client.emit("JOINED_ROOM", { status: 1, status_message: " wrong password" });
+					this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: wrong password`);
+					return ; 
+				}
 			}
 			else if (local_room.protection === RoomProtection.PRIVATE)
 			{
 				if(local_room.invited.find(string => string === User.name))
 					local_room.users.push(client);
 				else
-					throw new UnauthorizedException("No invited in room");
+				{
+					client.emit("JOINED_ROOM", { status: 1, status_message: " you are is not in room's invite list" });
+					this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: Client is not in room's invite list`);
+					return ;
+				}
 			}
 			else
 			{
-				throw new UnauthorizedException(`Cannot join room : ${payoad.room_name}`)
+				client.emit("JOINED_ROOM", { status: 1, status_message: "unknown room protection type" });
+				this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: unknown room protection type`);
+				return ;
 			}
 		}
 
-		//this.logger.log(`Client ${client.id} joined room ${payoad.room_name}`);
+		this.logger.log(`[${client.id}] joined room ${payoad.room_name}`);
 		if(client.join(payoad.room_name))
-			client.emit("COMFIRM_JOIN: " + local_room.name +" socket: " + client);
+			client.emit("JOINED_ROOM", {
+				status: 0,
+				room_name: local_room.name,
+				// owner 
+				// online users
+				// ...
+			});
 		else
-			throw new UnauthorizedException(`Cannot join room : ${payoad.room_name},
-				Socket client: ${client}`);
+		{
+			client.emit("JOINED_ROOM", { status: 1, status_message: "unable to emit to socket" });
+			this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: unable to emit to socket`);
+			return
+		}
 	}
 
 
 
 
-	// TODO what happens if owner leaves ? 
+	// TODO SECURITY what happens if owner leaves ? 
 	/**
 	 * Emit to this event to leave a specific room
 	 * 
@@ -168,7 +203,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
-	// TODO  a revoir
+
+
+	// TODO documentation
 	@SubscribeMessage("INVITE_USER")
 	inviteUser(client: Socket, room_invite : room_invite 
 	): void
@@ -176,32 +213,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let local_room = this.rooms.find(o => o.name === room_invite.room_name);
 		if (local_room === undefined)
 		{
-			console.log("you invite in room undefined ???");
+			this.logger.log(`[${client.id}] Cannot invite to room: ${room_invite.room_name}: no such room`);
+			return ;
 		}
 		else 
 		{
-			if (local_room.protection !== RoomProtection.PRIVATE)
+			if (local_room.users.find(c => c === client))
 			{
-				throw new UnauthorizedException(`Cannot join room : ${room_invite.room_name}`)
+				this.logger.log(`[${client.id}] Cannot invite to room: ${room_invite.room_name}: user is already invited to that room`);
+				return ;
 			}
-			else
+			else if (local_room.invited.find(c => c === client.id))
 			{
-				let is_user = local_room.users.find(c => c === client);
-				if (is_user !== undefined)
-					throw new BadRequestException(`Client ${client.id} has already joined ${room_invite.room_name}`)
-				local_room.users.push(client);
+				this.logger.log(`[${client.id}] Cannot invite to room: ${room_invite.room_name}: user is already invited to that room`);
+				return ;
 			}
-			
+			local_room.invited.push(client.id);
 		}
-		
-		this.logger.log(`Client ${client.id} joined room ${room_invite.room_name}`);
-		client.join(room_invite.room_name);
-
 	}
 
 
 
-	// TODO protect against proctection disableing from outside
+	// TODO SECURITY protect against proctection disableing from outside
 	/**
 	 * Emit to this event to set a protection on a room
 	 * To be able to edit a room protection, you need to be the owner of that room
@@ -247,6 +280,7 @@ to private without sending a password")
 	}
 
 
+
 	/**
 	 * Emit on this event to change the name of a room
 	 * 
@@ -277,6 +311,8 @@ to private without sending a password")
 		local_room.name = payload.new_name;
 	}
 
+
+
 	/**
 	 * Emit on this event to change the password of a room and set password
 	 * @field name_room: the name of room
@@ -304,6 +340,8 @@ to private without sending a password")
 		local_room.password = payload.new_pass;
 	}
 
+
+
 	@SubscribeMessage('USER_LIST')
 	user_list(client: Socket , payload : room) : void
 	{
@@ -311,6 +349,8 @@ to private without sending a password")
 		payload.users.forEach(users => {listuse.push(payload.users)});
 		client.emit('USER_LIST',listuse);
 	}
+
+
 
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client:Socket): void
@@ -321,6 +361,7 @@ to private without sending a password")
 	}
 
 	
+
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
 		this.logger.log(`Client connected: ${client.id}`);
