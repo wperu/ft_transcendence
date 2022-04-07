@@ -20,6 +20,8 @@
 	width: var(--open-sidebar-size);
 	transition: var(--transition);
 	font-size: 4vmin;
+	text-align: center;
+	color: #ffffff;
 }
 
 #actual_bar > header
