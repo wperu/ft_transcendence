@@ -1,5 +1,4 @@
 import { Socket } from "socket.io";
-import { RoomProtection } from '../../../../Common/Dto/chat/room';
 
 interface room
 {
