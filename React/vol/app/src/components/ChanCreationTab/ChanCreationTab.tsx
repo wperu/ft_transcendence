@@ -1,8 +1,9 @@
 import React from "react";
-import { useChatContext, IRoom, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
+import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChanCreationTab.css";
-import { JoinRoomDto } from "../../interface/chat/chatDto";
-import { channel } from "diagnostics_channel";
+//import { RoomProtection } from "../../Common/Dto/chat/room";
+import { create_room } from "../../Common/Dto/chat/room";
+//import { RoomProtection } from "../../Common/Dto/chat/RoomProtection.d";
 
 function ChanCreationTab()
 {
@@ -16,27 +17,34 @@ function ChanCreationTab()
 			password: {value: string};
 			is_protected: {value: boolean};
 		};
-		if (target.channel_name.value.length == 0)
+		if (target.channel_name.value.length === 0)
 		{
 			alert("The new channel needs a name");
 		}
 		else
 		{
+			//let test: RoomProtection = RoomProtection.NONE;
 			if (target.is_protected)
-			{			
+			{		
+				
 				// console.log("protected by pass: " + target.password.value);
-				var data: JoinRoomDto =
+				var data: create_room =
 				{
 					room_name: target.channel_name.value,
-					password: target.password.value
+					proctection:  0!,
+					password: target.password.value,
 				};
 			}
 			else
 			{
-				var data: JoinRoomDto = { room_name: target.channel_name.value };
+				var data: create_room =
+				{ 
+					room_name: target.channel_name.value,
+					proctection: 0!,
+				};
 			}
-			chatCtx.socket.emit("JOIN_ROOM", data);
-			chatCtx.addRoom(target.channel_name.value, target.is_protected.value);
+			chatCtx.socket.emit("CREATE_ROOM", data);
+			//chatCtx.addRoom(target.channel_name.value, target.is_protected.value);
 			alert("Channel " + target.channel_name.value + " créé");
 			// console.log("channel created. name: " + target.channel_name.value + " visibility: " + target.channel_visibility.value);
 			target.channel_name.value = '';

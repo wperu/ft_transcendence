@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
+import { room_joined } from "../../../Common/Dto/chat/room_joined";
 
 export enum ELevelInRoom
 {
@@ -43,7 +44,7 @@ const cltSocket = io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT
 
 function useChatProvider() : IChatContext
 {
-	const [socket, setSocket] = useState(cltSocket);
+	const [socket] = useState(cltSocket);
     const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
     const [rooms, setRooms] = useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
@@ -87,7 +88,11 @@ function useChatProvider() : IChatContext
 				console.log("[CHAT] rcv: ", data);
 				targetRoom.room_message.push(data);
 			}
+		
+
 		});
+
+		
 			
 		return function cleanup() {
 			
@@ -109,6 +114,11 @@ function useChatProvider() : IChatContext
 		// 	}
 		// });
 		socket.connect();
+		
+		socket.on("JOINED_ROOM", (data: room_joined) => {
+			if (data.status === 0 && data.room_name !== undefined)
+				addRoom(data.room_name, false);
+		})
 
 		return function cleanup() {
 			if (socket !== undefined)

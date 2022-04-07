@@ -6,6 +6,7 @@ import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
 import { create_room,room_protect, RoomProtection} from '../Common/Dto/chat/room';
+//import { RoomProtection } from 'src/Common/Dto/chat/RoomProtection.d';
 import room_invite from '../Common/Dto/chat/room_invite';
 import room_join from '../Common/Dto/chat/room_join';
 import {room_rename,room_change_pass} from '../Common/Dto/chat/room_rename';
@@ -81,6 +82,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				muted: [],
 				owner: client,
 			})
+
+			//todo join & add client to rooom
+			client.join(payload.room_name);
+			client.emit("JOINED_ROOM", { status: 0, room_name: payload.room_name });
 		}
 		else
 		{
@@ -157,7 +162,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 
 		this.logger.log(`[${client.id}] joined room ${payoad.room_name}`);
-		if(client.join(payoad.room_name))
+		//Todo join return promise or nothing
+		if(client.join(payoad.room_name) || 1 /*fixme*/)
 			client.emit("JOINED_ROOM", {
 				status: 0,
 				room_name: local_room.name,
