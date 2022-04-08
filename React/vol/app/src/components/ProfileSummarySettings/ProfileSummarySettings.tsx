@@ -63,6 +63,24 @@ function ProfileSummarySettings() {
 	{
 		if(event.key === "Enter")
 		{
+			//if (user)
+			{
+				const url = process.env.REACT_APP_API_USER + '/' + 0 +  '/update/username'; //fixme
+				const headers = {
+					//'authorization'	: user.access_token_42,
+					//'grant-type': 'authorization-code',
+					//'authorization-code': accessCode
+					//'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
+				}
+				axios.post(url, {username: event.currentTarget.value}, {headers})
+				.then(res => {
+					console.log("send");
+				})
+				.catch(res => {
+					console.log(res);
+					setIsTwoFactor(isTwoFactor);
+				});
+			}
 			event.currentTarget.value = '';
 		}
 	};
