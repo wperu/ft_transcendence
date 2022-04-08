@@ -21,13 +21,14 @@ function openLoginPopup(cb: () => void)
 		console.log(event.data);
 		
 		
-		if (event.origin !== process.env.REACT_APP_ORIGIN)
+		if (event.origin !== process.env.REACT_APP_ORIGIN_URL)
 		{
 			console.log("event.origin" + event.origin);
 			return ;
 		}
 		
 		console.log("Get IUser");
+		//if (event.data !== undefined)
 		const user : IUser	= event.data;
 
 		//todo
