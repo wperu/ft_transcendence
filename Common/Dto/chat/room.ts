@@ -1,5 +1,5 @@
 
-export enum RoomProtection {
+enum RoomProtection {
 	NONE,
 	PROTECTED,
 	PRIVATE,
@@ -20,6 +20,6 @@ export interface create_room
 }
 
 
-//export { RoomProtection };
+export { RoomProtection };
 
 // export { create_room, room_protect };

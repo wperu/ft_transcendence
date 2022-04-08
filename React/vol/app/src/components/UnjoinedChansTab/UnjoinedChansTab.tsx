@@ -12,16 +12,19 @@ function UnjoinedChansTab()
 	function joinChan(event: React.SyntheticEvent)
 	{
 		event.preventDefault();
+
 		const target = event.target as typeof event.target & {
 			name: {value: string};
 			password: {value: string};
 		};
+
 		if (target.name.value.length != 0)
 		{
+			var data: JoinRoomDto;
 			if (target.password.value.length > 0)
 			{			
 				console.log("protected by pass: " + target.password.value);
-				var data: JoinRoomDto =
+				data =
 				{
 					room_name: target.name.value,
 					password: target.password.value
@@ -29,12 +32,9 @@ function UnjoinedChansTab()
 			}
 			else
 			{
-				var data: JoinRoomDto = { room_name: target.name.value };
+				data = { room_name: target.name.value };
 			}
 			chatCtx.socket.emit("JOIN_ROOM", data);
-			//chatCtx.addRoom(target.name.value, (target.password.value.length > 0));
-			alert("Channel " + target.name.value + " rejoint");
-			console.log("channel joined. name: " + target.name.value);
 			target.name.value = '';
 			target.password.value = '';
 		}
@@ -59,20 +59,7 @@ function UnjoinedChansTab()
 				<div className="title">
 					Liste globale des channels
 				</div>
-				<UnjoinedChan name="chan start"/>
-				<UnjoinedChan name="chan 2"/>
-				<UnjoinedChan name="chan 3"/>
-				<UnjoinedChan name="chan 46541dwa564d5641546843153454121651654154165454685165 15415451"/>
-				<UnjoinedChan name="chan 5"/>
-				<UnjoinedChan name="chan 6"/>
-				<UnjoinedChan name="chan 7"/>
-				<UnjoinedChan name="chan 8"/>
-				<UnjoinedChan name="chan 9"/>
-				<UnjoinedChan name="chan 9"/>
-				<UnjoinedChan name="chan 10"/>
-				<UnjoinedChan name="chan 11"/>
-				<UnjoinedChan name="chan 12"/>
-				<UnjoinedChan name="chan end"/>
+				
 			</div>
 		</div>
 	);

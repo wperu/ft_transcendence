@@ -5,6 +5,7 @@ import "./ChatUser.css"
 interface	props
 {
 	currentUserLvl: ELevelInRoom;
+	username: string;
 }
 
 function ChatUser (data: props)
@@ -47,7 +48,7 @@ function ChatUser (data: props)
 
 	return (
 		<div className="chat_user" >
-			Random user
+			<div className="chat_user_username">{data.username}</div>
 			<Buttons />
 		</div>
 	);

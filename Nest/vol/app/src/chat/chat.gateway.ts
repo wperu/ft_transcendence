@@ -347,13 +347,20 @@ to private without sending a password")
 	}
 
 
-
+// TODO empecher de recuperer la liste d'users si on est pas dans la room
 	@SubscribeMessage('USER_LIST')
-	user_list(client: Socket , payload : room) : void
+	user_list(client: Socket , payload: string) : void
 	{
-		let listuse;
-		payload.users.forEach(users => {listuse.push(payload.users)});
-		client.emit('USER_LIST',listuse);
+		var	current_room = this.rooms.find(e => e.name === payload)
+		var	names_list : Array<string> = [];
+		
+		if (current_room !== undefined)
+		{
+			current_room.users.forEach(element => {
+				names_list.push(element.id);
+			});
+			client.emit("USER_LIST", names_list);
+		}
 	}
 
 

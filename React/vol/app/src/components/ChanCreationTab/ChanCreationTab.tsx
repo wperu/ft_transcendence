@@ -1,9 +1,7 @@
 import React from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChanCreationTab.css";
-//import { RoomProtection } from "../../Common/Dto/chat/room";
 import { create_room } from "../../Common/Dto/chat/room";
-//import { RoomProtection } from "../../Common/Dto/chat/RoomProtection.d";
 
 function ChanCreationTab()
 {
@@ -23,30 +21,26 @@ function ChanCreationTab()
 		}
 		else
 		{
-			//let test: RoomProtection = RoomProtection.NONE;
+			var data: create_room;
 			if (target.is_protected)
 			{		
 				
-				// console.log("protected by pass: " + target.password.value);
-				var data: create_room =
+				data =
 				{
 					room_name: target.channel_name.value,
-					proctection:  0!,
+					proctection: 0,
 					password: target.password.value,
 				};
 			}
 			else
 			{
-				var data: create_room =
-				{ 
+				data =
+				{
 					room_name: target.channel_name.value,
-					proctection: 0!,
+					proctection: 0,
 				};
 			}
 			chatCtx.socket.emit("CREATE_ROOM", data);
-			//chatCtx.addRoom(target.channel_name.value, target.is_protected.value);
-			alert("Channel " + target.channel_name.value + " créé");
-			// console.log("channel created. name: " + target.channel_name.value + " visibility: " + target.channel_visibility.value);
 			target.channel_name.value = '';
 			target.channel_visibility.value = '';
 			target.password.value = '';

@@ -60,7 +60,7 @@ function useChatProvider() : IChatContext
 			protected: is_protected,
         };
 		
-        setRooms([...rooms, newRoom]);
+        setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
 		if (currentRoom !== undefined)
 			setCurrentRoomByName(currentRoom.room_name);
     };
@@ -117,7 +117,14 @@ function useChatProvider() : IChatContext
 		
 		socket.on("JOINED_ROOM", (data: room_joined) => {
 			if (data.status === 0 && data.room_name !== undefined)
+			{
+				alert("Channel " + data.room_name + " rejoint");
 				addRoom(data.room_name, false);
+			}
+			else if (data.status_message !== undefined)
+			{
+				alert(data.status_message);
+			}
 		})
 
 		return function cleanup() {
