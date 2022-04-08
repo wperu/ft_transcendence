@@ -377,6 +377,7 @@ to private without sending a password")
 
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
+		this.logger.log(client.handshake.auth);
 		this.logger.log(`Client connected: ${client.id}`);
 	}
 

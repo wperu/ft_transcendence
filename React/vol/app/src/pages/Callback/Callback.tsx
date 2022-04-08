@@ -28,7 +28,7 @@ function Callback() : JSX.Element
 					},
 				})
 				.then(res => {				
-					window.opener.postMessage(res.data, process.env.REACT_APP_ORIGIN);
+					window.opener.postMessage(res.data, process.env.REACT_APP_ORIGIN_URL);
 					window.close();
 				});
 

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
 import { room_joined } from "../../../Common/Dto/chat/room_joined";
+import { useAuth } from "../../../auth/useAuth";
 
 export enum ELevelInRoom
 {
@@ -40,11 +41,15 @@ interface IChatContext
 	setCurrentTab: (tab: ECurrentTab) => void;
 }
 
-const cltSocket = io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false});
+//const cltSocket = 
 
 function useChatProvider() : IChatContext
 {
-	const [socket] = useState(cltSocket);
+	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
+		auth:{ 
+			token: useAuth().user?.access_token_42
+		}
+	}));
     const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
     const [rooms, setRooms] = useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
