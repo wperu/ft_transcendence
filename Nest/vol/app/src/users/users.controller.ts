@@ -3,6 +3,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
 import { Request } from 'express';
+import { brotliDecompress } from 'zlib';
 
 @Controller('users')
 export class UsersController
@@ -37,7 +38,7 @@ export class UsersController
 
 	@Post("/:id/update/username")
 	//@UseGuards(AuthGuard)
-	async updateUserName(@Req() request: Request, @Body() body: string, @Param('id') param): Promise<void> | undefined
+	async updateUserName(@Req() request: Request, @Body() body, @Param('id') param): Promise<void> | undefined
 	{
 		// TODO update user in service
 		let id: number = parseInt(param);
@@ -45,9 +46,12 @@ export class UsersController
 			throw new NotFoundException();
 
 			console.log(body);
-			/*let username = body;
-			if (username !== undefined)
-				this.updateUserName(username, id);*/
+			if (body.username !== undefined )
+			{
+				let username = body.username;
+				if (username !== undefined)
+					this.userService.updateUserName(id, username);
+			}
 
 		return (undefined);
 	}

@@ -63,9 +63,10 @@ function ProfileSummarySettings() {
 	{
 		if(event.key === "Enter")
 		{
-			//if (user)
+			if (user)
 			{
-				const url = process.env.REACT_APP_API_USER + '/' + 0 +  '/update/username'; //fixme
+				const name = event.currentTarget.value;
+				const url = process.env.REACT_APP_API_USER + '/' + user.id +  '/update/username'; //fixme
 				const headers = {
 					//'authorization'	: user.access_token_42,
 					//'grant-type': 'authorization-code',
@@ -75,10 +76,10 @@ function ProfileSummarySettings() {
 				axios.post(url, {username: event.currentTarget.value}, {headers})
 				.then(res => {
 					console.log("send");
+					if (user) user.username = name; //fixme update username
 				})
 				.catch(res => {
-					console.log(res);
-					setIsTwoFactor(isTwoFactor);
+					console.log('failed');
 				});
 			}
 			event.currentTarget.value = '';
