@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import UnjoinedChan from "../UnjoinedChan/UnjoinedChan";
 import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
 import { JoinRoomDto } from "../../interface/chat/chatDto";
@@ -8,6 +8,23 @@ import "./UnjoinedChansTab.css";
 function UnjoinedChansTab()
 {
 	const chatCtx = useChatContext();
+
+	const [roomList, setRoomList] = useState<Array<string>>([]);
+	
+	useEffect(() => {
+		chatCtx.socket.on("ROOM_LIST", (data: Array<string>) => {
+			setRoomList(data);
+		})
+		
+		chatCtx.socket.emit("ROOM_LIST");
+
+		return function cleanup() {
+			if (chatCtx.socket !== undefined)
+			{
+				chatCtx.socket.off("ROOM_LIST");
+			}
+		};
+	}, [roomList]);
 
 	function joinChan(event: React.SyntheticEvent)
 	{
@@ -59,7 +76,7 @@ function UnjoinedChansTab()
 				<div className="title">
 					Liste globale des channels
 				</div>
-				
+				{roomList.map((name) => (<UnjoinedChan name={name} />))}
 			</div>
 		</div>
 	);
