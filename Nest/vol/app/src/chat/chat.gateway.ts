@@ -368,9 +368,9 @@ to private without sending a password")
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client:Socket): void
 	{
-		let lists;
-		this.rooms.forEach(room => {lists.push(room.name)});
-		client.emit('ROOM_LIST',lists);
+		var	rooms_list : Array<string> = [];
+		this.rooms.forEach(room => {rooms_list.push(room.name)});
+		client.emit('ROOM_LIST', rooms_list);
 	}
 
 	
