@@ -122,4 +122,14 @@ export class UsersService {
 	{
 		return (await this.usersRepository.save(user));
 	}
+
+	async updateUserName(id: Number, newUserName : string)
+	{
+		await this.usersRepository
+				.createQueryBuilder()
+				.update(User)
+				.set({username: newUserName})
+				.where("id = :id", {id})
+				.execute();
+	}
 }
