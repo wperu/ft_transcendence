@@ -385,6 +385,7 @@ to private without sending a password")
 	handleDisconnect(client: Socket)
 	{
 		this.logger.log(`Client disconnected: ${client.id}`);
+		this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
 	}
 }
 
