@@ -3,6 +3,7 @@ import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
 import { room_joined } from "../../../Common/Dto/chat/room_joined";
 import { useAuth } from "../../../auth/useAuth";
+import { RoomLeftDto } from "../../../Common/Dto/chat/room";
 
 export enum ELevelInRoom
 {
@@ -69,6 +70,13 @@ function useChatProvider() : IChatContext
 		if (currentRoom !== undefined)
 			setCurrentRoomByName(currentRoom.room_name);
     };
+
+	function rmRoom(room_name: string, is_protected: boolean)
+    {
+		rooms.splice(rooms.findIndex((o) => {
+			return (o.room_name === room_name);
+		}), 1);
+    };
 	
 	function setCurrentRoomByName (name: string)
 	{
@@ -93,15 +101,9 @@ function useChatProvider() : IChatContext
 				console.log("[CHAT] rcv: ", data);
 				targetRoom.room_message.push(data);
 			}
-		
-
 		});
 
-		
-			
-		return function cleanup() {
-			
-
+		return function cleanup() {		
 			if (socket !== undefined)
 			{
 				socket.off('RECEIVE_MSG');
@@ -110,14 +112,6 @@ function useChatProvider() : IChatContext
 	}, [rooms]);
 
 	useEffect(() => {
-		// socket.on('JOINED_ROOM', (data : JoinChatDto) => { //A REVOIR
-		// 	setRooms([...rooms, ])
-		// 	if (targetRoom !== undefined)
-		// 	{
-		// 		console.log("[CHAT] rcv: ", data);
-		// 		targetRoom.room_message.push(data);
-		// 	}
-		// });
 		socket.connect();
 		
 		socket.on("JOINED_ROOM", (data: room_joined) => {
@@ -130,6 +124,18 @@ function useChatProvider() : IChatContext
 			{
 				alert(data.status_message);
 			}
+		})
+
+		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
+			
+			if (currentRoom !== undefined && currentRoom.room_name == data.room_name)
+				setCurrentRoom(undefined);
+
+			setRooms(prevRooms => {
+				return prevRooms.splice(prevRooms.findIndex((o) => {
+					return (o.room_name === data.room_name);
+				}), 1)
+			});
 		})
 
 		return function cleanup() {

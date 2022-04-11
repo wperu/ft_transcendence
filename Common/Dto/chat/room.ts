@@ -20,6 +20,27 @@ export interface create_room
 }
 
 
+export interface RoomPromoteDto
+{
+	room_name: string,
+	user_name: string,
+	isPromote: boolean,
+}
+
+export interface RoomMuteDto
+{
+	room_name: string,
+	user_name: string,
+}
+
+export interface RoomLeftDto
+{
+	status: number,
+	status_message?: string,
+	room_name?: string,
+}
+
+
 export { RoomProtection };
 
 // export { create_room, room_protect };

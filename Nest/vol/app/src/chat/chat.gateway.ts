@@ -5,7 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { create_room,room_protect, RoomProtection} from '../Common/Dto/chat/room';
+import { create_room,room_protect, RoomProtection, RoomLeftDto} from '../Common/Dto/chat/room';
 //import { RoomProtection } from 'src/Common/Dto/chat/RoomProtection.d';
 import room_invite from '../Common/Dto/chat/room_invite';
 import room_join from '../Common/Dto/chat/room_join';
@@ -203,6 +203,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 
 		this.logger.log(`Client ${client.id} left room ${payload}`);
+		const dto : RoomLeftDto = { status: 1, room_name: payload };
+		client.emit('LEFT_ROOM', dto);
 		client.leave(payload);
 		if (local_room.users.length === 0)
 			this.rooms.splice(this.rooms.indexOf(local_room), 1);
