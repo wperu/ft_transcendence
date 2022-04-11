@@ -5,7 +5,7 @@ import { Server, Socket } from 'socket.io';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { create_room,room_protect, RoomProtection, RoomLeftDto} from '../Common/Dto/chat/room';
+import { create_room,room_protect, RoomProtection, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
 //import { RoomProtection } from 'src/Common/Dto/chat/RoomProtection.d';
 import room_invite from '../Common/Dto/chat/room_invite';
 import room_join from '../Common/Dto/chat/room_join';
@@ -365,7 +365,29 @@ to private without sending a password")
 		}
 	}
 
+	//todo
+	@SubscribeMessage('ROOM_BAN')
+	room_block(client:Socket, payload: RoomBanDto): void
+	{
+		this.logger.log(`Client emit ban: ${client.id}`);
+	}
 
+	//todo
+	@SubscribeMessage('ROOM_MUTE')
+	room_mute(client:Socket, payload: RoomMuteDto): void
+	{
+		this.logger.log(`Client emit mute: ${client.id}`);
+	}
+
+	//todo
+	@SubscribeMessage('ROOM_PROMOTE')
+	room_promote(client:Socket, payload: RoomPromoteDto): void
+	{
+		this.logger.log(`Client emit promote: ${client.id}`);
+	}
+
+
+	
 
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client:Socket): void

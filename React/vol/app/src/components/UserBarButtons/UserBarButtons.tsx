@@ -4,6 +4,14 @@ import BanLogo from "../../ressources/images/hammer.png";
 import InviteLogo from "../../ressources/images/pvp.png";
 import PromoteLogo from "../../ressources/images/promote.png";
 import "./UserBarButtons.css";
+import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
+
+interface Prop
+{
+	user_name: string
+}
+
 
 export function InviteUserButton()
 {
@@ -16,10 +24,21 @@ export function InviteUserButton()
 	);
 }
 
-export function BanUserButton()
+export function BanUserButton(prop: Prop)
 {
+	const chtCtx = useChatContext();
+
 	function onClick()
 	{
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomBanDto =
+			{
+				room_name: chtCtx.currentRoom.room_name,
+				user_name: prop.user_name,
+			} 
+			chtCtx.socket.emit('ROOM_BAN', dto);
+		}
 		console.log("user banned");
 	}
 	return (
@@ -27,32 +46,66 @@ export function BanUserButton()
 	);
 }
 
-export function MuteUserButton()
+export function MuteUserButton(prop: Prop)
 {
+	const chtCtx = useChatContext();
+
 	function onClick()
 	{
-		console.log("user muted");
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomMuteDto =
+			{
+				room_name: chtCtx.currentRoom.room_name,
+				user_name: prop.user_name,
+			} 
+			chtCtx.socket.emit('ROOM_MUTE', dto);
+		}
 	}
 	return (
 		<button className="user_bar_button negative_user_button" onClick={onClick}><img alt="" src={MuteLogo}/>mute</button>
 	);
 }
 
-export function BlockUserButton()
+//todo Friend part
+export function BlockUserButton(prop: Prop)
 {
+	//const chtCtx = useChatContext();
+
 	function onClick()
 	{
-		console.log("user blocked");
+		/*if (chtCtx.currentRoom !== undefined)
+		{
+			const dto :  =
+			{
+				room_name: chtCtx.currentRoom.room_name,
+				user_name: prop.user_name,
+			} 
+			chtCtx.socket.emit('USER_BLOCK', dto);
+		}*/
 	}
 	return (
 		<button className="user_bar_button negative_user_button" onClick={onClick}><img alt="" src={BlockLogo}/>block</button>
 	);
 }
 
-export function PromoteUserButton()
+
+export function PromoteUserButton(prop: Prop)
 {
+	const chtCtx = useChatContext();
+
 	function onClick()
 	{
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomPromoteDto =
+			{
+				room_name: chtCtx.currentRoom.room_name,
+				user_name: prop.user_name,
+				isPromote: true,
+			} 
+			chtCtx.socket.emit('ROOM_PROMOTE', dto);
+		}
 		console.log("user promoted");
 	}
 	return (

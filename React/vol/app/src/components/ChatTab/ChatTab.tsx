@@ -56,10 +56,10 @@ function ChatTab ()
 		{
 			chatCtx.socket.emit("LEAVE_ROOM", chatCtx.currentRoom.room_name);
 			setMessages([]);
-			chatCtx.rooms.splice(chatCtx.rooms.findIndex((o) => {
+			/*chatCtx.rooms.splice(chatCtx.rooms.findIndex((o) => {
 				return (o.room_name === chatCtx.currentRoom?.room_name);
-			}), 1);
-			chatCtx.setCurrentRoom(undefined);
+			}), 1);*/
+			//chatCtx.setCurrentRoom(undefined);
 			chatCtx.setCurrentTab(ECurrentTab.channels);
 		}
 	}

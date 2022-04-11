@@ -33,6 +33,12 @@ export interface RoomMuteDto
 	user_name: string,
 }
 
+export interface RoomBanDto
+{
+	room_name: string,
+	user_name: string,
+}
+
 export interface RoomLeftDto
 {
 	status: number,

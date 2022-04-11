@@ -17,7 +17,7 @@ function ChatUser (data: props)
 			return (
 				<div className="chat_user_button_div">
 					<InviteUserButton />
-					<BlockUserButton />
+					<BlockUserButton user_name={data.username}/>
 				</div>
 			);
 		}
@@ -26,9 +26,9 @@ function ChatUser (data: props)
 			return (
 				<div className="chat_user_button_div">
 					<InviteUserButton />
-					<BlockUserButton />
-					<MuteUserButton />
-					<BanUserButton />
+					<BlockUserButton user_name={data.username}/>
+					<MuteUserButton user_name={data.username}/>
+					<BanUserButton user_name={data.username}/>
 				</div>
 			);
 		}
@@ -37,10 +37,10 @@ function ChatUser (data: props)
 			return (
 				<div className="chat_user_button_div">
 					<InviteUserButton />
-					<PromoteUserButton />
-					<BlockUserButton />
-					<MuteUserButton />
-					<BanUserButton />
+					<PromoteUserButton user_name={data.username}/>
+					<BlockUserButton user_name={data.username}/>
+					<MuteUserButton user_name={data.username}/>
+					<BanUserButton user_name={data.username}/>
 				</div>
 			);
 		}
