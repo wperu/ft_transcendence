@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import "./NotifyContext.css";
 
 interface INotice
 {
@@ -23,10 +24,10 @@ function useProvideNotify() : INotifyContext
 	const [maxNotify] = useState<number>(5);
 	const [msgNotify, setMsgNotify] = useState<INotice[]>([]);
 
-	function getMaxId()
+	function getMaxId(tab: INotice[])
 	{
 		let nu = 0;
-		msgNotify.forEach((o) => {
+		tab.forEach((o) => {
 			if (o.id === nu)
 				nu = o.id;
 		})
@@ -43,19 +44,25 @@ function useProvideNotify() : INotifyContext
 		};
 
 		setId(pre => {return pre + 1});
+		
 		setMsgNotify(pre => {
 			return([...pre, notice]);
 		})
 		
-		setTimeout(() => {
+		 setTimeout(() => {
 			setMsgNotify(pre => {
-				setId(getMaxId());
+				setId(getMaxId(pre));
+				
 				return pre.splice(pre.findIndex((o) => {
 					return (o.id === val);
 				}), 1)
 			})
-		  }, time);
-		  console.log(msgNotify);
+			
+			console.log("val: " + val);
+			console.log("id: " + id);
+		  }, 5000);
+		 
+		
 	}
 
 	return({
@@ -78,9 +85,11 @@ export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
 	
 	return (
 		<notifyContext.Provider value={ctx}>
-			{ctx.msgNotify.map(({level, message}) => {
-				return <div id={level}>{message}</div>
-			})}
+				<aside id="notify">
+					<ul>
+						{ctx.msgNotify.map(({id, level, message}) => { return <li key={id} className={level}>{message}</li> })}
+					</ul>
+				</aside>
 			{children}
 		</notifyContext.Provider>
 	);
