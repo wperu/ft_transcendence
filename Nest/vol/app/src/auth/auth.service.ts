@@ -5,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import FormData = require("form-data");
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/entities/user.entity';
-import { JwtService } from './jwt/jwt.service';
+import { JwtService } from '@nestjs/jwt' //'./jwt/jwt.service';
+import { TokenService } from './token.service'
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,10 @@ export class AuthService {
         @Inject(forwardRef(() => UsersService))
 		private readonly usersService: UsersService,
 
-        @Inject(forwardRef(() => JwtService))
+        @Inject(forwardRef(() => TokenService))
+        private readonly tokenService: TokenService,
+
+        //@Inject(JwtService)
         private readonly jwtService: JwtService,
     ) {}
 
@@ -99,15 +103,15 @@ export class AuthService {
 
     async generateAuthorizationCode(access_token: string) : Promise<string>
     {
-        return (await this.jwtService.generateCode(access_token));
+        return (await this.tokenService.generateCode(access_token));
     }
 
 
 
     async getAccessToken(code: string) : Promise<string | undefined>
     {
-        let access_token = await this.jwtService.getAccessToken(code);
-        this.jwtService.deleteAccessCode(code);
+        let access_token = await this.tokenService.getAccessToken(code);
+        this.tokenService.deleteAccessCode(code);
         return (access_token);
     }
 }

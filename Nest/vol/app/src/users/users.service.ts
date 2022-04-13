@@ -1,15 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
 import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
+import bcrypt = require('bcrypt')
+import { TokenService } from 'src/auth/token.service';
 
 @Injectable()
-export class UsersService {
+export class UsersService 
+{
 	
 	constructor(
 		@InjectRepository(User)
 		private usersRepository: Repository<User>,
+
+		private readonly tokenService: TokenService,
 	) {}
 
 
@@ -76,14 +81,22 @@ export class UsersService {
 			refresh_token: string,
 			expires_in: number
 		}
-	): Promise<User>
+	) : Promise<User>
 	{
 		let user: User = new User();
 		user.reference_id = reference_id;
 		user.username = username;
-		user.access_token_42 = token.access_token;
 		user.refresh_token_42 = token.refresh_token;
 		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
+
+		/* sign the token with jwt */
+		const user_data = {
+			username: username,
+			reference_id: reference_id,
+		};
+
+		let hash = this.tokenService.generateToken(user_data);
+		user.access_token_42 = hash;
 
 		await this.usersRepository.create(user);
 		let newUser = await this.usersRepository.save(user);
@@ -122,6 +135,8 @@ export class UsersService {
 	{
 		return (await this.usersRepository.save(user));
 	}
+
+
 
 	async updateUserName(id: Number, newUserName : string)
 	{

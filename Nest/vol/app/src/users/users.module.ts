@@ -1,26 +1,17 @@
-import { HttpModule } from '@nestjs/axios';
 import { Global, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
-import { JwtModule } from 'src/auth/jwt/jwt.module';
-import { User } from '../entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { TokenService } from 'src/auth/token.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Global()
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([User]),
-		ConfigModule.forRoot(), 
-		HttpModule.register({
-			timeout: 5000,
-			maxRedirects: 5,
-		}),
-		JwtModule
+		...AuthModule.getDependencies()
 	],
 	controllers: [UsersController],
-	providers: [UsersService, AuthService],
-	exports: [UsersService]
+	providers: [UsersService, AuthService, TokenService],
+	exports: [UsersService],
 })
 export class UsersModule {}

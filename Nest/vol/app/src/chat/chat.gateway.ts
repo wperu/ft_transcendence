@@ -2,6 +2,8 @@ import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/comm
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
+import { TokenService } from 'src/auth/token.service';
+import { ChatUser } from 'src/chat/interface/chat_user.d';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
@@ -10,10 +12,11 @@ import { create_room,room_protect, RoomProtection, RoomLeftDto, RoomMuteDto, Roo
 import room_invite from '../Common/Dto/chat/room_invite';
 import room_join from '../Common/Dto/chat/room_join';
 import {room_rename,room_change_pass} from '../Common/Dto/chat/room_rename';
+import { ChatService } from './chat.service';
 import {room} from "./interface/room";
 
 
-// Todo fixe origin
+// Todo fix origin
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
 	/*namespace: "/chat/", */
@@ -29,6 +32,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	constructor(
+		private chatService: ChatService,
 		private rooms: room[]
 	) { }
 
@@ -52,14 +56,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		room_name: string
 	}) : void
 	{
+		let user: ChatUser = this.chatService.getUserFromSocket(client);
 		let msg_obj = {
 			message: payload.message,
-			sender: "getUserBySocket",
+			sender: user.username,
 			send_date: format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
 			room_name: payload.room_name
 		};
 
-		// TODO check if user is actually in room
+		// TODO check if user is actually in room           
+		// TODO maybe store in DB if we want chat history ? 
 
 		this.logger.log("[Socket io] new message: " + msg_obj.message);
 		this.server.to(payload.room_name).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
@@ -83,7 +89,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				owner: client,
 			})
 
-			//todo join & add client to rooom
+			//todo join & add client to room
 			client.join(payload.room_name);
 			client.emit("JOINED_ROOM", { status: 0, room_name: payload.room_name });
 		}
@@ -162,20 +168,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 
 		this.logger.log(`[${client.id}] joined room ${payoad.room_name}`);
-		//Todo join return promise or nothing
-		if(client.join(payoad.room_name) || 1 /*fixme*/)
-			client.emit("JOINED_ROOM", {
-				status: 0,
-				room_name: local_room.name,
-				// owner 
-				// online users
-				// ...
-			});
-		else
+		client.join(payoad.room_name)
+		if (!client.emit("JOINED_ROOM", {
+			status: 0,
+			room_name: local_room.name,
+			// owner 
+			// online users
+			// ...
+		}))
 		{
-			client.emit("JOINED_ROOM", { status: 1, status_message: "unable to emit to socket" });
-			this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: unable to emit to socket`);
-			return
+			client.emit("JOINED_ROOM", { status: 1, status_message: "unable to join room" });
+			this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: unable to join room`);
+			return;
 		}
 	}
 
@@ -242,7 +246,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 
-	// TODO SECURITY protect against proctection disableing from outside
+	// TODO SECURITY protect against proctection disabling from outside
 	/**
 	 * Emit to this event to set a protection on a room
 	 * To be able to edit a room protection, you need to be the owner of that room
@@ -277,8 +281,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				case RoomProtection.PROTECTED:
 					local_room.protection = RoomProtection.PROTECTED;
 					if (payload["opt"] === undefined)
-						throw new BadRequestException("No opt parameter: Cannot set a room protection mode \
-to private without sending a password")
+						throw new BadRequestException("No opt parameter: Cannot set a room protection mode to private without sending a password")
 					local_room.password = payload.opt;
 					break;
 				default:
@@ -349,7 +352,7 @@ to private without sending a password")
 	}
 
 
-// TODO empecher de recuperer la liste d'users si on est pas dans la room
+	// TODO empecher de recuperer la liste d'users si on est pas dans la room
 	@SubscribeMessage('USER_LIST')
 	user_list(client: Socket , payload: string) : void
 	{
@@ -387,13 +390,18 @@ to private without sending a password")
 	}
 
 
-	
-
+	// TODO SEND ONLY PUBLIC CHANS  
+	// TODO do some RoomListDTO  
 	@SubscribeMessage('ROOM_LIST')
-	room_list(client:Socket): void
+	room_list(client: Socket): void
 	{
-		var	rooms_list : Array<string> = [];
-		this.rooms.forEach(room => {rooms_list.push(room.name)});
+		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
+		this.rooms.forEach(room => {
+			rooms_list.push({
+				name: room.name,
+				has_password: room.password !== null,
+			})
+		});
 		client.emit('ROOM_LIST', rooms_list);
 	}
 
@@ -401,8 +409,14 @@ to private without sending a password")
 
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
-		this.logger.log(client.handshake.auth);
-		this.logger.log(`Client connected: ${client.id}`);
+		let userInfo = this.chatService.getUserFromSocket(client);
+
+		if (userInfo === undefined)
+		{
+			this.logger.log(`Chat warning: Unable to retrieve users informations on socket ${client.id}`);
+			return ;
+		}
+		this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
 	}
 
 

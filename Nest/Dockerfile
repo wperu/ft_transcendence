@@ -1,6 +1,6 @@
 FROM alpine:3.15.0
 
-RUN apk update; apk add nodejs npm;
+RUN apk update; apk add nodejs npm python3;
 
 EXPOSE 3000 4000
 
