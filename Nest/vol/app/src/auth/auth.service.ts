@@ -90,7 +90,8 @@ export class AuthService {
         }
         else
         {
-            user.access_token_42 = token.access_token;
+			//FIX rehash if accesToken change
+            user.access_token_42 ;//= token.access_token;
             user.refresh_token_42 = token.refresh_token;
             user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
             this.usersService.saveUser(user);

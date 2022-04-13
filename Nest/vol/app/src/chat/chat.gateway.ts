@@ -56,7 +56,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		room_name: string
 	}) : void
 	{
-		let user: ChatUser = this.chatService.getUserFromSocket(client);
+		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
 		let msg_obj = {
 			message: payload.message,
 			sender: user.username,
@@ -406,7 +407,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	
-
+	//Todo emit disconect if token is wrong
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
 		let userInfo : ChatUser | undefined = this.chatService.getUserFromSocket(client);
@@ -417,8 +418,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			return ;
 			
 		}
-		if (userInfo !== null)
-			this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
+		this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
 	}
 
 
