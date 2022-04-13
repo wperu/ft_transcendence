@@ -409,14 +409,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
-		let userInfo = this.chatService.getUserFromSocket(client);
+		let userInfo : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
 		if (userInfo === undefined)
 		{
 			this.logger.log(`Chat warning: Unable to retrieve users informations on socket ${client.id}`);
 			return ;
+			
 		}
-		this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
+		if (userInfo !== null)
+			this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
 	}
 
 

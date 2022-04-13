@@ -16,7 +16,8 @@ export class ChatService {
         const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
         /* todo   maybe check if data contains the keys that we have in ChatUser */
         /* todo   and only that so we cant pass data through here                */
-
+		if (data === null)
+			return (undefined);
         return (data as ChatUser);
     }
 }
