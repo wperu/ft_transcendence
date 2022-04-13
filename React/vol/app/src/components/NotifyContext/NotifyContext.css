@@ -1,0 +1,14 @@
+#error
+{
+	width: max-content;
+	left: 0px;
+	top: 0px;
+	margin: 8px;
+	padding: 20px;
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	background-color: #21242b;
+	box-sizing: border-box;
+	border-radius: 20px;
+}

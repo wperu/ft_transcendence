@@ -6,6 +6,7 @@ import { ProvideAuth } from '../auth/useAuth';
 import { RequireAuth } from '../auth/RequireAuth';
 import Callback from '../pages/Callback/Callback';
 import SidebarWithContext from '../components/SidebarWithContext/SidebarWithContext';
+import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 
 
 interface Props{
@@ -24,23 +25,25 @@ function AppRoute() : JSX.Element
 {
 	const element =
 	<ProvideAuth>
-		<BrowserRouter>
-			<Routes>
-			<Route path="/login" element={<HomeLoggedOut />}/>
-			<Route path="/login/callback" element={<Callback />}/>
-			<Route path="*" element={<NoMatch />}/>
-			<Route element={<RequireAuth/>}>
-				<Route element={<>
-									<SidebarWithContext />
-									<Outlet />
-								</>}>
-					<Route path="/" element={<HomeLoggedIn />}/>
-					<Route path="/profile" element={<Profile/>}/>
-					<Route path="/profile/:id" element={<Profile/>}/>
+		<ProvideNotify>
+			<BrowserRouter>
+				<Routes>
+				<Route path="/login" element={<HomeLoggedOut />}/>
+				<Route path="/login/callback" element={<Callback />}/>
+				<Route path="*" element={<NoMatch />}/>
+				<Route element={<RequireAuth/>}>
+					<Route element={<>
+										<SidebarWithContext />
+										<Outlet />
+									</>}>
+						<Route path="/" element={<HomeLoggedIn />}/>
+						<Route path="/profile" element={<Profile/>}/>
+						<Route path="/profile/:id" element={<Profile/>}/>
+					</Route>
 				</Route>
-			</Route>
-			</Routes>
-		</BrowserRouter>
+				</Routes>
+			</BrowserRouter>
+		</ProvideNotify>
 	</ProvideAuth>;
 	return element;
 }
