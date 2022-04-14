@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
-import { room_joined } from "../../../Common/Dto/chat/room_joined";
+import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
-import { RoomLeftDto } from "../../../Common/Dto/chat/room";
+import { RoomLeftDto } from "../../../Common/Dto/chat/Room";
 
 export enum ELevelInRoom
 {
@@ -133,7 +133,7 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		socket.connect();
 		
-		socket.on("JOINED_ROOM", (data: room_joined) => {
+		socket.on("JOINED_ROOM", (data: RoomJoined) => {
 			if (data.status === 0 && data.room_name !== undefined)
 			{
 				//alert("Channel " + data.room_name + " rejoint");

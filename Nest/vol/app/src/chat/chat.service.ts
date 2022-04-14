@@ -1,15 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { RouterModule } from '@nestjs/core';
 import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
-import { ChatUser, UserData } from 'src/chat/interface/chat_user'
+import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { RoomProtection } from 'src/Common/Dto/chat/Room';
+import { Room } from './interface/Room';
 
 @Injectable()
 export class ChatService {
     constructor (
-        private tokenService: TokenService
+        private tokenService: TokenService,
+		private rooms: Room[],
     )
     {}
+
+
 
     getUserFromSocket(socket: Socket, users: ChatUser[], isConnection: boolean): ChatUser | undefined
     {
@@ -50,6 +56,8 @@ export class ChatService {
         return (undefined);
     }
 
+
+
 	disconnectClient(socket: Socket, users: ChatUser[]): ChatUser | undefined
 	{
 		const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
@@ -70,6 +78,69 @@ export class ChatService {
 			users.splice(users.findIndex((u) => { return u.username === us.username}), 1);*/
 
 		return (chatUser);
+	}
+
+
+
+	isUserInRoom(user: ChatUser, room: Room) : boolean
+	{
+		return (room.users.find((u) => { u === user }) !== undefined)
+	}
+
+
+
+	createRoom(room_name: string, room_protection: RoomProtection, owner: ChatUser, password: string = "")
+	{
+		this.rooms.push({
+			name: room_name,
+			protection: room_protection,
+			users: [owner],
+			invited : [],
+			muted: [],
+			banned : [],
+			owner: owner,
+			password : password,
+		})
+	}
+
+
+
+	roomExists(room_name: string) : boolean
+	{
+		return (this.rooms.find((r) => { r.name === room_name}) !== undefined);
+	}
+
+
+
+	getRoom(room_name: string): Room
+	{
+		if (!this.roomExists(room_name))
+			return (undefined);
+		return (this.rooms.find((r) => { r.name === room_name}));
+	}
+
+
+
+	removeRoom(room_name: string): boolean
+	{
+		let to_remove: Room = this.getRoom(room_name);
+		if (to_remove === undefined)
+			return (false);
+		this.rooms.splice(this.rooms.indexOf(to_remove), 1);
+		return (true);
+	}
+
+
+
+	isOwner(user: ChatUser, room: Room): boolean
+	{
+		return ((room.owner.socket.find((s) => { user.socket.find((u) => (u === s)) !== undefined}) !== undefined));
+	}
+
+
+	getAllRooms(): Room[]
+	{
+		return (this.rooms);
 	}
 
 }

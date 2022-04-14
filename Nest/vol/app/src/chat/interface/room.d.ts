@@ -1,11 +1,11 @@
 import { Socket } from "socket.io";
-import { ChatUser } from "./chat_user";
+import { ChatUser } from "./ChatUser";
 
-interface room
+interface Room
 {
     name: string,
 	protection: RoomProtection,
-	owner: Socket,
+	owner: ChatUser,
 	users: Array<ChatUser>
 	invited : Array<string>,
 	muted : Array<string>,
@@ -13,4 +13,4 @@ interface room
 	password?: string,
 }
 
-export {room};
+export {Room as Room};
