@@ -34,6 +34,7 @@ export class ChatService {
 					socketId: [socket.id],
 					username: us.username,
 					reference_id: us.reference_id,
+					room_list: [],
 				})
 
 				ret = users[idx - 1];
