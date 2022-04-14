@@ -3,7 +3,7 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
-import { ChatUser } from 'src/chat/interface/chat_user.d';
+import { ChatUser, UserData } from 'src/chat/interface/chat_user.d';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
@@ -33,7 +33,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	constructor(
 		private chatService: ChatService,
-		private rooms: room[]
+		private rooms: room[],
+		private users: ChatUser[]
 	) { }
 
 
@@ -56,7 +57,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		room_name: string
 	}) : void
 	{
-		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user: UserData | undefined = this.chatService.getUserFromSocket(client, this.users);
 
 		let msg_obj = {
 			message: payload.message,
@@ -411,7 +412,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	//Todo emit disconect if token is wrong
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
-		let userInfo : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let userInfo : ChatUser | undefined = this.chatService.getUserFromSocket(client, this.users);
 
 		if (userInfo === undefined)
 		{
@@ -420,6 +421,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			
 		}
 		this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
+		this.logger.log(`${userInfo.username} total connection : ${userInfo.socketId.length}`);
+
 	}
 
 
@@ -427,7 +430,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	handleDisconnect(client: Socket)
 	{
 		this.logger.log(`Client disconnected: ${client.id}`);
-		this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
+		//this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
+		
+		let userInfo : ChatUser | undefined = this.chatService.disconnectClient(client, this.users);
+		if (userInfo !== undefined)
+		{
+			//to stuff
+
+			//users.splice(users.findIndex((u) => { return u.username === us.username})
+		}
 	}
 }
 

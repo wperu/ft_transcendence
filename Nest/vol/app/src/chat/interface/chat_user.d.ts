@@ -1,13 +1,18 @@
 
 import { Socket } from 'socket.io'
 
+export interface UserData
+{
+	username: string,
+    reference_id: string,
+}
+
 export interface ChatUser 
 {
-    socket: Socket,
+    socketId: string[],
 
     username: string,
-    reference_id: string,
-    user_blocked : Array[string],
+    reference_id: string
     
     /* ... */
 }
