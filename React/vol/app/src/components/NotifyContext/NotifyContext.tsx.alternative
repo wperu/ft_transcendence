@@ -1,0 +1,116 @@
+import React, { createContext, useContext, useEffect, useState } from "react";
+import "./NotifyContext.css";
+
+export enum ELevel
+{
+	info = "info",
+	error = "error",
+}
+
+interface INotice
+{
+	level: ELevel;
+	message: string;
+	timeout: undefined | NodeJS.Timeout;
+}
+
+interface INotifyContext
+{
+	maxNotify : number,
+	msgNotify: INotice[],
+	addNotice: (level: ELevel, message: string, time: number | undefined) => void,
+}
+
+const notifyContext = createContext<INotifyContext>(null!);
+
+function useProvideNotify() : INotifyContext
+{
+	const maxNotify = 5;
+	const [nextFreeSlot, setNextFreeSlot] = useState<number>(0);
+	const [msgNotify, setMsgNotify] = useState<INotice[]>(Array<INotice>(maxNotify));
+
+	useEffect(() => {
+		setMsgNotify((prev) => {
+			var i = 0;
+			while (i < maxNotify)
+			{
+				prev[i++] = {level: ELevel.info, message: "", timeout: undefined};
+			}
+			return (prev);
+		});
+	}, []);
+
+	function getNextSlot(id: number) : number
+	{
+		if (id < maxNotify - 1)
+			return (id + 1);
+		return (0);
+	}
+
+
+	function printNoticeList(list : INotice[], size : number) : void
+	{
+		var i = 0;
+		var	output : string;
+
+		while (i < size)
+		{
+			var tmp : boolean = list[i].timeout === undefined;
+			output = i + " [" + list[i].level + " " + list[i].message + " " + tmp.toString() + "]";
+			console.log(output);
+			i++;
+		}
+	}
+	
+	function addNotice(level: ELevel, message: string, time: number | undefined)
+	{
+		var tmpTimeout : NodeJS.Timeout | undefined = msgNotify[nextFreeSlot].timeout;
+		if (tmpTimeout !== undefined)
+		clearTimeout(tmpTimeout);
+		setMsgNotify(prev => {
+			var	i = nextFreeSlot;
+			prev[i].level = level;
+			prev[i].message = message;
+			prev[i].timeout = setTimeout(() => {
+				setMsgNotify(prev => {
+					prev[i].timeout = undefined;
+					return (prev);
+				});
+			}, time === undefined ? 5000 : time);
+			return (prev);
+		});	
+		setNextFreeSlot(getNextSlot(nextFreeSlot));
+	}
+
+	return({
+		maxNotify,
+		msgNotify,
+		addNotice
+	});
+
+}
+
+export function useNotifyContext()
+{
+	return useContext(notifyContext);
+}
+
+export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
+{
+	const ctx = useProvideNotify();
+	
+	return (
+		<notifyContext.Provider value={ctx}>
+				<ul id="notify">
+					{ctx.msgNotify.map(({level, message, timeout}) => {
+						if (timeout === undefined)
+							return (<div></div>);
+						return (<li className={"notification " + level}>{message}</li>)
+					})
+					}
+				</ul>
+			{children}
+		</notifyContext.Provider>
+	);
+	
+}
