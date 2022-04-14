@@ -6,11 +6,11 @@ import "./MainMenuButton.css";
 
 function MatchmakingButton ()
 {
-	const notify = useNotifyContext();
+	//const notify = useNotifyContext();
 
 	function MatchmakingClick ()
 	{
-		notify.addNotice("error", "mymessagetoyou", 3000);
+		//notify.addNotice("error", "mymessagetoyou", 3000);
 		//alert("Partie rapide/Matchmaking");
 	}
 
