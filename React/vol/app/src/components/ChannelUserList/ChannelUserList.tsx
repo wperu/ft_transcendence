@@ -30,7 +30,9 @@ function ChannelUserList ()
 		user_lvl = chatCtx.currentRoom.user_level;
 	return (
 		<div id="channel_users_list">
-			{userList.map((name) => (<ChatUser username={name} currentUserLvl={user_lvl}/>))}
+			{userList.map((name) => (<ChatUser isBlockedByCurrentUser={false}
+				targetUserLvl={ELevelInRoom.casual} targetUsername={name}
+				currentUserLvl={user_lvl}/>))}
 		</div>
 	);
 }

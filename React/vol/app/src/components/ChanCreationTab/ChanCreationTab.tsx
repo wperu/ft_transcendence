@@ -28,7 +28,7 @@ function ChanCreationTab()
 				data =
 				{
 					room_name: target.channel_name.value,
-					proctection: 0,
+					proctection: 1,
 					password: target.password.value,
 				};
 			}

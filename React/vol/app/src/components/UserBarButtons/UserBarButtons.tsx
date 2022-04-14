@@ -9,9 +9,20 @@ import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/r
 
 interface Prop
 {
-	user_name: string
+	user_name: string;
 }
 
+interface promoteProp
+{
+	user_name: string;
+	already_admin: boolean;
+}
+
+interface blockProp
+{
+	user_name: string;
+	already_blocked: boolean;
+}
 
 export function InviteUserButton()
 {
@@ -68,11 +79,11 @@ export function MuteUserButton(prop: Prop)
 }
 
 //todo Friend part
-export function BlockUserButton(prop: Prop)
+export function BlockUserButton(prop: blockProp)
 {
 	//const chtCtx = useChatContext();
 
-	function onClick()
+	function blockUser()
 	{
 		/*if (chtCtx.currentRoom !== undefined)
 		{
@@ -84,17 +95,32 @@ export function BlockUserButton(prop: Prop)
 			chtCtx.socket.emit('USER_BLOCK', dto);
 		}*/
 	}
-	return (
-		<button className="user_bar_button negative_user_button" onClick={onClick}><img alt="" src={BlockLogo}/>block</button>
-	);
+
+	function unblockUser()
+	{
+
+	}
+
+	if (prop.already_blocked)
+	{
+		return (
+			<button className="user_bar_button positive_user_button" onClick={unblockUser}><img alt="" src={BlockLogo}/>unblock</button>
+		);
+	}
+	else
+	{
+		return (
+			<button className="user_bar_button negative_user_button" onClick={blockUser}><img alt="" src={BlockLogo}/>block</button>
+		);
+	}
 }
 
 
-export function PromoteUserButton(prop: Prop)
+export function PromoteUserButton(prop: promoteProp)
 {
 	const chtCtx = useChatContext();
 
-	function onClick()
+	function promote()
 	{
 		if (chtCtx.currentRoom !== undefined)
 		{
@@ -108,7 +134,22 @@ export function PromoteUserButton(prop: Prop)
 		}
 		console.log("user promoted");
 	}
-	return (
-		<button className="user_bar_button positive_user_button" onClick={onClick}><img alt="" src={PromoteLogo}/>promote</button>
-	);
+
+	function demote()
+	{
+		console.log("todo demote");
+	}
+
+	if (prop.already_admin)
+	{
+		return (
+			<button className="user_bar_button negative_user_button flipped" onClick={demote}><img alt="" src={PromoteLogo}/>demote</button>
+		);
+	}
+	else
+	{
+		return (
+			<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>
+		);
+	}
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import UnjoinedChan from "../UnjoinedChan/UnjoinedChan";
 import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
 import { JoinRoomDto } from "../../interface/chat/chatDto";
@@ -9,10 +9,10 @@ function UnjoinedChansTab()
 {
 	const chatCtx = useChatContext();
 
-	const [roomList, setRoomList] = useState<Array<string>>([]);
+	const [roomList, setRoomList] = useState<Array<{name: string, has_password: boolean}>>([]);
 	
 	useEffect(() => {
-		chatCtx.socket.on("ROOM_LIST", (data: Array<string>) => {
+		chatCtx.socket.on("ROOM_LIST", (data: Array<{name: string, has_password: boolean}>) => {
 			setRoomList(data);
 		})
 		
@@ -76,7 +76,7 @@ function UnjoinedChansTab()
 				<div className="title">
 					Liste globale des channels
 				</div>
-				{roomList.map((name) => (<UnjoinedChan name={name} />))}
+				{roomList.map(( element ) => (<UnjoinedChan name={element.name} is_protected={element.has_password} />))}
 			</div>
 		</div>
 	);

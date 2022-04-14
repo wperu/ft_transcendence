@@ -7,9 +7,9 @@ import { RoomLeftDto } from "../../../Common/Dto/chat/room";
 
 export enum ELevelInRoom
 {
-	casual = "casual",
-	admin = "admin",
-	owner = "owner",
+	casual = 0,
+	admin = 1,
+	owner = 2,
 }
 
 export enum ECurrentTab

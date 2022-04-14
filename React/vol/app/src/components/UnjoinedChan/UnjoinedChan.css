@@ -16,7 +16,32 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 90%;
+	max-width: 70%;
+}
+
+.unjoined_chan_input
+{
+	width: fit-content;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.unjoined_chan_input input[type="password"]
+{
+	width: 15vmin;
+	background-color: #636772;
+	color: white;
+	border-style: none;
+	font-size: 0.4em;
+	padding: 0.2vmin 0.8vmin;
+	border-radius: 10px;
+	margin-right: 2vmin;
+}
+
+.invisible
+{
+	display: none;
 }
 
 .join_chan
@@ -27,7 +52,8 @@
 .join_chan + label
 {
 	text-align: right;
-	font-size: 0.65em;
+	text-transform: uppercase;
+	font-size: 0.55em;
 	background-color: limegreen;
 	opacity: 85%;
 	/* margin-right: 4px; */
