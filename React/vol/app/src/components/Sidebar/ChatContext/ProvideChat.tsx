@@ -112,6 +112,18 @@ function useChatProvider() : IChatContext
 	}, [rooms]);
 
 	useEffect(() => {
+		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
+			if (currentRoom !== undefined && currentRoom.room_name === data.room_name)
+				setCurrentRoom(undefined);
+			setRooms(prevRooms => {
+				return prevRooms.splice(prevRooms.findIndex((o) => {
+					return (o.room_name === data.room_name);
+				}), 1)
+			});
+		})
+	}, [currentRoom]);
+
+	useEffect(() => {
 		socket.connect();
 		
 		socket.on("JOINED_ROOM", (data: room_joined) => {
@@ -124,18 +136,6 @@ function useChatProvider() : IChatContext
 			{
 				alert(data.status_message);
 			}
-		})
-
-		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
-			
-			if (currentRoom !== undefined && currentRoom.room_name == data.room_name)
-				setCurrentRoom(undefined);
-
-			setRooms(prevRooms => {
-				return prevRooms.splice(prevRooms.findIndex((o) => {
-					return (o.room_name === data.room_name);
-				}), 1)
-			});
 		})
 
 		return function cleanup() {

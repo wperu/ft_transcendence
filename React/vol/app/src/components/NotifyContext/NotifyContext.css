@@ -1,20 +1,30 @@
-
 #notify
 {
 	width: max-content;
-	left: 0px;
-	top: 0px;
-	margin: 8px;
-	padding: 20px;
-	position: absolute;
+	position: fixed;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	color: white;
 	display: flex;
-	flex-direction: row;
-	background-color: #21242b;
+	flex-direction: column;
 	box-sizing: border-box;
-	border-radius: 20px;
+	list-style-type: none;
+}
+
+.notification
+{
+	font-size: 0.8em;
+	border-radius: 8px;
+	margin-bottom: 0.5vmin;
+	padding: 0.5vmin 2vmin;
 }
 
 .error
 {
-	background-color: red;
+	background-color: rgb(207, 5, 5);
+}
+.info
+{
+	background-color: rgb(64, 179, 11);
 }

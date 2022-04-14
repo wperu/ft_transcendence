@@ -1,10 +1,16 @@
 import React, { createContext, useContext, useState } from "react";
 import "./NotifyContext.css";
 
+export enum ELevel
+{
+	info = "info",
+	error = "error",
+}
+
 interface INotice
 {
 	id: number;
-	level: string;
+	level: ELevel;
 	message: string;
 }
 
@@ -12,7 +18,7 @@ interface INotifyContext
 {
 	maxNotify : number,
 	msgNotify: INotice[], 
-	addNotice: (level: string, message: string, time: number | undefined) => void,
+	addNotice: (level: ELevel, message: string, time: number | undefined) => void,
 }
 
 const notifyContext = createContext<INotifyContext>(null!);
@@ -34,7 +40,7 @@ function useProvideNotify() : INotifyContext
 		return nu + 1;
 	}
 
-	function addNotice(level: string, message: string, time: number | undefined)
+	function addNotice(level: ELevel, message: string, time: number | undefined)
 	{
 		const val = id;
 		const notice: INotice = {
@@ -85,11 +91,9 @@ export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
 	
 	return (
 		<notifyContext.Provider value={ctx}>
-				<aside id="notify">
-					<ul>
-						{ctx.msgNotify.map(({id, level, message}) => { return <li key={id} className={level}>{message}</li> })}
+					<ul id="notify">
+						{ctx.msgNotify.map(({id, level, message}) => { return <li key={id} className={"notification " + level}>{message}</li> })}
 					</ul>
-				</aside>
 			{children}
 		</notifyContext.Provider>
 	);
