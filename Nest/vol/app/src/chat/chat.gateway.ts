@@ -435,9 +435,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let userInfo : ChatUser | undefined = this.chatService.disconnectClient(client, this.users);
 		if (userInfo !== undefined)
 		{
-			//to stuff
-
-			//users.splice(users.findIndex((u) => { return u.username === us.username})
+			
+			if(userInfo.socketId.length === 0)
+			{
+				userInfo.room_list.forEach(room => {this.leaveRoom(client,room)});
+				this.users.splice(this.users.findIndex((u) => { return u.username === userInfo.username}))
+			}
 		}
 	}
 }
