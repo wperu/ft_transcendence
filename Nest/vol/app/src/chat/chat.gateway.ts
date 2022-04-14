@@ -87,9 +87,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				users: [client],
 				invited : [],
 				muted: [],
+				baned : [],
 				owner: client,
-			})
+				password : payload.password,
 
+			})
 			//todo join & add client to room
 			client.join(payload.room_name);
 			client.emit("JOINED_ROOM", { status: 0, room_name: payload.room_name });
@@ -205,12 +207,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			let user_idx = local_room.users.indexOf(client);
 			local_room.users.splice(user_idx, 1);
+			this.logger.log(`Client ${client.id} left room ${payload}`);
+			const dto : RoomLeftDto = { status: 1, room_name: payload };
+			client.emit('LEFT_ROOM', dto);
+			client.leave(payload);
 		}
-
-		this.logger.log(`Client ${client.id} left room ${payload}`);
-		const dto : RoomLeftDto = { status: 1, room_name: payload };
-		client.emit('LEFT_ROOM', dto);
-		client.leave(payload);
 		if (local_room.users.length === 0)
 			this.rooms.splice(this.rooms.indexOf(local_room), 1);
 	}

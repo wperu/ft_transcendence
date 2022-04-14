@@ -7,6 +7,7 @@ export interface ChatUser
 
     username: string,
     reference_id: string,
-
+    user_blocked : Array[string],
+    
     /* ... */
 }
