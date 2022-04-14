@@ -9,7 +9,8 @@ export interface UserData
 
 export interface ChatUser 
 {
-    socketId: string[],
+    //socketId: string[],
+	socket: Socket[],
 
     username: string,
     reference_id: string

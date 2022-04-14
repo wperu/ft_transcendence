@@ -27,7 +27,8 @@ export class ChatService {
 			if (ret === undefined && isConnection === true)
 			{
 				let idx = users.push({
-					socketId: [socket.id],
+					//socketId: [socket.id],
+					socket: [socket], 
 					username: us.username,
 					reference_id: us.reference_id,
 					room_list: [],
@@ -37,10 +38,10 @@ export class ChatService {
 			}
 			else if (isConnection === true)
 			{
-				let idx = ret.socketId.find((id) => { return id === socket.id})
+				let idx = ret.socket.find((s) => { return s.id === socket.id})
 
 				if (idx === undefined)
-					ret.socketId.push(socket.id);
+					ret.socket.push(socket);
 
 			}
 			return (ret);
@@ -63,7 +64,7 @@ export class ChatService {
 			return undefined;//throw error
 		
 
-		chatUser.socketId.splice(chatUser.socketId.findIndex((id) => { return id === socket.id}), 1);
+		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id}), 1);
 
 		/*if (chatUser.socketId.length === 0)
 			users.splice(users.findIndex((u) => { return u.username === us.username}), 1);*/

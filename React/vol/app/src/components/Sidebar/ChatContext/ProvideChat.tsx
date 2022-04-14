@@ -129,7 +129,7 @@ function useChatProvider() : IChatContext
 		socket.on("JOINED_ROOM", (data: room_joined) => {
 			if (data.status === 0 && data.room_name !== undefined)
 			{
-				alert("Channel " + data.room_name + " rejoint");
+				//alert("Channel " + data.room_name + " rejoint");
 				addRoom(data.room_name, false);
 			}
 			else if (data.status_message !== undefined)
