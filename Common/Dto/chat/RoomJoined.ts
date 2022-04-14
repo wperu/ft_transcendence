@@ -1,4 +1,4 @@
-export interface room_joined
+export interface RoomJoined
 {
 	status: number,
 	status_message?: string,

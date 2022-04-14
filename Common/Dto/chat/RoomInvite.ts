@@ -1,8 +1,8 @@
 
-interface room_invite
+interface RoomInvite
 {
     room_name: string,
     invited_user: string
 }
 
-export default room_invite;
+export default RoomInvite;

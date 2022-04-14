@@ -1,8 +1,8 @@
-interface room_join
+interface RoomJoin
 {
     room_name: string,
     password?: string
 }
 
 
-export default room_join;
+export default RoomJoin;

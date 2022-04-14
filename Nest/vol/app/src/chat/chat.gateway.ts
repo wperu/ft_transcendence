@@ -1,19 +1,18 @@
 import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
-import { format } from 'date-fns';
+import { format, getISOWeeksInYear } from 'date-fns';
 import { Server, Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
-import { ChatUser, UserData } from 'src/chat/interface/chat_user.d';
+import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { create_room,room_protect, RoomProtection, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
-//import { RoomProtection } from 'src/Common/Dto/chat/RoomProtection.d';
-import room_invite from '../Common/Dto/chat/room_invite';
-import room_join from '../Common/Dto/chat/room_join';
-import {room_rename,room_change_pass} from '../Common/Dto/chat/room_rename';
+import { CreateRoom,RoomProtect, RoomProtection, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/Room';
+import RoomInvite from '../Common/Dto/chat/RoomInvite';
+import RoomJoin from '../Common/Dto/chat/RoomJoin';
+import { RoomRename, RoomChangePass } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
-import {room} from "./interface/room";
+import { Room } from "./interface/Room";
 
 
 // Todo fix origin
@@ -33,7 +32,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	constructor(
 		private chatService: ChatService,
-		private rooms: room[],
 		private users: ChatUser[]
 	) { }
 
@@ -77,26 +75,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	@SubscribeMessage('CREATE_ROOM')
-	createRoom(client: Socket, payload: create_room): void 
+	createRoom(client: Socket, payload: CreateRoom): void 
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client, this.users, false);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 		
-		let local_room = this.rooms.find(o => o.name === payload.room_name);
-		if (local_room === undefined)
+		if (!this.chatService.roomExists(payload.room_name))
 		{
-			this.rooms.push({
-				name: payload.room_name,
-				protection: payload.proctection,
-				users: [user],
-				invited : [],
-				muted: [],
-				banned : [],
-				owner: client,
-				password : payload.password,
+			this.chatService.createRoom(payload.room_name, payload.proctection, user, payload.password);
 
-			})
 			//todo join & add client to room
 			client.join(payload.room_name);
 			user.room_list.push(payload.room_name);
@@ -125,17 +113,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * upgrade room protection using 'PROTECT_ROOM' event
 	 */
 	@SubscribeMessage('JOIN_ROOM')
-	joinRoom(client: Socket, payoad: room_join): void
+	joinRoom(client: Socket, payload: RoomJoin): void
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client, this.users, false);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		let local_room = this.rooms.find(o => o.name === payoad.room_name);
+		let local_room = this.chatService.getRoom(payload.room_name);//this.rooms.find(o => o.name === payload.room_name);
 		if (local_room === undefined)
 		{
 			client.emit("JOINED_ROOM", { status: 1, status_message: " no such room" });
-			this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: no such room`);
+			this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: no such room`);
 			return ;
 		}
 		else
@@ -145,7 +133,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			if (is_user !== undefined)
 			{
 				client.emit("JOINED_ROOM", { status: 1, status_message: " you are already in that room" });
-				this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: Client ${client.id} has already joined room`);
+				this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: Client ${client.id} has already joined room`);
 				return ;
 			}
 			
@@ -156,12 +144,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 			else if (local_room.protection === RoomProtection.PROTECTED)
 			{
-				if (local_room.password === payoad.password)
+				if (local_room.password === payload.password)
 					local_room.users.push(user);
 				else
 				{
 					client.emit("JOINED_ROOM", { status: 1, status_message: " wrong password" });
-					this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: wrong password`);
+					this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: wrong password`);
 					return ; 
 				}
 			}
@@ -172,22 +160,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				else
 				{
 					client.emit("JOINED_ROOM", { status: 1, status_message: " you are is not in room's invite list" });
-					this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: Client is not in room's invite list`);
+					this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: Client is not in room's invite list`);
 					return ;
 				}
 			}
 			else
 			{
 				client.emit("JOINED_ROOM", { status: 1, status_message: "unknown room protection type" });
-				this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: unknown room protection type`);
+				this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: unknown room protection type`);
 				return ;
 			}
 		}
 
-		this.logger.log(`[${client.id}] joined room ${payoad.room_name}`);
+		this.logger.log(`[${client.id}] joined room ${payload.room_name}`);
 		//client.join();
 		user.socket.forEach((s) => {
-			s.join(payoad.room_name);
+			s.join(payload.room_name);
 			s.emit("JOINED_ROOM", {
 				status: 0,
 				room_name: local_room.name,
@@ -195,7 +183,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				// online users
 				// ...
 			})});
-		user.room_list.push(payoad.room_name);
+		user.room_list.push(payload.room_name);
 		/*if (!client.emit("JOINED_ROOM", {
 			status: 0,
 			room_name: local_room.name,
@@ -226,7 +214,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		let local_room = this.rooms.find(o => o.name === payload);
+		let local_room = this.chatService.getRoom(payload);
 		if (local_room === undefined)
 		{
 			console.error("Left an undefined room ??");
@@ -247,7 +235,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			user.room_list.splice(user.room_list.findIndex((room) => { return(room === payload) }), 1);
 		}
 		if (local_room.users.length === 0)
-			this.rooms.splice(this.rooms.indexOf(local_room), 1);
+			this.chatService.removeRoom(local_room.name);
 	}
 
 
@@ -295,16 +283,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field opt: optional field, used to store the password when protection_mode is PRIVATE
 	 */
 	@SubscribeMessage('PROTECT_ROOM')
-	protectRoom(client: Socket, payload: room_protect)
+	protectRoom(client: Socket, payload: RoomProtect)
 	{
-		let local_room = this.rooms.find(o => o.name === payload.room_name);
+		let local_room = this.chatService.getRoom(payload.room_name)
 		if (local_room === undefined)
 		{
 			console.error(`Cannot set protection to unknown room: ${payload.room_name}`);
 			throw new BadRequestException(`Unknown room ${payload.room_name}`);
 		}
 
-		if (client === local_room.owner)
+		if (!this.chatService.isOwner(this.chatService.getUserFromSocket(client, this.users, false), local_room))
 		{
 			switch (payload.protection_mode)
 			{
@@ -335,21 +323,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field new_name: the new name for the room
 	 */
 	@SubscribeMessage('RENAME_ROOM')
-	renameRoom(client: Socket, payload: room_rename)
+	renameRoom(client: Socket, payload: RoomRename)
 	{
-		let local_room = this.rooms.find(o => o.name === payload.old_name);
+		let local_room = this.chatService.getRoom(payload.old_name);
 		if (local_room === undefined)
 		{
 			console.error(`Cannot rename unknown room: ${payload.old_name}`);
 			throw new BadRequestException(`Unknown room ${payload.old_name}`);
 		}
-		if (client !== local_room.owner)
+		if (!this.chatService.isOwner(this.chatService.getUserFromSocket(client, this.users, false), local_room))
 		{
 			throw new UnauthorizedException("Only the room owner can rename the room !");
 		}
 
-		let is_new_name = this.rooms.find(o => o.name === payload.new_name);
-		if (is_new_name !== undefined)
+		if (!this.chatService.roomExists(payload.new_name))
 		{
 			console.error(`Cannot rename room ${payload.old_name} to  ${payload.new_name}: A room with that name already exists`);
 			throw new BadRequestException(`Bad name: ${payload.new_name} (try again with another name)`);
@@ -365,21 +352,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field name_room: the name of room
 	 * @field new_pass: the new password for the room
 	 */
-	@SubscribeMessage('ROOM_CHANGE_PASS')
-	room_change_pass(client:Socket, payload: room_change_pass)
+	@SubscribeMessage('RoomChangePass')
+	RoomChangePass(client:Socket, payload: RoomChangePass)
 	{
-		let local_room = this.rooms.find(o => o.name === payload.room_name);
+		let local_room =this.chatService.getRoom(payload.room_name);
 		if (local_room === undefined)
 		{
 			console.error(`Cannot change password unknown room: ${payload.room_name}`);
 			throw new BadRequestException(`Unknown room ${payload.room_name}`);
 		}
-		if (client !== local_room.owner)
+		if  (!this.chatService.isOwner(this.chatService.getUserFromSocket(client, this.users, false), local_room))
 		{
 			throw new UnauthorizedException("Only the room owner can change password the room !");
 		}
-		let is_new_pass = this.rooms.find(o => o.password === payload.new_pass);
-		if (is_new_pass === undefined)
+		if (local_room.password === payload.new_pass)
 		{
 			console.error(`Cannot change password `);
 			throw new BadRequestException(`Bad password (try again with another password)`);
@@ -392,7 +378,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('USER_LIST')
 	user_list(client: Socket , payload: string) : void
 	{
-		var	current_room = this.rooms.find(e => e.name === payload)
+		var	current_room = this.chatService.getRoom(payload);
 		var	names_list : Array<string> = [];
 		
 		if (current_room !== undefined)
@@ -426,17 +412,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
-	// TODO SEND ONLY PUBLIC CHANS  
 	// TODO do some RoomListDTO  
 	@SubscribeMessage('ROOM_LIST')
 	room_list(client: Socket): void
 	{
 		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
-		this.rooms.forEach(room => {
-			rooms_list.push({
-				name: room.name,
-				has_password: room.password !== null,
-			})
+		this.chatService.getAllRooms().forEach(room => {
+			if (room.protection === RoomProtection.NONE)
+			{
+				rooms_list.push({
+					name: room.name,
+					has_password: room.password !== null,
+				});
+			}
 		});
 		client.emit('ROOM_LIST', rooms_list);
 	}

@@ -1,7 +1,7 @@
 import React from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChanCreationTab.css";
-import { create_room } from "../../Common/Dto/chat/room";
+import { CreateRoom } from "../../Common/Dto/chat/Room";
 
 function ChanCreationTab()
 {
@@ -21,7 +21,7 @@ function ChanCreationTab()
 		}
 		else
 		{
-			var data: create_room;
+			var data: CreateRoom;
 			if (target.is_protected)
 			{		
 				

@@ -5,14 +5,14 @@ enum RoomProtection {
 	PRIVATE,
 }
 
-export interface room_protect
+export interface RoomProtect
 {
     room_name : string,
     protection_mode: RoomProtection,
     opt?: string
 }
 
-export interface create_room
+export interface CreateRoom
 {
 	room_name: string,
 	proctection: RoomProtection,
