@@ -4,8 +4,8 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
-import { RoomProtection } from 'src/Common/Dto/chat/Room';
-import { Room } from './interface/Room';
+import { RoomProtection } from 'src/Common/Dto/chat/room';
+import { Room } from './interface/room';
 
 @Injectable()
 export class ChatService {
@@ -107,7 +107,7 @@ export class ChatService {
 
 	roomExists(room_name: string) : boolean
 	{
-		return (this.rooms.find((r) => { r.name === room_name}) !== undefined);
+		return (this.rooms.find((r) => {return r.name === room_name}) !== undefined);
 	}
 
 

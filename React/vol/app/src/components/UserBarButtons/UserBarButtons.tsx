@@ -5,7 +5,7 @@ import InviteLogo from "../../ressources/images/pvp.png";
 import PromoteLogo from "../../ressources/images/promote.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
-import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/Room";
+import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
 
 interface Prop
 {

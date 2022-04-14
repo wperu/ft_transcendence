@@ -1,7 +1,7 @@
 import React from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChanCreationTab.css";
-import { CreateRoom } from "../../Common/Dto/chat/Room";
+import { CreateRoom } from "../../Common/Dto/chat/room";
 
 function ChanCreationTab()
 {

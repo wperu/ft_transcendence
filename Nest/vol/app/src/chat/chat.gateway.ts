@@ -7,12 +7,12 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomProtection, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/Room';
+import { CreateRoom,RoomProtect, RoomProtection, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
 import RoomInvite from '../Common/Dto/chat/RoomInvite';
 import RoomJoin from '../Common/Dto/chat/RoomJoin';
 import { RoomRename, RoomChangePass } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
-import { Room } from "./interface/Room";
+import { Room } from "./interface/room";
 
 
 // Todo fix origin
@@ -233,9 +233,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				s.emit('LEFT_ROOM', dto);
 			});
 			user.room_list.splice(user.room_list.findIndex((room) => { return(room === payload) }), 1);
+			if (local_room.users.length === 0)
+				this.chatService.removeRoom(local_room.name);
 		}
-		if (local_room.users.length === 0)
-			this.chatService.removeRoom(local_room.name);
+		
 	}
 
 
