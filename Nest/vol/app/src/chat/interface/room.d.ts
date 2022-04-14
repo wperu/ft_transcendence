@@ -8,7 +8,8 @@ interface room
 	users: Array<Socket>
 	invited : Array<string>,
 	muted : Array<string>,
-	password?: string
+	banned : Array<string>,
+	password?: string,
 }
 
 export {room};

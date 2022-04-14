@@ -87,7 +87,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				users: [client],
 				invited : [],
 				muted: [],
-				baned : [],
+				banned : [],
 				owner: client,
 				password : payload.password,
 
