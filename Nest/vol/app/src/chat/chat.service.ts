@@ -11,7 +11,7 @@ export class ChatService {
     )
     {}
 
-    getUserFromSocket(socket: Socket, users: ChatUser[]): ChatUser | undefined
+    getUserFromSocket(socket: Socket, users: ChatUser[], isConnection: boolean): ChatUser | undefined
     {
         const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
         /* todo   maybe check if data contains the keys that we have in ChatUser */
@@ -19,16 +19,12 @@ export class ChatService {
 		if (data === null)
 			return (undefined);
 
-	/*	if (users.length === 0)
-		{
-
-		}*/
 		if (data as UserData)
 		{
 			const us = data as UserData;
 
 			let ret = users.find((u) => { return u.username === us.username})
-			if (ret === undefined)
+			if (ret === undefined && isConnection === true)
 			{
 				let idx = users.push({
 					socketId: [socket.id],
@@ -38,7 +34,7 @@ export class ChatService {
 
 				ret = users[idx - 1];
 			}
-			else
+			else if (isConnection === true)
 			{
 				let idx = ret.socketId.find((id) => { return id === socket.id})
 
