@@ -121,7 +121,14 @@ function useChatProvider() : IChatContext
 				}), 1)
 			});
 		})
-	}, [currentRoom]);
+
+		return function cleanup() {		
+			if (socket !== undefined)
+			{
+				socket.off('LEFT_ROOM');
+			}
+		};
+	}, [currentRoom, rooms]);
 
 	useEffect(() => {
 		socket.connect();
