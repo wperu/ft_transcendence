@@ -1,6 +1,6 @@
 import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
-import { useChatContext, IRoom, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
+import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import { RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
 import "./ChatTab.css"
 
@@ -56,10 +56,6 @@ function ChatTab ()
 		{
 			chatCtx.socket.emit("LEAVE_ROOM", chatCtx.currentRoom.room_name);
 			setMessages([]);
-			/*chatCtx.rooms.splice(chatCtx.rooms.findIndex((o) => {
-				return (o.room_name === chatCtx.currentRoom?.room_name);
-			}), 1);*/
-			//chatCtx.setCurrentRoom(undefined);
 			chatCtx.setCurrentTab(ECurrentTab.channels);
 		}
 	}
@@ -93,11 +89,6 @@ function ChatTab ()
 			setUpdated(false);
 		}
 	}, [updated]);
-	
-	let i = 0;
-	useEffect(() => {
-		i = 0;
-	})
 
 	return (
 		<div id="ChatTab">
@@ -112,7 +103,11 @@ function ChatTab ()
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date}) => (<li key={i++}><ChatMessage src_name={sender} content={message} time={send_date} /></li>))
+					messages.map(({message, sender, send_date} , index) => (
+						<li key={index}>
+							<ChatMessage src_name={sender} content={message} time={send_date} />
+						</li>))
+					
 				}
 				</ul>
 			</div>

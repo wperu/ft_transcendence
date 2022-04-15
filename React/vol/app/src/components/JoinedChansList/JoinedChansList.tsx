@@ -11,13 +11,6 @@ function Joined_chans_list()
 	const chatCtx = useChatContext();
 	const [socket, setSocket] = useState(chatCtx.socket);
 
-	let i = 0;
-
-	useEffect(() => 
-	{
-		i = 0;
-	});
-
 	function Content()
 	{
 		if (chatCtx.rooms.length === 0)
@@ -26,7 +19,7 @@ function Joined_chans_list()
 			return (
 				<div id="joined_chans_list">
 					<ul>
-						{chatCtx.rooms.map(({room_name}) => <li key={i++}><JoinedChan name={room_name}/></li>)}
+						{chatCtx.rooms.map(({room_name}, index) => <li key={index}><JoinedChan name={room_name}/></li>)}
 					</ul>
 				</div>
 			);

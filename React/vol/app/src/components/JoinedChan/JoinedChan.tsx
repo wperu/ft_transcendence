@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { ECurrentTab, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./JoinedChan.css";
 
