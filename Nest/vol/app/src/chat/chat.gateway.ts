@@ -7,7 +7,7 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomProtection, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
+import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
 import RoomInvite from '../Common/Dto/chat/RoomInvite';
 import RoomJoin from '../Common/Dto/chat/RoomJoin';
 import { RoomRename, RoomChangePass } from '../Common/Dto/chat/RoomRename';
@@ -83,7 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		
 		if (!this.chatService.roomExists(payload.room_name))
 		{
-			this.chatService.createRoom(payload.room_name, payload.proctection, user, payload.password);
+			this.chatService.createRoom(payload.room_name, payload.private_room, user, payload.password);
 
 			//todo join & add client to room
 			client.join(payload.room_name);
@@ -299,23 +299,33 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (!this.chatService.isOwner(this.chatService.getUserFromSocket(client, this.users, false), local_room))
 		{
-			switch (payload.protection_mode)
+			if(payload.private_room)
 			{
-				case RoomProtection.NONE:
-					local_room.protection = RoomProtection.NONE;
+				local_room.private_room = true;
+				local_room.password = payload.opt;
+			}
+			else
+			{
+				local_room.private_room = false;
+				local_room.password = payload.opt;
+			}
+			/*switch (payload.private_room)
+			{
+				case (true):
+					local_room.private_room = true;
 					break;
-				case RoomProtection.PRIVATE:
-					local_room.protection = RoomProtection.PRIVATE;
+				case (false):
+					local_room.private_room = false;
 					break;
 				case RoomProtection.PROTECTED:
-					local_room.protection = RoomProtection.PROTECTED;
+					local_room.private_room = RoomProtection.PROTECTED;
 					if (payload["opt"] === undefined)
 						throw new BadRequestException("No opt parameter: Cannot set a room protection mode to private without sending a password")
 					local_room.password = payload.opt;
 					break;
 				default:
-					console.log(`Unknown protection mode: ${payload.protection_mode}`);
-			}
+					console.log(`Unknown protection mode: ${payload.private_room}`);
+			}*/
 		}
 	}
 
@@ -423,7 +433,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
 		this.chatService.getAllRooms().forEach(room => {
-			if (room.protection === RoomProtection.NONE) //fix me
+			if (!room.private_room) //fix me
 			{
 				rooms_list.push({
 					name: room.name,

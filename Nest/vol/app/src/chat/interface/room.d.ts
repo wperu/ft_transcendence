@@ -4,7 +4,7 @@ import { ChatUser } from "./ChatUser";
 interface Room
 {
     name: string,
-	protection: RoomProtection,
+	private_room: boolean,
 	owner: ChatUser,
 	users: Array<ChatUser>
 	invited : Array<string>,

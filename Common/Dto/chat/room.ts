@@ -1,21 +1,16 @@
 
-enum RoomProtection {
-	NONE,
-	PROTECTED,
-	PRIVATE,
-}
 
 export interface RoomProtect
 {
     room_name : string,
-    protection_mode: RoomProtection,
+    private_room: boolean,
     opt?: string
 }
 
 export interface CreateRoom
 {
 	room_name: string,
-	proctection: RoomProtection,
+	private_room: boolean,
 	password?: string
 }
 
@@ -46,7 +41,5 @@ export interface RoomLeftDto
 	room_name?: string,
 }
 
-
-export { RoomProtection };
 
 // export { create_room, room_protect };
