@@ -71,12 +71,15 @@ function useChatProvider() : IChatContext
 			setCurrentRoomByName(currentRoom.room_name);
     };
 
-	function rmRoom(room_name: string, is_protected: boolean)
-    {
-		rooms.splice(rooms.findIndex((o) => {
-			return (o.room_name === room_name);
-		}), 1);
-    };
+
+	function rmRoom(room_name: string)
+	{
+		setRooms(prev => {
+			return prev.filter((o) => {
+				return (o.room_name !== room_name);
+			})
+		});
+	};
 	
 	function setCurrentRoomByName (name: string)
 	{
@@ -115,11 +118,13 @@ function useChatProvider() : IChatContext
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
 			if (currentRoom !== undefined && currentRoom.room_name === data.room_name)
 				setCurrentRoom(undefined);
-			setRooms(prevRooms => {
+			/*setRooms(prevRooms => {
 				return prevRooms.splice(prevRooms.findIndex((o) => {
 					return (o.room_name === data.room_name);
 				}), 1)
-			});
+			});*/
+			if (data.room_name !== undefined)
+				rmRoom(data.room_name);
 		})
 
 		return function cleanup() {		

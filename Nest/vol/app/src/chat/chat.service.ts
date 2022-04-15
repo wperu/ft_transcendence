@@ -13,7 +13,7 @@ export class ChatService {
         private tokenService: TokenService,
 		private rooms: Room[],
     )
-    {}
+    { this.rooms = [];}
 
 
 
@@ -114,9 +114,13 @@ export class ChatService {
 
 	getRoom(room_name: string): Room
 	{
-		if (!this.roomExists(room_name))
+		if (this.roomExists(room_name) === true)
+		{
+			const el = this.rooms.find((r) => { return r.name === room_name});
+			return (el);
+		}
+		else
 			return (undefined);
-		return (this.rooms.find((r) => { r.name === room_name}));
 	}
 
 
