@@ -4,7 +4,6 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
-import { RoomProtection } from 'src/Common/Dto/chat/room';
 import { Room } from './interface/room';
 
 @Injectable()
@@ -89,11 +88,11 @@ export class ChatService {
 
 
 
-	createRoom(room_name: string, room_protection: RoomProtection, owner: ChatUser, password: string = "")
+	createRoom(room_name: string, room_private: boolean, owner: ChatUser, password: string = "")
 	{
 		this.rooms.push({
 			name: room_name,
-			protection: room_protection,
+			private_room: room_private,
 			users: [owner],
 			invited : [],
 			muted: [],
