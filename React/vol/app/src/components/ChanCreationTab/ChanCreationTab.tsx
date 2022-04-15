@@ -1,7 +1,7 @@
 import React from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChanCreationTab.css";
-import { CreateRoom } from "../../Common/Dto/chat/room";
+import { CreateRoom, RoomProtection } from "../../Common/Dto/chat/room";
 
 function ChanCreationTab()
 {
@@ -21,6 +21,7 @@ function ChanCreationTab()
 		}
 		else
 		{
+			
 			var data: CreateRoom;
 			if (target.is_protected)
 			{		
@@ -28,7 +29,7 @@ function ChanCreationTab()
 				data =
 				{
 					room_name: target.channel_name.value,
-					proctection: 1,
+					proctection: (target.channel_visibility.value !== "private_chan") ? 0 : 2,
 					password: target.password.value,
 				};
 			}
@@ -37,7 +38,7 @@ function ChanCreationTab()
 				data =
 				{
 					room_name: target.channel_name.value,
-					proctection: 0,
+					proctection: (target.channel_visibility.value !== "private_chan") ? 0 : 2,
 				};
 			}
 			chatCtx.socket.emit("CREATE_ROOM", data);

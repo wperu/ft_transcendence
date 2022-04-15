@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import UnjoinedChan from "../UnjoinedChan/UnjoinedChan";
-import { useChatContext, IRoom } from "../Sidebar/ChatContext/ProvideChat";
+import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { JoinRoomDto } from "../../interface/chat/chatDto";
 
 import "./UnjoinedChansTab.css";
@@ -11,8 +11,11 @@ function UnjoinedChansTab()
 
 	const [roomList, setRoomList] = useState<Array<{name: string, has_password: boolean}>>([]);
 	
+
+	//fix me useInterval
 	useEffect(() => {
 		chatCtx.socket.on("ROOM_LIST", (data: Array<{name: string, has_password: boolean}>) => {
+			console.log(data);
 			setRoomList(data);
 		})
 		
@@ -24,7 +27,7 @@ function UnjoinedChansTab()
 				chatCtx.socket.off("ROOM_LIST");
 			}
 		};
-	}, [roomList]);
+	}, [roomList, chatCtx.socket]);
 
 	function joinChan(event: React.SyntheticEvent)
 	{
@@ -35,7 +38,7 @@ function UnjoinedChansTab()
 			password: {value: string};
 		};
 
-		if (target.name.value.length != 0)
+		if (target.name.value.length !== 0)
 		{
 			var data: JoinRoomDto;
 			if (target.password.value.length > 0)

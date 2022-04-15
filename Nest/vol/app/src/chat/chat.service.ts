@@ -144,7 +144,8 @@ export class ChatService {
 
 	getAllRooms(): Room[]
 	{
-		return (this.rooms);
+		const ref = this.rooms;
+		return (ref);
 	}
 
 }

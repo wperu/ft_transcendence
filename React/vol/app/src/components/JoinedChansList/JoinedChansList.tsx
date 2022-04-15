@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import JoinedChan from "../JoinedChan/JoinedChan";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";
@@ -11,6 +11,13 @@ function Joined_chans_list()
 	const chatCtx = useChatContext();
 	const [socket, setSocket] = useState(chatCtx.socket);
 
+	let i = 0;
+
+	useEffect(() => 
+	{
+		i = 0;
+	});
+
 	function Content()
 	{
 		if (chatCtx.rooms.length === 0)
@@ -18,7 +25,9 @@ function Joined_chans_list()
 		else
 			return (
 				<div id="joined_chans_list">
-					{chatCtx.rooms.map(({room_name}) => <JoinedChan name={room_name}/> )}
+					<ul>
+						{chatCtx.rooms.map(({room_name}) => <li key={i++}><JoinedChan name={room_name}/></li>)}
+					</ul>
 				</div>
 			);
 	}

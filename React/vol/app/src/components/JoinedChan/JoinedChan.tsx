@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ECurrentTab, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./JoinedChan.css";
 
@@ -21,6 +21,7 @@ function JoinedChan(props: chan_props)
 		chatCtx.setCurrentTab(ECurrentTab["chat"]);
 	}
 	
+
 	return (
 		<div className="joined_chan">
 			<input className="connect_chan"  id={"connect_chan" + props.name}

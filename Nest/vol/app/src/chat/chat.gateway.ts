@@ -138,11 +138,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 			
 			/* Protection check */
-			if (local_room.protection === RoomProtection.NONE)
+
+
+
+			if (local_room.password === "")
 			{
 				local_room.users.push(user);
 			}
-			else if (local_room.protection === RoomProtection.PROTECTED)
+			else if (local_room.password !== "")
 			{
 				if (local_room.password === payload.password)
 					local_room.users.push(user);
@@ -153,7 +156,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					return ; 
 				}
 			}
-			else if (local_room.protection === RoomProtection.PRIVATE)
+		/*	else if (local_room.password !== "")
 			{
 				if(local_room.invited.find(string => string === User.name))
 					local_room.users.push(user);
@@ -163,7 +166,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: Client is not in room's invite list`);
 					return ;
 				}
-			}
+			}*/
 			else
 			{
 				client.emit("JOINED_ROOM", { status: 1, status_message: "unknown room protection type" });
@@ -214,6 +217,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
+		console.log('your chan: ' + this.chatService.roomExists(payload));
 		let local_room = this.chatService.getRoom(payload);
 		if (local_room === undefined)
 		{
@@ -419,11 +423,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
 		this.chatService.getAllRooms().forEach(room => {
-			if (room.protection === RoomProtection.NONE)
+			if (room.protection === RoomProtection.NONE) //fix me
 			{
 				rooms_list.push({
 					name: room.name,
-					has_password: room.password !== null,
+					has_password: room.password !== "",
 				});
 			}
 		});

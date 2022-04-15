@@ -93,6 +93,11 @@ function ChatTab ()
 			setUpdated(false);
 		}
 	}, [updated]);
+	
+	let i = 0;
+	useEffect(() => {
+		i = 0;
+	})
 
 	return (
 		<div id="ChatTab">
@@ -105,7 +110,11 @@ function ChatTab ()
 					value="Inviter à jouer" />
 			</header>
 			<div id="messages_list" ref={msg_list_ref}>
-				{messages.map(({message, sender, send_date}) => (<ChatMessage src_name={sender} content={message} time={send_date} />))}
+				<ul>
+				{	
+					messages.map(({message, sender, send_date}) => (<li key={i++}><ChatMessage src_name={sender} content={message} time={send_date} /></li>))
+				}
+				</ul>
 			</div>
 			<footer id="msg_footer">
 				<input type="text" id="message_input" onKeyPress={pressedSend} 
