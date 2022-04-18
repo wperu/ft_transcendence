@@ -10,6 +10,11 @@ interface	user_props
 	online: boolean;
 }
 
+interface	blocked_user_props
+{
+	name: string;
+}
+
 
 export function Friend(props: user_props)
 {
@@ -22,13 +27,29 @@ export function Friend(props: user_props)
 	return (
 		<div className={get_opacity()}>
 			<div className="friends_user_infos">
-				<img className="friend_profile_pic" src={defaultLogo} alt="truc" />
-				<div className="friend_username">{props.name}</div>
+				<img className="friends_user_profile_pic" src={defaultLogo} alt="truc" />
+				<div className="friends_user_username">{props.name}</div>
 			</div>
 			<div className="chat_user_button_div">
 				<InviteUserButton />
 				<BlockUserButton user_name={props.name}
 					already_blocked={false} />
+			</div>
+		</div>
+	);
+}
+
+export function BlockedUser(props: blocked_user_props)
+{
+	return (
+		<div className="friends_tab_user">
+			<div className="friends_user_infos">
+				<img className="friends_user_profile_pic" src={defaultLogo} alt="truc" />
+				<div className="friends_user_username blocked_username">{props.name}</div>
+			</div>
+			<div className="chat_user_button_div">
+				<BlockUserButton user_name={props.name}
+					already_blocked={true} />
 			</div>
 		</div>
 	);

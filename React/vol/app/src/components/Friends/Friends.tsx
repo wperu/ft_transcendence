@@ -1,5 +1,5 @@
 import React from "react";
-import { Friend } from "./Users/Users"
+import { Friend, BlockedUser } from "./Users/Users"
 import "./Friends.css";
 
 function Friends() {
@@ -37,17 +37,18 @@ function Friends() {
 			</div>
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
-				a <br/>
-				b <br/>
-				c <br/>
-				d <br/>
-				e <br/>
-				f <br/>
-				g <br/>
-				h <br/>
-				i <br/>
-				j <br/>
-				k <br/>
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="fgerabgadjrf abFVHMWEgrfvsgnadbgrmfesvfbejfve666" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="a" />
+				<BlockedUser name="z" />
 			</div>
 		</div>
 	);

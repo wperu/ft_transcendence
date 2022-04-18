@@ -14,14 +14,14 @@
 	align-items: center;
 }
 
-.friend_username
+.friends_user_username
 {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow:ellipsis;
 }
 
-.friend_profile_pic
+.friends_user_profile_pic
 {
 	margin-right: 1.5vmin;
 	width: 3vmin;
@@ -31,4 +31,9 @@
 .offline
 {
 	opacity: 50%;
+}
+
+.blocked_username
+{
+	color: rgb(255, 31, 31);
 }
