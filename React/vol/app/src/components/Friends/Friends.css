@@ -1,2 +1,33 @@
-@import url("../../ressources/base.css");
+#Friends
+{
+	text-align: left;
+}
 
+.friends_tab_list
+{
+	height: calc((100vh - (var(--tab_button_height) * 4)) / 3);
+	max-width: 100%;
+	/* padding-left: 2.5vmin; */
+	background-color: #373a41c7;
+	scroll-behavior: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.friends_list_title
+{
+	display: flex;
+	align-items: center;
+	font-size: 0.65em;
+	text-transform: uppercase;
+	margin-left: 0.5vmin;
+	height: var(--tab_button_height);
+}
+
+.user_status_tab
+{
+	text-transform: lowercase;
+	font-style: italic;
+	font-size: 0.8em;
+	padding-left: 1vmin;
+}
