@@ -32,6 +32,7 @@ export interface RoomBanDto
 {
 	room_name: string,
 	user_name: string,
+	expires_in: number,
 }
 
 export interface RoomLeftDto

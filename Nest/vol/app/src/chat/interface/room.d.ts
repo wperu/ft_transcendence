@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { UserBan } from "src/Common/Dto/chat/UserBlock";
 import { ChatUser } from "./ChatUser";
 
 interface Room
@@ -9,7 +10,7 @@ interface Room
 	users: Array<ChatUser>
 	invited : Array<string>,
 	muted : Array<string>,
-	banned : Array<string>,
+	banned : Array<UserBan>,
 	password?: string,
 }
 
