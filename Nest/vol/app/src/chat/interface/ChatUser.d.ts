@@ -13,7 +13,7 @@ export interface ChatUser
 	socket: Socket[],
 
     username: string,
-    reference_id: string
+    reference_id: number,
     room_list: string[],
     /* ... */
 }
