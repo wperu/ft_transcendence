@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import UnjoinedChan from "../UnjoinedChan/UnjoinedChan";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { JoinRoomDto } from "../../interface/chat/chatDto";
-
 import "./UnjoinedChansTab.css";
+import useInterval from "../../hooks/useInterval";
 
 function UnjoinedChansTab()
 {
@@ -12,13 +12,11 @@ function UnjoinedChansTab()
 	const [roomList, setRoomList] = useState<Array<{name: string, has_password: boolean}>>([]);
 	
 
-	//fix me useInterval
 	useEffect(() => {
 		chatCtx.socket.on("ROOM_LIST", (data: Array<{name: string, has_password: boolean}>) => {
-			console.log(data);
 			setRoomList(data);
-		})
-		
+		});
+
 		chatCtx.socket.emit("ROOM_LIST");
 
 		return function cleanup() {
@@ -27,7 +25,15 @@ function UnjoinedChansTab()
 				chatCtx.socket.off("ROOM_LIST");
 			}
 		};
-	}, [roomList, chatCtx.socket]);
+	}, [])
+
+	function refreshList()
+	{
+		chatCtx.socket.emit("ROOM_LIST");
+	}
+	
+	//request List
+	useInterval(refreshList, 2000);
 
 	function joinChan(event: React.SyntheticEvent)
 	{
