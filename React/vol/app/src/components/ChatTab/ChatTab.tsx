@@ -3,28 +3,9 @@ import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import { RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
 import "./ChatTab.css"
+import useInterval from '../../hooks/useInterval';
 
 
-function useInterval(callback: () => void, delay: number) {
-	const savedCallback = useRef(callback);
-
-	// Remember the latest callback.
-	useEffect(() => {
-	savedCallback.current = callback;
-	}, [callback]);
-
-	// Set up the interval.
-	useEffect(() => {
-	function tick() {
-		if (savedCallback !== undefined)
-			savedCallback.current();
-	}
-	if (delay !== null) {
-		let id = setInterval(tick, delay);
-		return () => clearInterval(id);
-	}
-	}, [delay]);
-}
 
 function ChatTab ()
 {
