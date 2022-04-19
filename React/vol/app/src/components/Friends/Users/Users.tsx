@@ -1,5 +1,5 @@
 import "./Users.css";
-import { BlockUserButton, InviteUserButton }
+import { BlockUserButton, InviteUserButton, AddFriendButton }
 	from "../../UserBarButtons/UserBarButtons";
 import defaultLogo from "../../../ressources/images/user-icon-0.png";
 
@@ -32,6 +32,8 @@ export function Friend(props: user_props)
 			</div>
 			<div className="chat_user_button_div">
 				<InviteUserButton />
+				<AddFriendButton user_name={props.name}
+							already_friend={false} />
 				<BlockUserButton user_name={props.name}
 					already_blocked={false} />
 			</div>

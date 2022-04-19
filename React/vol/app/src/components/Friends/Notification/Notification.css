@@ -1,0 +1,19 @@
+.friends_info_notification
+{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.friends_notification_date
+{
+	font-size: 0.6em;
+	color: rgb(165, 165, 165);
+}
+
+.friends_notification_content
+{
+	font-size: 0.7em;
+	width: 75%;
+	text-align: end;
+}

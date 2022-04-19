@@ -3,6 +3,7 @@ import MuteLogo from "../../ressources/images/mute.png";
 import BanLogo from "../../ressources/images/hammer.png";
 import InviteLogo from "../../ressources/images/pvp.png";
 import PromoteLogo from "../../ressources/images/promote.png";
+import AddFriendLogo from "../../ressources/images/add-friend.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
@@ -16,6 +17,13 @@ interface promoteProp
 {
 	user_name: string;
 	already_admin: boolean;
+}
+
+
+interface friendProp
+{
+	user_name: string;
+	already_friend: boolean;
 }
 
 interface blockProp
@@ -150,6 +158,34 @@ export function PromoteUserButton(prop: promoteProp)
 	{
 		return (
 			<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>
+		);
+	}
+}
+
+export function AddFriendButton(prop: friendProp)
+{
+	const chtCtx = useChatContext();
+
+	function addFriend()
+	{
+		console.log(prop.user_name + " friend :D");
+	}
+	
+	function removeFriend()
+	{
+		console.log(prop.user_name + " not friend anymore");
+	}
+
+	if (prop.already_friend)
+	{
+		return (
+			<button className="user_bar_button negative_user_button flipped" onClick={removeFriend}><img alt="" src={AddFriendLogo}/>unfriend</button>
+		);
+	}
+	else
+	{
+		return (
+			<button className="user_bar_button positive_user_button" onClick={addFriend}><img alt="" src={AddFriendLogo}/>friend</button>
 		);
 	}
 }

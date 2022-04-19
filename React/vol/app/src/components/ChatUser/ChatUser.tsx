@@ -1,5 +1,6 @@
 import {ELevelInRoom} from "../Sidebar/ChatContext/ProvideChat"
-import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton, PromoteUserButton} from "../UserBarButtons/UserBarButtons"
+import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
+	PromoteUserButton, AddFriendButton} from "../UserBarButtons/UserBarButtons"
 import "./ChatUser.css"
 
 interface	props
@@ -19,6 +20,8 @@ function ChatUser(data: props)
 			return (
 				<div className="chat_user_button_div">
 					<InviteUserButton />
+					<AddFriendButton user_name={data.targetUsername}
+							already_friend={false} />
 					<BlockUserButton user_name={data.targetUsername}
 						already_blocked={data.isBlockedByCurrentUser} />
 				</div>
@@ -31,6 +34,8 @@ function ChatUser(data: props)
 				return (
 					<div className="chat_user_button_div">
 						<InviteUserButton />
+						<AddFriendButton user_name={data.targetUsername}
+							already_friend={false} />
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} />
 						<MuteUserButton user_name={data.targetUsername} />
@@ -43,6 +48,8 @@ function ChatUser(data: props)
 				return (
 					<div className="chat_user_button_div">
 						<InviteUserButton />
+						<AddFriendButton user_name={data.targetUsername}
+							already_friend={false} />
 						<PromoteUserButton user_name={data.targetUsername}
 							already_admin={data.targetUserLvl === ELevelInRoom.admin} />
 						<BlockUserButton user_name={data.targetUsername}

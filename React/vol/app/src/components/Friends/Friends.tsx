@@ -1,5 +1,6 @@
 import React from "react";
 import { Friend, BlockedUser } from "./Users/Users"
+import { InfoNotification } from "./Notification/Notification"
 import "./Friends.css";
 
 function Friends() {
@@ -7,17 +8,21 @@ function Friends() {
 		<div id="Friends">
 			<span className="friends_list_title">Notifications</span>
 			<div className="friends_tab_list notifs_list">
-				a <br/>
-				b <br/>
-				c <br/>
-				d <br/>
-				e <br/>
-				f <br/>
-				g <br/>
-				h <br/>
-				i <br/>
-				j <br/>
-				k <br/>
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info dkslgabbj wjk 
+					bfewhj hj fhjds Vfhj vfhjes bfh vF Hsv hjfdsv hfd jsvdh
+					vfd hjs fhvhj vdfhsjv df mdr bite" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
+				<InfoNotification content="ceci est une info" date="today" />
 			</div>
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">

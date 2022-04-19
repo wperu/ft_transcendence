@@ -23,7 +23,7 @@ function ChannelUserList ()
 				chatCtx.socket.off("USER_LIST");
 			}
 		};
-	}, [userList]);
+	}, []);
 
 
 	if (chatCtx.currentRoom)
