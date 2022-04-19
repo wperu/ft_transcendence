@@ -4,6 +4,7 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { ChatModule } from './chat.module';
 import { Room } from './interface/room';
 
 @Injectable()
@@ -11,12 +12,28 @@ export class ChatService {
     constructor (
         private tokenService: TokenService,
 		private rooms: Room[],
+		private users: ChatUser[],
+
     )
     { this.rooms = [];}
 
 
+	connectUserFromSocket(socket: Socket): ChatUser | undefined
+	{
+        const data: ChatUser = this.tokenService.decodeToken(socket.handshake.auth.token) as ChatUser;
 
-    getUserFromSocket(socket: Socket, users: ChatUser[], isConnection: boolean): ChatUser | undefined
+		let idx = this.users.push({
+			socket: [socket], 
+			username: data.username,
+			reference_id: data.reference_id,
+			room_list: [],
+		})
+
+		return this.users[idx - 1];
+	}
+
+
+    getUserFromSocket(socket: Socket): ChatUser | undefined
     {
         const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
         /* todo   maybe check if data contains the keys that we have in ChatUser */
@@ -28,27 +45,7 @@ export class ChatService {
 		{
 			const us = data as UserData;
 
-			let ret = users.find((u) => { return u.username === us.username})
-			if (ret === undefined && isConnection === true)
-			{
-				let idx = users.push({
-					//socketId: [socket.id],
-					socket: [socket], 
-					username: us.username,
-					reference_id: us.reference_id,
-					room_list: [],
-				})
-
-				ret = users[idx - 1];
-			}
-			else if (isConnection === true)
-			{
-				let idx = ret.socket.find((s) => { return s.id === socket.id})
-
-				if (idx === undefined)
-					ret.socket.push(socket);
-
-			}
+			let ret = this.users.find((u) => { return u.username === us.username})
 			return (ret);
 		}
 
@@ -56,8 +53,13 @@ export class ChatService {
     }
 
 
+    getUserFromUsername(username: string): ChatUser | undefined
+    {
+        return (this.users.find((u) => { return u.username === username}));
+    }
 
-	disconnectClient(socket: Socket, users: ChatUser[]): ChatUser | undefined
+
+	disconnectClient(socket: Socket): ChatUser | undefined
 	{
 		const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
 
@@ -66,7 +68,7 @@ export class ChatService {
 
 		const us = data as UserData;
 
-		const chatUser = users.find((u) => { return u.username === us.username})
+		const chatUser = this.users.find((u) => { return u.username === us.username})
 		if (chatUser === undefined)
 			return undefined;//throw error
 		
@@ -131,6 +133,12 @@ export class ChatService {
 			return (false);
 		this.rooms.splice(this.rooms.indexOf(to_remove), 1);
 		return (true);
+	}
+
+
+	removeUser(username: string) 
+	{
+		this.users.splice(this.users.findIndex((u) => { return u.username === username}))
 	}
 
 
