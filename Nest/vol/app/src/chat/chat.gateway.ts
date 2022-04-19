@@ -73,7 +73,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 
-
+	
 	@SubscribeMessage('CREATE_ROOM')
 	createRoom(client: Socket, payload: CreateRoom): void 
 	{
@@ -96,7 +96,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else
 		{
-			throw new BadRequestException(`room exist impossible create with same name`)	
+			client.emit("JOINED_ROOM", { status: 1, status_message: `room ${payload.room_name} already exists` });
 		}
 	}
 
@@ -156,17 +156,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					return ; 
 				}
 			}
-		/*	else if (local_room.password !== "")
-			{
-				if(local_room.invited.find(string => string === User.name))
-					local_room.users.push(user);
-				else
-				{
-					client.emit("JOINED_ROOM", { status: 1, status_message: " you are is not in room's invite list" });
-					this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: Client is not in room's invite list`);
-					return ;
-				}
-			}*/
 			else
 			{
 				client.emit("JOINED_ROOM", { status: 1, status_message: "unknown room protection type" });
@@ -187,18 +176,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				// ...
 			})});
 		user.room_list.push(payload.room_name);
-		/*if (!client.emit("JOINED_ROOM", {
-			status: 0,
-			room_name: local_room.name,
-			// owner 
-			// online users
-			// ...
-		}))
-		{
-			client.emit("JOINED_ROOM", { status: 1, status_message: "unable to join room" });
-			this.logger.log(`[${client.id}] Cannot join room: ${payoad.room_name}: unable to join room`);
-			return;
-		}*/
 	}
 
 
