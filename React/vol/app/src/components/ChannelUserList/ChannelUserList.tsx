@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
+import useInterval from "../../hooks/useInterval";
 import ChatUser from "../ChatUser/ChatUser";
 import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChannelUserList.css"
@@ -15,7 +15,7 @@ function ChannelUserList ()
 			setUserList(data);
 		})
 		
-		chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.room_name);
+		//
 
 		return function cleanup() {
 			if (chatCtx.socket !== undefined)
@@ -24,6 +24,12 @@ function ChannelUserList ()
 			}
 		};
 	}, [userList]);
+
+	useEffect(() => {
+		chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.room_name);
+	}, [chatCtx.socket])
+
+	useInterval(() => {chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.room_name);}, 1000);
 
 
 	if (chatCtx.currentRoom)

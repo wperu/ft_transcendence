@@ -47,6 +47,7 @@ export function BanUserButton(prop: Prop)
 			{
 				room_name: chtCtx.currentRoom.room_name,
 				user_name: prop.user_name,
+				expires_in: 5000,
 			} 
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
