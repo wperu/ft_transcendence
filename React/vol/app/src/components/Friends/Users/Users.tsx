@@ -33,7 +33,7 @@ export function Friend(props: user_props)
 			<div className="chat_user_button_div">
 				<InviteUserButton />
 				<AddFriendButton user_name={props.name}
-							already_friend={false} />
+							already_friend={true} />
 				<BlockUserButton user_name={props.name}
 					already_blocked={false} />
 			</div>

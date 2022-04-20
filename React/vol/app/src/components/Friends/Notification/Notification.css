@@ -2,18 +2,58 @@
 {
 	display: flex;
 	justify-content: space-between;
+	min-height: 4vmin;
+	width: 100%;
+}
+
+.friends_interactive_notification
+{
+	height: 4vmin;
+	display: flex;
+	justify-content: space-between;
 	align-items: center;
+	width: 100%;
 }
 
 .friends_notification_date
 {
-	font-size: 0.6em;
+	font-size: 0.55em;
 	color: rgb(165, 165, 165);
+	width: 15%;
 }
 
-.friends_notification_content
+.friends_info_notification_content
 {
-	font-size: 0.7em;
-	width: 75%;
-	text-align: end;
+	font-size: 0.6em;
+	width: 80%;
+	text-align: start;
+	overflow: visible;
+}
+
+.friends_interactive_notif_content
+{
+	font-size: 0.5em;
+	width: 36%;
+	height: fit-content;
+	text-align: start;
+	margin-left: 2%;
+}
+
+
+.notif_button_div
+{
+	display: flex;
+	justify-content: right;
+	align-items: center;
+	width: 27%;
+	height: 100%;
+}
+
+.friends_notif_name
+{
+	width: 20%;
+	font-size: 0.5em;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }

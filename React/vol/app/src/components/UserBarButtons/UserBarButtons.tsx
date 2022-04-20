@@ -4,6 +4,7 @@ import BanLogo from "../../ressources/images/hammer.png";
 import InviteLogo from "../../ressources/images/pvp.png";
 import PromoteLogo from "../../ressources/images/promote.png";
 import AddFriendLogo from "../../ressources/images/add-friend.png";
+import AcceptInvitation from "../../ressources/images/accept.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
@@ -30,6 +31,11 @@ interface blockProp
 {
 	user_name: string;
 	already_blocked: boolean;
+}
+
+interface gameInvitationProp
+{
+	src_name: string;
 }
 
 export function InviteUserButton()
@@ -179,7 +185,7 @@ export function AddFriendButton(prop: friendProp)
 	if (prop.already_friend)
 	{
 		return (
-			<button className="user_bar_button negative_user_button flipped" onClick={removeFriend}><img alt="" src={AddFriendLogo}/>unfriend</button>
+			<button className="user_bar_button negative_user_button" onClick={removeFriend}><img alt="" src={AddFriendLogo}/>unfriend</button>
 		);
 	}
 	else
@@ -188,4 +194,15 @@ export function AddFriendButton(prop: friendProp)
 			<button className="user_bar_button positive_user_button" onClick={addFriend}><img alt="" src={AddFriendLogo}/>friend</button>
 		);
 	}
+}
+
+export function AcceptGameInvitation(prop: gameInvitationProp)
+{
+	function accept()
+	{
+		console.log("accepted game invitation from " + prop)
+	}
+	return (
+		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitation}/>play</button>
+	);
 }

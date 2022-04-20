@@ -15,7 +15,6 @@ function UnjoinedChansTab()
 	//fix me useInterval
 	useEffect(() => {
 		chatCtx.socket.on("ROOM_LIST", (data: Array<{name: string, has_password: boolean}>) => {
-			console.log(data);
 			setRoomList(data);
 		})
 		
