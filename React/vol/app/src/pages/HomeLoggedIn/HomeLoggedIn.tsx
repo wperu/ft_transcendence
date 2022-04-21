@@ -17,7 +17,7 @@ function HomeLoggedIn() {
 				<PongLogo />
 			</header>
 			<ul id="buttons">
-				<li><MatchmakingButton /></li>
+				<li><Link to='/game'><MatchmakingButton /></Link></li>
 				<li><Link to='/profile'><ProfileButton /></Link></li>
 			</ul>
 			

@@ -13,7 +13,6 @@ export class ChatService {
         private tokenService: TokenService,
 		private rooms: Room[],
 		private users: ChatUser[],
-
     )
     { this.rooms = [];}
 
@@ -22,6 +21,9 @@ export class ChatService {
 	{
         const data: ChatUser = this.tokenService.decodeToken(socket.handshake.auth.token) as ChatUser;
 
+		if (data === null)
+			return (undefined);
+		
 		let idx = this.users.push({
 			socket: [socket], 
 			username: data.username,
