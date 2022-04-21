@@ -1,2 +1,74 @@
-@import url("../../ressources/base.css");
+#Friends
+{
+	text-align: left;
+}
 
+.friends_tab_list
+{
+	height: calc((100vh - (var(--tab_button_height) * 5)) / 3);
+	max-width: 100%;
+	/* padding-left: 2.5vmin; */
+	background-color: #373a41c7;
+	scroll-behavior: auto;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.friends_list_title
+{
+	display: flex;
+	align-items: center;
+	font-size: 0.65em;
+	text-transform: uppercase;
+	margin-left: 0.5vmin;
+	height: var(--tab_button_height);
+}
+
+.user_status_tab
+{
+	text-transform: lowercase;
+	font-style: italic;
+	font-size: 0.8em;
+	padding-left: 1vmin;
+}
+
+#add_friend_by_name_form
+{
+	width: 100%;
+	height: calc(var(--tab_button_height) - 1px);
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	border-bottom: 1px solid whitesmoke;
+}
+
+#add_friend_title
+{
+	font-size: 0.5em;
+	text-transform: uppercase;
+}
+
+#add_friend_input
+{
+	width: 50%;
+	font-size: 0.4em;
+	color: white;
+	border: none;
+	background-color: #52565f;
+	padding: 0.5vmin;
+	border-radius: 5px;
+}
+
+#add_friend_button
+{
+	height: max-content;
+	font-size: 0.4em;
+	color: white;
+	width: max-content;
+	border-style: none;
+	border-radius: 7px;
+	background-color: #537896;
+	padding: 0.5vmin;
+	text-transform: uppercase;
+	transition: 0.2s cubic-bezier(.23,1,.32,1);
+}

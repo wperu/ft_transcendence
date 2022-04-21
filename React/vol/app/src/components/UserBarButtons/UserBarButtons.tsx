@@ -3,6 +3,9 @@ import MuteLogo from "../../ressources/images/mute.png";
 import BanLogo from "../../ressources/images/hammer.png";
 import InviteLogo from "../../ressources/images/pvp.png";
 import PromoteLogo from "../../ressources/images/promote.png";
+import AddFriendLogo from "../../ressources/images/add-friend.png";
+import AcceptInvitationLogo from "../../ressources/images/accept.png";
+import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
@@ -18,11 +21,29 @@ interface promoteProp
 	already_admin: boolean;
 }
 
+
+interface friendProp
+{
+	user_name: string;
+	already_friend: boolean;
+}
+
 interface blockProp
 {
 	user_name: string;
 	already_blocked: boolean;
 }
+
+interface gameInvitationProp
+{
+	src_name: string;
+}
+
+interface dmProp
+{
+	name: string;
+}
+
 
 export function InviteUserButton()
 {
@@ -47,7 +68,7 @@ export function BanUserButton(prop: Prop)
 			{
 				room_name: chtCtx.currentRoom.room_name,
 				user_name: prop.user_name,
-				expires_in: 5000,
+				expires_in: 50000
 			} 
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
@@ -153,4 +174,54 @@ export function PromoteUserButton(prop: promoteProp)
 			<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>
 		);
 	}
+}
+
+export function AddFriendButton(prop: friendProp)
+{
+	const chtCtx = useChatContext();
+
+	function addFriend()
+	{
+		console.log(prop.user_name + " friend :D");
+	}
+	
+	function removeFriend()
+	{
+		console.log(prop.user_name + " not friend anymore");
+	}
+
+	if (prop.already_friend)
+	{
+		return (
+			<button className="user_bar_button negative_user_button" onClick={removeFriend}><img alt="" src={AddFriendLogo}/>unfriend</button>
+		);
+	}
+	else
+	{
+		return (
+			<button className="user_bar_button positive_user_button" onClick={addFriend}><img alt="" src={AddFriendLogo}/>friend</button>
+		);
+	}
+}
+
+export function AcceptGameInvitation(prop: gameInvitationProp)
+{
+	function accept()
+	{
+		console.log("accepted game invitation from " + prop.src_name)
+	}
+	return (
+		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitationLogo}/>play</button>
+	);
+}
+
+export function DirectMessage(prop: dmProp)
+{
+	function goDM()
+	{
+		console.log("go dm avec " + prop.name)
+	}
+	return (
+		<button className="user_bar_button positive_user_button" onClick={goDM}><img alt="" src={ChatLogo}/>DM</button>
+	);
 }

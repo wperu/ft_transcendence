@@ -23,7 +23,7 @@ function ChannelUserList ()
 				chatCtx.socket.off("USER_LIST");
 			}
 		};
-	}, [userList]);
+	}, []);
 
 	useEffect(() => {
 		chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.room_name);
