@@ -4,6 +4,8 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { User } from 'src/entities/user.entity';
+import { FriendsService } from 'src/friends/friends.service';
 import { ChatModule } from './chat.module';
 import { Room } from './interface/room';
 
@@ -11,6 +13,7 @@ import { Room } from './interface/room';
 export class ChatService {
     constructor (
         private tokenService: TokenService,
+		private friendService: FriendsService,
 		private rooms: Room[],
 		private users: ChatUser[],
 
@@ -154,5 +157,60 @@ export class ChatService {
 		const ref = this.rooms;
 		return (ref);
 	}
+
+	/*
+
+	//Todo create userDto 
+	async getFriendList(user: ChatUser) : Promise<UserData[]>
+	{
+		const relation = await this.friendService.findFriendOf(user.reference_id);
+
+		let ret: UserData[];
+
+
+		relation.forEach((rel) => {
+			ret.push({
+				username: "default", //todo
+				reference_id: rel.id_two,
+			});
+		});
+
+		return ret;
+	}
+
+	async getBlockList(user: ChatUser) : Promise<UserData[]>
+	{
+		const relation = await this.friendService.findBlockedOf(user.reference_id);
+
+		let ret: UserData[];
+
+
+		relation.forEach((rel) => {
+			ret.push({
+				username: "default", //todo
+				reference_id: rel.id_two,
+			});
+		});
+
+		return ret;
+	}
+
+	async getRequestList(user: ChatUser) : Promise<UserData[]>
+	{
+		const relation = await this.friendService.findRequestOf(user.reference_id);
+
+		let ret: UserData[];
+
+
+		relation.forEach((rel) => {
+			ret.push({
+				username: "default", //todo
+				reference_id: rel.id_two,
+			});
+		});
+
+		return ret;
+	}
+	*/
 
 }

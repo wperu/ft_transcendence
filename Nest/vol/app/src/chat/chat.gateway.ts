@@ -386,6 +386,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		client.emit('ROOM_LIST', rooms_list);
 	}
 
+	@SubscribeMessage('BLOCK_LIST')
+	block_list(client: Socket) : void
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+
+		}
+	}
+
+	@SubscribeMessage('FRIEND_LIST')
+	friend_list(client: Socket) : void
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			
+		}
+	}
+
+	@SubscribeMessage('FRIEND_REQUEST_LIST')
+	request_list(client: Socket) : void
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			
+		}
+	}
+
 	
 	//Todo emit disconect if token is wrong
 	handleConnection(client: Socket, ...args: any[]) : void
