@@ -83,7 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		
 		if (!this.chatService.roomExists(payload.room_name))
 		{
-			this.chatService.createRoom(payload.room_name, payload.private_room, user, payload.password);
+			this.chatService.createRoom(payload.room_name, payload.password !== "", user, payload.password);
 
 			//todo join & add client to room
 			client.join(payload.room_name);
@@ -350,7 +350,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			user_ban.expires_in = new Date(Date.now()+ payload.expires_in * 1000)
 			current_room.banned.push(user_ban);
 		}
-		this.logger.log(`Client emit ban: ${client.id}`);
+		user.socket.forEach((s) => { s.disconnect(); });
+		this.logger.log(`Banned user ${client.id} from room ${current_room.name}`);
 	}
 
 	//todo
@@ -389,12 +390,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	//Todo emit disconect if token is wrong
 	handleConnection(client: Socket, ...args: any[]) : void
 	{
-		let userInfo : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		
-		if (userInfo === undefined)
+		if (user === undefined)
 		{
-			userInfo = this.chatService.connectUserFromSocket(client);
-			if(userInfo === undefined)
+			user = this.chatService.connectUserFromSocket(client);
+			if(user === undefined)
 			{
 				console.log("Unknown user tried to join the chat");
 				client.disconnect();
@@ -403,19 +404,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else
 		{
-			let idx = userInfo.socket.find((s) => { return s.id === client.id})
+			let idx = user.socket.find((s) => { return s.id === client.id})
 
 			if (idx === undefined)
-				userInfo.socket.push(client);
+				user.socket.push(client);
 		}
 
-		if (userInfo === undefined)
+		if (user === undefined)
 		{
 			this.logger.log(`Chat warning: Unable to retrieve users informations on socket ${client.id}`);
 			return ;
 			
 		}
-		userInfo.room_list.forEach((room) => {
+		user.room_list.forEach((room) => {
 			client.join(room);
 			client.emit("JOINED_ROOM", {
 				status: 0,
@@ -427,9 +428,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		})
 
-		this.logger.log(`${userInfo.username} connected to the chat under id : ${client.id}`);
-		this.logger.log(`${userInfo.username} total connection : ${userInfo.socket.length}`);
-
+		this.logger.log(`${user.username} connected to the chat under id : ${client.id}`);
+		this.logger.log(`${user.username} total connection : ${user.socket.length}`);
 	}
 
 
