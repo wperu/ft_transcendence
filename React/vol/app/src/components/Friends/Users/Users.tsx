@@ -1,5 +1,5 @@
 import "./Users.css";
-import { BlockUserButton, InviteUserButton, AddFriendButton }
+import { BlockUserButton, InviteUserButton, AddFriendButton, DirectMessage }
 	from "../../UserBarButtons/UserBarButtons";
 import defaultLogo from "../../../ressources/images/user-icon-0.png";
 
@@ -32,6 +32,7 @@ export function Friend(props: user_props)
 			</div>
 			<div className="chat_user_button_div">
 				<InviteUserButton />
+				<DirectMessage name={props.name} />
 				<AddFriendButton user_name={props.name}
 							already_friend={true} />
 				<BlockUserButton user_name={props.name}

@@ -1,6 +1,6 @@
 import {ELevelInRoom} from "../Sidebar/ChatContext/ProvideChat"
 import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
-	PromoteUserButton, AddFriendButton} from "../UserBarButtons/UserBarButtons"
+	PromoteUserButton, AddFriendButton, DirectMessage} from "../UserBarButtons/UserBarButtons"
 import "./ChatUser.css"
 
 interface	props
@@ -19,6 +19,7 @@ function ChatUser(data: props)
 		{
 			return (
 				<div className="chat_user_button_div">
+					<DirectMessage name={data.targetUsername} />
 					<InviteUserButton />
 					<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} />
@@ -33,6 +34,7 @@ function ChatUser(data: props)
 			{
 				return (
 					<div className="chat_user_button_div">
+						<DirectMessage name={data.targetUsername} />
 						<InviteUserButton />
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} />
@@ -47,6 +49,7 @@ function ChatUser(data: props)
 			{
 				return (
 					<div className="chat_user_button_div">
+						<DirectMessage name={data.targetUsername} />
 						<InviteUserButton />
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} />

@@ -4,7 +4,8 @@ import BanLogo from "../../ressources/images/hammer.png";
 import InviteLogo from "../../ressources/images/pvp.png";
 import PromoteLogo from "../../ressources/images/promote.png";
 import AddFriendLogo from "../../ressources/images/add-friend.png";
-import AcceptInvitation from "../../ressources/images/accept.png";
+import AcceptInvitationLogo from "../../ressources/images/accept.png";
+import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
@@ -37,6 +38,12 @@ interface gameInvitationProp
 {
 	src_name: string;
 }
+
+interface dmProp
+{
+	name: string;
+}
+
 
 export function InviteUserButton()
 {
@@ -200,9 +207,20 @@ export function AcceptGameInvitation(prop: gameInvitationProp)
 {
 	function accept()
 	{
-		console.log("accepted game invitation from " + prop)
+		console.log("accepted game invitation from " + prop.src_name)
 	}
 	return (
-		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitation}/>play</button>
+		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitationLogo}/>play</button>
+	);
+}
+
+export function DirectMessage(prop: dmProp)
+{
+	function goDM()
+	{
+		console.log("go dm avec " + prop.name)
+	}
+	return (
+		<button className="user_bar_button positive_user_button" onClick={goDM}><img alt="" src={ChatLogo}/>DM</button>
 	);
 }

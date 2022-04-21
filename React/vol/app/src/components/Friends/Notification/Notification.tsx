@@ -1,4 +1,4 @@
-import { AddFriendButton, BlockUserButton, InviteUserButton, AcceptGameInvitation } from "../../UserBarButtons/UserBarButtons";
+import { AddFriendButton, BlockUserButton, InviteUserButton, AcceptGameInvitation, DirectMessage } from "../../UserBarButtons/UserBarButtons";
 import "./Notification.css";
 
 interface infos
@@ -39,7 +39,8 @@ export function InviteNotification(props: invite)
 			<div className="friends_interactive_notif_content">t'as invité à jouer</div>
 			<div className="notif_button_div">
 				<AcceptGameInvitation src_name={props.name} />
-				<InviteUserButton />
+				<DirectMessage name={props.name} />
+				<AddFriendButton user_name={props.name} already_friend={false} />
 				<BlockUserButton user_name={props.name} already_blocked={false} />
 			</div>
 		</div>
@@ -54,8 +55,9 @@ export function NewFriendNotification(props: fren)
 			<div className="friends_notif_name">{props.name}</div>
 			<div className="friends_interactive_notif_content"> t'as ajouté à ses amis</div>
 			<div className="notif_button_div">
-				<AddFriendButton user_name={props.name} already_friend={false} />
 				<InviteUserButton />
+				<DirectMessage name={props.name} />
+				<AddFriendButton user_name={props.name} already_friend={false} />
 				<BlockUserButton user_name={props.name} already_blocked={false} />
 			</div>
 		</div>

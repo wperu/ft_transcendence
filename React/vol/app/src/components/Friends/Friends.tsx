@@ -4,8 +4,29 @@ import { InfoNotification, InviteNotification, NewFriendNotification } from "./N
 import "./Friends.css";
 
 function Friends() {
+
+	function addFriend(event: React.SyntheticEvent)
+	{
+		event.preventDefault();
+
+		const target = event.target as typeof event.target & {
+			name: {value: string};
+		};
+
+		if (target.name.value.length !== 0)
+		{
+			console.log("add friend with name: " + target.name.value);
+			target.name.value = '';
+		}
+	}
 	return (
 		<div id="Friends">
+			<form id="add_friend_by_name_form" onSubmit={addFriend}>
+				<div id="add_friend_title">Ajouter un ami</div>
+				<input id="add_friend_input" type="text"
+					name="name" placeholder="Nom du fdp"/>
+				<input id="add_friend_button" type="submit" value="Ajouter"/>
+			</form>
 			<span className="friends_list_title">Notifications</span>
 			<div className="friends_tab_list notifs_list">
 				<InviteNotification name="michel" date="today" />
