@@ -35,12 +35,13 @@ function ChanCreationTab()
 		}
 		else
 		{
-			
 			var data: CreateRoom;
 			if (target.is_protected.value === true)
 			{		
 				if (target.password.value.length === 0)
 					alert("You can't set an empty password");
+				else if (target.password.value !== target.password_confirmation.value)
+					alert("The passwords must be the same");
 				else
 				{
 					data =
