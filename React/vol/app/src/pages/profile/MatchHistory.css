@@ -1,0 +1,66 @@
+#match_history
+{
+	width: 100%;
+	display: block;
+}
+
+.history_match > *
+{
+	display: inline;
+	text-align: center;
+}
+
+.match_score_separator
+{
+	color: lightblue;
+}
+
+.history_match
+{
+	color: whitesmoke;
+	width: 55%;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	height: 7vh;
+	margin: auto;
+}
+
+.history_match_user
+{
+	width: 20%;
+}
+
+.history_match_score
+{
+	width: 15%;
+}
+
+.victory, .defeat, .draw, .outcome_counterweight
+{
+	height: fit-content;
+	width: 13%;
+}
+
+.victory, .defeat, .draw
+{
+	font-size: 0.6em;
+	text-transform: uppercase;
+	text-align: center;
+	text-justify: center;
+}
+
+.victory
+{
+	color: greenyellow;
+}
+
+.defeat
+{
+	color: red;
+}
+
+.draw
+{
+	color: lightgrey;
+}

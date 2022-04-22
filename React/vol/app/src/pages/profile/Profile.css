@@ -1,6 +1,30 @@
-#profile-page
+#profile_page footer
 {
+	position: fixed;
+	bottom: 2vmin;
+	left: 2vmin;
+}
+
+#profile_header
+{
+	width: 100%;
+	background-color: rgb(95, 127, 185);
 	display: flex;
-	justify-content: space-around;
-	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+}
+
+#profile_header img
+{
+	border: 4px solid whitesmoke;
+	width: 15vh;
+	margin: 2vmin 2vmin;
+}
+
+
+#profile_username, #profile_level
+{
+	font-size: 1.2em;
+	color: whitesmoke;
+	margin: 0 7vw;
 }

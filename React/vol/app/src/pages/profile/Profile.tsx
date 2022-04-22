@@ -1,53 +1,74 @@
 import LogOutButton from "../../components/LogOutButton/LogOutButton";
-import ProfileSummary from "../../components/ProfileSummary/ProfileSummary";
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../interface/User";
 import axios from "axios";
-import ProfileSummarySettings from "../../components/ProfileSummarySettings/ProfileSummarySettings";
+import DefaultPP from "../../ressources/images/user-icon-0.png";
+import "./Profile.css";
+import MatchHistory from "./MatchHistory";
+
+interface headerInfo
+{
+	username: string;
+}
+
+function ProfileHeader(props : headerInfo)
+{
+	return (
+		<header id="profile_header">
+			<img alt="" src={DefaultPP}/>
+			<div id="profile_username">
+				{props.username}
+			</div>
+			<div id="profile_level">
+				Niveau 4
+			</div>
+
+		</header>
+	);
+}
 
 function Profile() {
 	
 	let { id }						= useParams<"id">();
 	const auth						= useAuth();
-	const [user, setUser]			= useState<IUser>(null!);
-	const [profilSum, setProfilSum] = useState<JSX.Element>(<ProfileSummary/>);
+	var	user: IUser 				= null!;
 
-	useEffect(() =>
+	function getUserName() : string
 	{
-		if (!id)
-		{
-			//me
-			if (auth.user)
-				setUser(auth.user);
+		if (user === null)
+			return ("default");
+		return (user.username);
+	}
 
-			setProfilSum(<ProfileSummarySettings/>);	
-		}
-		else
-		{
-			const url : string	= process.env.REACT_APP_API_USER || "/";
+	if (!id)
+	{
+		//me
+		if (auth.user)
+			user = auth.user;
+		// setProfilSum(<ProfileSummarySettings/>);
+	}
+	else
+	{
+		const url : string	= process.env.REACT_APP_API_USER || "/";
 
-			axios.get(url + "/" + id).then( resp => {
-				let data : IUser = resp.data;
-				//JSON.parse(resp.data);
-				//setUser(data);
-				console.log(data);
-			})
-			.catch(error => {
-				console.log(error.response.status);
-				//console.log(resp);
-			});
-		}
-	}, []);
+		axios.get(url + "/" + id).then( resp => {
+			let data : IUser = resp.data;
+			//JSON.parse(resp.data);
+			//setUser(data);
+		})
+		.catch(error => {
+			console.log(error.response.status);
+			//console.log(resp);
+		});
+	}
 
 	return (
-		<div>
-			<header id="home_header">
-				{profilSum}
-				<h1>Profile</h1>
-			</header>
-			 <footer>
+		<div id="profile_page">
+			<ProfileHeader username={getUserName()} />
+			<MatchHistory />
+			<footer>
 				<LogOutButton />
 			</footer>
 		</div>
