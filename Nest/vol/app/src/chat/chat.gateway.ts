@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Logger, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format, getISOWeeksInYear } from 'date-fns';
 import { Server, Socket } from 'socket.io';
@@ -358,7 +358,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_MUTE')
 	room_mute(client:Socket, payload: RoomMuteDto): void
 	{
+		let user_mute = this.chatService.getUserFromUsername(payload.user_name);
+		let current_room = this.chatService.getRoom(payload.room_name)
+		if(current_room !== undefined)
+		{
+			current_room.muted.push(user_mute.username);
+		}
 		this.logger.log(`Client emit mute: ${client.id}`);
+	}
+
+	@SubscribeMessage('ROOM_DEMUTE')
+	room_demute(client:Socket, payload: RoomMuteDto):void
+	{		
+		let current_room = this.chatService.getRoom(payload.room_name)
+		let user_mute = this.chatService.getUserFromUsername(payload.user_name);
+		if(current_room !== undefined)
+		{
+			current_room.muted.splice(current_room.muted.findIndex((string) => {return user_mute.username === payload.user_name}),1);
+		}	
+		this.logger.log(`Client emit mute: ${client.id}`);
+
 	}
 
 	//todo
