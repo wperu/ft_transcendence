@@ -7,7 +7,7 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
+import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import RoomInvite from '../Common/Dto/chat/RoomInvite';
 import RoomJoin from '../Common/Dto/chat/RoomJoin';
@@ -326,12 +326,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	user_list(client: Socket , payload: string) : void
 	{
 		var	current_room = this.chatService.getRoom(payload);
-		var	names_list : Array<string> = [];
+		var	names_list : Array<UserDataDto> = [];
 		
 		if (current_room !== undefined)
 		{
 			current_room.users.forEach(element => {
-				names_list.push(element.username);
+				if (element !== undefined)
+				{
+					let el = {
+						username: element.username,
+						reference_id: element.reference_id,
+					} as UserDataDto;
+
+					names_list.push(el);
+				}
 			});
 			client.emit("USER_LIST", names_list);
 		}
@@ -425,19 +433,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user !== undefined)
 		{
+			let ret = this.chatService.getFriendList(user) as Promise<UserDataDto[]>;
 			
+			console.log();
+			client.emit('FRIEND_LIST', ret);
 		}
 	}
 
 	@SubscribeMessage('FRIEND_REQUEST_LIST')
-	request_list(client: Socket) : void
+	request_list(client: Socket) : Promise<UserDataDto[]>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
-			
+			return this.chatService.getRequestList(user);
 		}
+		return ;
 	}
 
 	
@@ -504,5 +516,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 		}
 	}
+
+	/**
+	 ****** FRIEND PART ******
+	 */
+
+
+	 /**
+	  * 
+	  * @param client 
+	  * @param payload refId
+	  */
+	@SubscribeMessage('ADD_FRIEND')
+	add_friend(client: Socket, payload: number) : void
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			this.chatService.addFriend(user, payload);
+		}
+	}
+
 }
 

@@ -19,7 +19,7 @@ interface fren
 	date: string;
 }
 
-
+//fix me refID
 export function InfoNotification(props: infos)
 {
 	return (
@@ -38,10 +38,10 @@ export function InviteNotification(props: invite)
 			<div className="friends_notif_name">{props.name}</div>
 			<div className="friends_interactive_notif_content">t'as invité à jouer</div>
 			<div className="notif_button_div">
-				<AcceptGameInvitation src_name={props.name} />
-				<DirectMessage name={props.name} />
-				<AddFriendButton user_name={props.name} already_friend={false} />
-				<BlockUserButton user_name={props.name} already_blocked={false} />
+				<AcceptGameInvitation src_name={props.name} refId={0}/>
+				<DirectMessage name={props.name} refId={0}/>
+				<AddFriendButton user_name={props.name} already_friend={false} refId={0}/>
+				<BlockUserButton user_name={props.name} already_blocked={false} refId={0}/>
 			</div>
 		</div>
 	);
@@ -56,9 +56,9 @@ export function NewFriendNotification(props: fren)
 			<div className="friends_interactive_notif_content"> t'as ajouté à ses amis</div>
 			<div className="notif_button_div">
 				<InviteUserButton />
-				<DirectMessage name={props.name} />
-				<AddFriendButton user_name={props.name} already_friend={false} />
-				<BlockUserButton user_name={props.name} already_blocked={false} />
+				<DirectMessage name={props.name} refId={0}/>
+				<AddFriendButton user_name={props.name} already_friend={false} refId={0}/>
+				<BlockUserButton user_name={props.name} already_blocked={false} refId={0}/>
 			</div>
 		</div>
 	);

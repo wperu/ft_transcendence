@@ -42,5 +42,11 @@ export interface RoomLeftDto
 	room_name?: string,
 }
 
+export interface UserDataDto
+{
+	username: string,
+    reference_id: number,
+}
+
 
 // export { create_room, room_protect };

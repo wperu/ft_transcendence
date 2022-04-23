@@ -5,8 +5,8 @@ import { User } from 'src/entities/user.entity';
 import { FriendsService } from './friends.service';
 
 @Module({
-
 	imports: [TypeOrmModule.forFeature([User, FriendShip])],
- 	providers: [FriendsService]
+ 	providers: [FriendsService],
+	exports: [FriendsService]
 })
 export class FriendsModule {}

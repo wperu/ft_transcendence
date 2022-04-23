@@ -25,12 +25,16 @@ export class ChatService {
 	{
         const data: ChatUser = this.tokenService.decodeToken(socket.handshake.auth.token) as ChatUser;
 
+		if (data === undefined)
+			return undefined;
+
 		let idx = this.users.push({
 			socket: [socket], 
 			username: data.username,
 			reference_id: data.reference_id,
 			room_list: [],
 		})
+
 
 		return this.users[idx - 1];
 	}
@@ -54,6 +58,16 @@ export class ChatService {
 
         return (undefined);
     }
+
+	getUsernameFromID(refId : number)
+	{
+		let ret = this.users.find((u) => { return u.reference_id === refId});
+
+		if (ret === undefined)
+			return "undefined";
+
+		return ret.username;
+	}
 
 
     getUserFromUsername(username: string): ChatUser | undefined
@@ -158,19 +172,22 @@ export class ChatService {
 		return (ref);
 	}
 
-	/*
+	
 
 	//Todo create userDto 
 	async getFriendList(user: ChatUser) : Promise<UserData[]>
 	{
 		const relation = await this.friendService.findFriendOf(user.reference_id);
 
+		if (relation === undefined)
+			return [];
 		let ret: UserData[];
-
+		
+		ret = [];
 
 		relation.forEach((rel) => {
 			ret.push({
-				username: "default", //todo
+				username: this.getUsernameFromID(rel.id_two), //todo
 				reference_id: rel.id_two,
 			});
 		});
@@ -187,7 +204,7 @@ export class ChatService {
 
 		relation.forEach((rel) => {
 			ret.push({
-				username: "default", //todo
+				username: this.getUsernameFromID(rel.id_two), //todo
 				reference_id: rel.id_two,
 			});
 		});
@@ -204,13 +221,19 @@ export class ChatService {
 
 		relation.forEach((rel) => {
 			ret.push({
-				username: "default", //todo
+				username: this.getUsernameFromID(rel.id_two) || "default", //todo
 				reference_id: rel.id_two,
 			});
 		});
 
 		return ret;
 	}
-	*/
+	
+	async addFriend(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.addRequestFriend(user.reference_id, ref_id);
+
+		return;
+	}
 
 }

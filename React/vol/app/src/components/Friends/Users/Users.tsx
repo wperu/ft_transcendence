@@ -15,7 +15,7 @@ interface	blocked_user_props
 	name: string;
 }
 
-
+//fix add refID
 export function Friend(props: user_props)
 {
 	function get_opacity()
@@ -32,11 +32,11 @@ export function Friend(props: user_props)
 			</div>
 			<div className="chat_user_button_div">
 				<InviteUserButton />
-				<DirectMessage name={props.name} />
+				<DirectMessage name={props.name} refId={0}/>
 				<AddFriendButton user_name={props.name}
-							already_friend={true} />
+							already_friend={true} refId={0}/>
 				<BlockUserButton user_name={props.name}
-					already_blocked={false} />
+					already_blocked={false} refId={0}/>
 			</div>
 		</div>
 	);
@@ -52,7 +52,7 @@ export function BlockedUser(props: blocked_user_props)
 			</div>
 			<div className="chat_user_button_div">
 				<BlockUserButton user_name={props.name}
-					already_blocked={true} />
+					already_blocked={true} refId={0}/>
 			</div>
 		</div>
 	);

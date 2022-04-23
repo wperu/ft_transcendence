@@ -7,6 +7,7 @@ interface	props
 {
 	currentUserLvl: ELevelInRoom;
 	targetUsername: string;
+	refId: number;
 	targetUserLvl: ELevelInRoom;
 	isBlockedByCurrentUser: boolean;
 }
@@ -19,12 +20,12 @@ function ChatUser(data: props)
 		{
 			return (
 				<div className="chat_user_button_div">
-					<DirectMessage name={data.targetUsername} />
+					<DirectMessage name={data.targetUsername} refId={data.refId}/>
 					<InviteUserButton />
 					<AddFriendButton user_name={data.targetUsername}
-							already_friend={false} />
+							already_friend={false} refId={data.refId}/>
 					<BlockUserButton user_name={data.targetUsername}
-						already_blocked={data.isBlockedByCurrentUser} />
+						already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 				</div>
 			);
 		}
@@ -34,14 +35,14 @@ function ChatUser(data: props)
 			{
 				return (
 					<div className="chat_user_button_div">
-						<DirectMessage name={data.targetUsername} />
+						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton />
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={false} />
+							already_friend={false} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
-							already_blocked={data.isBlockedByCurrentUser} />
-						<MuteUserButton user_name={data.targetUsername} />
-						<BanUserButton user_name={data.targetUsername} />
+							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
+						<MuteUserButton user_name={data.targetUsername} refId={data.refId} />
+						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
 					</div>
 				);
 			}
@@ -49,16 +50,16 @@ function ChatUser(data: props)
 			{
 				return (
 					<div className="chat_user_button_div">
-						<DirectMessage name={data.targetUsername} />
+						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton />
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={false} />
+							already_friend={false} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}
-							already_admin={data.targetUserLvl === ELevelInRoom.admin} />
+							already_admin={data.targetUserLvl === ELevelInRoom.admin} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
-							already_blocked={data.isBlockedByCurrentUser} />
-						<MuteUserButton user_name={data.targetUsername} />
-						<BanUserButton user_name={data.targetUsername} />
+							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
+						<MuteUserButton user_name={data.targetUsername} refId={data.refId}/>
+						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
 					</div>
 				);
 			}

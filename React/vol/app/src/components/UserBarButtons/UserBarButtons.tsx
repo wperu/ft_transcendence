@@ -13,12 +13,15 @@ import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/r
 interface Prop
 {
 	user_name: string;
+	refId: number;
+	
 }
 
 interface promoteProp
 {
 	user_name: string;
 	already_admin: boolean;
+	refId: number;
 }
 
 
@@ -26,22 +29,26 @@ interface friendProp
 {
 	user_name: string;
 	already_friend: boolean;
+	refId: number;
 }
 
 interface blockProp
 {
 	user_name: string;
 	already_blocked: boolean;
+	refId: number;
 }
 
 interface gameInvitationProp
 {
 	src_name: string;
+	refId: number;
 }
 
 interface dmProp
 {
 	name: string;
+	refId: number;
 }
 
 
@@ -183,6 +190,7 @@ export function AddFriendButton(prop: friendProp)
 	function addFriend()
 	{
 		console.log(prop.user_name + " friend :D");
+		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
 	
 	function removeFriend()

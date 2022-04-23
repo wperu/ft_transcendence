@@ -90,11 +90,20 @@ export class FriendsService
 		else
 		{
 			let req: FriendShip = new FriendShip();
+			const rel_two = await this.findFriendRelationOf(userIdTwo, userIdOne);
 
+			if (rel_two !== undefined && rel_two.status === EStatus.REQUEST)
+			{
+				rel_two.status = EStatus.FRIEND;
+				await this.friendRepository.save(rel_two);
+				req.status = EStatus.FRIEND;
+			}
+			else
+			{
+				req.status = EStatus.REQUEST;
+			}
 			req.id_one = userIdOne;
 			req.id_two = userIdTwo;
-			req.status = EStatus.REQUEST;
-
 			return await this.friendRepository.save(req);
 		}
 	}

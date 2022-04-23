@@ -1,9 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Friend, BlockedUser } from "./Users/Users"
 import { InfoNotification, InviteNotification, NewFriendNotification } from "./Notification/Notification"
 import "./Friends.css";
+import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import useInterval from "../../hooks/useInterval";
+import { UserDataDto } from "../../Common/Dto/chat/room";
 
-function Friends() {
+//fix me status online, offline... not work
+function Friends()
+{
+	const chtCtx = useChatContext();
+	const [friendsList, setFriendsList] = useState<Array<UserDataDto>>([]);
+	//const [blocks, setBlocks] = useState();
+
+	useEffect(() => {
+
+		chtCtx.socket.on('FRIEND_LIST', (data: UserDataDto[]) => {
+			setFriendsList(data);
+			console.log(data);
+		});
+
+		chtCtx.socket.emit("FRIEND_LIST");
+
+	}, [])
+
+	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
+
 
 	function addFriend(event: React.SyntheticEvent)
 	{
@@ -19,6 +41,11 @@ function Friends() {
 			target.name.value = '';
 		}
 	}
+
+						/*{friendsList.map((u, index) => (
+						<Friend key={index} name={u.username} online={true}/>
+					))}*/
+
 	return (
 		<div id="Friends">
 			<form id="add_friend_by_name_form" onSubmit={addFriend}>
@@ -43,12 +70,7 @@ function Friends() {
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-				<Friend name="ailly" online={true}/>
-				<Friend name="billy" online={true}/>
-				<Friend name="abcdefghijklmnopqrstuvwxyz" online={true}/>
-				<Friend name="dilly" online={true}/>
-				<Friend name="eilly" online={true}/>
-				<Friend name="filly" online={true}/>
+
 				<div className="user_status_tab">Offline</div>
 				<Friend name="gilly" online={false}/>
 				<Friend name="hilly" online={false}/>
