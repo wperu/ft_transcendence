@@ -83,7 +83,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		
 		if (!this.chatService.roomExists(payload.room_name))
 		{
-			this.chatService.createRoom(payload.room_name, payload.password !== "", user, payload.password);
+			this.chatService.createRoom(payload.room_name, payload.private_room, user, payload.password);
 
 			//todo join & add client to room
 			client.join(payload.room_name);
@@ -393,7 +393,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	room_list(client: Socket): void
 	{
 		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
-		this.chatService.getAllRooms().forEach(room => {
+		const rooms = this.chatService.getAllRooms();
+		console.log(rooms);
+		rooms.forEach(room => {
 			if (!room.private_room) //fix me
 			{
 				rooms_list.push({
