@@ -42,9 +42,7 @@ function Friends()
 		}
 	}
 
-						/*{friendsList.map((u, index) => (
-						<Friend key={index} name={u.username} online={true}/>
-					))}*/
+						/**/
 
 	return (
 		<div id="Friends">
@@ -70,7 +68,9 @@ function Friends()
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-
+				{friendsList.map((u, index) => (
+						<Friend key={index} name={u.username} online={true}/>
+					))}
 				<div className="user_status_tab">Offline</div>
 				<Friend name="gilly" online={false}/>
 				<Friend name="hilly" online={false}/>

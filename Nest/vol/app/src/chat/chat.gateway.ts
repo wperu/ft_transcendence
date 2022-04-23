@@ -427,15 +427,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage('FRIEND_LIST')
-	friend_list(client: Socket) : void
+	async friend_list(client: Socket) : Promise<void>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
-			let ret = this.chatService.getFriendList(user) as Promise<UserDataDto[]>;
+			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
 			
-			console.log();
+		//	console.log(ret);
 			client.emit('FRIEND_LIST', ret);
 		}
 	}

@@ -17,13 +17,15 @@ export class FriendsService
 	 * @param userId 
 	 * @returns Array of relation
 	 */
-	async findFriendOf(userId: number): Promise<FriendShip[]>
+	async findFriendOf(id_one: number): Promise<FriendShip[]>
 	{
-		return await this.friendRepository.find({
+		
+		const ret = await this.friendRepository.find({
 			where: {
-				id_one: userId
+				id_one: id_one,
 			},
 		});
+		return ret;
 	}
 	
 	/**

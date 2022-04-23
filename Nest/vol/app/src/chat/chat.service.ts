@@ -192,6 +192,7 @@ export class ChatService {
 			});
 		});
 
+		//console.log(ret);
 		return ret;
 	}
 
