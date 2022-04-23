@@ -80,7 +80,7 @@
 	border-style: none;
 	font-size: 1em;
 	padding: 0.8vmin 2vmin;
-	margin-bottom: 4vmin;
+	/* margin-bottom: 4vmin; */
 }
 
 #create_chan_validation
