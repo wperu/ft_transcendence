@@ -1,4 +1,3 @@
-import React from "react";
 import "./InfoButton.css";
 
 function InfoButton () {

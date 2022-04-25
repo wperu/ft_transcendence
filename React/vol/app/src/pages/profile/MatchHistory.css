@@ -4,6 +4,14 @@
 	display: block;
 }
 
+@media only screen and (max-width: 1400px)
+{
+	#match_history
+	{
+		font-size: 0.6em;
+	}
+}
+
 .history_match > *
 {
 	display: inline;
@@ -12,18 +20,21 @@
 
 .match_score_separator
 {
+	width: fit-content;
 	color: lightblue;
 }
 
 .history_match
 {
+	background-color: #2d3444;
 	color: whitesmoke;
 	width: 55%;
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
-	height: 7vh;
-	margin: auto;
+	height: 1.7em;
+	margin: 0.5em auto;
+	border: 1px solid whitesmoke;
 }
 
 .history_match_user
@@ -33,7 +44,7 @@
 
 .history_match_score
 {
-	width: 15%;
+	width: 10%;
 }
 
 .victory, .defeat, .draw, .outcome_counterweight

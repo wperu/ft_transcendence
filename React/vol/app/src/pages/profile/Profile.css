@@ -12,19 +12,86 @@
 	display: flex;
 	justify-content: flex-start;
 	align-items: center;
+	color: whitesmoke;
+	font-size: 1.2em;
 }
 
-#profile_header img
+#current_profile_username, #profile_level, #profile_stats
+{
+	margin: 0 auto;
+}
+
+#pp_label, #current_profile_username
+{
+	display: grid;
+}
+
+#profile_pic, #profile_pic_edit_logo, #profile_username_input, #username_edit_logo
+{
+	grid-column: 1;
+	grid-row: 1;
+}
+
+#profile_username_input
+{
+	padding: 0.05em 0.2em;
+	font-size: 1em;
+	color: whitesmoke;
+	font-size: 1.2em;
+	background-color: #282c3450;
+	border: none;
+	border-radius: 4px;
+	width: 20vw;
+}
+
+#new_username_submit
+{
+	grid-column: 2;
+	grid-row: 1;
+	height: 2vh;
+	width: 4vw;
+	margin: auto;
+}
+
+#profile_username_input::placeholder
+{
+	opacity: 1;
+}
+
+.edit_logo
+{
+	width: 2vh;
+	transition: 0.3s;
+}
+
+#profile_pic_edit_logo
+{
+	margin: auto 0.7em 0.7em auto;
+
+}
+
+#username_edit_logo
+{
+	width: 2vh;
+	margin: auto 0.2em 0.2em auto;
+	pointer-events: none;
+}
+
+.edit_logo:hover, #profile_pic:hover + #profile_pic_edit_logo
+{
+	transform: scale(1.25,1.25);
+	-webkit-transform: scale(1.25,1.25);
+	-moz-transform: scale(1.25,1.25);
+}
+
+#profile_pic
 {
 	border: 4px solid whitesmoke;
 	width: 15vh;
 	margin: 2vmin 2vmin;
 }
 
-
-#profile_username, #profile_level
+#new_pp_input
 {
-	font-size: 1.2em;
-	color: whitesmoke;
-	margin: 0 7vw;
+	display: none;
 }
