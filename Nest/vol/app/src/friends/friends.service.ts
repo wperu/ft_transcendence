@@ -128,6 +128,27 @@ export class FriendsService
 		return ;
 	}
 
+	async rmFriend(userIdOne: number, userIdTwo: number): Promise<void>
+	{
+		await this.friendRepository
+		    .createQueryBuilder()
+		    .delete()
+		    .from(FriendShip)
+		    .where("id_one = :id", { id: userIdOne })
+			.andWhere("id_two = :id", { id: userIdTwo })
+		    .execute();
+
+		await this.friendRepository
+		    .createQueryBuilder()
+		    .delete()
+		    .from(FriendShip)
+		    .where("id_one = :id", { id: userIdTwo })
+			.andWhere("id_two = :id", { id: userIdOne })
+		    .execute();
+		return ;
+	}
+	
+
 	/**
 	 * 
 	 * @param id request_id
@@ -197,4 +218,18 @@ export class FriendsService
 
 		return await this.friendRepository.save(relation);
 	}
+
+	async unBlockUser(userIdOne: number, userIdTwo: number): Promise<void>
+	{
+		
+		await this.friendRepository
+		.createQueryBuilder()
+		.delete()
+		.from(FriendShip)
+		.where("id_one = :id", { id: userIdOne })
+		.andWhere("id_two = :id", { id: userIdTwo })
+		.andWhere("status = :status", { status: EStatus.BLOCK})
+		.execute();
+	}
+
 }

@@ -260,9 +260,23 @@ export class ChatService {
 		return;
 	}
 
+	async rmFriend(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.rmFriend(user.reference_id, ref_id);
+
+		return;
+	}
+
 	async blockUser(user: ChatUser, ref_id : number) : Promise<void>
 	{
 		await this.friendService.blockUser(user.reference_id, ref_id);
+
+		return;
+	}
+
+	async unBlockUser(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.unBlockUser(user.reference_id, ref_id);
 
 		return;
 	}
