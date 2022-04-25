@@ -4,8 +4,10 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { UserDataDto } from 'src/Common/Dto/chat/room';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
+import { UsersService } from 'src/users/users.service';
 import { ChatModule } from './chat.module';
 import { Room } from './interface/room';
 
@@ -16,6 +18,7 @@ export class ChatService {
 		private friendService: FriendsService,
 		private rooms: Room[],
 		private users: ChatUser[],
+		private userService: UsersService,
 
     )
     { this.rooms = [];}
@@ -175,22 +178,28 @@ export class ChatService {
 	
 
 	//Todo create userDto 
-	async getFriendList(user: ChatUser) : Promise<UserData[]>
+	async getFriendList(user: ChatUser) : Promise<UserDataDto[]>
 	{
 		const relation = await this.friendService.findFriendOf(user.reference_id);
 
 		if (relation === undefined)
 			return [];
-		let ret: UserData[];
+		let ret: UserDataDto[];
 		
 		ret = [];
+		for (const rel of relation)
+		{
+			let user = await this.userService.findUserByReferenceID(rel.id_two);
 
-		relation.forEach((rel) => {
+			let username = user?.username || "default";
+			//let status = user.is_connected; //todo
+
 			ret.push({
-				username: this.getUsernameFromID(rel.id_two), //todo
+				username: username,
 				reference_id: rel.id_two,
+				is_connected: user.is_connected,
 			});
-		});
+		};
 
 		//console.log(ret);
 		return ret;
@@ -200,15 +209,22 @@ export class ChatService {
 	{
 		const relation = await this.friendService.findBlockedOf(user.reference_id);
 
-		let ret: UserData[];
+		if (relation === undefined)
+			return [];
 
+		let ret: Array<UserData>;
 
-		relation.forEach((rel) => {
+		ret = [];
+		for (const rel of relation)
+		{
+			let user = await this.userService.findUserByReferenceID(rel.id_two);
+			let username = user?.username || "default";
+			
 			ret.push({
-				username: this.getUsernameFromID(rel.id_two), //todo
+				username: username,
 				reference_id: rel.id_two,
 			});
-		});
+		};
 
 		return ret;
 	}
@@ -219,13 +235,20 @@ export class ChatService {
 
 		let ret: UserData[];
 
+		ret = [];
+		if (relation === undefined)
+			return [];
 
-		relation.forEach((rel) => {
+		for (const rel of relation)
+		{
+			let user = await this.userService.findUserByReferenceID(rel.id_two);
+
+			let username = user?.username || "default";
 			ret.push({
 				username: this.getUsernameFromID(rel.id_two) || "default", //todo
 				reference_id: rel.id_two,
 			});
-		});
+		};
 
 		return ret;
 	}
@@ -233,6 +256,13 @@ export class ChatService {
 	async addFriend(user: ChatUser, ref_id : number) : Promise<void>
 	{
 		await this.friendService.addRequestFriend(user.reference_id, ref_id);
+
+		return;
+	}
+
+	async blockUser(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.blockUser(user.reference_id, ref_id);
 
 		return;
 	}

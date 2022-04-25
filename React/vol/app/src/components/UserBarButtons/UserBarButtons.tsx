@@ -110,19 +110,11 @@ export function MuteUserButton(prop: Prop)
 //todo Friend part
 export function BlockUserButton(prop: blockProp)
 {
-	//const chtCtx = useChatContext();
+	const chtCtx = useChatContext();
 
 	function blockUser()
 	{
-		/*if (chtCtx.currentRoom !== undefined)
-		{
-			const dto :  =
-			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
-			} 
-			chtCtx.socket.emit('USER_BLOCK', dto);
-		}*/
+		chtCtx.socket.emit('BLOCK_USER', prop.refId);
 	}
 
 	function unblockUser()

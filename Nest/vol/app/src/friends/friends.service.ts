@@ -35,12 +35,14 @@ export class FriendsService
 	 */
 	async findBlockedOf(userId: number): Promise<FriendShip[]>
 	{
-		return await this.friendRepository.find({
+		const ret =  await this.friendRepository.find({
 			where: {
 				id_one: userId,
 				status: EStatus.BLOCK
 			},
 		});
+
+		return ret;
 	}
 
 	/**
@@ -168,7 +170,7 @@ export class FriendsService
 	 * @param userIdTwo 
 	 * @returns Blocked relation
 	 */
-	async blockUseer(userIdOne: number, userIdTwo: number): Promise<FriendShip>
+	async blockUser(userIdOne: number, userIdTwo: number): Promise<FriendShip>
 	{
 		//Delete if relation exist & != Block (2, 1)
 		await this.friendRepository
@@ -178,7 +180,7 @@ export class FriendsService
 		    .where("id_one = :id", { id: userIdTwo })
 			.andWhere("id_two = :id", { id: userIdOne })
 			.andWhere("status = :status", { status: EStatus.FRIEND})
-		    .execute()
+		    .execute();
 
 		//Update relation (1, 2)
 		let relation = await this.findFriendRelationOf(userIdOne, userIdTwo);

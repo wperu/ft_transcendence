@@ -416,15 +416,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage('BLOCK_LIST')
-	block_list(client: Socket) : void
+	async block_list(client: Socket) : Promise<void>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
-
+			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			
+		//	console.log(ret);
+			client.emit('BLOCK_LIST', ret);
 		}
 	}
+
+	
 
 	@SubscribeMessage('FRIEND_LIST')
 	async friend_list(client: Socket) : Promise<void>
@@ -535,6 +540,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			this.chatService.addFriend(user, payload);
+		}
+	}
+
+	@SubscribeMessage('BLOCK_USER')
+	async block_user(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		this.logger.log("BLOCK REQUEST");
+		if (user !== undefined)
+		{
+			this.chatService.blockUser(user, payload);
 		}
 	}
 

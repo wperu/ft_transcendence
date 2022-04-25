@@ -11,6 +11,7 @@ function Friends()
 {
 	const chtCtx = useChatContext();
 	const [friendsList, setFriendsList] = useState<Array<UserDataDto>>([]);
+	const [blockList, setBlockList] = useState<Array<UserDataDto>>([]);
 	//const [blocks, setBlocks] = useState();
 
 	useEffect(() => {
@@ -22,9 +23,16 @@ function Friends()
 
 		chtCtx.socket.emit("FRIEND_LIST");
 
+		chtCtx.socket.on('BLOCK_LIST', (data: UserDataDto[]) => {
+			setBlockList(data);
+		});
+
+		chtCtx.socket.emit("BLOCK_LIST");
+
 	}, [])
 
 	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
+	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
 
 
 	function addFriend(event: React.SyntheticEvent)
@@ -68,30 +76,14 @@ function Friends()
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-				{friendsList.map((u, index) => (
-						<Friend key={index} name={u.username} online={true}/>
-					))}
+				{friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected !== false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
 				<div className="user_status_tab">Offline</div>
-				<Friend name="gilly" online={false}/>
-				<Friend name="hilly" online={false}/>
-				<Friend name="iilly" online={false}/>
-				<Friend name="jilly" online={false}/>
-				<Friend name="killy" online={false}/>
+				{friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected === false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
 			</div>
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="fgerabgadjrf abFVHMWEgrfvsgnadbgrmfesvfbejfve666" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="z" />
+				<BlockedUser name="a" ref_id={0} />
+			
 			</div>
 		</div>
 	);

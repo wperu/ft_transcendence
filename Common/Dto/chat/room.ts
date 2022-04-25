@@ -46,6 +46,7 @@ export interface UserDataDto
 {
 	username: string,
     reference_id: number,
+	is_connected?: boolean,
 }
 
 
