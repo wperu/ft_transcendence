@@ -14,6 +14,62 @@ interface headerInfo
 	user: IUser;
 }
 
+interface twoFAProps
+{
+	user: IUser;
+	is_active: boolean;
+}
+
+function TwoFactorAuthSetting(props: twoFAProps)
+{
+	const [isTwoFactor, setIsTwoFactor] = useState<boolean>(props.is_active);
+
+	function changeTwoFactor()
+	{
+		setIsTwoFactor(!isTwoFactor);
+		if (props.user)
+		{
+			const url = process.env.REACT_APP_API_USER + '/' + props.user.id +  '/'; //fixme
+			const headers = {
+				//'authorization'	: user.access_token_42,
+				//'grant-type': 'authorization-code',
+				//'authorization-code': accessCode
+				'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
+			}
+			// axios.post(url, file, {headers})
+			// .then(res => {
+			// 	if (process.env.NODE_ENV === "development")
+			// 	{
+			// 		console.log('Avatar Post succes');
+			// 	}
+			// })
+			// .catch(res => {
+			// 	console.log(res);
+			// 	setIsTwoFactor(isTwoFactor);
+			// });
+		}
+	}
+
+	function getKeyInputVisibility()
+	{
+		if (!isTwoFactor)
+			return ("");
+		else
+			return ("invisible")
+	}
+
+	return (
+		<div id="tfa_setting">
+			2FA
+			<input id="tfa_checkbox" type="checkbox" checked={isTwoFactor} onChange={changeTwoFactor} />
+			<label id="tfa_switch" htmlFor="tfa_checkbox">
+				<span id="tfa_slider"></span>
+			</label>
+			<input id="tfa_key_input" className={getKeyInputVisibility()} type="text" placeholder="Clé de 2FA Google" />
+		</div>
+	);
+}
+
 function CurrentUserProfileHeader(props : headerInfo)
 {
 	const [img, setImg] = useState(DefaultPP);
@@ -86,15 +142,35 @@ function CurrentUserProfileHeader(props : headerInfo)
 			<form id="current_profile_username">
 				<input type="text" maxLength={20} id="profile_username_input"
 					placeholder={getUserName()}  />
-				<img src={EditLogo} alt="edit" className="edit_logo"
-					id="username_edit_logo" />
-				<input type="submit" id="new_username_submit" value="Valider le nouveau nom" />
+				<input type="submit" id="new_username_submit" value="Changer" />
 			</form>
-			<div id="profile_level">
-				Niveau 4
-			</div>
 			<div id="profile_stats">
-				W:L 42:667
+				<div id="profile_lvl">Niveau 4</div>
+				<div id="profile_ratio"><span id="ratio_caption">W:L</span> <span id="ratio_wins">42</span>:<span id="ratio_losses">667</span></div>
+			</div>
+			<TwoFactorAuthSetting user={props.user} is_active={true} />
+		</header>
+	);
+}
+
+function OtherUserProfileHeader(props : headerInfo)
+{
+	const [img, setImg] = useState(DefaultPP);
+	
+	function getUserName() : string
+	{
+		if (props.user === null)
+			return ("default");
+		return (props.user.username);
+	}
+
+	return (
+		<header id="profile_header">
+			<img src={img} alt="PP" id="profile_pic"/>
+			<div id="profile_username">{getUserName()}</div>
+			<div id="profile_stats">
+				<div id="profile_lvl">Niveau 4</div>
+				<div id="profile_ratio"><span id="ratio_caption">W:L</span> <span id="ratio_wins">42</span>:<span id="ratio_losses">667</span></div>
 			</div>
 		</header>
 	);
@@ -112,31 +188,43 @@ function Profile() {
 		if (auth.user)
 			user = auth.user;
 		// setProfilSum(<ProfileSummarySettings/>);
+		return (
+			<div id="profile_page">
+				<CurrentUserProfileHeader user={user} />
+				<MatchHistory />
+				<footer>
+					<LogOutButton />
+				</footer>
+			</div>
+		);
 	}
 	else
 	{
-		const url : string	= process.env.REACT_APP_API_USER || "/";
+		// const url : string	= process.env.REACT_APP_API_USER || "/";
 
-		axios.get(url + "/" + id).then( resp => {
-			let data : IUser = resp.data;
-			//JSON.parse(resp.data);
-			//setUser(data);
-		})
-		.catch(error => {
-			console.log(error.response.status);
-			//console.log(resp);
-		});
+		// axios.get(url + "/" + id).then( resp => {
+		// 	let data : IUser = resp.data;
+		// 	//JSON.parse(resp.data);
+		// 	//setUser(data);
+		// })
+		// .catch(error => {
+		// 	console.log(error.response.status);
+		// 	//console.log(resp);
+		// });
+		if (auth.user)
+			user = auth.user;
+		return (
+			<div id="profile_page">
+				<OtherUserProfileHeader user={user} />
+				<MatchHistory />
+				<footer>
+					<LogOutButton />
+				</footer>
+			</div>
+		);
 	}
 
-	return (
-		<div id="profile_page">
-			<CurrentUserProfileHeader user={user} />
-			<MatchHistory />
-			<footer>
-				<LogOutButton />
-			</footer>
-		</div>
-	);
+	
   }
   
   export default Profile;

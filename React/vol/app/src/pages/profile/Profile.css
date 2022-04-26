@@ -8,6 +8,7 @@
 #profile_header
 {
 	width: 100%;
+	height: max-content;
 	background-color: rgb(95, 127, 185);
 	display: flex;
 	justify-content: flex-start;
@@ -16,7 +17,7 @@
 	font-size: 1.2em;
 }
 
-#current_profile_username, #profile_level, #profile_stats
+#current_profile_username, #profile_stats, #tfa_setting, #profile_username
 {
 	margin: 0 auto;
 }
@@ -26,7 +27,7 @@
 	display: grid;
 }
 
-#profile_pic, #profile_pic_edit_logo, #profile_username_input, #username_edit_logo
+#profile_pic, #profile_pic_edit_logo, #profile_username_input
 {
 	grid-column: 1;
 	grid-row: 1;
@@ -46,11 +47,25 @@
 
 #new_username_submit
 {
+	font-size: 0.4em;
 	grid-column: 2;
 	grid-row: 1;
-	height: 2vh;
-	width: 4vw;
 	margin: auto;
+	margin-left: 1vw;
+	color: white;
+	background-color: #79bbe4;
+	padding: 2vmin 0.8vmin;
+	text-transform: uppercase;
+	border: none;
+	border-radius: 7px;
+	transition: 0.2s;
+}
+
+#new_username_submit:hover
+{
+	transform: scale(1.10,1.10);
+	-webkit-transform: scale(1.10,1.10);
+	-moz-transform: scale(1.10,1.10);
 }
 
 #profile_username_input::placeholder
@@ -70,13 +85,6 @@
 
 }
 
-#username_edit_logo
-{
-	width: 2vh;
-	margin: auto 0.2em 0.2em auto;
-	pointer-events: none;
-}
-
 .edit_logo:hover, #profile_pic:hover + #profile_pic_edit_logo
 {
 	transform: scale(1.25,1.25);
@@ -94,4 +102,88 @@
 #new_pp_input
 {
 	display: none;
+}
+
+#profile_stats
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#ratio_caption
+{
+	font-size: 0.6em;
+}
+
+#ratio_wins
+{
+	color: greenyellow;
+}
+
+#ratio_losses
+{
+	color: rgb(235, 43, 43);
+}
+
+
+#tfa_setting
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 14%;
+	text-align: center;
+}
+
+#tfa_checkbox
+{
+	display: none;
+}
+
+#tfa_switch
+{
+	z-index: 1;
+	position: relative;
+	width: 10vmin;
+	height: 5vh;
+	background-color: rgb(221, 26, 26);
+	border-radius: 100px;
+	padding: 2px;
+}
+
+#tfa_slider
+{
+	display: block;
+	position: absolute;
+	left: 2%;
+	border-radius: 100px;
+	height: 5vh;
+	width: 5vh;
+	background-color: whitesmoke;
+}
+
+#tfa_checkbox:checked + #tfa_switch
+{
+	background-color: yellowgreen;
+}
+
+#tfa_checkbox:checked + #tfa_switch #tfa_slider
+{
+	right: 2%;
+	left: auto;
+}
+
+#tfa_key_input
+{
+	margin-top: 0.3em;
+	text-align: center;
+	padding: 0.05em 0.2em;
+	font-size: 1em;
+	color: whitesmoke;
+	font-size: 0.6em;
+	background-color: #282c3450;
+	border: none;
+	border-radius: 4px;
+	width: 100%;
 }
