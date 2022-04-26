@@ -327,9 +327,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		var	current_room = this.chatService.getRoom(payload);
 		var	names_list : Array<UserDataDto> = [];
+		let user :ChatUser = this.chatService.getUserFromSocket(client);
 		
 		if (current_room !== undefined)
 		{
+
+			if (user !== undefined)
+				this.chatService.isUserInRoom(user, current_room);
+
 			current_room.users.forEach(element => {
 				if (element !== undefined)
 				{
@@ -419,7 +424,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	async block_list(client: Socket) : Promise<void>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
-
 		if (user !== undefined)
 		{
 			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
@@ -533,13 +537,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	  * @param payload refId
 	  */
 	@SubscribeMessage('ADD_FRIEND')
-	add_friend(client: Socket, payload: number) : void
+	async add_friend(client: Socket, payload: number) : Promise<void>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
-			this.chatService.addFriend(user, payload);
+			await this.chatService.addFriend(user, payload);
+		}
+	}
+
+	@SubscribeMessage('RM_FRIEND')
+	async rm_friend(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.rmFriend(user, payload);
 		}
 	}
 
@@ -548,10 +563,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
-		this.logger.log("BLOCK REQUEST");
 		if (user !== undefined)
 		{
-			this.chatService.blockUser(user, payload);
+			await this.chatService.blockUser(user, payload);
+		}
+	}
+
+	@SubscribeMessage('UNBLOCK_USER')
+	async unblock_user(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.unBlockUser(user, payload);
 		}
 	}
 
