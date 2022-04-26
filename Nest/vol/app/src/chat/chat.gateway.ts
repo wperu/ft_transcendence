@@ -327,13 +327,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		var	current_room = this.chatService.getRoom(payload);
 		var	names_list : Array<string> = [];
-		
-		if (current_room !== undefined)
+		let user_current = this.chatService.getUserFromSocket(client);
+		if(current_room.users.find(c => {c.reference_id === user_current.reference_id}))
 		{
+			if (current_room !== undefined)
+			{
 			current_room.users.forEach(element => {
 				names_list.push(element.username);
 			});
 			client.emit("USER_LIST", names_list);
+			}
 		}
 	}
 
