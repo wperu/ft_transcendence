@@ -14,6 +14,7 @@ import RoomJoin from '../Common/Dto/chat/RoomJoin';
 import { RoomRename, RoomChangePass } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { Room } from "./interface/room";
+import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 
 
 // Todo fix origin
@@ -463,7 +464,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	
 	//Todo emit disconect if token is wrong
-	handleConnection(client: Socket, ...args: any[]) : void
+	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		
@@ -502,6 +503,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			});
 
 		})
+
+		let dto : NotifDTO[];
+
+		dto = [];
+
+		const req = await this.chatService.getRequestList(user);
+
+		req.forEach((r) => { 
+			dto.push({
+				type: ENotification.FRIEND_REQUEST,
+				req_id: r.reference_id,
+				username: r.username,
+				content: undefined,
+			})
+		})
+		console.log(dto);
+
+		
+		client.emit('RECEIVE_NOTIF', dto);
+		//client.emit
 
 		this.logger.log(`${user.username} connected to the chat under id : ${client.id}`);
 		this.logger.log(`${user.username} total connection : ${user.socket.length}`);
@@ -544,6 +565,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			await this.chatService.addFriend(user, payload);
+		}
+
+		let us = this.chatService.getUserFromID(payload);
+
+		if (us !== undefined)
+		{
+			let dto : NotifDTO[];
+
+			dto = [{
+				type: ENotification.FRIEND_REQUEST,
+				req_id: user.reference_id,
+				username: "",
+				content: undefined,
+			}]
+
+			us.socket.forEach((s) => {
+				s.emit('RECEIVE_NOTIF', dto);
+			});
 		}
 	}
 

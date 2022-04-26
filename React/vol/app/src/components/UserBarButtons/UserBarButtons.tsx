@@ -119,7 +119,7 @@ export function BlockUserButton(prop: blockProp)
 
 	function unblockUser()
 	{
-
+		chtCtx.socket.emit('UNBLOCK_USER', prop.refId);
 	}
 
 	if (prop.already_blocked)
@@ -188,6 +188,7 @@ export function AddFriendButton(prop: friendProp)
 	function removeFriend()
 	{
 		console.log(prop.user_name + " not friend anymore");
+		chtCtx.socket.emit('RM_FRIEND', prop.refId);
 	}
 
 	if (prop.already_friend)

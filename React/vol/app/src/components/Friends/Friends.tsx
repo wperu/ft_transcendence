@@ -2,9 +2,36 @@ import React, { useEffect, useState } from "react";
 import { Friend, BlockedUser } from "./Users/Users"
 import { InfoNotification, InviteNotification, NewFriendNotification } from "./Notification/Notification"
 import "./Friends.css";
-import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import { INotif, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from "../../hooks/useInterval";
 import { UserDataDto } from "../../Common/Dto/chat/room";
+
+enum ENotification
+{
+	INFO,
+	GAME_REQUEST,
+	FRIEND_REQUEST
+}
+interface IProp
+{
+	notif: INotif;
+}
+
+function Notification(prop : IProp) : JSX.Element
+{
+	if (prop.notif.type === ENotification.FRIEND_REQUEST
+		&& prop.notif.username !== undefined
+		&& prop.notif.req_id !== undefined)
+		return <NewFriendNotification name={prop.notif.username} date="today" refId={prop.notif.req_id} />;
+	else if (prop.notif.type === ENotification.GAME_REQUEST
+			&& prop.notif.username !== undefined
+			&& prop.notif.req_id !== undefined)
+		return <InviteNotification name={prop.notif.username} date="today" refId={prop.notif.req_id} />;
+	else if (prop.notif.type === ENotification.INFO
+			&& prop.notif.content !== undefined)
+		return <InfoNotification content={prop.notif.content} date="today" />;	
+	return <></>;
+}
 
 //fix me status online, offline... not work
 function Friends()
@@ -18,7 +45,6 @@ function Friends()
 
 		chtCtx.socket.on('FRIEND_LIST', (data: UserDataDto[]) => {
 			setFriendsList(data);
-			console.log(data);
 		});
 
 		chtCtx.socket.emit("FRIEND_LIST");
@@ -62,16 +88,7 @@ function Friends()
 			</form>
 			<span className="friends_list_title">Notifications</span>
 			<div className="friends_tab_list notifs_list">
-				<InviteNotification name="michel" date="today" />
-				<NewFriendNotification name="michel" date="today" />
-				<InviteNotification name="jean abdul de la street" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
-				<InfoNotification content="ceci est une info dkslgabbj wjk 
-					bfewhj hj fhjds Vfhj vfhjes bfh vF Hsv hjfdsv hfd jsvdh
-					vfd hjs fhvhj vdfhsjv df mdr bite" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
+				{chtCtx.notification.map((n, index) => {return <Notification key={index} notif={n} />})}
 			</div>
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
@@ -82,8 +99,7 @@ function Friends()
 			</div>
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
-				<BlockedUser name="a" ref_id={0} />
-			
+				{blockList.map((u) => (<BlockedUser key={u.reference_id} ref_id={u.reference_id} name={u.username} /> ))}
 			</div>
 		</div>
 	);

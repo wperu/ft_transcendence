@@ -4,6 +4,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RoomLeftDto } from "../../../Common/Dto/chat/room";
+import { ENotification } from "../../../Common/Dto/chat/notification";
 
 export enum ELevelInRoom
 {
@@ -17,6 +18,17 @@ export enum ECurrentTab
 	friends = "friends",
 	channels = "channels",
 	chat = "chat",
+}
+
+export interface INotif
+{
+	id: string;
+	type: ENotification;
+
+	req_id?: number;
+	username?: string;
+	content? : string;
+
 }
 
 export interface IRoom
@@ -38,6 +50,9 @@ interface IChatContext
 	rooms: IRoom[];
 	addRoom: (room_name: string, is_protected: boolean) => void;
 
+	notification: INotif[];
+	rmNotif: (id : string) => void;
+
 	currentTab: ECurrentTab;
 	setCurrentTab: (tab: ECurrentTab) => void;
 }
@@ -54,6 +69,7 @@ function useChatProvider() : IChatContext
     const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
     const [rooms, setRooms] = useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
+	const [notification, setNotification] = useState<INotif[]>([]);
 
 	
     function addRoom(room_name: string, is_protected: boolean)
@@ -80,6 +96,37 @@ function useChatProvider() : IChatContext
 			})
 		});
 	};
+
+	function addNotif(notif: INotif[])
+	{
+		setNotification(prev => {
+			return [...prev, ...notif];
+		});
+	};
+
+	function rmNotif(id: string)
+	{
+		setNotification(prev => {
+			return prev.filter((o) => {
+				return (o.id !== id);
+			})
+		});
+	};
+
+	useEffect(() => {
+		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
+			addNotif(data);
+
+			console.log('notif :' + data);
+		});
+		
+		return function cleanup() {		
+			if (socket !== undefined)
+			{
+				socket.off('RECEIVE_NOTIF');
+			}
+		};
+	}, [socket]);
 	
 	function setCurrentRoomByName (name: string)
 	{
@@ -93,8 +140,9 @@ function useChatProvider() : IChatContext
 		return (rooms.find(o => {
 			return (o.room_name === name);
 		}));
-	}
+	};
 
+	
 	useEffect(() => {
 		
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
@@ -105,6 +153,8 @@ function useChatProvider() : IChatContext
 				targetRoom.room_message.push(data);
 			}
 		});
+
+		
 
 		return function cleanup() {		
 			if (socket !== undefined)
@@ -118,11 +168,7 @@ function useChatProvider() : IChatContext
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
 			if (currentRoom !== undefined && currentRoom.room_name === data.room_name)
 				setCurrentRoom(undefined);
-			/*setRooms(prevRooms => {
-				return prevRooms.splice(prevRooms.findIndex((o) => {
-					return (o.room_name === data.room_name);
-				}), 1)
-			});*/
+			
 			if (data.room_name !== undefined)
 				rmRoom(data.room_name);
 		})
@@ -167,6 +213,8 @@ function useChatProvider() : IChatContext
 		setCurrentTab,
         rooms,
         addRoom,
+		notification,
+		rmNotif,
     });
 }
 

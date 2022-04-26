@@ -23,6 +23,7 @@ export class FriendsService
 		const ret = await this.friendRepository.find({
 			where: {
 				id_one: id_one,
+				status: EStatus.FRIEND,
 			},
 		});
 		return ret;
@@ -134,16 +135,16 @@ export class FriendsService
 		    .createQueryBuilder()
 		    .delete()
 		    .from(FriendShip)
-		    .where("id_one = :id", { id: userIdOne })
-			.andWhere("id_two = :id", { id: userIdTwo })
+		    .where("id_one = :id_one", { id: userIdOne })
+			.andWhere("id_two = :id_two", { id: userIdTwo })
 		    .execute();
 
 		await this.friendRepository
 		    .createQueryBuilder()
 		    .delete()
 		    .from(FriendShip)
-		    .where("id_one = :id", { id: userIdTwo })
-			.andWhere("id_two = :id", { id: userIdOne })
+		    .where("id_one = :id_one", { id: userIdTwo })
+			.andWhere("id_two = :id_two", { id: userIdOne })
 		    .execute();
 		return ;
 	}
@@ -198,8 +199,8 @@ export class FriendsService
 		    .createQueryBuilder()
 		    .delete()
 		    .from(FriendShip)
-		    .where("id_one = :id", { id: userIdTwo })
-			.andWhere("id_two = :id", { id: userIdOne })
+		    .where("id_one = :id_one", { id_one: userIdTwo })
+			.andWhere("id_two = :id_two", { id_two: userIdOne })
 			.andWhere("status = :status", { status: EStatus.FRIEND})
 		    .execute();
 
@@ -226,10 +227,11 @@ export class FriendsService
 		.createQueryBuilder()
 		.delete()
 		.from(FriendShip)
-		.where("id_one = :id", { id: userIdOne })
-		.andWhere("id_two = :id", { id: userIdTwo })
+		.where("id_one = :id_one", { id_one: userIdOne })
+		.andWhere("id_two = :id_two", { id_two: userIdTwo })
 		.andWhere("status = :status", { status: EStatus.BLOCK})
 		.execute();
+
 	}
 
 }

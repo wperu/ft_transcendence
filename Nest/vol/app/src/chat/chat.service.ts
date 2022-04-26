@@ -72,6 +72,17 @@ export class ChatService {
 		return ret.username;
 	}
 
+	getUserFromID(refId : number) : ChatUser
+	{
+		let ret = this.users.find((u) => { return u.reference_id === refId});
+
+		if (ret === undefined)
+			return ret;
+
+		return ret;
+	}
+
+
 
     getUserFromUsername(username: string): ChatUser | undefined
     {
@@ -189,15 +200,15 @@ export class ChatService {
 		ret = [];
 		for (const rel of relation)
 		{
-			let user = await this.userService.findUserByReferenceID(rel.id_two);
+			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
 
-			let username = user?.username || "default";
+			let username = user2?.username || "default";
 			//let status = user.is_connected; //todo
 
 			ret.push({
 				username: username,
 				reference_id: rel.id_two,
-				is_connected: user.is_connected,
+				is_connected: user2.is_connected,
 			});
 		};
 
@@ -217,8 +228,8 @@ export class ChatService {
 		ret = [];
 		for (const rel of relation)
 		{
-			let user = await this.userService.findUserByReferenceID(rel.id_two);
-			let username = user?.username || "default";
+			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
+			let username = user2?.username || "default";
 			
 			ret.push({
 				username: username,
@@ -241,12 +252,12 @@ export class ChatService {
 
 		for (const rel of relation)
 		{
-			let user = await this.userService.findUserByReferenceID(rel.id_two);
+			let user2 = await this.userService.findUserByReferenceID(rel.id_one);
 
-			let username = user?.username || "default";
+			let username = user2?.username || "default";
 			ret.push({
-				username: this.getUsernameFromID(rel.id_two) || "default", //todo
-				reference_id: rel.id_two,
+				username: username || "default", //todo
+				reference_id: rel.id_one,
 			});
 		};
 
