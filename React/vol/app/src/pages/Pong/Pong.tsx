@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ProvidePong, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { PongGame } from "../../components/PongGame/PongGame";
 import { PongMatchmaking } from "../../components/PongMatchmaking/PongMatchmaking";
 
@@ -6,23 +7,26 @@ import { PongMatchmaking } from "../../components/PongMatchmaking/PongMatchmakin
 function Pong()
 {
     const [inGame, setInGame] = useState<boolean>(false);
-
-    // 
+    const pongCtx = usePongContext();
 
     if (!inGame)
     {
         return (
-            <div>
-                <PongMatchmaking/>
-            </div>
+            <ProvidePong>
+                <div>
+                    <PongMatchmaking/>
+                </div>
+            </ProvidePong>
         );
     }
     else
     {
         return (
-            <div>
-                <PongGame/>
-            </div>
+            <ProvidePong>
+                <div>
+                    <PongGame/>
+                </div>
+            </ProvidePong>
         );
     }
 }

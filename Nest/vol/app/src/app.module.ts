@@ -7,6 +7,10 @@ import { User } from './entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { TokenValidatorEntity } from './entities/token_validator.entity';
 import { ChatModule } from './chat/chat.module';
+import { PongModule } from './pong/pong.module';
+import { PongGateway } from './pong/pong.gateway';
+import { PongService } from './pong/pong.service';
+import { TokenService } from './auth/token.service';
 
 @Module({
 	imports: [TypeOrmModule.forRoot(
@@ -20,8 +24,8 @@ import { ChatModule } from './chat/chat.module';
 			entities: [User, TokenValidatorEntity],
 			synchronize: true,
 		}
-	), UsersModule, AuthModule, ChatModule],
+	), UsersModule, ...AuthModule.getDependencies(), ChatModule, PongModule],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, PongService, PongGateway, Array, TokenService],
 })
 export class AppModule {}

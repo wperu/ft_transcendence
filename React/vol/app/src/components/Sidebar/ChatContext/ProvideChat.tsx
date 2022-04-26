@@ -46,7 +46,7 @@ interface IChatContext
 
 function useChatProvider() : IChatContext
 {
-	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
+	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/chat", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
 			token: useAuth().user?.access_token_42
 		}

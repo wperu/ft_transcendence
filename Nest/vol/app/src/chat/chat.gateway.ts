@@ -19,7 +19,7 @@ import { Room } from "./interface/room";
 // Todo fix origin
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
-	/*namespace: "/chat/", */
+	namespace: "/chat",
 	cors: {
 		origin: '*',
 	},
