@@ -7,7 +7,7 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto} from '../Common/Dto/chat/room';
+import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import RoomInvite from '../Common/Dto/chat/RoomInvite';
 import RoomJoin from '../Common/Dto/chat/RoomJoin';
@@ -58,9 +58,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
-		let msg_obj = {
+		let msg_obj : RcvMessageDto;
+
+		msg_obj = {
 			message: payload.message,
 			sender: user.username,
+			refId: user.reference_id,
 			send_date: format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
 			room_name: payload.room_name
 		};

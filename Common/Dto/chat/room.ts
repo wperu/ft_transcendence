@@ -50,4 +50,13 @@ export interface UserDataDto
 }
 
 
+export interface RcvMessageDto
+{
+	message: string,
+	sender: string,
+	refId: number,
+	send_date: string,
+	room_name: string
+};
+
 // export { create_room, room_protect };

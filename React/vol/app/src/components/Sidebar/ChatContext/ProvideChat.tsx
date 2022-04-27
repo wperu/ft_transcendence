@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { RcvMessageDto} from "../../../interface/chat/chatDto";
 import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
-import { RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
+import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
 import { ENotification } from "../../../Common/Dto/chat/notification";
 
 export enum ELevelInRoom

@@ -84,9 +84,9 @@ function ChatTab ()
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date} , index) => (
+					messages.map(({message, sender, send_date, refId} , index) => (
 						<li key={index}>
-							<ChatMessage src_name={sender} content={message} time={send_date} />
+							<ChatMessage src_name={sender} content={message} time={send_date} refId={refId} />
 						</li>))
 					
 				}
