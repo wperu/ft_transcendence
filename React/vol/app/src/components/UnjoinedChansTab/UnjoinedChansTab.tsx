@@ -10,7 +10,6 @@ function UnjoinedChansTab()
 	const chatCtx = useChatContext();
 
 	const [roomList, setRoomList] = useState<Array<{name: string, has_password: boolean}>>([]);
-	
 
 	useEffect(() => {
 		chatCtx.socket.on("ROOM_LIST", (data: Array<{name: string, has_password: boolean}>) => {

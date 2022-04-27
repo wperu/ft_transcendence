@@ -27,14 +27,14 @@ function ProfileSummarySettings() {
 	function selectFile(e: React.ChangeEvent<HTMLInputElement>)
 	{
 		if (!e.target.files || e.target.files.length === 0) {
-            setFile(undefined)
-            return
-        }
+			setFile(undefined)
+			return
+		}
 		//setFile(e.target.files[0]);
 
 		const value : File = e.target.files[0];
-        // I've kept this example simple by using the first image instead of multiple
-        
+		// I've kept this example simple by using the first image instead of multiple
+		
 		if (user)
 		{
 			const url = process.env.REACT_APP_API_USER + '/' + user.id +  '/avatar';
@@ -114,17 +114,17 @@ function ProfileSummarySettings() {
 	}
 
 	useEffect(() => {
-        if (!file) {
-            setImg(defaultLogo);
-            return;
-        }
+		if (!file) {
+			setImg(defaultLogo);
+			return;
+		}
 
-        const objectUrl = URL.createObjectURL(file);
-        setImg(objectUrl);
+		const objectUrl = URL.createObjectURL(file);
+		setImg(objectUrl);
 
-        // free memory when ever this component is unmounted
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [file]);
+		// free memory when ever this component is unmounted
+		return () => URL.revokeObjectURL(objectUrl);
+	}, [file]);
 
 
 	//fix MaxLength username

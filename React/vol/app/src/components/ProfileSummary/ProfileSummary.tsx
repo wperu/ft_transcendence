@@ -1,4 +1,3 @@
-import React from "react";
 import "./ProfileSummary.css";
 import defaultLogo from "../../ressources/images/user-icon-0.png";
 import IUser from "../../interface/User";

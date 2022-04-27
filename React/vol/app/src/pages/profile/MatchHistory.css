@@ -1,0 +1,77 @@
+#match_history
+{
+	width: 100%;
+	display: block;
+}
+
+@media only screen and (max-width: 1400px)
+{
+	#match_history
+	{
+		font-size: 0.6em;
+	}
+}
+
+.history_match > *
+{
+	display: inline;
+	text-align: center;
+}
+
+.match_score_separator
+{
+	width: fit-content;
+	color: lightblue;
+}
+
+.history_match
+{
+	background-color: #2d3444;
+	color: whitesmoke;
+	width: 55%;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	height: 1.7em;
+	margin: 0.5em auto;
+	border: 1px solid whitesmoke;
+}
+
+.history_match_user
+{
+	width: 20%;
+}
+
+.history_match_score
+{
+	width: 10%;
+}
+
+.victory, .defeat, .draw, .outcome_counterweight
+{
+	height: fit-content;
+	width: 13%;
+}
+
+.victory, .defeat, .draw
+{
+	font-size: 0.6em;
+	text-transform: uppercase;
+	text-align: center;
+	text-justify: center;
+}
+
+.victory
+{
+	color: greenyellow;
+}
+
+.defeat
+{
+	color: red;
+}
+
+.draw
+{
+	color: lightgrey;
+}
