@@ -37,25 +37,10 @@ function Notification(prop : IProp) : JSX.Element
 function Friends()
 {
 	const chtCtx = useChatContext();
-	const [friendsList, setFriendsList] = useState<Array<UserDataDto>>([]);
-	const [blockList, setBlockList] = useState<Array<UserDataDto>>([]);
+
 	//const [blocks, setBlocks] = useState();
 
-	useEffect(() => {
 
-		chtCtx.socket.on('FRIEND_LIST', (data: UserDataDto[]) => {
-			setFriendsList(data);
-		});
-
-		chtCtx.socket.emit("FRIEND_LIST");
-
-		chtCtx.socket.on('BLOCK_LIST', (data: UserDataDto[]) => {
-			setBlockList(data);
-		});
-
-		chtCtx.socket.emit("BLOCK_LIST");
-
-	}, [])
 
 	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
 	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
@@ -93,13 +78,13 @@ function Friends()
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-				{friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected !== false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
+				{chtCtx.friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected !== false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
 				<div className="user_status_tab">Offline</div>
-				{friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected === false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
+				{chtCtx.friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected === false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
 			</div>
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
-				{blockList.map((u) => (<BlockedUser key={u.reference_id} ref_id={u.reference_id} name={u.username} /> ))}
+				{chtCtx.blockList.map((u) => (<BlockedUser key={u.reference_id} ref_id={u.reference_id} name={u.username} /> ))}
 			</div>
 		</div>
 	);
