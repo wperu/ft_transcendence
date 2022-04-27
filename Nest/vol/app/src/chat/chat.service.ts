@@ -264,11 +264,18 @@ export class ChatService {
 		return ret;
 	}
 	
-	async addFriend(user: ChatUser, ref_id : number) : Promise<void>
+	/**
+	 * Return true if a newRequest was created
+	 * @param user 
+	 * @param ref_id 
+	 * @returns 
+	 */
+	async addFriend(user: ChatUser, ref_id : number) : Promise<boolean>
 	{
-		await this.friendService.addRequestFriend(user.reference_id, ref_id);
+		if (await this.friendService.addRequestFriend(user.reference_id, ref_id) !== undefined)
+			return true;
 
-		return;
+		return false;
 	}
 
 	async rmFriend(user: ChatUser, ref_id : number) : Promise<void>

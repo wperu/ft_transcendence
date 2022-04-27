@@ -77,6 +77,8 @@ export class FriendsService
 	 */
 	async findFriendRelationOf(userIdOne: number, userIdTwo: number): Promise<FriendShip | undefined>
 	{
+		if (userIdOne === userIdTwo)
+			return undefined;
 		return await this.friendRepository.findOne({
 			where: {
 				id_one: userIdOne,
@@ -91,19 +93,24 @@ export class FriendsService
 	 * add new friend Request
 	 * @param userIdOne 
 	 * @param userIdTwo 
-	 * @returns friendRequest
+	 * @returns friendRequest if newRequest was create else undefined
 	 */
-	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip>
+	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | undefined>
 	{
+		if (userIdOne === userIdTwo)
+			return undefined;
 		const rel = await this.findFriendRelationOf(userIdOne, userIdTwo);
-		if (rel !== undefined) //request already exist or isFriend
+		if (rel !== undefined ) //request already exist or isFriend
 		{
-			return rel;
+			return undefined;
 		}
 		else
 		{
 			let req: FriendShip = new FriendShip();
 			const rel_two = await this.findFriendRelationOf(userIdTwo, userIdOne);
+
+			if (rel_two !== undefined && rel_two.status === EStatus.BLOCK)
+				return undefined
 
 			if (rel_two !== undefined && rel_two.status === EStatus.REQUEST)
 			{
@@ -128,6 +135,7 @@ export class FriendsService
 	 */
 	async rmRequestFriend(id: number) : Promise<void>
 	{
+		
 		await this.friendRepository
 		    .createQueryBuilder()
 		    .delete()
@@ -139,6 +147,8 @@ export class FriendsService
 
 	async rmFriend(userIdOne: number, userIdTwo: number): Promise<void>
 	{
+		if (userIdOne === userIdTwo)
+			return undefined;
 		await this.friendRepository
 		    .createQueryBuilder()
 		    .delete()
@@ -202,6 +212,8 @@ export class FriendsService
 	 */
 	async blockUser(userIdOne: number, userIdTwo: number): Promise<FriendShip>
 	{
+		if (userIdOne === userIdTwo)
+			return undefined;
 		//Delete if relation exist & != Block (2, 1)
 		await this.friendRepository
 		    .createQueryBuilder()
@@ -209,7 +221,7 @@ export class FriendsService
 		    .from(FriendShip)
 		    .where("id_one = :id_one", { id_one: userIdTwo })
 			.andWhere("id_two = :id_two", { id_two: userIdOne })
-			.andWhere("status = :status", { status: EStatus.FRIEND})
+			.andWhere("status != :status", { status: EStatus.BLOCK})
 		    .execute();
 
 		//Update relation (1, 2)
@@ -230,7 +242,8 @@ export class FriendsService
 
 	async unBlockUser(userIdOne: number, userIdTwo: number): Promise<void>
 	{
-		
+		if (userIdOne === userIdTwo)
+			return undefined;
 		await this.friendRepository
 		.createQueryBuilder()
 		.delete()
@@ -239,7 +252,6 @@ export class FriendsService
 		.andWhere("id_two = :id_two", { id_two: userIdTwo })
 		.andWhere("status = :status", { status: EStatus.BLOCK})
 		.execute();
-
 	}
 
 }

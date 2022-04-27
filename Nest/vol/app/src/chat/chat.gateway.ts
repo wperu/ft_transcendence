@@ -566,26 +566,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user !== undefined)
 		{
-			await this.chatService.addFriend(user, payload);
-		}
+			if(await this.chatService.addFriend(user, payload) === false)
+				return ;
 
-		let us = this.chatService.getUserFromID(payload);
+			let us = this.chatService.getUserFromID(payload);
 
+			if (us !== undefined)
+			{
+				let dto : NotifDTO[];
 
-		if (us !== undefined)
-		{
-			let dto : NotifDTO[];
+				dto = [{
+					type: ENotification.FRIEND_REQUEST,
+					req_id: user.reference_id,
+					username: user.username,
+					content: undefined,
+				}]
 
-			dto = [{
-				type: ENotification.FRIEND_REQUEST,
-				req_id: user.reference_id,
-				username: user.username,
-				content: undefined,
-			}]
-
-			us.socket.forEach((s) => {
-				s.emit('RECEIVE_NOTIF', dto);
-			});
+				us.socket.forEach((s) => {
+					s.emit('RECEIVE_NOTIF', dto);
+				});
+			}
 		}
 	}
 
