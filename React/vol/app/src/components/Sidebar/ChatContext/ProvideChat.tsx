@@ -3,7 +3,14 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
-import { ENotification } from "../../../Common/Dto/chat/notification";
+
+
+enum ENotification
+{
+	INFO,
+	GAME_REQUEST,
+	FRIEND_REQUEST
+}
 
 export enum ELevelInRoom
 {
@@ -214,6 +221,16 @@ function useChatProvider() : IChatContext
 			}
 		};
 	}, [socket]);
+
+	useEffect(() => {
+		setNotification((prev) => { return prev.filter((n) => {
+			return(!(
+			n.type === ENotification.FRIEND_REQUEST
+			&& n.req_id
+			&& friendsList.find((f) => {return f.reference_id === n.req_id})))
+			})
+		})
+	}, [friendsList]);
 	
 	
 	/**
