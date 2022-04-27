@@ -521,7 +521,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				content: undefined,
 			})
 		})
-		console.log(dto);
 
 		
 		client.emit('RECEIVE_NOTIF', dto);
@@ -572,6 +571,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		let us = this.chatService.getUserFromID(payload);
 
+
 		if (us !== undefined)
 		{
 			let dto : NotifDTO[];
@@ -579,7 +579,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			dto = [{
 				type: ENotification.FRIEND_REQUEST,
 				req_id: user.reference_id,
-				username: "",
+				username: user.username,
 				content: undefined,
 			}]
 

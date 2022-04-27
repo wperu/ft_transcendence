@@ -3,6 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EStatus, FriendShip } from 'src/entities/friend_ship.entity';
 import { In, Repository } from 'typeorm';
 
+
+/**
+ * //TODO
+ * * Request avoid friend
+ * * avoid double request
+ * * unfriend
+ * * avoid or not request from blocked user ??
+ */
 @Injectable()
 export class FriendsService
 {
