@@ -1,5 +1,6 @@
 #notify
 {
+	z-index: 15;
 	width: max-content;
 	position: fixed;
 	top: 0;
@@ -18,6 +19,8 @@
 	border-radius: 8px;
 	margin-bottom: 0.5vmin;
 	padding: 0.5vmin 2vmin;
+	display: flex;
+	align-items: center;
 }
 
 .error
@@ -27,4 +30,13 @@
 .info
 {
 	background-color: rgb(64, 179, 11);
+}
+
+.delete_notif
+{
+	background-color: transparent;
+	border: none;
+	color: white;
+	font-size: 0.4em;
+	margin-left: 1em;
 }

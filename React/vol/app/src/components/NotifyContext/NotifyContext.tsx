@@ -94,7 +94,7 @@ function Notice(prop: INotice)
 
 	}, [isClosing])
 
-	return <li className={"notification " + prop.level}>{prop.message}<button onClick={() => { ctx.onDelete(prop.idx)}}></button></li>
+	return <li className={"notification " + prop.level}>{prop.message}<button className="delete_notif" onClick={() => { ctx.onDelete(prop.idx)}}>dismiss</button></li>
 }
 
 export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
@@ -109,5 +109,4 @@ export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
 			{children}
 		</notifyContext.Provider>
 	);
-	
 }

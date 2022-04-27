@@ -14,7 +14,6 @@ function LogOutButton () : JSX.Element
 
 	function LogOutClick ()
 	{
-		alert("déConnexion");
 		auth.signout(delUser);
 	}
 

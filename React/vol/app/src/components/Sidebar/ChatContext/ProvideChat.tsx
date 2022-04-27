@@ -4,6 +4,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RoomLeftDto } from "../../../Common/Dto/chat/room";
+import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
 
 export enum ELevelInRoom
 {
@@ -46,6 +47,7 @@ interface IChatContext
 
 function useChatProvider() : IChatContext
 {
+	const notify = useNotifyContext();
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
 			token: useAuth().user?.access_token_42
@@ -54,7 +56,7 @@ function useChatProvider() : IChatContext
     const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
     const [rooms, setRooms] = useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
-
+	
 	
     function addRoom(room_name: string, is_protected: boolean)
     {
@@ -68,10 +70,10 @@ function useChatProvider() : IChatContext
 		
         setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
 		if (currentRoom !== undefined)
-			setCurrentRoomByName(currentRoom.room_name);
+		setCurrentRoomByName(currentRoom.room_name);
     };
-
-
+	
+	
 	function rmRoom(room_name: string)
 	{
 		setRooms(prev => {
@@ -136,6 +138,7 @@ function useChatProvider() : IChatContext
 	}, [currentRoom, rooms]);
 
 	useEffect(() => {
+
 		socket.connect();
 		
 		socket.on("JOINED_ROOM", (data: RoomJoined) => {
@@ -143,10 +146,11 @@ function useChatProvider() : IChatContext
 			{
 				//alert("Channel " + data.room_name + " rejoint");
 				addRoom(data.room_name, false);
+				notify.addNotice(ELevel.info, "Room " + data.room_name + " joined", 3000);
 			}
 			else if (data.status_message !== undefined)
 			{
-				alert(data.status_message);
+				notify.addNotice(ELevel.error, data.status_message, 3000);
 			}
 		})
 
