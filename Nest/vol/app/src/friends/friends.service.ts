@@ -7,9 +7,8 @@ import { In, Repository } from 'typeorm';
 /**
  * //TODO
  * * Request avoid friend
- * * avoid double request
  * * unfriend
- * * avoid or not request from blocked user ??
+ *
  */
 @Injectable()
 export class FriendsService
@@ -153,16 +152,16 @@ export class FriendsService
 		    .createQueryBuilder()
 		    .delete()
 		    .from(FriendShip)
-		    .where("id_one = :id_one", { id: userIdOne })
-			.andWhere("id_two = :id_two", { id: userIdTwo })
+		    .where("id_one = :id_one", { id_one: userIdOne })
+			.andWhere("id_two = :id_two", { id_two: userIdTwo })
 		    .execute();
 
 		await this.friendRepository
 		    .createQueryBuilder()
 		    .delete()
 		    .from(FriendShip)
-		    .where("id_one = :id_one", { id: userIdTwo })
-			.andWhere("id_two = :id_two", { id: userIdOne })
+		    .where("id_one = :id_one", { id_one: userIdTwo })
+			.andWhere("id_two = :id_two", { id_two: userIdOne })
 		    .execute();
 		return ;
 	}

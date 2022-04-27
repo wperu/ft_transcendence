@@ -4,6 +4,10 @@ import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
 
+/** //fix
+ *  NOTIF rework notif system
+ * 	dub request && invalide request... 
+ */
 
 enum ENotification
 {
@@ -199,6 +203,7 @@ function useChatProvider() : IChatContext
 	function addNotif(notif: INotif[])
 	{
 		setNotification(prev => {
+
 			return [...prev, ...notif];
 		});
 	};
@@ -215,7 +220,6 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
 			addNotif(data);
-
 		});
 		
 		return function cleanup() {		
