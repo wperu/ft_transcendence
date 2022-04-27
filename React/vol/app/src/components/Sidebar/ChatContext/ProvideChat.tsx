@@ -167,6 +167,11 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		socket.connect();
 		
+		socket.on("disconnect", () => {
+			setRooms([]); //clean rooms
+			setCurrentRoom(undefined);
+		  });
+
 		socket.on("JOINED_ROOM", (data: RoomJoined) => {
 			if (data.status === 0 && data.room_name !== undefined)
 			{
@@ -211,7 +216,6 @@ function useChatProvider() : IChatContext
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
 			addNotif(data);
 
-			console.log('notif :' + data);
 		});
 		
 		return function cleanup() {		
@@ -227,10 +231,11 @@ function useChatProvider() : IChatContext
 			return(!(
 			n.type === ENotification.FRIEND_REQUEST
 			&& n.req_id
-			&& friendsList.find((f) => {return f.reference_id === n.req_id})))
+			&& (friendsList.find((f) => {return f.reference_id === n.req_id})
+			|| blockList.find((b) => {return b.reference_id === n.req_id}))))
 			})
 		})
-	}, [friendsList]);
+	}, [friendsList, blockList]);
 	
 	
 	/**
