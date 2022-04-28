@@ -1,8 +1,11 @@
 #profile_page footer
 {
 	position: fixed;
-	bottom: 2vmin;
-	left: 2vmin;
+	bottom: 0;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	margin: 2vmin;
 }
 
 #profile_header

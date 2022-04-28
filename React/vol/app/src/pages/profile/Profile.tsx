@@ -1,13 +1,14 @@
-import LogOutButton from "../../components/LogOutButton/LogOutButton";
+import "./Profile.css";
 import React, { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
+import axios from "axios";
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../interface/User";
-import axios from "axios";
 import DefaultPP from "../../ressources/images/user-icon-0.png";
 import EditLogo from "../../ressources/images/draw.png";
-import "./Profile.css";
 import MatchHistory from "./MatchHistory";
+import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuButton";
+
 
 interface headerInfo
 {
@@ -193,7 +194,7 @@ function Profile() {
 				<CurrentUserProfileHeader user={user} />
 				<MatchHistory />
 				<footer>
-					<LogOutButton />
+					<Link to='/'><BackToMainMenuButton /></Link>
 				</footer>
 			</div>
 		);
@@ -218,7 +219,7 @@ function Profile() {
 				<OtherUserProfileHeader user={user} />
 				<MatchHistory />
 				<footer>
-					<LogOutButton />
+					<Link to='/'><BackToMainMenuButton /></Link>
 				</footer>
 			</div>
 		);
