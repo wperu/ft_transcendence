@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
+import useInterval from "../../../hooks/useInterval";
 
 /** //fix
  *  NOTIF rework notif system
@@ -217,6 +218,15 @@ function useChatProvider() : IChatContext
 		});
 	};
 
+	function rmFriendNotif(id: number)
+	{
+		setNotification(prev => {
+			return prev.filter((o) => {
+				return (!(o.type === ENotification.FRIEND_REQUEST && o.req_id === id));
+			})
+		});
+	};
+
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
 			addNotif(data);
@@ -230,7 +240,7 @@ function useChatProvider() : IChatContext
 		};
 	}, [socket]);
 
-	useEffect(() => {
+/*	useEffect(() => {
 		setNotification((prev) => { return prev.filter((n) => {
 			return(!(
 			n.type === ENotification.FRIEND_REQUEST
@@ -239,7 +249,7 @@ function useChatProvider() : IChatContext
 			|| blockList.find((b) => {return b.reference_id === n.req_id}))))
 			})
 		})
-	}, [friendsList, blockList]);
+	}, [friendsList, blockList]);*/
 	
 	
 	/**
@@ -269,6 +279,42 @@ function useChatProvider() : IChatContext
 		};
 
 	}, [socket]);
+
+
+	useEffect(() => {
+		socket.on('FRIEND_REQUEST_LIST', (data : UserDataDto[]) => {
+			
+
+			setNotification((prev) => {
+				console.log(prev);
+				console.log(data);
+				return prev.filter((no) => {
+					if (no.type !== ENotification.FRIEND_REQUEST)
+						return true;
+					if (no.type === ENotification.FRIEND_REQUEST && data.find((d) => { return d.reference_id === no.req_id}))
+						return true;
+					else
+						return false;
+				});
+			})
+			/*let refIds : number[];
+
+			refIds = [];
+			notification.forEach((no) => {
+				if (no.type === ENotification.FRIEND_REQUEST && no.req_id !== undefined)
+				{
+					if (data.find((d) => { return d.reference_id === no.req_id}) === undefined)
+					{
+						refIds.push(no.req_id);
+					}
+				}
+			})
+
+			refIds.forEach((i) => {rmFriendNotif(i)});*/
+		});
+	}, [])
+
+	useInterval(() => {socket.emit("FRIEND_REQUEST_LIST");}, 1000);
 
     return({
 		socket,

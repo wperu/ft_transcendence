@@ -144,6 +144,12 @@ export class FriendsService
 		return ;
 	}
 
+	/**
+	 * 
+	 * @param userIdOne 
+	 * @param userIdTwo 
+	 * @returns 
+	 */
 	async rmFriend(userIdOne: number, userIdTwo: number): Promise<void>
 	{
 		if (userIdOne === userIdTwo)
