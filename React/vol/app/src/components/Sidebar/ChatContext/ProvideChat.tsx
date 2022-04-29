@@ -144,7 +144,6 @@ function useChatProvider() : IChatContext
 		socket.on("JOINED_ROOM", (data: RoomJoined) => {
 			if (data.status === 0 && data.room_name !== undefined)
 			{
-				//alert("Channel " + data.room_name + " rejoint");
 				addRoom(data.room_name, false);
 				notify.addNotice(ELevel.info, "Room " + data.room_name + " joined", 3000);
 			}
@@ -164,13 +163,13 @@ function useChatProvider() : IChatContext
 	
     return({
 		socket,
-        currentRoom,
-        setCurrentRoom,
+		currentRoom,
+		setCurrentRoom,
 		setCurrentRoomByName,
 		currentTab,
 		setCurrentTab,
-        rooms,
-        addRoom,
+		rooms,
+		addRoom,
     });
 }
 
