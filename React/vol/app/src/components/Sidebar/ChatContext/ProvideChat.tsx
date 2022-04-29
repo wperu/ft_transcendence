@@ -64,6 +64,7 @@ interface IChatContext
 
 	notification:	INotif[];
 	rmNotif:		(id: string) => void;
+	rmFriendNotif: 	(id: number) => void;
 
 	currentTab:		ECurrentTab;
 	setCurrentTab:	(tab: ECurrentTab) => void;
@@ -204,7 +205,7 @@ function useChatProvider() : IChatContext
 	function addNotif(notif: INotif[])
 	{
 		setNotification(prev => {
-
+			//notif.filter((n) => {return (!(prev.find((p) => (n.req_id && p.req_id && n.req_id === p.req_id))))});
 			return [...prev, ...notif];
 		});
 	};
@@ -229,7 +230,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
-			addNotif(data);
+			//addNotif(data);
 		});
 		
 		return function cleanup() {		
@@ -284,35 +285,34 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		socket.on('FRIEND_REQUEST_LIST', (data : UserDataDto[]) => {
 			
+			console.log('list : ' + data);
 
-			setNotification((prev) => {
-				console.log(prev);
-				console.log(data);
-				return prev.filter((no) => {
-					if (no.type !== ENotification.FRIEND_REQUEST)
-						return true;
-					if (no.type === ENotification.FRIEND_REQUEST && data.find((d) => { return d.reference_id === no.req_id}))
-						return true;
-					else
-						return false;
-				});
-			})
-			/*let refIds : number[];
+			data.forEach((req) => {
+				let not : INotif[];
 
-			refIds = [];
-			notification.forEach((no) => {
-				if (no.type === ENotification.FRIEND_REQUEST && no.req_id !== undefined)
+				not = [];
+				if (!(notification.find((n) => (req.reference_id === n.req_id))))
 				{
-					if (data.find((d) => { return d.reference_id === no.req_id}) === undefined)
-					{
-						refIds.push(no.req_id);
-					}
+					not.push({
+						id: "",
+						type: ENotification.FRIEND_REQUEST,
+						req_id: req.reference_id,
+						username: req.username
+					});
 				}
+				addNotif(not);
+				console.log(not);
 			})
-
-			refIds.forEach((i) => {rmFriendNotif(i)});*/
 		});
-	}, [])
+
+		return function cleanup() {		
+			if (socket !== undefined)
+			{
+				socket.off('FRIEND_REQUEST_LIST');
+			}
+		};
+
+	}, [notification])
 
 	useInterval(() => {socket.emit("FRIEND_REQUEST_LIST");}, 1000);
 
@@ -327,6 +327,7 @@ function useChatProvider() : IChatContext
         addRoom,
 		notification,
 		rmNotif,
+		rmFriendNotif,
 		friendsList,
 		blockList,
     });

@@ -437,35 +437,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 	}
 
-	
-
-	@SubscribeMessage('FRIEND_LIST')
-	async friend_list(client: Socket) : Promise<void>
-	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
-
-		if (user !== undefined)
-		{
-			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
-			
-		//	console.log(ret);
-			client.emit('FRIEND_LIST', ret);
-		}
-	}
-
-	@SubscribeMessage('FRIEND_REQUEST_LIST')
-	async request_list(client: Socket) : Promise<void>
-	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
-
-		if (user !== undefined)
-		{
-			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
-
-			client.emit('FRIEND_REQUEST_LIST', ret);
-		}
-		return ;
-	}
 
 	
 	//Todo emit disconect if token is wrong
@@ -525,7 +496,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		})
 
 		
-		client.emit('RECEIVE_NOTIF', dto);
+		//client.emit('RECEIVE_NOTIF', dto);
 		//client.emit
 
 		this.logger.log(`${user.username} connected to the chat under id : ${client.id}`);
@@ -584,9 +555,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					content: undefined,
 				}]
 
-				us.socket.forEach((s) => {
+				/*us.socket.forEach((s) => {
 					s.emit('RECEIVE_NOTIF', dto);
-				});
+				});*/
 			}
 		}
 	}
@@ -622,6 +593,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			await this.chatService.unBlockUser(user, payload);
 		}
+	}
+
+	@SubscribeMessage('FRIEND_LIST')
+	async friend_list(client: Socket) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
+			
+		//	console.log(ret);
+			client.emit('FRIEND_LIST', ret);
+		}
+	}
+
+	@SubscribeMessage('FRIEND_REQUEST_LIST')
+	async request_list(client: Socket) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			let ret = await this.chatService.getRequestList(user) as UserDataDto[];
+
+			client.emit('FRIEND_REQUEST_LIST', ret);
+		}
+		return ;
 	}
 
 }

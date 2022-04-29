@@ -21,7 +21,7 @@ export class AuthController
 
 
     @Get('/login')
-    @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=bb0e2df66549b7a90ccfb9ae53736366337e6be09540ac731757e0d38f14978a&redirect_uri=https%3A%2F%2F10.4.2.5%2Fapi%2Fauth%2Fintra42%2Fcallback&response_type=code', 301)
+    @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=bb0e2df66549b7a90ccfb9ae53736366337e6be09540ac731757e0d38f14978a&redirect_uri=https%3A%2F%2F10.3.12.5%2Fapi%2Fauth%2Fintra42%2Fcallback&response_type=code', 301)
     async   login()
     {
         console.log("login redirection");

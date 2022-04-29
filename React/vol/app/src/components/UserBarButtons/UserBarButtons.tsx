@@ -114,6 +114,7 @@ export function BlockUserButton(prop: blockProp)
 
 	function blockUser()
 	{
+		chtCtx.rmFriendNotif(prop.refId);
 		chtCtx.socket.emit('BLOCK_USER', prop.refId);
 	}
 
@@ -182,6 +183,8 @@ export function AddFriendButton(prop: friendProp)
 	function addFriend()
 	{
 		console.log(prop.user_name + " friend :D");
+
+		chtCtx.rmFriendNotif(prop.refId);
 		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
 	
