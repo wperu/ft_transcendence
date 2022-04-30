@@ -3,11 +3,11 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
-import useInterval from "../../../hooks/useInterval";
 
 /** //fix
  *  NOTIF rework notif system
- * 	dub request && invalide request... 
+ * 	dub request && invalide request...
+ * 	room add is_pm
  */
 
 enum ENotification
@@ -69,11 +69,10 @@ interface IChatContext
 	currentTab:		ECurrentTab;
 	setCurrentTab:	(tab: ECurrentTab) => void;
 
-	friendsList:	Array<UserDataDto>;
-	blockList:		Array<UserDataDto>;
+	friendsList:			Array<UserDataDto>;
+	blockList:				Array<UserDataDto>;
+	//RequestList:		Array<UserDataDto>;
 }
-
-//const cltSocket = 
 
 function useChatProvider() : IChatContext
 {
@@ -82,11 +81,12 @@ function useChatProvider() : IChatContext
 			token: useAuth().user?.access_token_42
 		}
 	}));
-    const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
-    const [rooms, setRooms]					= useState<IRoom[]>([]);
+	const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
+	const [rooms, setRooms]					= useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab]		= useState<ECurrentTab>(ECurrentTab.channels);
 	const [notification, setNotification] 	= useState<INotif[]>([]);
 	const [friendsList, setFriendsList]		= useState<Array<UserDataDto>>([]);
+	const [requestList, setRequestList]		= useState<Array<UserDataDto>>([]);
 	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
 
 	/**
@@ -138,7 +138,6 @@ function useChatProvider() : IChatContext
 			let targetRoom = findRoomByName(data.room_name);
 			if (targetRoom !== undefined)
 			{
-				console.log("[CHAT] rcv: ", data);
 				targetRoom.room_message.push(data);
 			}
 		});
@@ -181,7 +180,6 @@ function useChatProvider() : IChatContext
 		socket.on("JOINED_ROOM", (data: RoomJoined) => {
 			if (data.status === 0 && data.room_name !== undefined)
 			{
-				//alert("Channel " + data.room_name + " rejoint");
 				addRoom(data.room_name, false);
 			}
 			else if (data.status_message !== undefined)
@@ -241,18 +239,6 @@ function useChatProvider() : IChatContext
 		};
 	}, [socket]);
 
-/*	useEffect(() => {
-		setNotification((prev) => { return prev.filter((n) => {
-			return(!(
-			n.type === ENotification.FRIEND_REQUEST
-			&& n.req_id
-			&& (friendsList.find((f) => {return f.reference_id === n.req_id})
-			|| blockList.find((b) => {return b.reference_id === n.req_id}))))
-			})
-		})
-	}, [friendsList, blockList]);*/
-	
-	
 	/**
 	 * ***** Relation Ship *****
 	 */
@@ -281,17 +267,26 @@ function useChatProvider() : IChatContext
 
 	}, [socket]);
 
+	function isNotified(req : number)
+	{
+		return ((notification.find((n) => ( req === n.req_id))));
+	}
+
+	function rmDeadNotif(data : UserDataDto[])
+	{
+		setNotification((prev) => (prev.filter((n) => (!(n.type === ENotification.FRIEND_REQUEST && data.find((d) => ( d.reference_id === n.req_id)) === undefined)))))
+	}
 
 	useEffect(() => {
 		socket.on('FRIEND_REQUEST_LIST', (data : UserDataDto[]) => {
-			
-			console.log('list : ' + data);
+			let not : INotif[];
 
+			not = [];
 			data.forEach((req) => {
-				let not : INotif[];
+				
 
-				not = [];
-				if (!(notification.find((n) => (req.reference_id === n.req_id))))
+				
+				if (!isNotified(req.reference_id))
 				{
 					not.push({
 						id: "",
@@ -300,9 +295,12 @@ function useChatProvider() : IChatContext
 						username: req.username
 					});
 				}
-				addNotif(not);
-				console.log(not);
+				
 			})
+			addNotif(not);
+
+			setRequestList(data);
+			
 		});
 
 		return function cleanup() {		
@@ -314,7 +312,9 @@ function useChatProvider() : IChatContext
 
 	}, [notification])
 
-	useInterval(() => {socket.emit("FRIEND_REQUEST_LIST");}, 1000);
+	useEffect(() => {
+		rmDeadNotif(requestList);
+	}, [requestList]);
 
     return({
 		socket,

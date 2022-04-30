@@ -8,6 +8,7 @@ import { In, Repository } from 'typeorm';
  * //TODO
  * * Request avoid friend
  * * unfriend
+ * * add Try Catch on save (prevent thow from duplication of relation)
  *
  */
 @Injectable()
@@ -114,7 +115,14 @@ export class FriendsService
 			if (rel_two !== undefined && rel_two.status === EStatus.REQUEST)
 			{
 				rel_two.status = EStatus.FRIEND;
-				await this.friendRepository.save(rel_two);
+				try {
+					await this.friendRepository.save(rel_two);
+				}
+				catch (e)
+				{
+
+				}
+
 				req.status = EStatus.FRIEND;
 			}
 			else
@@ -123,7 +131,16 @@ export class FriendsService
 			}
 			req.id_one = userIdOne;
 			req.id_two = userIdTwo;
-			return await this.friendRepository.save(req);
+			
+			try {
+				let ret = await this.friendRepository.save(req);
+
+				return ret;
+			}
+			catch (e)
+			{
+				return undefined;
+			}
 		}
 	}
 

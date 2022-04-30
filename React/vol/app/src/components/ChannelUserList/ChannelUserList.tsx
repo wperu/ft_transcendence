@@ -14,7 +14,6 @@ function ChannelUserList ()
 	useEffect(() => {
 		chatCtx.socket.on("USER_LIST", (data: Array<UserDataDto>) => {
 			setUserList(data);
-			console.log(data);
 		})
 		
 		
@@ -40,7 +39,7 @@ function ChannelUserList ()
 		<div id="channel_users_list">
 			<ul>
 				{userList.map((user, index) => (
- 				<li key={index}>
+ 				<li key={user.reference_id}>
 				 	<ChatUser isBlockedByCurrentUser={false} targetUserLvl={ELevelInRoom.casual} targetUsername={user.username} refId={user.reference_id} currentUserLvl={user_lvl}/>
 				</li>))}
 			</ul>

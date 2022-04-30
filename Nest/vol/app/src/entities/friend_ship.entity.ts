@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 export enum EStatus
 {
@@ -8,6 +8,7 @@ export enum EStatus
 }
 
 @Entity()
+@Unique("relation", ['id_one', 'id_two'])
 export class FriendShip
 {
 	@PrimaryGeneratedColumn()

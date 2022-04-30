@@ -9,6 +9,7 @@ import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
+import Chat from "../Chat/Chat";
 
 interface Prop
 {
@@ -111,7 +112,7 @@ export function MuteUserButton(prop: Prop)
 export function BlockUserButton(prop: blockProp)
 {
 	const chtCtx = useChatContext();
-
+	
 	function blockUser()
 	{
 		chtCtx.rmFriendNotif(prop.refId);
@@ -123,7 +124,7 @@ export function BlockUserButton(prop: blockProp)
 		chtCtx.socket.emit('UNBLOCK_USER', prop.refId);
 	}
 
-	if (prop.already_blocked)
+	if (chtCtx.blockList.find((b) => (b.reference_id === prop.refId)))
 	{
 		return (
 			<button className="user_bar_button positive_user_button" onClick={unblockUser}><img alt="" src={BlockLogo}/>unblock</button>
@@ -197,7 +198,7 @@ export function AddFriendButton(prop: friendProp)
 	if (prop.already_friend)
 	{
 		return (
-			<button className="user_bar_button negative_user_button" onClick={removeFriend}><img alt="" src={AddFriendLogo}/>unfriend</button>
+			<button className="user_bar_button negative_user_button" onClick={removeFriend}><img alt={AddFriendLogo} src={AddFriendLogo}/>unfriend</button>
 		);
 	}
 	else

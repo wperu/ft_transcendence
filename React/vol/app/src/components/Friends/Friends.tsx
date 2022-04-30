@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Friend, BlockedUser } from "./Users/Users"
 import { InfoNotification, InviteNotification, NewFriendNotification } from "./Notification/Notification"
 import "./Friends.css";
 import { INotif, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from "../../hooks/useInterval";
-import { UserDataDto } from "../../Common/Dto/chat/room";
+
 
 enum ENotification
 {
@@ -41,9 +41,10 @@ function Friends()
 	//const [blocks, setBlocks] = useState();
 
 
-
-	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
-	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
+	const int1 = useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
+	const int3 = useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
+	const int2 = useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
+	
 
 
 	function addFriend(event: React.SyntheticEvent)
@@ -57,6 +58,8 @@ function Friends()
 		if (target.name.value.length !== 0)
 		{
 			console.log("add friend with name: " + target.name.value);
+			chtCtx.socket.emit('ADD_FRIEND_USERNAME', target.name.value);
+			
 			target.name.value = '';
 		}
 	}

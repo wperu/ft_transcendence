@@ -278,6 +278,13 @@ export class ChatService {
 		return false;
 	}
 
+	async getUserByUsername(username : string) : Promise<User>
+	{
+		let toSend = await this.userService.findUserByUsername(username);
+		return toSend;
+	}
+
+
 	async rmFriend(user: ChatUser, ref_id : number) : Promise<void>
 	{
 		await this.friendService.rmFriend(user.reference_id, ref_id);

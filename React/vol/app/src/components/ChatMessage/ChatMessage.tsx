@@ -14,7 +14,7 @@ interface MessageProps
 //todo block user
 function ChatMessage(props: MessageProps)
 {
-	const { blockList } = useChatContext();
+	/*const { blockList } = useChatContext();
 
 
 	if (blockList.find(({reference_id}) => {  return (reference_id === props.refId)}))
@@ -29,7 +29,7 @@ function ChatMessage(props: MessageProps)
 			</div>
 		);
 	}
-	else 
+	else */
 		return (
 			<div className="message">
 				<header>

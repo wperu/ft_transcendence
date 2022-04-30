@@ -411,7 +411,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
 		const rooms = this.chatService.getAllRooms();
-		console.log(rooms);
 		rooms.forEach(room => {
 			if (!room.private_room) //fix me
 			{
@@ -554,12 +553,73 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					username: user.username,
 					content: undefined,
 				}]
+				
+				let ret = await this.chatService.getFriendList(us) as UserDataDto[];
+				let ret2 = await this.chatService.getRequestList(us) as UserDataDto[];
 
-				/*us.socket.forEach((s) => {
-					s.emit('RECEIVE_NOTIF', dto);
-				});*/
+				us.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret);
+					s.emit('FRIEND_REQUEST_LIST', ret2);
+				});
+
+				let ret3 = await this.chatService.getFriendList(user) as UserDataDto[];
+
+				user.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret3);
+				});
 			}
 		}
+	}
+
+	/**
+	 * 
+	 * @param client 
+	 * @param payload 
+	 * @returns 
+	 */
+	@SubscribeMessage('ADD_FRIEND_USERNAME')
+	async add_friend_by_username(client: Socket, payload: string) : Promise<void>
+	{
+	  let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+	  if (user !== undefined)
+	  {
+		  
+		let us = await this.chatService.getUserByUsername(payload);
+		if (us !== undefined)
+		{
+			if(await this.chatService.addFriend(user, us.reference_id) === false)
+				return ;
+
+			let recv = this.chatService.getUserFromID(us.reference_id);
+
+			if (recv !== undefined)
+			{
+				let dto : NotifDTO[];
+
+				dto = [{
+					type: ENotification.FRIEND_REQUEST,
+					req_id: user.reference_id,
+					username: user.username,
+					content: undefined,
+				}]
+				
+				let ret = await this.chatService.getFriendList(recv) as UserDataDto[];
+				let ret2 = await this.chatService.getRequestList(recv) as UserDataDto[];
+
+				recv.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret);
+					s.emit('FRIEND_REQUEST_LIST', ret2);
+				});
+
+				let ret3 = await this.chatService.getFriendList(user) as UserDataDto[];
+
+				user.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret3);
+				});
+			}
+		}
+	  }
 	}
 
 	@SubscribeMessage('RM_FRIEND')
@@ -570,6 +630,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			await this.chatService.rmFriend(user, payload);
+			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
+
+			user.socket.forEach(s => {
+				s.emit('FRIEND_LIST', ret);
+			});
 		}
 	}
 
@@ -581,6 +646,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			await this.chatService.blockUser(user, payload);
+
+			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			
+			user.socket.forEach(s => {
+				s.emit('BLOCK_LIST', ret);
+			});
+			
 		}
 	}
 
@@ -592,6 +664,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			await this.chatService.unBlockUser(user, payload);
+
+			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			user.socket.forEach(s => {
+				s.emit('BLOCK_LIST', ret);
+			});
 		}
 	}
 
