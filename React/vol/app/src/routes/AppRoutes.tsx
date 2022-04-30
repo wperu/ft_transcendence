@@ -8,6 +8,7 @@ import Callback from '../pages/Callback/Callback';
 import SidebarWithContext from '../components/SidebarWithContext/SidebarWithContext';
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
+import { FakeUser } from '../pages/FakeUser/FakeUser';
 
 
 interface Props{
@@ -32,6 +33,7 @@ function AppRoute() : JSX.Element
 				<Route path="/login" element={<HomeLoggedOut />}/>
 				<Route path="/login/callback" element={<Callback />}/>
 				<Route path="/game" element={<Pong />}/>
+				<Route path="/dev_user" element={<FakeUser/>}/>
 				<Route path="*" element={<NoMatch />}/>
 				<Route element={<RequireAuth/>}>
 					<Route element={<>
@@ -47,6 +49,7 @@ function AppRoute() : JSX.Element
 			</BrowserRouter>
 		</ProvideNotify>
 	</ProvideAuth>;
+
 	return element;
 }
 

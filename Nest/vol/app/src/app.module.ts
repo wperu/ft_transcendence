@@ -11,6 +11,8 @@ import { PongModule } from './pong/pong.module';
 import { PongGateway } from './pong/pong.gateway';
 import { PongService } from './pong/pong.service';
 import { TokenService } from './auth/token.service';
+import { FriendShip } from './entities/friend_ship.entity';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
 	imports: [TypeOrmModule.forRoot(
@@ -21,7 +23,7 @@ import { TokenService } from './auth/token.service';
 			username: 'postgres',
 			password: 'example',
 			database: 'postgres',
-			entities: [User, TokenValidatorEntity],
+			entities: [User, TokenValidatorEntity, FriendShip],
 			synchronize: true,
 		}
 	), UsersModule, ...AuthModule.getDependencies(), ChatModule, PongModule],

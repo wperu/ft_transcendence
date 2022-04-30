@@ -68,7 +68,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect
 
 	
 	
-		handleDisconnect(client: any)
+	handleDisconnect(client: any)
 	{
 		
 	}

@@ -39,8 +39,8 @@ export class AuthService {
             form.append('client_id', this.configService.get<string>("CLIENT_ID"));
             form.append('client_secret', this.configService.get<string>("CLIENT_SECRET"));
             form.append(data, access_code);
-            form.append('redirect_uri', "http://localhost/api/auth/intra42/callback");
-			//console.log(process.env.ORIGIN_URL + '/api/auth/intra42/callback');
+            form.append('redirect_uri', process.env.SCHEME + "://" +  process.env.ORIGIN + "/api/auth/intra42/callback");
+			//console.log(process.env.SCHEME + process.env.ORIGIN + '/api/auth/intra42/callback');
             const response = await firstValueFrom(this.httpService
 				.post(
                     this.configService.get<string>('AUTHTOKEN_URL'),

@@ -1,6 +1,7 @@
 import { Controller, Redirect, Get, Query, UnauthorizedException, Res, UseGuards, Req, ForbiddenException, BadRequestException, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { randomInt } from 'crypto';
 import { resolveSoa } from 'dns';
 import { ServerResponse } from 'http';
 import { User } from 'src/entities/user.entity';
@@ -53,5 +54,24 @@ export class AuthController
             throw new ForbiddenException("wrong access code");
         /* validates user, deletes code */
         return (this.usersService.findUserByAccessToken(token));
+    }
+
+    @Post('/dev-user')
+    async   createDevUser(@Req() req) : Promise<User | undefined>
+    {
+        let fake_token = {
+            access_token: "F4KE",
+            refresh_token: "F4KE",
+            expires_in: 42
+        };
+        if (req.headers['username'] === undefined)
+        {
+            throw new BadRequestException("no field username in request");
+        }
+
+        console.log (`Created new DEV user with Username \"${req.headers["username"]}\"`);
+
+        let user = await this.usersService.createUser(randomInt(10000), req.headers['username'], fake_token);
+        return (user);
     }
 }
