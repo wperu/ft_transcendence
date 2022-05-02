@@ -27,8 +27,20 @@ function Sidebar()
 	function handleChange(event: React.ChangeEvent<HTMLInputElement>)
 	{
 		let tmp: ECurrentTab = ECurrentTab[event.target.value as keyof typeof ECurrentTab];
+
+		if (tmp === ECurrentTab.chat && chatCtx.currentRoom === undefined)
+			return; //Todo add notification no chan join
+
 		chatCtx.setCurrentTab(tmp);
 	};
+
+	useEffect(() =>
+	{
+		if(chatCtx.currentRoom === undefined && chatCtx.currentTab === ECurrentTab.chat)
+			chatCtx.setCurrentTab(ECurrentTab.channels);
+	}, [chatCtx.currentRoom])
+
+
 
 	return (
 		<div id="sidebar">

@@ -1,7 +1,7 @@
 //Todo define what is send by backend
 
 // peut pas importer ça dans le react
-// import DatabaseFile from "src/entities/databaseFile.entity";
+//import DatabaseFile from "src/entities/databaseFile.entity";
 
 
 interface IUser

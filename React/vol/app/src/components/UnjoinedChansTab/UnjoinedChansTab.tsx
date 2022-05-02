@@ -84,7 +84,7 @@ function UnjoinedChansTab()
 				<div className="title">
 					Liste globale des channels
 				</div>
-				{roomList.map(( element ) => (<UnjoinedChan name={element.name} is_protected={element.has_password} />))}
+				{roomList.map(( element, index ) => (<li key={index}><UnjoinedChan name={element.name} is_protected={element.has_password} /></li>))}
 			</div>
 		</div>
 	);

@@ -9,6 +9,7 @@ import { TokenValidatorEntity } from './entities/token_validator.entity';
 import { ChatModule } from './chat/chat.module';
 import { FriendShip } from './entities/friend_ship.entity';
 import { FriendsModule } from './friends/friends.module';
+import DatabaseFile from './entities/databaseFile.entity';
 
 @Module({
 	imports: [TypeOrmModule.forRoot(
@@ -19,7 +20,7 @@ import { FriendsModule } from './friends/friends.module';
 			username: 'postgres',
 			password: 'example',
 			database: 'postgres',
-			entities: [User, TokenValidatorEntity, FriendShip],
+			entities: [User, TokenValidatorEntity, FriendShip, DatabaseFile],
 			synchronize: true,
 		}
 	), UsersModule, AuthModule, ChatModule, FriendsModule],

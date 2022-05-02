@@ -7,13 +7,14 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto} from '../Common/Dto/chat/room';
+import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import RoomJoin from '../Common/Dto/chat/RoomJoin';
 import { RoomRename, RoomChangePass, RoomPassChange } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { Room } from "./interface/room";
 import { RoomJoined } from 'src/Common/Dto/chat/RoomJoined';
+import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 
 
 // Todo fix origin
@@ -57,9 +58,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
-		let msg_obj = {
+		let msg_obj : RcvMessageDto;
+
+		msg_obj = {
 			message: payload.message,
 			sender: user.username,
+			refId: user.reference_id,
 			send_date: format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
 			room_name: payload.room_name
 		};
@@ -373,14 +377,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	user_list(client: Socket , payload: string) : void
 	{
 		var	current_room = this.chatService.getRoom(payload);
-		var	names_list : Array<string> = [];
-		let user_current = this.chatService.getUserFromSocket(client);
-		if(current_room.users.find(c => {c.reference_id === user_current.reference_id}))
+		var	names_list : Array<UserDataDto> = [];
+		let user :ChatUser = this.chatService.getUserFromSocket(client);
+		
+		if (current_room !== undefined)
 		{
-			if (current_room !== undefined)
+
+			if (user !== undefined)
 			{
+			this.chatService.isUserInRoom(user, current_room);
 			current_room.users.forEach(element => {
-				names_list.push(element.username);
+				if (element !== undefined)
+				{
+					let el = {
+						username: element.username,
+						reference_id: element.reference_id,
+					} as UserDataDto;
+
+					names_list.push(el);
+				}
 			});
 			client.emit("USER_LIST", names_list);
 			}
@@ -444,7 +459,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
 		const rooms = this.chatService.getAllRooms();
-		console.log(rooms);
 		rooms.forEach(room => {
 			if (!room.private_room) //fix me
 			{
@@ -457,9 +471,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		client.emit('ROOM_LIST', rooms_list);
 	}
 
+	@SubscribeMessage('BLOCK_LIST')
+	async block_list(client: Socket) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		if (user !== undefined)
+		{
+			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			
+		//	console.log(ret);
+			client.emit('BLOCK_LIST', ret);
+		}
+	}
+
+
 	
 	//Todo emit disconect if token is wrong
-	handleConnection(client: Socket, ...args: any[]) : void
+	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
 		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		
@@ -499,6 +527,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		})
 
+		let dto : NotifDTO[];
+
+		dto = [];
+
+		const req = await this.chatService.getRequestList(user);
+
+		req.forEach((r) => { 
+			dto.push({
+				type: ENotification.FRIEND_REQUEST,
+				req_id: r.reference_id,
+				username: r.username,
+				content: undefined,
+			})
+		})
+
+		
+		//client.emit('RECEIVE_NOTIF', dto);
+		//client.emit
+
 		this.logger.log(`${user.username} connected to the chat under id : ${client.id}`);
 		this.logger.log(`${user.username} total connection : ${user.socket.length}`);
 	}
@@ -521,5 +568,185 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 		}
 	}
+
+	/**
+	 ****** FRIEND PART ******
+	 */
+
+
+	 /**
+	  * 
+	  * @param client 
+	  * @param payload refId
+	  */
+	@SubscribeMessage('ADD_FRIEND')
+	async add_friend(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			if(await this.chatService.addFriend(user, payload) === false)
+				return ;
+
+			let us = this.chatService.getUserFromID(payload);
+
+			if (us !== undefined)
+			{
+				let dto : NotifDTO[];
+
+				dto = [{
+					type: ENotification.FRIEND_REQUEST,
+					req_id: user.reference_id,
+					username: user.username,
+					content: undefined,
+				}]
+				
+				let ret = await this.chatService.getFriendList(us) as UserDataDto[];
+				let ret2 = await this.chatService.getRequestList(us) as UserDataDto[];
+
+				us.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret);
+					s.emit('FRIEND_REQUEST_LIST', ret2);
+				});
+
+				let ret3 = await this.chatService.getFriendList(user) as UserDataDto[];
+
+				user.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret3);
+				});
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param client 
+	 * @param payload 
+	 * @returns 
+	 */
+	@SubscribeMessage('ADD_FRIEND_USERNAME')
+	async add_friend_by_username(client: Socket, payload: string) : Promise<void>
+	{
+	  let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+	  if (user !== undefined)
+	  {
+		  
+		let us = await this.chatService.getUserByUsername(payload);
+		if (us !== undefined)
+		{
+			if(await this.chatService.addFriend(user, us.reference_id) === false)
+				return ;
+
+			let recv = this.chatService.getUserFromID(us.reference_id);
+
+			if (recv !== undefined)
+			{
+				let dto : NotifDTO[];
+
+				dto = [{
+					type: ENotification.FRIEND_REQUEST,
+					req_id: user.reference_id,
+					username: user.username,
+					content: undefined,
+				}]
+				
+				let ret = await this.chatService.getFriendList(recv) as UserDataDto[];
+				let ret2 = await this.chatService.getRequestList(recv) as UserDataDto[];
+
+				recv.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret);
+					s.emit('FRIEND_REQUEST_LIST', ret2);
+				});
+
+				let ret3 = await this.chatService.getFriendList(user) as UserDataDto[];
+
+				user.socket.forEach(s => {
+					s.emit('FRIEND_LIST', ret3);
+				});
+			}
+		}
+	  }
+	}
+
+	@SubscribeMessage('RM_FRIEND')
+	async rm_friend(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.rmFriend(user, payload);
+			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
+
+			user.socket.forEach(s => {
+				s.emit('FRIEND_LIST', ret);
+			});
+		}
+	}
+
+	@SubscribeMessage('BLOCK_USER')
+	async block_user(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.blockUser(user, payload);
+
+			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			
+			user.socket.forEach(s => {
+				s.emit('BLOCK_LIST', ret);
+			});
+			
+		}
+	}
+
+	@SubscribeMessage('UNBLOCK_USER')
+	async unblock_user(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.unBlockUser(user, payload);
+
+			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			user.socket.forEach(s => {
+				s.emit('BLOCK_LIST', ret);
+			});
+		}
+	}
+
+	@SubscribeMessage('FRIEND_LIST')
+	async friend_list(client: Socket) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
+			
+		//	console.log(ret);
+			client.emit('FRIEND_LIST', ret);
+		}
+	}
+
+	@SubscribeMessage('FRIEND_REQUEST_LIST')
+	async request_list(client: Socket) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			let ret = await this.chatService.getRequestList(user) as UserDataDto[];
+
+			client.emit('FRIEND_REQUEST_LIST', ret);
+		}
+		return ;
+	}
+
 }
 

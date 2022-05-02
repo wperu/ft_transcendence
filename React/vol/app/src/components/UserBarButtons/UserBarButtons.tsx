@@ -9,16 +9,20 @@ import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
+import Chat from "../Chat/Chat";
 
 interface Prop
 {
 	user_name: string;
+	refId: number;
+	
 }
 
 interface promoteProp
 {
 	user_name: string;
 	already_admin: boolean;
+	refId: number;
 }
 
 
@@ -26,22 +30,26 @@ interface friendProp
 {
 	user_name: string;
 	already_friend: boolean;
+	refId: number;
 }
 
 interface blockProp
 {
 	user_name: string;
 	already_blocked: boolean;
+	refId: number;
 }
 
 interface gameInvitationProp
 {
 	src_name: string;
+	refId: number;
 }
 
 interface dmProp
 {
 	name: string;
+	refId: number;
 }
 
 
@@ -104,27 +112,20 @@ export function MuteUserButton(prop: Prop)
 //todo Friend part
 export function BlockUserButton(prop: blockProp)
 {
-	//const chtCtx = useChatContext();
-
+	const chtCtx = useChatContext();
+	
 	function blockUser()
 	{
-		/*if (chtCtx.currentRoom !== undefined)
-		{
-			const dto :  =
-			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
-			} 
-			chtCtx.socket.emit('USER_BLOCK', dto);
-		}*/
+		chtCtx.rmFriendNotif(prop.refId);
+		chtCtx.socket.emit('BLOCK_USER', prop.refId);
 	}
 
 	function unblockUser()
 	{
-
+		chtCtx.socket.emit('UNBLOCK_USER', prop.refId);
 	}
 
-	if (prop.already_blocked)
+	if (chtCtx.blockList.find((b) => (b.reference_id === prop.refId)))
 	{
 		return (
 			<button className="user_bar_button positive_user_button" onClick={unblockUser}><img alt="" src={BlockLogo}/>unblock</button>
@@ -184,17 +185,21 @@ export function AddFriendButton(prop: friendProp)
 	function addFriend()
 	{
 		console.log(prop.user_name + " friend :D");
+
+		chtCtx.rmFriendNotif(prop.refId);
+		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
 	
 	function removeFriend()
 	{
 		console.log(prop.user_name + " not friend anymore");
+		chtCtx.socket.emit('RM_FRIEND', prop.refId);
 	}
 
 	if (prop.already_friend)
 	{
 		return (
-			<button className="user_bar_button negative_user_button" onClick={removeFriend}><img alt="" src={AddFriendLogo}/>unfriend</button>
+			<button className="user_bar_button negative_user_button" onClick={removeFriend}><img alt={AddFriendLogo} src={AddFriendLogo}/>unfriend</button>
 		);
 	}
 	else
