@@ -337,7 +337,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 
 			if (user !== undefined)
-				this.chatService.isUserInRoom(user, current_room);
+			{
+			this.chatService.isUserInRoom(user, current_room);
 			current_room.users.forEach(element => {
 				if (element !== undefined)
 				{
