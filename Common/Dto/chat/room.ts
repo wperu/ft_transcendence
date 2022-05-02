@@ -19,13 +19,14 @@ export interface RoomPromoteDto
 {
 	room_name: string,
 	user_name: string,
-	isPromote: boolean,
+	isPromote: boolean, // true = promote; false = demote
 }
 
 export interface RoomMuteDto
 {
 	room_name: string,
 	user_name: string,
+	isMute: boolean // true = mute; false = unmute
 }
 
 export interface RoomBanDto
@@ -41,6 +42,3 @@ export interface RoomLeftDto
 	status_message?: string,
 	room_name?: string,
 }
-
-
-// export { create_room, room_protect };

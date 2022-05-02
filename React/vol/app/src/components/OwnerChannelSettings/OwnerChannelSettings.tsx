@@ -3,6 +3,7 @@ import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import ChannelUserList from "../ChannelUserList/ChannelUserList";
 import "./OwnerChannelSettings.css"
 import { useState } from "react";
+import { RoomChangePass } from "../../Common/Dto/chat/RoomRename";
 
 function OwnerChannelSettings ()
 {
@@ -25,20 +26,34 @@ function OwnerChannelSettings ()
 		else
 		{
 			if (chatCtx.currentRoom)
-			chatCtx.currentRoom.protected = true;
+			{
+				chatCtx.currentRoom.protected = true;
+				let data : RoomChangePass =
+				{
+					room_name: chatCtx.currentRoom.room_name,
+					new_pass: target.password.value,
+				};
+				chatCtx.socket.emit('ROOM_CHANGE_PASS', data);
+			}
 			target.password.value = "";
 			target.password_repeat.value = "";
 			setUpdate(!update);
-			notify.addNotice(ELevel.info, "Password modification successfull", 3000);
 		}
 	}
 		
 	function removePassword()
 	{
 		if (chatCtx.currentRoom !== undefined)
+		{
 			chatCtx.currentRoom.protected = false;
-		setUpdate(!update);
-		notify.addNotice(ELevel.info, "Password removed", 3000);
+			let data : RoomChangePass =
+			{
+				room_name: chatCtx.currentRoom.room_name,
+				new_pass: "",
+			};
+			chatCtx.socket.emit('ROOM_CHANGE_PASS', data);
+			setUpdate(!update);
+		}
 	}
 
 	function PasswordSettings()

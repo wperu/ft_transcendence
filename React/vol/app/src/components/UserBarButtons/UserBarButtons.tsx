@@ -91,6 +91,7 @@ export function MuteUserButton(prop: Prop)
 			{
 				room_name: chtCtx.currentRoom.room_name,
 				user_name: prop.user_name,
+				isMute: true,
 			} 
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}

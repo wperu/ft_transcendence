@@ -96,6 +96,7 @@ export class ChatService {
 			name: room_name,
 			private_room: room_private,
 			users: [owner],
+			admins: [], // admin =/= owner
 			invited : [],
 			muted: [],
 			banned : [],
@@ -141,13 +142,15 @@ export class ChatService {
 		this.users.splice(this.users.findIndex((u) => { return u.username === username}))
 	}
 
-
-
 	isOwner(user: ChatUser, room: Room): boolean
 	{
-		return ((room.owner.socket.find((s) => { user.socket.find((u) => (u === s)) !== undefined}) !== undefined));
+		return (user.reference_id == room.owner.reference_id);
 	}
 
+	isAdmin(user: ChatUser, room: Room) : boolean
+	{
+		return (room.admins.find((u) => { u === user }) !== undefined)
+	}
 
 	getAllRooms(): Room[]
 	{

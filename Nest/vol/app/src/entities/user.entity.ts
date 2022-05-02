@@ -41,17 +41,17 @@ export class User
   avatar_id: 
   // TODO : create entity databasefile for avatar_id 
   */
-  @JoinColumn({ name: 'avatarId' })
-  @OneToOne(
-    () => DatabaseFile,
-    {
-      nullable: true
-    }
-  )
-  public avatar?: DatabaseFile;
+//   @JoinColumn({ name: 'avatarId' })
+//   @OneToOne(
+//     () => DatabaseFile,
+//     {
+//       nullable: true
+//     }
+//   )
+//   public avatar?: DatabaseFile;
  
-  @Column({ nullable: true })
-  public avatarId?: number;
+//   @Column({ nullable: true })
+//   public avatarId?: number;
 
   //TODO : create nb_won, nb_lose,block_list,friend_list
 }

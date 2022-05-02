@@ -10,5 +10,11 @@ export interface RoomChangePass
     new_pass: string
 }
 
+export interface RoomPassChange
+{
+	status: number,
+	room_name: string,
+	status_message?: string,
+}
 
 // export {RoomRename,RoomChangePass};
