@@ -54,6 +54,19 @@ export class UsersService
 		return (undefined)
 	}
 
+	async findUserByUsername(username: string): Promise<User | undefined>
+	{
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				username: In([username])
+			},
+		});
+
+		if (user !== undefined)
+			return user
+		return (undefined)
+	}
+
 
 
 

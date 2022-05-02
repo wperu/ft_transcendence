@@ -3,6 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EStatus, FriendShip } from 'src/entities/friend_ship.entity';
 import { In, Repository } from 'typeorm';
 
+
+/**
+ * //TODO
+ * * Request avoid friend
+ * * unfriend
+ * * add Try Catch on save (prevent thow from duplication of relation)
+ *
+ */
 @Injectable()
 export class FriendsService
 {
@@ -17,17 +25,60 @@ export class FriendsService
 	 * @param userId 
 	 * @returns Array of relation
 	 */
-	async findFriendOf(userId: number): Promise<FriendShip[]>
+	async findFriendOf(id_one: number): Promise<FriendShip[]>
+	{
+		
+		const ret = await this.friendRepository.find({
+			where: {
+				id_one: id_one,
+				status: EStatus.FRIEND,
+			},
+		});
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param userId 
+	 * @returns 
+	 */
+	async findBlockedOf(userId: number): Promise<FriendShip[]>
+	{
+		const ret =  await this.friendRepository.find({
+			where: {
+				id_one: userId,
+				status: EStatus.BLOCK
+			},
+		});
+
+		return ret;
+	}
+
+	/**
+	 * 
+	 * @param userId 
+	 * @returns 
+	 */
+	async findRequestOf(userId: number): Promise<FriendShip[]>
 	{
 		return await this.friendRepository.find({
 			where: {
-				id_one: userId
+				id_two: userId,
+				status: EStatus.REQUEST
 			},
 		});
 	}
 
+	/**
+	 * return rel (1, 2)
+	 * @param userIdOne 
+	 * @param userIdTwo 
+	 * @returns <FriendShip | undefined>
+	 */
 	async findFriendRelationOf(userIdOne: number, userIdTwo: number): Promise<FriendShip | undefined>
 	{
+		if (userIdOne === userIdTwo)
+			return undefined;
 		return await this.friendRepository.findOne({
 			where: {
 				id_one: userIdOne,
@@ -42,23 +93,110 @@ export class FriendsService
 	 * add new friend Request
 	 * @param userIdOne 
 	 * @param userIdTwo 
-	 * @returns friendRequest
+	 * @returns friendRequest if newRequest was create else undefined
 	 */
-	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip>
+	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | undefined>
 	{
-		let req: FriendShip = new FriendShip();
+		if (userIdOne === userIdTwo)
+			return undefined;
+		const rel = await this.findFriendRelationOf(userIdOne, userIdTwo);
+		if (rel !== undefined ) //request already exist or isFriend
+		{
+			return undefined;
+		}
+		else
+		{
+			let req: FriendShip = new FriendShip();
+			const rel_two = await this.findFriendRelationOf(userIdTwo, userIdOne);
 
-		req.id_one = userIdOne;
-		req.id_two = userIdTwo;
-		req.status = EStatus.REQUEST;
+			if (rel_two !== undefined && rel_two.status === EStatus.BLOCK)
+				return undefined
 
-		return await this.friendRepository.save(req);
+			if (rel_two !== undefined && rel_two.status === EStatus.REQUEST)
+			{
+				rel_two.status = EStatus.FRIEND;
+				try {
+					await this.friendRepository.save(rel_two);
+				}
+				catch (e)
+				{
+
+				}
+
+				req.status = EStatus.FRIEND;
+			}
+			else
+			{
+				req.status = EStatus.REQUEST;
+			}
+			req.id_one = userIdOne;
+			req.id_two = userIdTwo;
+			
+			try {
+				let ret = await this.friendRepository.save(req);
+
+				return ret;
+			}
+			catch (e)
+			{
+				return undefined;
+			}
+		}
 	}
 
+	/**
+	 * 
+	 * @param id : request_id 
+	 * @returns void
+	 */
+	async rmRequestFriend(id: number) : Promise<void>
+	{
+		
+		await this.friendRepository
+		    .createQueryBuilder()
+		    .delete()
+		    .from(FriendShip)
+		    .where("id = :id", { id: id })
+		    .execute()
+		return ;
+	}
 
+	/**
+	 * 
+	 * @param userIdOne 
+	 * @param userIdTwo 
+	 * @returns 
+	 */
+	async rmFriend(userIdOne: number, userIdTwo: number): Promise<void>
+	{
+		if (userIdOne === userIdTwo)
+			return undefined;
+		await this.friendRepository
+		    .createQueryBuilder()
+		    .delete()
+		    .from(FriendShip)
+		    .where("id_one = :id_one", { id_one: userIdOne })
+			.andWhere("id_two = :id_two", { id_two: userIdTwo })
+		    .execute();
+
+		await this.friendRepository
+		    .createQueryBuilder()
+		    .delete()
+		    .from(FriendShip)
+		    .where("id_one = :id_one", { id_one: userIdTwo })
+			.andWhere("id_two = :id_two", { id_two: userIdOne })
+		    .execute();
+		return ;
+	}
+	
+
+	/**
+	 * 
+	 * @param id request_id
+	 */
 	async acceptRequestFriend(id: number) : Promise<void>
 	{
-		//Set relation to FRIEND
+		//Set relation to FRIEND (1, 2)
 		const rel = await this.friendRepository.findOne({ 
 			where: {
 				id: In([id])
@@ -68,7 +206,7 @@ export class FriendsService
 
 		await this.friendRepository.save(rel);
 
-		//Create Request
+		//set relation (2, 1)
 
 		let rel_two = await this.findFriendRelationOf(rel.id_two, rel.id_two);
 
@@ -82,7 +220,7 @@ export class FriendsService
 		}
 		else
 		{
-			rel_two.status = EStatus.FRIEND;
+			rel_two.status = EStatus.FRIEND; //avoid block or request
 		}
 
 		await this.friendRepository.save(rel_two);
@@ -94,20 +232,22 @@ export class FriendsService
 	 * @param userIdTwo 
 	 * @returns Blocked relation
 	 */
-	async blockUseer(userIdOne: number, userIdTwo: number): Promise<FriendShip>
+	async blockUser(userIdOne: number, userIdTwo: number): Promise<FriendShip>
 	{
+		if (userIdOne === userIdTwo)
+			return undefined;
 		//Delete if relation exist & != Block (2, 1)
 		await this.friendRepository
 		    .createQueryBuilder()
 		    .delete()
 		    .from(FriendShip)
-		    .where("id_one = :id", { id: userIdTwo })
-			.andWhere("id_two = :id", { id: userIdOne })
+		    .where("id_one = :id_one", { id_one: userIdTwo })
+			.andWhere("id_two = :id_two", { id_two: userIdOne })
 			.andWhere("status != :status", { status: EStatus.BLOCK})
-		    .execute()
+		    .execute();
 
 		//Update relation (1, 2)
-		let relation	= await this.findFriendRelationOf(userIdOne, userIdTwo);
+		let relation = await this.findFriendRelationOf(userIdOne, userIdTwo);
 		if (relation === undefined)
 		{
 			relation = {
@@ -121,4 +261,19 @@ export class FriendsService
 
 		return await this.friendRepository.save(relation);
 	}
+
+	async unBlockUser(userIdOne: number, userIdTwo: number): Promise<void>
+	{
+		if (userIdOne === userIdTwo)
+			return undefined;
+		await this.friendRepository
+		.createQueryBuilder()
+		.delete()
+		.from(FriendShip)
+		.where("id_one = :id_one", { id_one: userIdOne })
+		.andWhere("id_two = :id_two", { id_two: userIdTwo })
+		.andWhere("status = :status", { status: EStatus.BLOCK})
+		.execute();
+	}
+
 }

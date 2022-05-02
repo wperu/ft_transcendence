@@ -4,6 +4,10 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { UserDataDto } from 'src/Common/Dto/chat/room';
+import { User } from 'src/entities/user.entity';
+import { FriendsService } from 'src/friends/friends.service';
+import { UsersService } from 'src/users/users.service';
 import { ChatModule } from './chat.module';
 import { Room } from './interface/room';
 
@@ -11,8 +15,10 @@ import { Room } from './interface/room';
 export class ChatService {
     constructor (
         private tokenService: TokenService,
+		private friendService: FriendsService,
 		private rooms: Room[],
 		private users: ChatUser[],
+		private userService: UsersService,
 
     )
     { this.rooms = [];}
@@ -22,12 +28,16 @@ export class ChatService {
 	{
         const data: ChatUser = this.tokenService.decodeToken(socket.handshake.auth.token) as ChatUser;
 
+		if (data === undefined)
+			return undefined;
+
 		let idx = this.users.push({
 			socket: [socket], 
 			username: data.username,
 			reference_id: data.reference_id,
 			room_list: [],
 		})
+
 
 		return this.users[idx - 1];
 	}
@@ -51,6 +61,27 @@ export class ChatService {
 
         return (undefined);
     }
+
+	getUsernameFromID(refId : number)
+	{
+		let ret = this.users.find((u) => { return u.reference_id === refId});
+
+		if (ret === undefined)
+			return "undefined";
+
+		return ret.username;
+	}
+
+	getUserFromID(refId : number) : ChatUser
+	{
+		let ret = this.users.find((u) => { return u.reference_id === refId});
+
+		if (ret === undefined)
+			return ret;
+
+		return ret;
+	}
+
 
 
     getUserFromUsername(username: string): ChatUser | undefined
@@ -153,6 +184,126 @@ export class ChatService {
 	{
 		const ref = this.rooms;
 		return (ref);
+	}
+
+	
+
+	//Todo create userDto 
+	async getFriendList(user: ChatUser) : Promise<UserDataDto[]>
+	{
+		const relation = await this.friendService.findFriendOf(user.reference_id);
+
+		if (relation === undefined)
+			return [];
+		let ret: UserDataDto[];
+		
+		ret = [];
+		for (const rel of relation)
+		{
+			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
+
+			let username = user2?.username || "default";
+			//let status = user.is_connected; //todo
+
+			ret.push({
+				username: username,
+				reference_id: rel.id_two,
+				is_connected: user2.is_connected,
+			});
+		};
+
+		//console.log(ret);
+		return ret;
+	}
+
+	async getBlockList(user: ChatUser) : Promise<UserData[]>
+	{
+		const relation = await this.friendService.findBlockedOf(user.reference_id);
+
+		if (relation === undefined)
+			return [];
+
+		let ret: Array<UserData>;
+
+		ret = [];
+		for (const rel of relation)
+		{
+			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
+			let username = user2?.username || "default";
+			
+			ret.push({
+				username: username,
+				reference_id: rel.id_two,
+			});
+		};
+
+		return ret;
+	}
+
+	async getRequestList(user: ChatUser) : Promise<UserData[]>
+	{
+		const relation = await this.friendService.findRequestOf(user.reference_id);
+
+		let ret: UserData[];
+
+		ret = [];
+		if (relation === undefined)
+			return [];
+
+		for (const rel of relation)
+		{
+			let user2 = await this.userService.findUserByReferenceID(rel.id_one);
+
+			let username = user2?.username || "default";
+			ret.push({
+				username: username || "default", //todo
+				reference_id: rel.id_one,
+			});
+		};
+
+		return ret;
+	}
+	
+	/**
+	 * Return true if a newRequest was created
+	 * @param user 
+	 * @param ref_id 
+	 * @returns 
+	 */
+	async addFriend(user: ChatUser, ref_id : number) : Promise<boolean>
+	{
+		if (await this.friendService.addRequestFriend(user.reference_id, ref_id) !== undefined)
+			return true;
+
+		return false;
+	}
+
+	async getUserByUsername(username : string) : Promise<User>
+	{
+		let toSend = await this.userService.findUserByUsername(username);
+		return toSend;
+	}
+
+
+	async rmFriend(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.rmFriend(user.reference_id, ref_id);
+
+		return;
+	}
+
+	async blockUser(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.blockUser(user.reference_id, ref_id);
+
+		return;
+	}
+
+	async unBlockUser(user: ChatUser, ref_id : number) : Promise<void>
+	{
+		await this.friendService.unBlockUser(user.reference_id, ref_id);
+
+		return;
 	}
 
 }

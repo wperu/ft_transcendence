@@ -42,5 +42,21 @@ export interface RoomLeftDto
 	room_name?: string,
 }
 
+export interface UserDataDto
+{
+	username: string,
+    reference_id: number,
+	is_connected?: boolean,
+}
+
+
+export interface RcvMessageDto
+{
+	message: string,
+	sender: string,
+	refId: number,
+	send_date: string,
+	room_name: string
+};
 
 // export { create_room, room_protect };

@@ -1,11 +1,10 @@
 import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import { RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
+import { SendMessageDto } from "../../interface/chat/chatDto";
 import "./ChatTab.css"
 import useInterval from '../../hooks/useInterval';
-
-
+import { RcvMessageDto } from "../../Common/Dto/chat/room";
 
 function ChatTab ()
 {
@@ -84,9 +83,9 @@ function ChatTab ()
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date} , index) => (
+					messages.map(({message, sender, send_date, refId} , index) => (
 						<li key={index}>
-							<ChatMessage src_name={sender} content={message} time={send_date} />
+							<ChatMessage src_name={sender} content={message} time={send_date} refId={refId} />
 						</li>))
 					
 				}
