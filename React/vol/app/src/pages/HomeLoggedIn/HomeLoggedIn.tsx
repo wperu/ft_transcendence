@@ -3,7 +3,7 @@ import MatchmakingButton from  "../../components/MainMenuButtons/MatchmakingButt
 import ProfileButton from  "../../components/MainMenuButtons/ProfileButton"
 import PongLogo from  "../../components/PongLogo/PongLogo"
 import ProfileSummary from  "../../components/ProfileSummary/ProfileSummary"
-import LogOutButton from  "../../components/LogOutButton/LogOutButton"
+import LogOutButton from  "../../components/FooterButton/LogOutButton"
 import SidebarWithContext from "../../components/SidebarWithContext/SidebarWithContext"
 import { Link } from "react-router-dom"
 

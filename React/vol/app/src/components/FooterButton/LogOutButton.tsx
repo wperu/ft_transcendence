@@ -1,5 +1,5 @@
 import React from "react";
-import "./LogOutButton.css";
+import "./FooterButton.css";
 import { useAuth } from "../../auth/useAuth";
 
 function LogOutButton () : JSX.Element
@@ -14,12 +14,11 @@ function LogOutButton () : JSX.Element
 
 	function LogOutClick ()
 	{
-		alert("déConnexion");
 		auth.signout(delUser);
 	}
 
 
-	return <button id="LogOut" onClick={LogOutClick}>Se déconnecter</button>;
+	return <button className="footer_button" onClick={LogOutClick}>Se déconnecter</button>;
 }
 
 export default LogOutButton;

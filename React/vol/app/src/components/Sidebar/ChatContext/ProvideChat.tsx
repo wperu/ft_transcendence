@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
+import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
 
 /** //fix
  *  NOTIF rework notif system
@@ -76,6 +77,7 @@ interface IChatContext
 
 function useChatProvider() : IChatContext
 {
+	const notify = useNotifyContext();
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
 			token: useAuth().user?.access_token_42
@@ -170,6 +172,7 @@ function useChatProvider() : IChatContext
 
 
 	useEffect(() => {
+
 		socket.connect();
 		
 		socket.on("disconnect", () => {
@@ -190,10 +193,11 @@ function useChatProvider() : IChatContext
 			if (data.status === 0 && data.room_name !== undefined)
 			{
 				addRoom(data.room_name, false);
+				notify.addNotice(ELevel.info, "Room " + data.room_name + " joined", 3000);
 			}
 			else if (data.status_message !== undefined)
 			{
-				alert(data.status_message);
+				notify.addNotice(ELevel.error, data.status_message, 3000);
 			}
 		})
 
@@ -326,13 +330,13 @@ function useChatProvider() : IChatContext
 
     return({
 		socket,
-        currentRoom,
-        setCurrentRoom,
+		currentRoom,
+		setCurrentRoom,
 		setCurrentRoomByName,
 		currentTab,
 		setCurrentTab,
-        rooms,
-        addRoom,
+    rooms,
+    addRoom,
 		notification,
 		rmNotif,
 		rmFriendNotif,

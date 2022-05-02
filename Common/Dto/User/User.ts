@@ -1,4 +1,8 @@
 //Todo define what is send by backend
+
+import DatabaseFile from "src/entities/databaseFile.entity";
+
+
 interface IUser
 {
 	id: number;
@@ -11,7 +15,9 @@ interface IUser
 	access_token_google?: string;
 	is_connected: boolean; // -> enum online | offline | ingame...
 	creation_date: Date;
-	//avatar : File;
+	avatar?: DatabaseFile;
+	avatar_id: number;
+	
 }
 
 export default IUser;

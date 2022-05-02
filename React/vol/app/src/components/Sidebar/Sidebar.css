@@ -6,12 +6,14 @@
 	--open-sidebar-size: 60vmin;
 	--closed-sidebar-size: -60vmin;
 	--transition: 0.7s;
+	z-index: 10;
 	height: 100%;
 }
 
 #actual_bar
 {
-	background-color: #454a53a9;
+	z-index: 10;
+	background-color: #454a53cb;
 	backdrop-filter: blur(20px);
 	position: fixed;
 	right: 0;
@@ -78,6 +80,7 @@
 	right: calc(var(--open-sidebar-size));
 	transform: rotate(45deg);
 	top: 50%;
+	z-index: 10;
 }
 
 #toggle:checked

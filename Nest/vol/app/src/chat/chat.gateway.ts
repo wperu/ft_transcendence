@@ -338,7 +338,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 			if (user !== undefined)
 				this.chatService.isUserInRoom(user, current_room);
-
 			current_room.users.forEach(element => {
 				if (element !== undefined)
 				{
@@ -351,6 +350,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				}
 			});
 			client.emit("USER_LIST", names_list);
+			}
 		}
 	}
 

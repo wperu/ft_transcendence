@@ -1,11 +1,13 @@
-import React, { useDebugValue, useState } from "react";
+import React, { useState } from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import { useNotifyContext, ELevel } from "../NotifyContext/NotifyContext";
 import "./ChanCreationTab.css";
 import { CreateRoom } from "../../Common/Dto/chat/room";
 
 function ChanCreationTab()
 {
 	const chatCtx = useChatContext();
+	const notify = useNotifyContext();
 
 	const	[is_protected, setProtected] = useState<boolean>(false);
 
@@ -27,21 +29,21 @@ function ChanCreationTab()
 			channel_visibility: {value :string};
 			password: {value: string};
 			password_confirmation: {value: string};
-			is_protected: {value: boolean};
 		};
+		console.log(is_protected);
 		if (target.channel_name.value.length === 0)
 		{
-			alert("The new channel needs a name");
+			notify.addNotice(ELevel.error, "The new channel needs a name", 3000);
 		}
 		else
 		{
 			var data: CreateRoom;
-			if (target.is_protected.value === true)
-			{		
+			if (is_protected == true)
+			{
 				if (target.password.value.length === 0)
-					alert("You can't set an empty password");
+					notify.addNotice(ELevel.error, "You can't set an empty password", 3000);
 				else if (target.password.value !== target.password_confirmation.value)
-					alert("The passwords must be the same");
+					notify.addNotice(ELevel.error, "The passwords must be the same", 3000);
 				else
 				{
 					data =
@@ -54,7 +56,8 @@ function ChanCreationTab()
 					target.channel_name.value = '';
 					target.channel_visibility.value = '';
 					target.password.value = '';
-					target.is_protected.value = false;
+					target.password_confirmation.value = '';
+					setProtected(false);
 				}
 			}
 			else
@@ -69,7 +72,7 @@ function ChanCreationTab()
 				target.channel_visibility.value = '';
 				target.password.value = '';
 				target.password_confirmation.value = '';
-				target.is_protected.value = false;
+				setProtected(false);
 			}
 		}
 	}

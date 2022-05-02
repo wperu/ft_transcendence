@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, JoinColumn, OneToOne } from 'typeorm';
+import DatabaseFile from './databaseFile.entity';
 
 @Entity()
 export class User
@@ -11,7 +12,7 @@ export class User
 
   @Column()
   username: string;
-
+  
 
 
   // all tokens are nullable because we dont want to keep an expired token
@@ -40,6 +41,17 @@ export class User
   avatar_id: 
   // TODO : create entity databasefile for avatar_id 
   */
+  @JoinColumn({ name: 'avatarId' })
+  @OneToOne(
+    () => DatabaseFile,
+    {
+      nullable: true
+    }
+  )
+  public avatar?: DatabaseFile;
+ 
+  @Column({ nullable: true })
+  public avatarId?: number;
 
   //TODO : create nb_won, nb_lose,block_list,friend_list
 }
