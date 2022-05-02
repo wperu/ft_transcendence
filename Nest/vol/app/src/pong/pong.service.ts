@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 import { UserData } from 'src/chat/interface/ChatUser';
+import { UserToken } from 'src/Common/Dto/User/UserToken';
+import { User } from 'src/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { RoomState } from '../Common/Dto/pong/PongRoomDto'
 import { PongRoom } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
@@ -13,6 +16,7 @@ export class PongService {
     private logger: Logger = new Logger('AppService');
 
     constructor(
+        private usersService: UsersService,
         private rooms: Array<PongRoom>,
         private users: Array<PongUser>,
         private tokenService: TokenService
@@ -37,10 +41,13 @@ export class PongService {
     {
         let room = this.rooms.find((r) => { return r.state === RoomState.WAITING });
 
-        if (room === undefined)
+        this.logger.log("searching room");
+
+        if (room === undefined || this.rooms === null)
         {
             this.createRoom(user);
             this.logger.log("created new room for user ");
+            return ;
         }
 
         this.logger.log("joined waiting room");
@@ -54,6 +61,7 @@ export class PongService {
         let starting_obj = {   /* TODO DTO */
 
         }
+
         room.state = RoomState.PLAYING;
         room.player_1.socket.forEach((s) => {
             s.emit('STARTING_ROOM', starting_obj);
@@ -63,44 +71,69 @@ export class PongService {
             s.emit('STARTING_ROOM', starting_obj);
         })
 
+        console.log("sent start request to players");
+
         room.spectators.forEach((usr) => {
             usr.socket.forEach((s) => {
                 s.emit('STARTING_ROOM', starting_obj);
             }
         )})
+
+        console.log("sent start request to spectators");
     }
 
 
-    connectUserFromSocket(socket: Socket): PongUser | undefined
+    async connectUserFromSocket(socket: Socket): Promise<PongUser | undefined>
 	{
-        const data: PongUser = this.tokenService.decodeToken(socket.handshake.auth.token) as PongUser;
+        const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
 
 		if (data === null)
+        {
+            console.log("[PONG] unable to decode user token data");
 			return (undefined);
+        }
 		
+        const user_info: User = await this.usersService.findUserByReferenceID(data.reference_id)
+
+        if (user_info === undefined)
+        {
+            console.log(`[PONG] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`);
+            socket.disconnect();
+            return (undefined);
+        }
+
 		let idx = this.users.push({
 			socket: [socket], 
-			username: data.username,
+			username: user_info.username,
             points: 0,
-        })
+        } as PongUser)
 
 		return this.users[idx - 1];
 	}
 
 
-    getUserFromSocket(socket: Socket): PongUser | undefined
+    async getUserFromSocket(socket: Socket): Promise<PongUser | undefined>
     {
-        const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
-        /* todo   maybe check if data contains the keys that we have in PongUser */
-        /* todo   and only that so we cant pass data through here                */
+        const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
+
 		if (data === null)
 			return (undefined);
 
-		if (data as UserData)
+		if (data as UserToken)
 		{
-			const us = data as UserData;
+			const us = data as UserToken;
 
-			let ret = this.users.find((u) => { return u.username === us.username})
+
+			let user_info = await this.usersService.findUserByReferenceID(data.reference_id);
+
+			if (user_info === undefined)
+			{
+				console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
+				socket.disconnect();
+				return (undefined);
+			}
+
+			let ret = this.users.find((u) => { return u.username === user_info.username})
 			return (ret);
 		}
 

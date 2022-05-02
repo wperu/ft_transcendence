@@ -26,20 +26,21 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect
 	{}
 
 	@SubscribeMessage('SEARCH_ROOM')
-	searchRoom(client: Socket)
+	async searchRoom(client: Socket)
 	{
-		this.pongService.searchRoom(this.pongService.getUserFromSocket(client));
+		this.pongService.searchRoom(await this.pongService.getUserFromSocket(client));
 	}
 
 	
 	
-	handleConnection(client: any, ...args: any[])
+	async handleConnection(client: any, ...args: any[]) : Promise<void>
 	{
-		let user : PongUser | undefined = this.pongService.getUserFromSocket(client);
+		let user : PongUser | undefined = await this.pongService.getUserFromSocket(client);
 		
 		if (user === undefined)
 		{
-			user = this.pongService.connectUserFromSocket(client);
+			user = await this.pongService.connectUserFromSocket(client);
+			
 			if(user === undefined)
 			{
 				console.log("Unknown user tried to join the pong");
@@ -47,19 +48,15 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect
 				return ;
 			}
 		}
-		else
+		else if (user.socket.find((s) => { return s.id === client.id}) === undefined)
 		{
-			let idx = user.socket.find((s) => { return s.id === client.id})
-
-			if (idx === undefined)
-				user.socket.push(client);
+			user.socket.push(client);
 		}
 
 		if (user === undefined)
 		{
 			this.logger.log(`PONG warning: Unable to retrieve users informations on socket ${client.id}`);
 			return ;
-			
 		}
 
 		this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);

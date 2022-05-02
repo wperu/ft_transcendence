@@ -5,6 +5,7 @@ import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
+import { UserToken } from '../Common/Dto/User/UserToken'
 
 @Injectable()
 export class UsersService 
@@ -90,8 +91,7 @@ export class UsersService
 		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
 
 		/* sign the token with jwt */
-		const user_data = {
-			username: username,
+		const user_data : UserToken = {
 			reference_id: reference_id,
 		};
 

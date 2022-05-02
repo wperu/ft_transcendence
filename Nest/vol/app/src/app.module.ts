@@ -26,7 +26,7 @@ import { FriendsModule } from './friends/friends.module';
 			entities: [User, TokenValidatorEntity, FriendShip],
 			synchronize: true,
 		}
-	), UsersModule, ...AuthModule.getDependencies(), ChatModule, PongModule],
+	), UsersModule, AuthModule, ...AuthModule.getDependencies(), ChatModule, PongModule],
 	controllers: [AppController],
 	providers: [AppService, PongService, PongGateway, Array, TokenService],
 })

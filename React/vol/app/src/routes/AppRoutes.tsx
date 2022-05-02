@@ -9,6 +9,7 @@ import SidebarWithContext from '../components/SidebarWithContext/SidebarWithCont
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
+import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 
 
 interface Props{
@@ -32,6 +33,7 @@ function AppRoute() : JSX.Element
 				<Routes>
 				<Route path="/login" element={<HomeLoggedOut />}/>
 				<Route path="/login/callback" element={<Callback />}/>
+				<Route path="/matchmaking" element={<PongMatchmaking />}/>
 				<Route path="/game" element={<Pong />}/>
 				<Route path="/dev_user" element={<FakeUser/>}/>
 				<Route path="*" element={<NoMatch />}/>
