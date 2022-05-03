@@ -9,7 +9,11 @@ import { TokenValidatorEntity } from './entities/token_validator.entity';
 import { ChatModule } from './chat/chat.module';
 import { FriendShip } from './entities/friend_ship.entity';
 import { FriendsModule } from './friends/friends.module';
+import { RoomModule } from './room/room.module';
 import DatabaseFile from './entities/databaseFile.entity';
+import { ChatRoomEntity } from './entities/room.entity';
+import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
+
 
 @Module({
 	imports: [TypeOrmModule.forRoot(
@@ -20,10 +24,17 @@ import DatabaseFile from './entities/databaseFile.entity';
 			username: 'postgres',
 			password: 'example',
 			database: 'postgres',
-			entities: [User, TokenValidatorEntity, FriendShip, DatabaseFile],
+			entities: [
+				User,
+				TokenValidatorEntity,
+				FriendShip,
+				DatabaseFile,
+				ChatRoomRelationEntity,
+				ChatRoomEntity
+			],
 			synchronize: true,
 		}
-	), UsersModule, AuthModule, ChatModule, FriendsModule],
+	), UsersModule, AuthModule, ChatModule, FriendsModule, RoomModule],
 	controllers: [AppController],
 	providers: [AppService],
 })

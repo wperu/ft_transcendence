@@ -60,4 +60,14 @@ export interface RcvMessageDto
 	room_name: string
 };
 
+export interface RoomListDTO
+{
+	id:				number;
+	name:			string;
+	owner:			number; //refId
+	has_password:	boolean;
+}
+
+
+
 // export { create_room, room_protect };

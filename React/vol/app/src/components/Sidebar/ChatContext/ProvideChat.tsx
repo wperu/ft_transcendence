@@ -200,6 +200,7 @@ function useChatProvider() : IChatContext
 			}
 		};
 	}, [socket])
+
 	useEffect(() => {
 
 		socket.on("JOINED_ROOM", (data: RoomJoined) => {
@@ -231,7 +232,6 @@ function useChatProvider() : IChatContext
 			{
 				socket.off('ROOM_PASS_CHANGE');
 				socket.off('JOINED_ROOM');
-				socket.disconnect();
 			}
 		};
 	}, [socket, addRoom]);

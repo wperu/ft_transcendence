@@ -7,6 +7,7 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { UserDataDto } from 'src/Common/Dto/chat/room';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
+import { RoomService } from 'src/room/room.service';
 import { UsersService } from 'src/users/users.service';
 import { ChatModule } from './chat.module';
 import { Room } from './interface/room';
@@ -19,6 +20,7 @@ export class ChatService {
 		private rooms: Room[],
 		private users: ChatUser[],
 		private userService: UsersService,
+		private roomService: RoomService
 
     )
     { this.rooms = [];}
@@ -121,8 +123,10 @@ export class ChatService {
 
 
 
-	createRoom(room_name: string, room_private: boolean, owner: ChatUser, password: string = "")
+	async createRoom(room_name: string, user : ChatUser, room_private: boolean, owner: ChatUser, password: string = "")
 	{
+		
+		await this.roomService.createRoom(room_name, await this.userService.findUserByReferenceID(user.reference_id), room_private, password, false);
 		this.rooms.push({
 			name: room_name,
 			private_room: room_private,
@@ -134,6 +138,27 @@ export class ChatService {
 			owner: owner,
 			password : password,
 		})
+	}
+
+	async joinRoom(user: ChatUser, roomName: string)
+	{
+		let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
+		await this.roomService.joinRoom(roomName, userRoom);
+		return;
+	}
+
+	async leaveRoom(user: ChatUser, roomName: string)
+	{
+		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
+		await this.roomService.leaveRoom(roomName, user.reference_id);
+		return;
+	}
+
+	async roomUserList(room: string, user: ChatUser)
+	{
+		const ret = await this.roomService.userListOfRoom(room, user.reference_id);
+
+		console.log(ret);
 	}
 
 
@@ -187,6 +212,17 @@ export class ChatService {
 	{
 		const ref = this.rooms;
 		return (ref);
+	}
+
+	//remake that
+	async ConnectToChan(client: Socket, user: ChatUser)
+	{
+		let rooms_list = await this.roomService.roomListOfUser(user.reference_id);
+
+		rooms_list.forEach(r => {
+			client.emit("JOINED_ROOM", r);
+		})
+		
 	}
 
 	
