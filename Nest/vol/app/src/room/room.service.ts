@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { id } from 'date-fns/locale';
 import { retry } from 'rxjs';
-import { RoomListDTO, UserDataDto } from 'src/Common/Dto/chat/room';
+import { RoomListDTO, UserDataDto, ChatUserDto, ELevelInRoom } from 'src/Common/Dto/chat/room';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
@@ -222,7 +222,7 @@ export class RoomService
 		rel.forEach((r) => {
 			ret.push({
 				reference_id : r.user.reference_id,
-				username: r.user.username
+				username: r.user.username,
 			})
 		})
 

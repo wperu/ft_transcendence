@@ -607,6 +607,4 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			client.emit('BLOCK_LIST', ret);
 		}
 	}
-
 }
-
