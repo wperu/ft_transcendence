@@ -50,7 +50,6 @@ export interface UserDataDto
 	is_connected?: boolean,
 }
 
-
 export interface RcvMessageDto
 {
 	message: string,
@@ -59,5 +58,3 @@ export interface RcvMessageDto
 	send_date: string,
 	room_name: string
 };
-
-// export { create_room, room_protect };
