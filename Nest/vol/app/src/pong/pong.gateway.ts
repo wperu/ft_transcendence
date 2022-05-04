@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'http';
 import { Socket } from 'socket.io';
-import { RoomState } from 'src/Common/Dto/pong/PongRoomDto';
+import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
 import { PongRoom } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
@@ -24,17 +24,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect
 		private pongService: PongService
 	)
 	{}
-
-	@SubscribeMessage('SEARCH_ROOM')
-	async searchRoom(client: Socket)
-	{
-		this.pongService.searchRoom(await this.pongService.getUserFromSocket(client));
-	}
-
 	
 	
-	async handleConnection(client: any, ...args: any[]) : Promise<void>
+	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
+		console.log(`CONNECTION -> ${client.id}`)
 		let user : PongUser | undefined = await this.pongService.getUserFromSocket(client);
 		
 		if (user === undefined)
@@ -56,17 +50,35 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect
 		if (user === undefined)
 		{
 			this.logger.log(`PONG warning: Unable to retrieve users informations on socket ${client.id}`);
+			client.disconnect();
 			return ;
 		}
 
+		// let the client know that we have authentificated him as a PongUser
+		client.emit("AUTHENTIFICATED");
 		this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
+	}
+
+	handleDisconnect(client: Socket)
+	{
+		console.log(`DISCONNECT <- ${client.id}`)
+	}
+
+
+	@SubscribeMessage('SEARCH_ROOM')
+	async searchRoom(client: Socket)
+	{
+		this.pongService.searchRoom(await this.pongService.getUserFromSocket(client));
+	}
+
+
+	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
+	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
+	{
+		this.pongService.updatePlayer(data);
 	}
 	
 
 	
 	
-	handleDisconnect(client: any)
-	{
-		
-	}
 }

@@ -5,11 +5,9 @@ import { ProvidePong, usePongContext } from "../../components/PongGame/PongConte
 function PongMatchmaking()
 {
     return (
-        <ProvidePong>
-            <div>
-                <h1>waiting for another player...</h1>
-            </div>
-        </ProvidePong>
+        <div>
+            <h1>waiting for another player...</h1>
+        </div>
     );
 }
 

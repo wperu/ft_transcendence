@@ -58,6 +58,23 @@ export class UsersService
 
 
 
+
+	async findUserByName(name: string): Promise<User | undefined>
+	{
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				username: In([name])
+			},
+		});
+
+		if (user !== undefined)
+			return user
+		return (undefined)
+	}
+
+
+
+
 	async findUserByAccessToken(access_token: string): Promise<User | undefined>
 	{
 		const user = await this.usersRepository.findOne({ 

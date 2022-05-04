@@ -10,6 +10,8 @@ import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
 import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
+import { ProvideChat } from '../components/Sidebar/ChatContext/ProvideChat';
+import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 
 
 interface Props{
@@ -31,22 +33,32 @@ function AppRoute() : JSX.Element
 		<ProvideNotify>
 			<BrowserRouter>
 				<Routes>
-				<Route path="/login" element={<HomeLoggedOut />}/>
-				<Route path="/login/callback" element={<Callback />}/>
-				<Route path="/matchmaking" element={<PongMatchmaking />}/>
-				<Route path="/game" element={<Pong />}/>
-				<Route path="/dev_user" element={<FakeUser/>}/>
-				<Route path="*" element={<NoMatch />}/>
-				<Route element={<RequireAuth/>}>
-					<Route element={<>
-										<SidebarWithContext />
-										<Outlet />
-									</>}>
-						<Route path="/" element={<HomeLoggedIn />}/>
-						<Route path="/profile" element={<Profile/>}/>
-						<Route path="/profile/:id" element={<Profile/>}/>
+
+					<Route path="/login" element={<HomeLoggedOut />}/>
+					<Route path="/login/callback" element={<Callback />}/>
+
+					<Route element= {
+						<ProvidePong>
+							<Outlet/>
+						</ProvidePong>
+					}>
+						<Route path="/matchmaking" element={<PongMatchmaking />}/>
+						<Route path="/game" element={<Pong />}/>
 					</Route>
-				</Route>
+
+					<Route path="/dev_user" element={<FakeUser/>}/>
+					<Route path="*" element={<NoMatch />}/>
+
+					<Route element={<RequireAuth/>}>
+						<Route element={<>
+											<SidebarWithContext />
+											<Outlet />
+										</>}>
+							<Route path="/" element={<HomeLoggedIn />}/>
+							<Route path="/profile" element={<Profile/>}/>
+							<Route path="/profile/:id" element={<Profile/>}/>
+						</Route>
+					</Route>
 				</Routes>
 			</BrowserRouter>
 		</ProvideNotify>

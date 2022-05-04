@@ -1,12 +1,23 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate, useNavigationType } from "react-router-dom";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { NumberLiteralType } from "typescript";
 import { useAuth } from "../../../auth/useAuth";
+import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
+import { UpdatePongRoomDTO } from '../../../Common/Dto/pong/UpdatePongRoomDTO'
 
 export interface IPongUser
 {
     username: string,
     points: number,
+    position: number,
+}
+
+export interface IPongBall
+{
+    pos_x: number,
+    pos_y: number,
+    size: number,
 }
 
 export enum RoomState {
@@ -17,15 +28,18 @@ export enum RoomState {
 
 export interface IPongRoom
 {
+    room_id: number,
     player_1: IPongUser,
     player_2: IPongUser,
+    ball: IPongBall,
     spectators: Array<IPongUser>,
     state: RoomState,
+    socket: Socket,
 }
 
 export interface IPongContext
 {
-    rooms: Array<IPongRoom>,
+    room: IPongRoom | null,
 }
 
 
@@ -33,25 +47,52 @@ export interface IPongContext
 function usePongProvider() : IPongContext
 {
     const [inGame, setInGame] = useState<boolean>(false);
-    const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: true,
+    const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
         auth: {
 			token: useAuth().user?.access_token_42,
         }
     }));
-    const [rooms, setRooms] = useState<Array<IPongRoom>>([]);
+    const [room, setRoom] = useState<IPongRoom | null>(null);
     const navigate = useNavigate();
 
 
-    function searchRoom()
-    {
-    }
-
     useEffect(() => {
-        socket.on('STARTING_ROOM', (data: any) => {
+        socket.on('STARTING_ROOM', (data: StartPongRoomDTO) => {
             console.log("Room is starting");
+            setRoom({
+                room_id: data.room_id,
+                player_1: {
+                    username: data.player_1.username,
+                    points: 0,
+                    position: 500, // default position ( 0 - 1000 )
+                } as IPongUser,
+
+                player_2: {
+                    username: data.player_2.username,
+                    points: 0,
+                    position: 500,
+                } as IPongUser,
+
+                ball: {
+                    pos_x: 0,
+                    pos_y: 0,
+                    size: 14,
+                } as IPongBall,
+
+                spectators: [],
+                state: RoomState.PLAYING,
+                socket: socket,
+            } as IPongRoom);
+
             setInGame(true);
         });
-     }, []);
+
+        return () => {
+            socket.off('STARTING_ROOM');
+        };
+     }, [inGame]);
+
+
 
     useEffect(() => {
         if (inGame === true)
@@ -63,14 +104,23 @@ function usePongProvider() : IPongContext
             navigate("/game", { replace: true });
         }
     }, [inGame])
+
     
     useEffect(() => {
         socket.connect();
-        socket.emit("SEARCH_ROOM");
         console.log(socket);
     }, []);
 
-    return ({rooms});
+
+    useEffect(() => {
+        socket.on("AUTHENTIFICATED", () => {
+            socket.emit("SEARCH_ROOM");
+        })
+    })
+
+    return ({
+        room: room
+    });
 }
 
 
