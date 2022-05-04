@@ -4,7 +4,9 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
-import { UserDataDto } from 'src/Common/Dto/chat/room';
+import { CreateRoom, UserDataDto } from 'src/Common/Dto/chat/room';
+import { JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
+import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
 import { RoomService } from 'src/room/room.service';
@@ -123,34 +125,87 @@ export class ChatService {
 
 
 
-	async createRoom(room_name: string, user : ChatUser, room_private: boolean, owner: ChatUser, password: string = "")
+	async createRoom(client: Socket, user: ChatUser, data : CreateRoom) : Promise<void>
 	{
 		
-		await this.roomService.createRoom(room_name, await this.userService.findUserByReferenceID(user.reference_id), room_private, password, false);
+		const resp = await this.roomService.createRoom(data.room_name, await this.userService.findUserByReferenceID(user.reference_id), data.private_room, data.password, false);
 		this.rooms.push({
-			name: room_name,
-			private_room: room_private,
-			users: [owner],
+			name: data.room_name,
+			private_room: data.private_room,
+			users: [user],
 			admins: [], // admin =/= owner
 			invited : [],
 			muted: [],
 			banned : [],
-			owner: owner,
-			password : password,
+			owner: user,
+			password : data.password,
 		})
+
+		if (resp instanceof ChatRoomEntity)
+		{
+			let room = resp;
+
+			user.socket.forEach(s => {
+
+				let data : RoomJoinedDTO;
+
+				data = {
+					status: JOINSTATUS.JOIN,
+					id: room.id,
+					room_name:  room.name,
+					protected: (room.password_key != undefined),
+					user_is_owner: room.owner === user.reference_id,
+				}
+				s.join(data.room_name);
+				s.emit("JOINED_ROOM", data);
+			});
+		}
+		else
+		{
+			let data : RoomJoinedDTO;
+			data = { status: JOINSTATUS.ERROR, status_message: resp };
+			client.emit("JOINED_ROOM", data);
+		}
+		return;
 	}
 
-	async joinRoom(user: ChatUser, roomName: string)
+	async joinRoom(client: Socket, user: ChatUser, roomName: string)
 	{
 		let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		await this.roomService.joinRoom(roomName, userRoom);
+		let resp = await this.roomService.joinRoom(roomName, userRoom);
+
+		if (resp instanceof ChatRoomEntity)
+		{
+			let room = resp;
+
+			user.socket.forEach(s => {
+
+				let data : RoomJoinedDTO;
+
+				data = {
+					status: JOINSTATUS.JOIN,
+					id: room.id,
+					room_name:  room.name,
+					protected: (room.password_key != undefined),
+					user_is_owner: room.owner === user.reference_id,
+				}
+				s.join(roomName);
+				s.emit("JOINED_ROOM", data);
+			});
+		}
+		else
+		{
+			let data : RoomJoinedDTO;
+			data = { status: JOINSTATUS.ERROR, status_message: resp };
+			client.emit("JOINED_ROOM", data);
+		}
 		return;
 	}
 
 	async leaveRoom(user: ChatUser, roomName: string)
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		await this.roomService.leaveRoom(roomName, user.reference_id);
+		await this.roomService.leaveRoomByName(roomName, user.reference_id);
 		return;
 	}
 
@@ -219,8 +274,20 @@ export class ChatService {
 	{
 		let rooms_list = await this.roomService.roomListOfUser(user.reference_id);
 
-		rooms_list.forEach(r => {
-			client.emit("JOINED_ROOM", r);
+		
+		rooms_list.forEach((r) => {
+			let data : RoomJoinedDTO;
+			console.log(r);
+			data = {
+				id: r.id,
+				room_name: r.name,
+				status: JOINSTATUS.JOIN,
+				user_is_owner: user.reference_id === r.owner,
+				protected: r.has_password,
+			}
+			client.join(r.name);
+			user.room_list.push(r.name);
+			client.emit("JOINED_ROOM", data);
 		})
 		
 	}

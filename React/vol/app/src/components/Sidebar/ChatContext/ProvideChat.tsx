@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
+import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
 import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
@@ -203,7 +203,8 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 
-		socket.on("JOINED_ROOM", (data: RoomJoined) => {
+		socket.on("JOINED_ROOM", (data: RoomJoinedDTO) => {
+			console.log(data);
 			if (data.status === 0 && data.room_name !== undefined)
 			{
 				if (data.protected !== undefined && data.user_is_owner !== undefined)

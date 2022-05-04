@@ -13,7 +13,7 @@ import RoomJoin from '../Common/Dto/chat/RoomJoin';
 import { RoomRename, RoomChangePass, RoomPassChange } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { Room } from "./interface/room";
-import { RoomJoined } from 'src/Common/Dto/chat/RoomJoined';
+import { RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 
 
@@ -85,13 +85,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 		return ;//todo trown error and disconnect
 		
-
-
-		var reply_data: RoomJoined;
+		await this.chatService.createRoom(client, user, payload);
+		/*
+		var reply_data: RoomJoinedDTO;
 
 		if (!this.chatService.roomExists(payload.room_name))
 		{
-			await this.chatService.createRoom(payload.room_name, user, payload.private_room, user, payload.password);
+			
 
 			//todo join & add client to room
 			client.join(payload.room_name);
@@ -111,7 +111,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		else
 		{
 			client.emit("JOINED_ROOM", { status: 1, status_message: `room ${payload.room_name} already exists` });
-		}
+		}*/
+
 	}
 
 
@@ -133,8 +134,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.joinRoom(user, payload.room_name);
-		var reply_data: RoomJoined;
+		await this.chatService.joinRoom(client, user, payload.room_name);
+		/*var reply_data: RoomJoinedDTO;
 		let local_room = this.chatService.getRoom(payload.room_name);//this.rooms.find(o => o.name === payload.room_name);
 		if (local_room === undefined)
 		{
@@ -145,7 +146,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else
 		{
-			/* Already joined check */
+			// Already joined check 
 			let is_user = local_room.users.find(c => c.username === user.username);
 			if (is_user !== undefined)
 			{
@@ -154,7 +155,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: Client ${client.id} has already joined room`);
 				return ;
 			}
-			/* Protection check */
+			// Protection check 
 			if (local_room.password === "")
 			{
 				local_room.users.push(user);
@@ -199,7 +200,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				// online users
 				// ...
 			})});
-		user.room_list.push(payload.room_name);
+		user.room_list.push(payload.room_name);*/
 	}
 
 
@@ -218,7 +219,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 		
-		await this.chatService.leaveRoom(user, payload);
+		//await this.chatService.leaveRoom(user, payload);
 		console.log('your chan: ' + this.chatService.roomExists(payload));
 		let local_room = this.chatService.getRoom(payload);
 		if (local_room === undefined)
@@ -505,20 +506,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			
 		}
 
+
 		this.chatService.ConnectToChan(client, user);
-		/*user.room_list.forEach((room) => {
-			client.join(room);
-			client.emit("JOINED_ROOM", {
-				status: 0,
-				room_name: room,
-				// owner 
-				// online users
-				// ...
-			});*/
-
-		})
-
-		let dto : NotifDTO[];
+	/*	let dto : NotifDTO[];
 
 		dto = [];
 
@@ -531,7 +521,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				username: r.username,
 				content: undefined,
 			})
-		})
+		})*/
 
 		
 		//client.emit('RECEIVE_NOTIF', dto);
