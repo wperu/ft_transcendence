@@ -38,9 +38,8 @@ export interface RoomBanDto
 
 export interface RoomLeftDto
 {
-	status: number,
-	status_message?: string,
-	room_name?: string,
+	id:			number,
+	room_name:	string,
 }
 
 export interface UserDataDto

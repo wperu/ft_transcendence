@@ -86,32 +86,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		return ;//todo trown error and disconnect
 		
 		await this.chatService.createRoom(client, user, payload);
-		/*
-		var reply_data: RoomJoinedDTO;
-
-		if (!this.chatService.roomExists(payload.room_name))
-		{
-			
-
-			//todo join & add client to room
-			client.join(payload.room_name);
-			user.room_list.push(payload.room_name);
-			user.socket.forEach((s) => {
-				s.join(payload.room_name);
-				reply_data = {
-					status: 0,
-					room_name: payload.room_name,
-					protected: payload.password != undefined,
-					user_is_owner: true,
-				};
-				s.emit("JOINED_ROOM", reply_data);
-			});
-			
-		}
-		else
-		{
-			client.emit("JOINED_ROOM", { status: 1, status_message: `room ${payload.room_name} already exists` });
-		}*/
 
 	}
 
@@ -135,72 +109,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			return ;//todo trown error and disconnect
 
 		await this.chatService.joinRoom(client, user, payload.room_name);
-		/*var reply_data: RoomJoinedDTO;
-		let local_room = this.chatService.getRoom(payload.room_name);//this.rooms.find(o => o.name === payload.room_name);
-		if (local_room === undefined)
-		{
-			reply_data = { status: 1, status_message: "No such room" };
-			client.emit("JOINED_ROOM", reply_data);
-			this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: no such room`);
-			return ;
-		}
-		else
-		{
-			// Already joined check 
-			let is_user = local_room.users.find(c => c.username === user.username);
-			if (is_user !== undefined)
-			{
-				reply_data = { status: 1, status_message: "You are already in that room" };
-				client.emit("JOINED_ROOM", reply_data);
-				this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: Client ${client.id} has already joined room`);
-				return ;
-			}
-			// Protection check 
-			if (local_room.password === "")
-			{
-				local_room.users.push(user);
-			}
-			else if (local_room.password !== "")
-			{
-				if (local_room.password === payload.password)
-					local_room.users.push(user);
-				else
-				{
-					reply_data = { status: 1, status_message: "Wrong password" };
-					client.emit("JOINED_ROOM", reply_data);
-					this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: wrong password`);
-					return ; 
-				}
-			}
-			else
-			{
-				reply_data = { status: 1, status_message: "Unknown room protection type" };
-				client.emit("JOINED_ROOM", reply_data);
-				this.logger.log(`[${client.id}] Cannot join room: ${payload.room_name}: unknown room protection type`);
-				return ;
-			}
-		}
-
-		let ban: UserBan | undefined = local_room.banned.find(u => {u.reference_id === user.reference_id})
-		if(ban !== undefined && new Date(Date.now()) < ban.expires_in)
-		{
-			reply_data = { status: 1, status_message: "You are banned from that channel" };
-			client.emit("JOINED_ROOM", { status: 1, status_message: "You are banned from that channel"})
-			return ;
-		}
-		this.logger.log(`[${client.id}] joined room ${payload.room_name}`);
-		user.socket.forEach((s) => {
-			s.join(payload.room_name);
-			s.emit("JOINED_ROOM", {
-				status: 0,
-				room_name: local_room.name,
-				protected: (payload.password != undefined),
-				user_is_owner: false,
-				// owner 
-				// online users
-				// ...
-			})});
-		user.room_list.push(payload.room_name);*/
 	}
 
 
@@ -213,36 +121,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @param room: the room name to leave.
 	 */
 	@SubscribeMessage('LEAVE_ROOM')
-	async leaveRoom(client: Socket, payload: string): Promise<void>
+	async leaveRoom(client: Socket, payload: any): Promise<void>
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 		
-		//await this.chatService.leaveRoom(user, payload);
-		console.log('your chan: ' + this.chatService.roomExists(payload));
-		let local_room = this.chatService.getRoom(payload);
-		if (local_room === undefined)
-		{
-			console.error("Left an undefined room ??");
-		}
-		else
-		{
-			let user_idx = local_room.users.findIndex((u) => {return u.username === user.username});
-			local_room.users.splice(user_idx, 1);
-			this.logger.log(`Client ${client.id} left room ${payload}`);
-			const dto : RoomLeftDto = { status: 1, room_name: payload };
-			
-
-			//client.leave(payload);
-			user.socket.forEach((s) => {
-				s.leave(payload);
-				s.emit('LEFT_ROOM', dto);
-			});
-			user.room_list.splice(user.room_list.findIndex((room) => { return(room === payload) }), 1);
-			if (local_room.users.length === 0)
-				this.chatService.removeRoom(local_room.name);
-		}
+		await this.chatService.leaveRoom(client, user, payload.id, payload.name);
 		
 	}
 
@@ -297,7 +182,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('RENAME_ROOM')
 	renameRoom(client: Socket, payload: RoomRename)
 	{
-		let local_room = this.chatService.getRoom(payload.old_name);
+		/*let local_room = this.chatService.getRoom(payload.old_name);
 		if (local_room === undefined)
 		{
 			console.error(`Cannot rename unknown room: ${payload.old_name}`);
@@ -314,7 +199,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			throw new BadRequestException(`Bad name: ${payload.new_name} (try again with another name)`);
 		}
 		
-		local_room.name = payload.new_name;
+		local_room.name = payload.new_name;*/
 	}
 
 
@@ -379,9 +264,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	// TODO empecher de recuperer la liste d'users si on est pas dans la room
 	@SubscribeMessage('USER_LIST')
-	user_list(client: Socket , payload: string) : void
+	async user_list(client: Socket , payload: number) : Promise<void>
 	{
-		var	current_room = this.chatService.getRoom(payload);
+		let user :ChatUser = this.chatService.getUserFromSocket(client);
+		
+		if (user !== undefined)
+			await this.chatService.roomUserList(client, user, payload);
+		/*var	current_room = this.chatService.getRoom(payload);
 		var	names_list : Array<UserDataDto> = [];
 		let user :ChatUser = this.chatService.getUserFromSocket(client);
 		
@@ -405,7 +294,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			});
 			client.emit("USER_LIST", names_list);
 			}
-		}
+		}*/
 	}
 
 	//todo

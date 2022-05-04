@@ -6,12 +6,11 @@
  */
 export interface RoomJoinedDTO
 {
-	id?: 				number,
+	id: 				number,
 	status:				number,
-	status_message?:	string,
-	room_name?:			string,
-	protected?:			boolean,
-	user_is_owner?:		boolean,
+	room_name:			string,
+	protected:			boolean,
+	user_is_owner:		boolean,
 }
 
 export enum JOINSTATUS

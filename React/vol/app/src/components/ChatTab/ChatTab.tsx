@@ -34,7 +34,11 @@ function ChatTab ()
 	{
 		if (chatCtx.currentRoom !== undefined)
 		{
-			chatCtx.socket.emit("LEAVE_ROOM", chatCtx.currentRoom.room_name);
+			let dto = {
+				id:		chatCtx.currentRoom.id,
+				name:	chatCtx.currentRoom.room_name,
+			}
+			chatCtx.socket.emit("LEAVE_ROOM", dto);
 			setMessages([]);
 			chatCtx.setCurrentTab(ECurrentTab.channels);
 		}

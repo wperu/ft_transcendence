@@ -4,14 +4,14 @@ import { Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
-import { CreateRoom, UserDataDto } from 'src/Common/Dto/chat/room';
+import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
+import { CreateRoom, RoomLeftDto, UserDataDto } from 'src/Common/Dto/chat/room';
 import { JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
 import { RoomService } from 'src/room/room.service';
 import { UsersService } from 'src/users/users.service';
-import { ChatModule } from './chat.module';
 import { Room } from './interface/room';
 
 @Injectable()
@@ -159,12 +159,16 @@ export class ChatService {
 				s.join(data.room_name);
 				s.emit("JOINED_ROOM", data);
 			});
+
+			let data : NoticeDTO;
+			data = { level: ELevel.info, content: "Room " + room.name + " created" };
+			client.emit("NOTIFICATION", data);	
 		}
 		else
 		{
-			let data : RoomJoinedDTO;
-			data = { status: JOINSTATUS.ERROR, status_message: resp };
-			client.emit("JOINED_ROOM", data);
+			let data : NoticeDTO;
+			data = { level: ELevel.error, content: resp };
+			client.emit("NOTIFICATION", data);
 		}
 		return;
 	}
@@ -192,28 +196,59 @@ export class ChatService {
 				s.join(roomName);
 				s.emit("JOINED_ROOM", data);
 			});
+			
+			let data : NoticeDTO;
+			data = { level: ELevel.info, content: "Room " + room.name + " joined" };
+			client.emit("NOTIFICATION", data);	
 		}
 		else
 		{
-			let data : RoomJoinedDTO;
-			data = { status: JOINSTATUS.ERROR, status_message: resp };
-			client.emit("JOINED_ROOM", data);
+			let data : NoticeDTO;
+			data = { level: ELevel.error, content: resp };
+			client.emit("NOTIFICATION", data);
 		}
 		return;
 	}
 
-	async leaveRoom(user: ChatUser, roomName: string)
+	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string)
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		await this.roomService.leaveRoomByName(roomName, user.reference_id);
-		return;
+		if (await this.roomService.leaveRoomById(id, user.reference_id) === false)
+		{
+
+			return ;
+		}
+
+		//return;
+
+		let dto: RoomLeftDto;
+		
+		dto = {
+			id: 0,
+			room_name: roomName,
+			//room_name: roomName,
+		}
+		user.socket.forEach((s) => {
+			s.leave(roomName);
+			s.emit('LEFT_ROOM', dto);
+		});
+
+		let data : NoticeDTO;
+		data = { level: ELevel.info, content: "Room " + roomName + " left" };
+		client.emit("NOTIFICATION", data);	
 	}
 
-	async roomUserList(room: string, user: ChatUser)
-	{
-		const ret = await this.roomService.userListOfRoom(room, user.reference_id);
 
-		console.log(ret);
+
+	async roomUserList(client: Socket, user: ChatUser, roomId: number)
+	{
+		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
+
+		if (typeof resp !== 'string')
+		{
+			client.emit("USER_LIST", resp);
+		}
+		//console.log(ret);
 	}
 
 

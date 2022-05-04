@@ -1,7 +1,7 @@
 export interface RoomRename
 {
-    old_name: string,
-    new_name: string
+    id:			number;
+    new_name:	string;
 }
 
 export interface RoomChangePass
