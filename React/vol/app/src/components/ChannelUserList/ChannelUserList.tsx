@@ -25,10 +25,10 @@ function ChannelUserList ()
 	}, []);
 
 	useEffect(() => {
-		chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.room_name);
+		chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.id);
 	}, [chatCtx.socket])
 
-	useInterval(() => {chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.room_name);}, 1000);
+	useInterval(() => {chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.id);}, 1000);
 
 
 	if (chatCtx.currentRoom)

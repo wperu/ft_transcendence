@@ -38,9 +38,8 @@ export interface RoomBanDto
 
 export interface RoomLeftDto
 {
-	status: number,
-	status_message?: string,
-	room_name?: string,
+	id:			number,
+	room_name:	string,
 }
 
 export interface UserDataDto
@@ -58,3 +57,12 @@ export interface RcvMessageDto
 	send_date: string,
 	room_name: string
 };
+
+export interface RoomListDTO
+{
+	id:				number;
+	name:			string;
+	owner:			number; //refId
+	has_password:	boolean;
+}
+
