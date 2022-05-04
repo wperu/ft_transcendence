@@ -40,13 +40,10 @@ function Friends()
 
 	//const [blocks, setBlocks] = useState();
 
-
 	const int1 = useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
 	const int3 = useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
 	const int2 = useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
 	
-
-
 	function addFriend(event: React.SyntheticEvent)
 	{
 		event.preventDefault();
@@ -64,8 +61,6 @@ function Friends()
 		}
 	}
 
-						/**/
-
 	return (
 		<div id="Friends">
 			<form id="add_friend_by_name_form" onSubmit={addFriend}>
@@ -74,17 +69,36 @@ function Friends()
 					name="name" placeholder="Nom du fdp"/>
 				<input id="add_friend_button" type="submit" value="Ajouter"/>
 			</form>
+
 			<span className="friends_list_title">Notifications</span>
 			<div className="friends_tab_list notifs_list">
-				{chtCtx.notification.map((n, index) => {return <Notification key={index} notif={n} />})}
+				{chtCtx.notification.map((n, index) => {
+					return <Notification key={index} notif={n} />
+					})}
 			</div>
+
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-				{chtCtx.friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected !== false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
+				{chtCtx.friendsList.map((u, index) => (
+					(u.is_connected !== undefined && u.is_connected !== false)
+					? <Friend
+						key={u.reference_id}
+						ref_id={u.reference_id}
+						name={u.username}
+						online={u.is_connected}/>
+					: null ))}
 				<div className="user_status_tab">Offline</div>
-				{chtCtx.friendsList.map((u, index) => ( (u.is_connected !== undefined && u.is_connected === false) ? <Friend key={u.reference_id} ref_id={u.reference_id} name={u.username} online={u.is_connected}/> : null ))}
+				{chtCtx.friendsList.map((u, index) => (
+					(u.is_connected !== undefined && u.is_connected === false)
+					? <Friend
+						key={u.reference_id}
+						ref_id={u.reference_id}
+						name={u.username}
+						online={u.is_connected}/>
+					: null ))}
 			</div>
+
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
 				{chtCtx.blockList.map((u) => (<BlockedUser key={u.reference_id} ref_id={u.reference_id} name={u.username} /> ))}

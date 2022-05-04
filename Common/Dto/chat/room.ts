@@ -49,7 +49,6 @@ export interface UserDataDto
 	is_connected?: boolean,
 }
 
-
 export interface RcvMessageDto
 {
 	message: string,
@@ -67,6 +66,3 @@ export interface RoomListDTO
 	has_password:	boolean;
 }
 
-
-
-// export { create_room, room_protect };
