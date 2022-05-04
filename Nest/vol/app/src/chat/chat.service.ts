@@ -357,6 +357,25 @@ export class ChatService {
 		return ret;
 	}
 
+
+	async sendRoomList(client: Socket)
+	{
+		const rooms = await this.roomService.publicRoomList();
+
+		//var	rooms_list : Array<{name: string, has_password: boolean}> = [];
+
+		/*rooms.forEach(room => {
+
+			rooms_list.push({
+				name: room.name,
+				has_password: room.has_password !== "",
+			}
+		});*/
+
+		console.log(rooms);
+		client.emit('ROOM_LIST', rooms);
+	}
+
 	async getBlockList(user: ChatUser) : Promise<UserData[]>
 	{
 		const relation = await this.friendService.findBlockedOf(user.reference_id);

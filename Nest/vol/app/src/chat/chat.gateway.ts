@@ -270,31 +270,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		
 		if (user !== undefined)
 			await this.chatService.roomUserList(client, user, payload);
-		/*var	current_room = this.chatService.getRoom(payload);
-		var	names_list : Array<UserDataDto> = [];
-		let user :ChatUser = this.chatService.getUserFromSocket(client);
-		
-		if (current_room !== undefined)
-		{
-
-			if (user !== undefined)
-			{
-			this.chatService.roomUserList(payload, user);
-			this.chatService.isUserInRoom(user, current_room);
-			current_room.users.forEach(element => {
-				if (element !== undefined)
-				{
-					let el = {
-						username: element.username,
-						reference_id: element.reference_id,
-					} as UserDataDto;
-
-					names_list.push(el);
-				}
-			});
-			client.emit("USER_LIST", names_list);
-			}
-		}*/
 	}
 
 	//todo
@@ -350,11 +325,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	// TODO do some RoomListDTO  
 	@SubscribeMessage('ROOM_LIST')
-	room_list(client: Socket): void
+	async room_list(client: Socket): Promise<void>
 	{
-		var	rooms_list : Array<{name: string, has_password: boolean}> = [];
-		const rooms = this.chatService.getAllRooms();
-		rooms.forEach(room => {
+		//var	rooms_list : Array<{name: string, has_password: boolean}> = [];
+		//const rooms = this.chatService.getAllRooms();
+
+		await this.chatService.sendRoomList(client);
+		/*rooms.forEach(room => {
 			if (!room.private_room) //fix me
 			{
 				rooms_list.push({
@@ -363,7 +340,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				});
 			}
 		});
-		client.emit('ROOM_LIST', rooms_list);
+		client.emit('ROOM_LIST', rooms_list);*/
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
