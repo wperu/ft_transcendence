@@ -10,6 +10,7 @@ interface	props
 	refId: number;
 	targetUserLvl: ELevelInRoom;
 	isBlockedByCurrentUser: boolean;
+	isMuted: boolean;
 }
 
 function ChatUser(data: props)
@@ -66,12 +67,17 @@ function ChatUser(data: props)
 		}
 	}
 
-	return (
-		<div className="chat_user" >
-			<div className="chat_user_username">{data.targetUsername}</div>
-			<Buttons />
-		</div>
-	);
+	if (data.isMuted)
+		return (null);
+	else
+	{
+		return (
+			<div className="chat_user" >
+				<div className="chat_user_username">{data.targetUsername}</div>
+				<Buttons />
+			</div>
+		);
+	}
 }
 
 export default ChatUser;
