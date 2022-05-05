@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, UnauthorizedException, UseFilters } from '@nestjs/common';
+import { BadRequestException, Logger, OnModuleInit, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format, getISOWeeksInYear } from 'date-fns';
 import { Server, Socket } from 'socket.io';
@@ -25,16 +25,20 @@ import { Room } from "./interface/room";
 	},
 	transports: ['websocket'] 
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, OnModuleInit
 {	
 	@WebSocketServer() server: Server;
-	private logger: Logger = new Logger('AppGateway');
+	private logger: Logger = new Logger('ChatGateway');
 
 
 	constructor(
 		private chatService: ChatService,
 	) { }
 
+	onModuleInit()
+	{
+		this.logger.log("Module initialized");
+	}
 
 
 	afterInit(server: Server) 

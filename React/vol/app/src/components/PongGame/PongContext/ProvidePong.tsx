@@ -11,6 +11,7 @@ export interface IPongUser
     username: string,
     points: number,
     position: number,
+    velocity: number;
 }
 
 export interface IPongBall
@@ -18,6 +19,8 @@ export interface IPongBall
     pos_x: number,
     pos_y: number,
     size: number,
+    vel_y: number;
+    vel_x: number;
 }
 
 export enum RoomState {

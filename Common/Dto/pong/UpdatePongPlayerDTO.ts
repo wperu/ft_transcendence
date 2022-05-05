@@ -1,5 +1,6 @@
 export interface UpdatePongPlayerDTO
 {
     player_id: number, // 1 - 2
-    position: number
+    position: number,
+    velocity: number
 }

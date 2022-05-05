@@ -15,9 +15,24 @@ interface CanvasProps
     height: number;
 }
 
-
-async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement)
+function update(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, deltaTime: number)
 {
+    if (!pong_ctx.room)
+        return ;
+    
+    pong_ctx.room.ball.pos_x += pong_ctx.room.ball.vel_x * deltaTime;
+    pong_ctx.room.ball.pos_y += pong_ctx.room.ball.vel_y * deltaTime;
+    pong_ctx.room.player_1.position += pong_ctx.room.player_1.velocity * deltaTime;
+    pong_ctx.room.player_2.position += pong_ctx.room.player_2.velocity * deltaTime;
+}
+
+
+async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, last_time: number = Date.now())
+{
+    /* timed update  */
+    let current_time = Date.now();
+    let delta = (current_time - last_time) / 1000
+    update(pong_ctx, ctx, canvas, delta);
 
     /* Background */
     ctx = canvas.getContext('2d');     // gets reference to canvas context
@@ -109,7 +124,7 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
                 Math.PI / 4, 0, 2 * Math.PI);
     ctx.fill();
 
-    requestAnimationFrame(() => draw(pong_ctx, ctx, canvas));
+    requestAnimationFrame(() => draw(pong_ctx, ctx, canvas, current_time));
 }
 
 const PongGame = (props: CanvasProps) => {
@@ -158,6 +173,8 @@ const PongGame = (props: CanvasProps) => {
                 {
                     pongCtx.room.ball.pos_x = data.ball_x;
                     pongCtx.room.ball.pos_y = data.ball_y;
+                    pongCtx.room.ball.vel_x = data.vel_x;
+                    pongCtx.room.ball.vel_y = data.vel_y;
                 }
             });
 
@@ -165,9 +182,15 @@ const PongGame = (props: CanvasProps) => {
                 if (pongCtx.room)
                 {
                     if (data.player_id === 1) 
+                    {
                         pongCtx.room.player_1.position = data.position;
+                        pongCtx.room.player_1.velocity = data.velocity;
+                    }
                     else if (data.player_id === 2)
+                    {
                         pongCtx.room.player_2.position = data.position;
+                        pongCtx.room.player_2.velocity = data.velocity;
+                    }
                 }
             });
         }

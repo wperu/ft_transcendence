@@ -1,5 +1,5 @@
-import { Logger } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Logger, OnModuleInit } from '@nestjs/common';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'http';
 import { Socket } from 'socket.io';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
@@ -15,16 +15,25 @@ import { PongService } from './pong.service';
 	},
 	transports: ['websocket'] 
 })
-export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect
+export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, OnModuleInit
 {
 	@WebSocketServer() server: Server;
-	private logger: Logger = new Logger('AppGateway');
+	private logger: Logger = new Logger('PongGateway');
 
 	constructor(
 		private pongService: PongService
 	)
 	{}
-	
+
+	onModuleInit()
+	{
+		this.logger.log("Module initialized");
+	}
+
+	afterInit(server: Server) 
+	{
+		this.logger.log("Server listening on ");
+	}
 	
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{

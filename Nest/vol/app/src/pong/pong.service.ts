@@ -25,14 +25,21 @@ export class PongService {
     private logger: Logger = new Logger('AppService');
 
 
-    private TICK_RATE: number = 100; // in ms
+    private TICK_RATE: number = 10; // tick every 10 frames
+    private GAME_RATE: number = 16; // refresh time on server side (about 60fps)
 
     private BALL_SIZE: number = 0.1;
+    private BALL_SPEED: number = 1.1;
     private PLAYER_SIZE: number = 0.25;
-    private PLAYER_SPEED: number = 0.09;
+    private PLAYER_SPEED: number = 0.9;
     private PLAYER_FRICTION: number = 0.5;
     private TERRAIN_PADDING_X: number = 0.05;
     private TERRAIN_PADDING_Y: number = 0.11;
+
+    private frameCount: number = 0;
+    private deltaTime: number = 0;
+    private last_time: number = 0;
+    private current_time: number = 0;
 
     constructor(
         private usersService: UsersService,
@@ -123,8 +130,8 @@ export class PongService {
             ball: {
                 pos_x: 1,
                 pos_y: 0.5,
-                vel_x: randomInt(1) > 0.5 ? -0.1 : 0.1,
-                vel_y: randomInt(-2, 2) / 100
+                vel_x: randomInt(1) > 0.5 ? -this.BALL_SPEED : this.BALL_SPEED,
+                vel_y: randomInt(-100, 100) / 1000
             } as PongBall,
             spectators: [],
             state: RoomState.WAITING
@@ -138,8 +145,8 @@ export class PongService {
     {
         room.ball.pos_x = 1;
         room.ball.pos_y = 0.5;
-        room.ball.vel_x = randomInt(1) > 0.5 ? -0.1 : 0.1;
-        room.ball.vel_y = randomInt(-2, 2) / 100;
+        room.ball.vel_x = randomInt(1) > 0.5 ? -this.BALL_SPEED : this.BALL_SPEED,
+        room.ball.vel_y = randomInt(-100, 100) / 1000
     }
 
 
@@ -219,7 +226,7 @@ export class PongService {
 
         console.log("sent start request to spectators");
 
-        setInterval(() => this.runRoom(room), this.TICK_RATE);
+        setInterval(() => this.runRoom(room), this.GAME_RATE);
     }
 
 
@@ -244,49 +251,59 @@ export class PongService {
 
     updateRoom(room: PongRoom)
     {
+        /* calulating delta time between frames */
+        this.current_time = Date.now();
+        if (this.last_time === 0)
+            this.last_time = this.current_time;
+        this.deltaTime = (this.current_time - this.last_time) / 1000;
+        this.last_time = this.current_time;
+
+        /* Logic update */
         this.gameUpdate(room);
 
-        let updated_room: UpdatePongRoomDTO = {
-            ball: {
-                pos_x: room.ball.pos_x,
-                pos_y: room.ball.pos_y,
-            },
-
-            player_1_pos: room.player_1.position,
-            player_2_pos: room.player_2.position,
-        };
-
-
-        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL', {
-            ball_x: updated_room.ball.pos_x,
-            ball_y: updated_room.ball.pos_y,
-        } as UpdatePongBallDTO) });
-
-        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL', {
-            ball_x: updated_room.ball.pos_x,
-            ball_y: updated_room.ball.pos_y,
-        } as UpdatePongBallDTO) });
+        /* Send data every tick */
+        if (this.frameCount % this.TICK_RATE === 0)
+        {
+            let ball_infos: UpdatePongBallDTO = {
+                ball_x: room.ball.pos_x,
+                ball_y: room.ball.pos_y,
+                vel_x: room.ball.vel_x,
+                vel_y: room.ball.vel_y,
+            };
+            room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
+            room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
 
 
-        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 1,
-            position: updated_room.player_1_pos,
-        } as UpdatePongPlayerDTO) });
+            // OPTIMIZE there is no need to update player's position every time,               
+            // OPTIMIZE we could reduce bandwidth by sending only opponent's informations      
+            // OPTIMIZE supposing that the client calculated it's position right (time issues) 
+            room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+                player_id: 1,
+                position: room.player_1.position,
+                velocity: room.player_1.velocity,
+            } as UpdatePongPlayerDTO) });
 
-        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 2,
-            position: updated_room.player_2_pos,
-        } as UpdatePongPlayerDTO) });
+            room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+                player_id: 2,
+                position: room.player_2.position,
+                velocity: room.player_2.velocity,
+            } as UpdatePongPlayerDTO) });
 
-        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 1,
-            position: updated_room.player_1_pos,
-        } as UpdatePongPlayerDTO) });
+            room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+                player_id: 1,
+                position: room.player_1.position,
+                velocity: room.player_1.velocity,
+            } as UpdatePongPlayerDTO) });
 
-        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 2,
-            position: updated_room.player_2_pos,
-        } as UpdatePongPlayerDTO) });
+            room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+                player_id: 2,
+                position: room.player_2.position,
+                velocity: room.player_2.velocity,
+            } as UpdatePongPlayerDTO) });
+        }
+
+        /* Increment frame Count */
+        this.frameCount++;
     }
 
 
@@ -335,8 +352,7 @@ export class PongService {
             front end will stretch the values as desired to prevent using
             too much ressources for calculating visual effects on the back-end 
         */
-        let terrain_x = 0, terrain_y = 0, terrain_sx = 2, terrain_sy = 1; 
-
+        let terrain_sx = 2, terrain_sy = 1;
 
         /* Calculating next frame velocities */
 
@@ -381,10 +397,10 @@ export class PongService {
         
 
         /* Updating positions */
-       room.ball.pos_x += room.ball.vel_x;
-       room.ball.pos_y += room.ball.vel_y;
-       room.player_1.position += room.player_1.velocity;
-       room.player_2.position += room.player_2.velocity;
+       room.ball.pos_x += room.ball.vel_x * this.deltaTime;
+       room.ball.pos_y += room.ball.vel_y * this.deltaTime;
+       room.player_1.position += room.player_1.velocity * this.deltaTime;
+       room.player_2.position += room.player_2.velocity * this.deltaTime;
 
 
         /* Player wall collisions */
