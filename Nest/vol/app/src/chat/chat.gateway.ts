@@ -10,7 +10,7 @@ import { isInt8Array } from 'util/types';
 import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import RoomJoin from '../Common/Dto/chat/RoomJoin';
-import { RoomRename, RoomChangePass, RoomPassChange } from '../Common/Dto/chat/RoomRename';
+import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { Room } from "./interface/room";
 import { RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
@@ -108,7 +108,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.joinRoom(client, user, payload.room_name);
+		await this.chatService.joinRoom(client, user, payload.room_name, payload.password);
 	}
 
 
@@ -209,55 +209,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field new_pass: the new password for the room
 	 */
 	@SubscribeMessage('ROOM_CHANGE_PASS')
-	RoomChangePass(client: Socket, payload: RoomChangePass)
+	async roomChangePass(client: Socket, payload: RoomChangePassDTO)
 	{
-		let	reply_data: RoomPassChange;
-		let local_room = this.chatService.getRoom(payload.room_name);
-		if (local_room === undefined)
-		{
-			reply_data =
-			{
-				status: 1,
-				room_name: payload.room_name,
-				status_message: "Unknown room"
-			};
-			client.emit("ROOM_PASS_CHANGE", reply_data);
-			console.error(`Cannot change password unknown room: ${payload.room_name}`);
-			throw new BadRequestException(`Unknown room ${payload.room_name}`);
-		}
-		else if  (!this.chatService.isOwner(this.chatService.getUserFromSocket(client), local_room))
-		{
-			console.log(this.chatService.isOwner(this.chatService.getUserFromSocket(client), local_room));
-			reply_data =
-			{
-				status: 1,
-				room_name: payload.room_name,
-				status_message: "Only the room owner can change the password !",
-			};
-			client.emit("ROOM_PASS_CHANGE", reply_data);
-			throw new UnauthorizedException("Only the room owner can change the password !");
-		}
-		else if (local_room.password === payload.new_pass)
-		{
-			reply_data =
-			{
-				status: 1,
-				room_name: payload.room_name,
-				status_message: "Same password"
-			};
-			client.emit("ROOM_PASS_CHANGE", reply_data);
-			console.error(`Cannot change password : same password`);
-		}
-		else
-		{
-			local_room.password = payload.new_pass;
-			reply_data =
-			{
-				status: 0,
-				room_name: payload.room_name,
-			};
-			client.emit("ROOM_PASS_CHANGE", reply_data);
-		}
+		let user: ChatUser = this.chatService.getUserFromSocket(client);
+		
+		if (user === undefined)
+			return ;
+
+		await this.chatService.roomChangePass(client, user, payload.id, payload.new_pass);
 	}
 
 

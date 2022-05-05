@@ -164,15 +164,19 @@ export class RoomService
 	 * @param user 
 	 * @returns  string with error or undefined
 	 */
-	async joinRoom(name: string, user: User) : Promise<string | ChatRoomEntity>
+	async joinRoom(name: string, user: User, password_key: string) : Promise<string | ChatRoomEntity>
 	{
 		const room = await this.findRoomByName(name);
 
 		if (room === undefined)
-			return ("no room exist");
+			return ("no room exist !");
 
 		if (await this.isInRoom(room, user.reference_id) === true)
-			return ("already in room");
+			return ("already in room !");
+		
+		if (password_key !== room.password_key)
+			return ("Wrong password !");
+		
 		
 		let roomRel	: ChatRoomRelationEntity	=  new ChatRoomRelationEntity();
 

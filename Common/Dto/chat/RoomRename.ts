@@ -4,10 +4,10 @@ export interface RoomRename
     new_name:	string;
 }
 
-export interface RoomChangePass
+export interface RoomChangePassDTO
 {
-    room_name: string,
-    new_pass: string
+    id:			number,
+    new_pass:	string
 }
 
 export interface RoomPassChange

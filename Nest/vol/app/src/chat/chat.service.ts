@@ -174,10 +174,10 @@ export class ChatService {
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, roomName: string)
+	async joinRoom(client: Socket, user: ChatUser, roomName: string, pass: string)
 	{
 		let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		let resp = await this.roomService.joinRoom(roomName, userRoom);
+		let resp = await this.roomService.joinRoom(roomName, userRoom, pass);
 
 		if (resp instanceof ChatRoomEntity)
 		{
@@ -239,7 +239,6 @@ export class ChatService {
 	}
 
 
-
 	async roomUserList(client: Socket, user: ChatUser, roomId: number)
 	{
 		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
@@ -252,7 +251,17 @@ export class ChatService {
 		//console.log(ret);
 	}
 
+	async roomChangePass(client: Socket, user: ChatUser, roomId: number ,pass: string)
+	{
+		const resp = await this.roomService.roomChangePass(roomId, user.reference_id, pass);
 
+		let data : NoticeDTO;
+		if (typeof resp !== 'string')
+			data =  { level: ELevel.info, content: "Password changed !" };
+		else
+			data = { level: ELevel.error, content: resp };
+		client.emit("NOTIFICATION", data);
+	}
 
 	roomExists(room_name: string) : boolean
 	{

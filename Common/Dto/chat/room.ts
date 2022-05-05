@@ -75,3 +75,11 @@ export interface RoomListDTO
 	has_password:	boolean;
 }
 
+export interface RoomUpdataDTO
+{
+	id:			number,
+	level?:		ELevelInRoom,
+	name?:		string,
+	isPrivate?: boolean,
+}
+
