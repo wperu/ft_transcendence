@@ -25,9 +25,9 @@ export interface RoomPromoteDto
 
 export interface RoomMuteDto
 {
-	room_name: string,
-	user_name: string,
-	isMute: boolean // true = mute; false = unmute
+	room_name:	string,
+	user_name:	string,
+	isMute:		boolean // true = mute; false = unmute
 }
 
 export interface RoomBanDto

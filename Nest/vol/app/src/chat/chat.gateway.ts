@@ -320,25 +320,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 		this.chatService.ConnectToChan(client, user);
-	/*	let dto : NotifDTO[];
-
-		dto = [];
-
-		const req = await this.chatService.getRequestList(user);
-
-		req.forEach((r) => { 
-			dto.push({
-				type: ENotification.FRIEND_REQUEST,
-				req_id: r.reference_id,
-				username: r.username,
-				content: undefined,
-			})
-		})*/
-
-		
-		//client.emit('RECEIVE_NOTIF', dto);
-		//client.emit
-
 		this.logger.log(`${user.username} connected to the chat under id : ${client.id}`);
 		this.logger.log(`${user.username} total connection : ${user.socket.length}`);
 	}

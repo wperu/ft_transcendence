@@ -7,7 +7,6 @@
 export interface RoomJoinedDTO
 {
 	id: 				number,
-	status:				number,
 	room_name:			string,
 	protected:			boolean,
 	level:				ELevelInRoom,

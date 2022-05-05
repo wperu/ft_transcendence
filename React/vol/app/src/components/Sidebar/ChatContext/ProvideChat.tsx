@@ -199,11 +199,7 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 
 		socket.on("JOINED_ROOM", (data: RoomJoinedDTO) => {
-			if (data.status === JOINSTATUS.JOIN && data.room_name !== undefined)
-			{
-				//if (data.protected !== undefined && data.user_is_owner !== undefined)
-				addRoom(data.id, data.room_name, data.protected, data.level);
-			}
+			addRoom(data.id, data.room_name, data.protected, data.level);
 		});
 
 		socket.on('ROOM_PASS_CHANGE', (data : RoomPassChange) => {
