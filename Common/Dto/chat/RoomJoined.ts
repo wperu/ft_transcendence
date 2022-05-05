@@ -10,7 +10,7 @@ export interface RoomJoinedDTO
 	status:				number,
 	room_name:			string,
 	protected:			boolean,
-	user_is_owner:		boolean,
+	level:				ELevelInRoom,
 }
 
 export enum JOINSTATUS
@@ -18,4 +18,11 @@ export enum JOINSTATUS
 	JOIN = 0,
 	ERROR = 1,
 	CONNECT = 2,
+}
+
+export enum ELevelInRoom
+{
+	casual = 0,
+	admin = 1,
+	owner = 2,
 }

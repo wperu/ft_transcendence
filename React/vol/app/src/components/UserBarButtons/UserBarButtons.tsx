@@ -150,8 +150,8 @@ export function PromoteUserButton(prop: promoteProp)
 		{
 			const dto : RoomPromoteDto =
 			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
+				room_id: chtCtx.currentRoom.id,
+				refId: prop.refId,
 				isPromote: true,
 			} 
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
@@ -161,6 +161,16 @@ export function PromoteUserButton(prop: promoteProp)
 
 	function demote()
 	{
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomPromoteDto =
+			{
+				room_id: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				isPromote: false,
+			} 
+			chtCtx.socket.emit('ROOM_PROMOTE', dto);
+		}
 		console.log("todo demote");
 	}
 

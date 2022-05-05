@@ -5,8 +5,8 @@ import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
-import { CreateRoom, RoomLeftDto, UserDataDto } from 'src/Common/Dto/chat/room';
-import { JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
+import { CreateRoom, RoomLeftDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { ELevelInRoom, JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
@@ -123,7 +123,7 @@ export class ChatService {
 		return (room.users.find((u) => { u === user }) !== undefined)
 	}
 
-
+	
 
 	async createRoom(client: Socket, user: ChatUser, data : CreateRoom) : Promise<void>
 	{
@@ -145,7 +145,8 @@ export class ChatService {
 		{
 			let room = resp;
 
-			user.socket.forEach(s => {
+			for (const s of user.socket) 
+			{
 
 				let data : RoomJoinedDTO;
 
@@ -153,12 +154,12 @@ export class ChatService {
 					status: JOINSTATUS.JOIN,
 					id: room.id,
 					room_name:  room.name,
-					protected: (room.password_key != undefined),
-					user_is_owner: room.owner === user.reference_id,
+					protected: (room.password_key !== null),
+					level: await this.roomService.getUserLevel(room.id, room.owner, user.reference_id),
 				}
 				s.join(data.room_name);
 				s.emit("JOINED_ROOM", data);
-			});
+			};
 
 			let data : NoticeDTO;
 			data = { level: ELevel.info, content: "Room " + room.name + " created" };
@@ -190,8 +191,8 @@ export class ChatService {
 					status: JOINSTATUS.JOIN,
 					id: room.id,
 					room_name:  room.name,
-					protected: (room.password_key != undefined),
-					user_is_owner: room.owner === user.reference_id,
+					protected: (room.password_key !== null),
+					level: ELevelInRoom.casual,
 				}
 				s.join(roomName);
 				s.emit("JOINED_ROOM", data);
@@ -215,7 +216,6 @@ export class ChatService {
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
 		if (await this.roomService.leaveRoomById(id, user.reference_id) === false)
 		{
-
 			return ;
 		}
 
@@ -244,6 +244,7 @@ export class ChatService {
 	{
 		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
 
+		
 		if (typeof resp !== 'string')
 		{
 			client.emit("USER_LIST", resp);
@@ -308,28 +309,64 @@ export class ChatService {
 	async ConnectToChan(client: Socket, user: ChatUser)
 	{
 		let rooms_list = await this.roomService.roomListOfUser(user.reference_id);
-
 		
-		rooms_list.forEach((r) => {
-			let data : RoomJoinedDTO;
-			console.log(r);
+		
+		for (const r of rooms_list)
+		{
+			let data : RoomJoinedDTO; 
 			data = {
 				id: r.id,
 				room_name: r.name,
 				status: JOINSTATUS.JOIN,
-				user_is_owner: user.reference_id === r.owner,
+				
 				protected: r.has_password,
+				level: await this.roomService.getUserLevel(r.id, r.owner, user.reference_id)
 			}
 			client.join(r.name);
 			user.room_list.push(r.name);
 			client.emit("JOINED_ROOM", data);
-		})
+		}
 		
 	}
 
-	
+	async sendRoomList(client: Socket)
+	{
+		const rooms = await this.roomService.publicRoomList();
+		client.emit('ROOM_LIST', rooms);
+	}
+
+	//todo send to user ?
+	async setIsAdmin(client:Socket, data: RoomPromoteDto)
+	{
+		const user = this.getUserFromSocket(client);
+
+		if (user === undefined)
+			return ;//todo disconnect;
+
+		const resp = await this.roomService.setIsAdmin(data.room_id, data.refId,user.reference_id, data.isPromote);
+
+		let dto : NoticeDTO;
+		if (resp !== undefined)
+			dto = { level: ELevel.error, content: resp };
+		else
+			dto = { level: ELevel.info, content: "User " + ((data.isPromote) ? "promote" : "demote")};
+		client.emit("NOTIFICATION", dto);
+
+		const newAdmin = this.getUserFromID(data.refId);
+		if (newAdmin !== undefined)
+		{
+			//todo send update
+		}
+	}
+
+	/**
+	 * 
+	 * * * * RELATIONSHIP * * * * *
+	 *
+	 */
 
 	//Todo create userDto 
+	//todo Status of user
 	async getFriendList(user: ChatUser) : Promise<UserDataDto[]>
 	{
 		const relation = await this.friendService.findFriendOf(user.reference_id);
@@ -352,28 +389,7 @@ export class ChatService {
 				is_connected: user2.is_connected,
 			});
 		};
-
-		//console.log(ret);
 		return ret;
-	}
-
-
-	async sendRoomList(client: Socket)
-	{
-		const rooms = await this.roomService.publicRoomList();
-
-		//var	rooms_list : Array<{name: string, has_password: boolean}> = [];
-
-		/*rooms.forEach(room => {
-
-			rooms_list.push({
-				name: room.name,
-				has_password: room.has_password !== "",
-			}
-		});*/
-
-		console.log(rooms);
-		client.emit('ROOM_LIST', rooms);
 	}
 
 	async getBlockList(user: ChatUser) : Promise<UserData[]>
@@ -423,6 +439,8 @@ export class ChatService {
 
 		return ret;
 	}
+
+
 	
 	/**
 	 * Return true if a newRequest was created

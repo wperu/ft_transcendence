@@ -172,7 +172,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
-
 	/**
 	 * Emit on this event to change the name of a room
 	 * 
@@ -311,7 +310,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			current_room.muted.splice(current_room.muted.findIndex((string) => {return user_mute.username === payload.user_name}),1);
 		}	
-		this.logger.log(`Client emit mute: ${client.id}`);
+		this.logger.log(`Client emit demute: ${client.id}`);
 
 	}
 
@@ -319,6 +318,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_PROMOTE')
 	room_promote(client:Socket, payload: RoomPromoteDto): void
 	{
+		this.chatService.setIsAdmin(client, payload);
 		this.logger.log(`Client emit promote: ${client.id}`);
 	}
 
@@ -327,20 +327,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_LIST')
 	async room_list(client: Socket): Promise<void>
 	{
-		//var	rooms_list : Array<{name: string, has_password: boolean}> = [];
-		//const rooms = this.chatService.getAllRooms();
-
 		await this.chatService.sendRoomList(client);
-		/*rooms.forEach(room => {
-			if (!room.private_room) //fix me
-			{
-				rooms_list.push({
-					name: room.name,
-					has_password: room.password !== "",
-				});
-			}
-		});
-		client.emit('ROOM_LIST', rooms_list);*/
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
@@ -433,7 +420,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user !== undefined)
 		{
-			if(await this.chatService.addFriend(user, payload) === false)
+			if (await this.chatService.addFriend(user, payload) === false)
 				return ;
 
 			let us = this.chatService.getUserFromID(payload);

@@ -1,3 +1,4 @@
+import { ELevelInRoom } from "./RoomJoined"
 
 
 export interface RoomProtect
@@ -17,9 +18,9 @@ export interface CreateRoom
 
 export interface RoomPromoteDto
 {
-	room_name: string,
-	user_name: string,
-	isPromote: boolean, // true = promote; false = demote
+	room_id:	number,
+	refId:		number,
+	isPromote:	boolean, // true = promote; false = demote
 }
 
 export interface RoomMuteDto
@@ -47,6 +48,14 @@ export interface UserDataDto
 	username: string,
     reference_id: number,
 	is_connected?: boolean,
+}
+
+export interface UserRoomDataDto
+{
+	username: string,
+    reference_id: number,
+	is_connected?: boolean,
+	level: ELevelInRoom,
 }
 
 export interface RcvMessageDto

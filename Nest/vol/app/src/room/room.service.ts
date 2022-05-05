@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { id } from 'date-fns/locale';
 import { retry } from 'rxjs';
-import { RoomListDTO, UserDataDto } from 'src/Common/Dto/chat/room';
+import { RoomListDTO, UserDataDto, UserRoomDataDto } from 'src/Common/Dto/chat/room';
+import { ELevelInRoom } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
@@ -54,6 +55,34 @@ export class RoomService
 		return ret[0];
 	}
 
+	async findRelOf(id: number, refId: number) : Promise<ChatRoomRelationEntity | undefined>
+	{
+		const ret = await this.roomRelRepo.findOne({
+			relations : ["user", "room"],
+			where : {
+				room: { id : id },
+				user : { reference_id : refId}
+			}
+		})
+
+		return ret;
+	}
+
+
+	async getUserLevel(id : number, owner: number, refId: number)
+	{
+		let level : ELevelInRoom;
+
+		if (owner === refId)
+			level = ELevelInRoom.owner;
+		else if (await this.isAdmin(id, refId))
+			level = ELevelInRoom.admin;
+		else
+			level = ELevelInRoom.casual;
+		
+		return level;
+	}
+
 	/**
 	 * Check if refId is in rooms
 	 * @param room 
@@ -62,11 +91,27 @@ export class RoomService
 	 */
 	async isInRoom(room : ChatRoomEntity, refId: number) : Promise<boolean>
 	{
+		const ret = await this.findRelOf(room.id, refId);
+
+		if (ret !== undefined)
+			return true;
+		return false;
+	}
+
+	/**
+	 * 
+	 * @param id roomId
+	 * @param refId user's refid
+	 * @returns 
+	 */
+	async isAdmin(id : number, refId: number) : Promise<boolean>
+	{
 		const ret = await this.roomRelRepo.findOne({
 			relations : ["user", "room"],
 			where : {
-				room: { id : room.id },
-				user : { reference_id : refId}
+				room: { id : id },
+				user : { reference_id : refId},
+				isAdmin: true,
 			}
 		})
 
@@ -200,7 +245,7 @@ export class RoomService
 	 * @param refId 
 	 * @returns UserDataDto[]
 	 */
-	async userListOfRoom(id: number, refId: number) : Promise<UserDataDto[] | string>
+	async userListOfRoom(id: number, refId: number) : Promise<UserRoomDataDto[] | string>
 	{
 		const room = await this.findRoomById(id);
 
@@ -216,15 +261,17 @@ export class RoomService
 				room : { id : room.id },
 			}
 		})
-		let ret : UserDataDto[];
+		let ret : UserRoomDataDto[];
 		ret = [];
-		
-		rel.forEach((r) => {
+
+		for(const r of rel)
+		{
 			ret.push({
 				reference_id : r.user.reference_id,
-				username: r.user.username
+				username: r.user.username,
+				level: await this.getUserLevel(room.id, room.owner, r.user.reference_id),
 			})
-		})
+		}
 
 		return (ret);
 	}
@@ -258,11 +305,58 @@ export class RoomService
 				id:				room.id,
 				name:			room.name,
 				owner:			room.owner,
-				has_password:	room.password_key !== "",
+				has_password:	room.password_key !== null,
 			})
 		});
 
 		return ret;
+	}
+
+	/**
+	 * //todo encrypt password
+	 * //todo "Same password"
+	 * @param id 
+	 * @param refId 
+	 * @param password 
+	 * @returns 
+	 */
+	async roomChangePass(id: number, refId: number, password: string | undefined)
+	{
+		const room = await this.findRoomById(id);
+
+		if (room === undefined)
+			return "Unknown room";
+		
+		if (await this.isAdmin(room.id, refId) === false)
+			return "Only the room owner can change the password !";
+		
+		room.password_key = password;
+
+		await this.roomRepo.save(room);
+	}
+
+
+	//todo already admin
+	async setIsAdmin(id: number, refId: number, senderId: number, isAdmin: boolean) : Promise<string | undefined> 
+	{
+		const room = await this.findRoomById(id);
+
+		if (room === undefined)
+			return "Unknown room";
+
+		if (room.owner !== senderId)
+			return "Only the room owner can promote/demote !";
+
+		if (room.owner === refId)
+			return "Owner can't be demote !"
+		const ret = await this.findRelOf(id, refId);
+
+		if (ret === undefined)
+			return "User need to be in room !";
+		
+		ret.isAdmin = isAdmin;
+		await this.roomRelRepo.save(ret);
+		return undefined;
 	}
 
 	/**
@@ -289,7 +383,7 @@ export class RoomService
 				id: room.id,
 				name: room.name,
 				owner: room.owner,
-				has_password: room.password_key !== "",
+				has_password: room.password_key !== null,
 			})
 		});
 

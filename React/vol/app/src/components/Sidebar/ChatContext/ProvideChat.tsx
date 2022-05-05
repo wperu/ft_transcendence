@@ -202,8 +202,7 @@ function useChatProvider() : IChatContext
 			if (data.status === JOINSTATUS.JOIN && data.room_name !== undefined)
 			{
 				//if (data.protected !== undefined && data.user_is_owner !== undefined)
-				addRoom(data.id, data.room_name, data.protected, (data.user_is_owner
-						? ELevelInRoom.owner : ELevelInRoom.casual));
+				addRoom(data.id, data.room_name, data.protected, data.level);
 			}
 		});
 
@@ -223,6 +222,19 @@ function useChatProvider() : IChatContext
 			}
 		};
 	}, [socket, addRoom]);
+
+	useEffect(() => {
+		socket.on("UPDATE_ROOM", (data: RoomJoinedDTO) => {
+			//todo for each modification
+		});
+
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('ROOM_UPDATE');
+			}
+		};
+	})
 
 	/**
 	 * **** Notice *****

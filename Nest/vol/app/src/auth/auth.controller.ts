@@ -69,9 +69,15 @@ export class AuthController
             throw new BadRequestException("no field username in request");
         }
 
-        console.log (`Created new DEV user with Username \"${req.headers["username"]}\"`);
 
-        let user = await this.usersService.createUser(randomInt(10000), req.headers['username'], fake_token);
-        return (user);
+        let user = await this.usersService.findUserByName(req.headers['username']);
+        if (user !== undefined)
+        {
+            console.log (`Logged back new DEV user \"${req.headers["username"]}\"`);
+            return (user);
+        }
+
+        console.log (`Created new DEV user with Username \"${req.headers["username"]}\"`);
+        return (await this.usersService.createUser(randomInt(10000), req.headers['username'], fake_token));
     }
 }
