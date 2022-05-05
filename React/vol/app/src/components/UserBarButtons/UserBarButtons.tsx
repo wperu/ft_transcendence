@@ -18,6 +18,11 @@ interface Prop
 	
 }
 
+interface muteProp extends Prop
+{
+	isMuted: boolean;
+}
+
 interface promoteProp
 {
 	user_name: string;
@@ -87,25 +92,46 @@ export function BanUserButton(prop: Prop)
 	);
 }
 
-export function MuteUserButton(prop: Prop)
+export function MuteUserButton(prop: muteProp)
 {
 	const chtCtx = useChatContext();
 
-	function onClick()
+	function mute()
 	{
 		if (chtCtx.currentRoom !== undefined)
 		{
 			const dto : RoomMuteDto =
 			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
+				roomId: chtCtx.currentRoom.id,
+				refId: prop.refId,
 				isMute: true,
+				expires_in: 10000,
 			} 
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}
 	}
+
+	function unmute()
+	{
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomMuteDto =
+			{
+				roomId: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				isMute: false,
+				expires_in: -1,
+			}
+			chtCtx.socket.emit('ROOM_MUTE', dto);
+		}
+	}
+
+	/*if (prop.isMuted)
+		return (
+		<button className="user_bar_button negative_user_button" onClick={unmute}><img alt="" src={MuteLogo}/>mute</button>
+		);*/
 	return (
-		<button className="user_bar_button negative_user_button" onClick={onClick}><img alt="" src={MuteLogo}/>mute</button>
+	<button className="user_bar_button negative_user_button" onClick={mute}><img alt="" src={MuteLogo}/>unmute</button>
 	);
 }
 
@@ -171,7 +197,6 @@ export function PromoteUserButton(prop: promoteProp)
 			} 
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
 		}
-		console.log("todo demote");
 	}
 
 	if (prop.already_admin)

@@ -25,9 +25,10 @@ export interface RoomPromoteDto
 
 export interface RoomMuteDto
 {
-	room_name:	string,
-	user_name:	string,
-	isMute:		boolean // true = mute; false = unmute
+	roomId:		number,
+	refId:		number,
+	expires_in:	number,
+	isMute:		boolean, // true = mute; false = unmute
 }
 
 export interface RoomBanDto
@@ -52,10 +53,11 @@ export interface UserDataDto
 
 export interface UserRoomDataDto
 {
-	username: string,
-    reference_id: number,
-	is_connected?: boolean,
-	level: ELevelInRoom,
+	username:		string,
+    reference_id:	number,
+	is_connected?:	boolean,
+	isMuted:		boolean,
+	level:			ELevelInRoom,
 }
 
 export interface RcvMessageDto
@@ -81,5 +83,6 @@ export interface RoomUpdataDTO
 	level?:		ELevelInRoom,
 	name?:		string,
 	isPrivate?: boolean,
+	isAdmin:	boolean,
 }
 

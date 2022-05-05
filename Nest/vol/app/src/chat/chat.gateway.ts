@@ -128,7 +128,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			return ;//todo trown error and disconnect
 		
 		await this.chatService.leaveRoom(client, user, payload.id, payload.name);
-		
 	}
 
 
@@ -219,8 +218,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		await this.chatService.roomChangePass(client, user, payload.id, payload.new_pass);
 	}
 
-
-	// TODO empecher de recuperer la liste d'users si on est pas dans la room
 	@SubscribeMessage('USER_LIST')
 	async user_list(client: Socket , payload: number) : Promise<void>
 	{
@@ -249,31 +246,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	//todo
 	@SubscribeMessage('ROOM_MUTE')
-	room_mute(client:Socket, payload: RoomMuteDto): void
+	async room_mute(client:Socket, payload: RoomMuteDto): Promise<void>
 	{
-		let user_mute = this.chatService.getUserFromUsername(payload.user_name);
-		let current_room = this.chatService.getRoom(payload.room_name)
-		if(current_room !== undefined)
-		{
-			current_room.muted.push(user_mute.username);
-		}
+		let user :ChatUser = this.chatService.getUserFromSocket(client);
+		
+		if (user === undefined)
+				return ;//fix
+		await this.chatService.roomMute(client, user, payload);
 		this.logger.log(`Client emit mute: ${client.id}`);
 	}
 
-	@SubscribeMessage('ROOM_DEMUTE')
-	room_demute(client:Socket, payload: RoomMuteDto):void
-	{		
-		let current_room = this.chatService.getRoom(payload.room_name)
-		let user_mute = this.chatService.getUserFromUsername(payload.user_name);
-		if(current_room !== undefined)
-		{
-			current_room.muted.splice(current_room.muted.findIndex((string) => {return user_mute.username === payload.user_name}),1);
-		}	
-		this.logger.log(`Client emit demute: ${client.id}`);
-
-	}
-
-	//todo
 	@SubscribeMessage('ROOM_PROMOTE')
 	room_promote(client:Socket, payload: RoomPromoteDto): void
 	{

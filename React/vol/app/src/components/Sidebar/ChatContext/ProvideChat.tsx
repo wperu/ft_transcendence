@@ -202,18 +202,9 @@ function useChatProvider() : IChatContext
 			addRoom(data.id, data.room_name, data.protected, data.level);
 		});
 
-		socket.on('ROOM_PASS_CHANGE', (data : RoomPassChange) => {
-			if (data.status == 0)
-				notify.addNotice(ELevel.info, "Password modification of room " +
-					data.room_name + " successful", 4000);
-			else if (data.status_message)
-				notify.addNotice(ELevel.error, data.status_message, 4000);
-		});
-
 		return function cleanup() {
 			if (socket !== undefined)
 			{
-				socket.off('ROOM_PASS_CHANGE');
 				socket.off('JOINED_ROOM');
 			}
 		};
@@ -230,7 +221,7 @@ function useChatProvider() : IChatContext
 				socket.off('ROOM_UPDATE');
 			}
 		};
-	})
+	}, [rooms, socket])
 
 	/**
 	 * **** Notice *****

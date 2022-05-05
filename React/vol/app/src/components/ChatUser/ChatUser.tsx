@@ -43,7 +43,7 @@ function ChatUser(data: props)
 							already_friend={false} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
-						<MuteUserButton user_name={data.targetUsername} refId={data.refId} />
+						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
 						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
 					</div>
 				);
@@ -60,7 +60,7 @@ function ChatUser(data: props)
 							already_admin={data.currentUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
-						<MuteUserButton user_name={data.targetUsername} refId={data.refId}/>
+						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted}/>
 						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
 					</div>
 				);

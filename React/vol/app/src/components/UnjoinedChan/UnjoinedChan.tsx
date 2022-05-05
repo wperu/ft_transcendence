@@ -30,7 +30,7 @@ function UnjoinedChan(props: chan_props)
 		};
 		var data : JoinRoomDto;
 		if (props.is_protected === false) 
-			data = {room_name: props.name};
+			data = {room_name: props.name, password: null!};
 		else
 			data = {room_name: props.name, password: target.password.value};
 		chatCtx.socket.emit("JOIN_ROOM", data);

@@ -39,12 +39,12 @@ function ChannelUserList ()
 				{userList.map((user, index) => (
  				<li key={user.reference_id}>
 					<ChatUser
-						isMuted={false}
 						isBlockedByCurrentUser={false}
 						targetUserLvl={user.level}
 						targetUsername={user.username}
 						refId={user.reference_id}
 						currentUserLvl={user_lvl}
+						isMuted={true}
 						 />
 				</li>))}
 			</ul>

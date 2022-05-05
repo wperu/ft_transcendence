@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { id } from 'date-fns/locale';
 import { retry } from 'rxjs';
-import { RoomListDTO, UserDataDto, UserRoomDataDto } from 'src/Common/Dto/chat/room';
+import { RoomListDTO, RoomMuteDto, UserDataDto, UserRoomDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
@@ -283,9 +283,10 @@ export class RoomService
 		for(const r of rel)
 		{
 			ret.push({
-				reference_id : r.user.reference_id,
-				username: r.user.username,
-				level: await this.getUserLevel(room.id, room.owner, r.user.reference_id),
+				reference_id :	r.user.reference_id,
+				username:		r.user.username,
+				level:			await this.getUserLevel(room.id, room.owner, r.user.reference_id),
+				isMuted:		await this.isMute(room.id, r.user.reference_id),
 			})
 		}
 
@@ -349,6 +350,65 @@ export class RoomService
 		room.password_key = password;
 
 		await this.roomRepo.save(room);
+	}
+
+	/**
+	 * check if mute is set & update if mute_expire is passed
+	 * @param id 
+	 * @param refId 
+	 * @returns true / false
+	 */
+	async isMute(id: number, refId: number) : Promise<boolean>
+	{
+		let rel = await this.findRelOf(id, refId);
+
+		if (rel.mute_expire === null)
+			return false;
+		
+		if (rel.mute_expire.getTime() <= Date.now())
+		{
+			rel.mute_expire = null;
+			await this.roomRelRepo.save(rel); //todo
+			return (false)
+		}
+		else
+			return (true);
+	}
+
+	async roomMute(id: number, senderRefId : number, refId: number, mute_expire: Date): Promise<string | boolean>
+	{
+		const room = await this.findRoomById(id);
+
+		if (await this.isAdmin(room.id, senderRefId) === false)
+			return "No Right !";
+		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
+			return "You can't mute room operator !";
+
+		const rel = await this.findRelOf(id, refId);
+		if (rel === undefined)
+			return "User not in room !";
+		rel.mute_expire = mute_expire;
+		
+		await this.roomRelRepo.save(rel);
+		return (true);
+	}
+
+	async roomUnmute(id: number, senderRefId : number, refId: number): Promise<string | boolean>
+	{
+		const room = await this.findRoomById(id);
+
+		if (await this.isAdmin(room.id, senderRefId) === false)
+			return "No Right !";
+		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
+			return "You can't unmute room operator !";
+
+		const rel = await this.findRelOf(id, refId);
+		if (rel === undefined)
+			return "User not in room !";
+		rel.mute_expire = null;
+		
+		await this.roomRelRepo.save(rel);
+		return (true);
 	}
 
 

@@ -18,4 +18,7 @@ export class ChatRoomRelationEntity
 
 	@Column({default: false})
 	isAdmin: boolean;
+
+	@Column({ nullable: true })
+	mute_expire: Date;
 }

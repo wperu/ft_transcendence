@@ -5,7 +5,7 @@ import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
-import { CreateRoom, RoomLeftDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { CreateRoom, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom, JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
@@ -151,7 +151,6 @@ export class ChatService {
 				let data : RoomJoinedDTO;
 
 				data = {
-					status: JOINSTATUS.JOIN,
 					id: room.id,
 					room_name:  room.name,
 					protected: (room.password_key !== null),
@@ -188,7 +187,6 @@ export class ChatService {
 				let data : RoomJoinedDTO;
 
 				data = {
-					status: JOINSTATUS.JOIN,
 					id: room.id,
 					room_name:  room.name,
 					protected: (room.password_key !== null),
@@ -242,13 +240,11 @@ export class ChatService {
 	async roomUserList(client: Socket, user: ChatUser, roomId: number)
 	{
 		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
-
 		
 		if (typeof resp !== 'string')
 		{
 			client.emit("USER_LIST", resp);
 		}
-		//console.log(ret);
 	}
 
 	async roomChangePass(client: Socket, user: ChatUser, roomId: number ,pass: string)
@@ -261,6 +257,28 @@ export class ChatService {
 		else
 			data = { level: ELevel.error, content: resp };
 		client.emit("NOTIFICATION", data);
+	}
+
+	async roomMute(client: Socket, user: ChatUser, data: RoomMuteDto)
+	{
+		let resp;
+
+		if (data.isMute)
+		{
+			const mute_expire = new Date(Date.now()+ data.expires_in * 1000);
+			resp = await this.roomService.roomMute(data.roomId, user.reference_id, data.refId, mute_expire);
+		}
+		else
+		{
+			resp = await this.roomService.roomUnmute(data.roomId, user.reference_id, data.refId);
+		}
+
+		let dto : NoticeDTO;
+		if (typeof resp !== 'string')
+			dto =  { level: ELevel.info, content: "User " + ((data.isMute) ? "mute" : "unmute") + " !" };
+		else
+			dto = { level: ELevel.error, content: resp };
+		client.emit("NOTIFICATION", dto);
 	}
 
 	roomExists(room_name: string) : boolean
@@ -325,9 +343,7 @@ export class ChatService {
 			let data : RoomJoinedDTO; 
 			data = {
 				id: r.id,
-				room_name: r.name,
-				status: JOINSTATUS.JOIN,
-				
+				room_name: r.name,		
 				protected: r.has_password,
 				level: await this.roomService.getUserLevel(r.id, r.owner, user.reference_id)
 			}
