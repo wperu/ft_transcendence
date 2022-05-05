@@ -35,7 +35,7 @@ export class RoomService
 			}
 		})
 
-		if (ret === undefined)
+		if (ret.length === 0)
 			return undefined
 
 		return ret[0];
@@ -49,7 +49,7 @@ export class RoomService
 			}
 		})
 
-		if (ret === undefined)
+		if (ret.length === 0)
 			return undefined
 
 		return ret[0];
@@ -195,7 +195,7 @@ export class RoomService
 		const room = await this.findRoomByName(chanName);
 
 		if (room === undefined)
-			return ;
+			return false;
 
 		const ret = await this.roomRelRepo.findOne({
 			relations : ["user", "room"],
@@ -206,6 +206,8 @@ export class RoomService
 		})
 		if (ret  !== undefined)
 			this.roomRelRepo.remove(ret);
+
+		
 
 		return (true);
 	}
@@ -231,12 +233,22 @@ export class RoomService
 				 user : { reference_id : refId}
 			 }
 		 })
-		 if (ret !== undefined)
-			 this.roomRelRepo.remove(ret);
-		 else
+		 if (ret === undefined)
 		 	return (false);
- 
-		 return (true);
+
+		await this.roomRelRepo.remove(ret);
+		const rels = await this.roomRelRepo.find({
+			relations : ["room"],
+			where : {
+				room : { id : room.id }
+			}
+		})
+
+		console.log(rels);
+
+		if (rels.length === 0)
+			await this.roomRepo.remove(room);
+		return (true);
 	 }
 
 	/**
@@ -294,7 +306,7 @@ export class RoomService
 
 		ret = [];
 
-		if (rooms_list === undefined)
+		if (rooms_list === [])
 			return [];
 		
 		rooms_list.forEach(({room}) => {
