@@ -33,6 +33,7 @@ export class PongService {
     private PLAYER_SIZE: number = 0.25;
     private PLAYER_SPEED: number = 0.9;
     private PLAYER_FRICTION: number = 0.5;
+    private PLAYER_SWEEP_FORCE: number = 0.47;
     private TERRAIN_PADDING_X: number = 0.05;
     private TERRAIN_PADDING_Y: number = 0.11;
 
@@ -147,6 +148,9 @@ export class PongService {
         room.ball.pos_y = 0.5;
         room.ball.vel_x = randomInt(1) > 0.5 ? -this.BALL_SPEED : this.BALL_SPEED,
         room.ball.vel_y = randomInt(-100, 100) / 1000
+
+        this.sendBallUpdate(room);
+        this.sendPlayerUpdate(room);
     }
 
 
@@ -262,48 +266,61 @@ export class PongService {
         this.gameUpdate(room);
 
         /* Send data every tick */
+        if (this.frameCount === 0)
+            this.sendBallUpdate(room);
+
         if (this.frameCount % this.TICK_RATE === 0)
         {
-            let ball_infos: UpdatePongBallDTO = {
-                ball_x: room.ball.pos_x,
-                ball_y: room.ball.pos_y,
-                vel_x: room.ball.vel_x,
-                vel_y: room.ball.vel_y,
-            };
-            room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
-            room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
-
-
             // OPTIMIZE there is no need to update player's position every time,               
             // OPTIMIZE we could reduce bandwidth by sending only opponent's informations      
             // OPTIMIZE supposing that the client calculated it's position right (time issues) 
-            room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-                player_id: 1,
-                position: room.player_1.position,
-                velocity: room.player_1.velocity,
-            } as UpdatePongPlayerDTO) });
-
-            room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-                player_id: 2,
-                position: room.player_2.position,
-                velocity: room.player_2.velocity,
-            } as UpdatePongPlayerDTO) });
-
-            room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-                player_id: 1,
-                position: room.player_1.position,
-                velocity: room.player_1.velocity,
-            } as UpdatePongPlayerDTO) });
-
-            room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-                player_id: 2,
-                position: room.player_2.position,
-                velocity: room.player_2.velocity,
-            } as UpdatePongPlayerDTO) });
+            this.sendPlayerUpdate(room);
         }
 
         /* Increment frame Count */
         this.frameCount++;
+    }
+
+
+
+    sendBallUpdate(room: PongRoom)
+    {
+        let ball_infos: UpdatePongBallDTO = {
+            ball_x: room.ball.pos_x,
+            ball_y: room.ball.pos_y,
+            vel_x: room.ball.vel_x,
+            vel_y: room.ball.vel_y,
+        };
+        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
+        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
+    }
+
+
+    sendPlayerUpdate(room: PongRoom)
+    {
+        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+            player_id: 1,
+            position: room.player_1.position,
+            velocity: room.player_1.velocity,
+        } as UpdatePongPlayerDTO) });
+
+        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+            player_id: 2,
+            position: room.player_2.position,
+            velocity: room.player_2.velocity,
+        } as UpdatePongPlayerDTO) });
+
+        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+            player_id: 1,
+            position: room.player_1.position,
+            velocity: room.player_1.velocity,
+        } as UpdatePongPlayerDTO) });
+
+        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
+            player_id: 2,
+            position: room.player_2.position,
+            velocity: room.player_2.velocity,
+        } as UpdatePongPlayerDTO) });
     }
 
 
@@ -354,12 +371,13 @@ export class PongService {
         */
         let terrain_sx = 2, terrain_sy = 1;
 
-        /* Calculating next frame velocities */
 
+        /* Calculating next frame velocities */
         // ball
         if (room.ball.pos_y > terrain_sy || room.ball.pos_y < 0)
         {
             room.ball.vel_y *= -1;
+            this.sendBallUpdate(room);
         }
 
         if (room.ball.pos_x > terrain_sx || room.ball.pos_x < 0)
@@ -385,15 +403,25 @@ export class PongService {
         if (room.ball.pos_x > this.TERRAIN_PADDING_X
             && room.ball.pos_x < this.TERRAIN_PADDING_X + this.BALL_SIZE
             && room.ball.pos_y > room.player_1.position - this.PLAYER_SIZE * 0.5
-            && room.ball.pos_y < room.player_1.position + this.PLAYER_SIZE * 0.5)
-                room.ball.vel_x *= -1;
+            && room.ball.pos_y < room.player_1.position + this.PLAYER_SIZE * 0.5
+            && room.ball.vel_x < 0)
+        {
+            room.ball.vel_y -= ((room.ball.pos_y - room.player_1.position) / this.PLAYER_SIZE) * this.PLAYER_SWEEP_FORCE;
+            room.ball.vel_x *= -1;
+            this.sendBallUpdate(room);
+        }
         
 
         if (room.ball.pos_x < 2.0
             && room.ball.pos_x > 2.0 - this.TERRAIN_PADDING_X - this.BALL_SIZE
             && room.ball.pos_y > room.player_2.position - this.PLAYER_SIZE * 0.5
-            && room.ball.pos_y < room.player_2.position + this.PLAYER_SIZE * 0.5)
-                room.ball.vel_x *= -1;
+            && room.ball.pos_y < room.player_2.position + this.PLAYER_SIZE * 0.5
+            && room.ball.vel_x > 0)
+        {
+            room.ball.vel_y -= ((room.ball.pos_y - room.player_1.position) / this.PLAYER_SIZE) * this.PLAYER_SWEEP_FORCE;
+            room.ball.vel_x *= -1;
+            this.sendBallUpdate(room);
+        }
         
 
         /* Updating positions */
