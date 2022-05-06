@@ -179,24 +179,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('RENAME_ROOM')
 	renameRoom(client: Socket, payload: RoomRename)
 	{
-		/*let local_room = this.chatService.getRoom(payload.old_name);
-		if (local_room === undefined)
-		{
-			console.error(`Cannot rename unknown room: ${payload.old_name}`);
-			throw new BadRequestException(`Unknown room ${payload.old_name}`);
-		}
-		if (!this.chatService.isOwner(this.chatService.getUserFromSocket(client), local_room))
-		{
-			throw new UnauthorizedException("Only the room owner can rename the room !");
-		}
-
-		if (!this.chatService.roomExists(payload.new_name))
-		{
-			console.error(`Cannot rename room ${payload.old_name} to  ${payload.new_name}: A room with that name already exists`);
-			throw new BadRequestException(`Bad name: ${payload.new_name} (try again with another name)`);
-		}
-		
-		local_room.name = payload.new_name;*/
 	}
 
 

@@ -445,10 +445,10 @@ export class RoomService
 		if (rel.mute_expire === null)
 			return false;
 		
-		if (rel.mute_expire.getTime() <= Date.now())
+		if (rel.mute_expire <= new Date())
 		{
 			rel.mute_expire = null;
-			await this.roomRelRepo.save(rel); //todo
+			await this.roomRelRepo.save(rel);
 			return (false)
 		}
 		else
