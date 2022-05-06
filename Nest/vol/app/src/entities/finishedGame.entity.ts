@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user.entity";
 
 @Entity()
-export class FinishedGameEntity
+export class FinishedGame
 {
 	@PrimaryGeneratedColumn()
 	id: number;
@@ -20,5 +20,5 @@ export class FinishedGameEntity
 	player_two_score: number;
 
 	@Column()
-	date: 
+	date: Date;
 }

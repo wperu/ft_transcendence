@@ -14,6 +14,7 @@ import DatabaseFile from './entities/databaseFile.entity';
 import { ChatRoomEntity } from './entities/room.entity';
 import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
 import { GameHistoryModule } from './game-history/game-history.module';
+import { FinishedGame } from './entities/finishedGame.entity';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { GameHistoryModule } from './game-history/game-history.module';
 				TokenValidatorEntity,
 				FriendShip,
 				DatabaseFile,
+				FinishedGame,
 				ChatRoomRelationEntity,
 				ChatRoomEntity
 			],
