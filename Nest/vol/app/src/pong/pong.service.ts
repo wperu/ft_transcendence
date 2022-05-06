@@ -262,18 +262,9 @@ export class PongService {
         /* Logic update */
         this.gameUpdate(room);
 
-        /* Send data every tick */
         if (this.frameCount === 0)
             this.sendBallUpdate(room);
-
-        if (this.frameCount % this.TICK_RATE === 0)
-        {
-            // OPTIMIZE there is no need to update player's position every time,               
-            // OPTIMIZE we could reduce bandwidth by sending only opponent's informations      
-            // OPTIMIZE supposing that the client calculated it's position right (time issues) 
-            //this.sendPlayerUpdate(room);
-        }
-
+        
         /* Increment frame Count */
         this.frameCount++;
     }
@@ -323,26 +314,6 @@ export class PongService {
                 velocity: room.player_1.velocity,
             } as UpdatePongPlayerDTO);        
         }
-
-        /*
-        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 2,
-            position: room.player_2.position,
-            velocity: room.player_2.velocity,
-        } as UpdatePongPlayerDTO) });
-
-        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 1,
-            position: room.player_1.position,
-            velocity: room.player_1.velocity,
-        } as UpdatePongPlayerDTO) });
-
-        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 2,
-            position: room.player_2.position,
-            velocity: room.player_2.velocity,
-        } as UpdatePongPlayerDTO) });
-        */
     }
 
 

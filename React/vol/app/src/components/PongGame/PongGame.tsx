@@ -37,12 +37,12 @@ function update(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, c
         return ;
 
     if (room.player_1.key !== 0)
-        room.player_1.velocity = room.player_1.key * 0.7
+        room.player_1.velocity = room.player_1.key * 0.9
     else 
         room.player_1.velocity *= 0.5;
 
     if (room.player_2.key !== 0)
-        room.player_2.velocity = room.player_2.key * 0.7
+        room.player_2.velocity = room.player_2.key * 0.9
     else 
         room.player_2.velocity *= 0.5;
 
@@ -83,11 +83,11 @@ function update(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, c
 }
 
 
-async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_time: number = Date.now())
+async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_time: number = performance.now())
 {
     /* timed update  */
-    let current_time = Date.now();
-    let delta = (current_time - last_time) / 1000
+    let current_time = performance.now();
+    let delta = (current_time - last_time) / 1000.0
     update(pong_ctx, ctx, canvas, delta);
 
     /* Background */
@@ -107,7 +107,7 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.restore();        // restore the transform
-    ctx.fillStyle = '#000000'
+    ctx.fillStyle = '#101016'
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -131,9 +131,19 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
     terrain_x = (canvas.width - terrain_w) * 0.5;
     terrain_y = (canvas.height - terrain_h) * 0.5;
 
+    ctx.strokeStyle = '#353540'
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 5;
+    ctx.moveTo(terrain_x + terrain_w * 0.5, terrain_y);
+    ctx.lineTo(terrain_x + terrain_w * 0.5, terrain_y + terrain_h);
+    ctx.stroke();
+    ctx.restore();
+
     ctx.strokeStyle = '#FFFFFF'
     ctx.lineWidth = 10;
     ctx.strokeRect(terrain_x, terrain_y, terrain_w, terrain_h);
+
     /* ******** */
 
 
@@ -188,8 +198,9 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
 
 
     /* Ball */
-    let ball_size = terrain_h * 0.02;
+    let ball_size = terrain_h * 0.03;
     ctx.fillStyle = '#FFFFFF'
+    ctx.beginPath();
     ctx.ellipse(ball_x,
                 ball_y, 
                 ball_size,

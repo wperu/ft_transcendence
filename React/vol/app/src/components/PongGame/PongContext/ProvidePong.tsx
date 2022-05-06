@@ -84,7 +84,7 @@ function usePongProvider() : IPongContext
                 ball: {
                     pos_x: 1,
                     pos_y: 0.5,
-                    size: 14,
+                    size: 16,
                     vel_x: 0,
                     vel_y: 0
                 } as IPongBall,
