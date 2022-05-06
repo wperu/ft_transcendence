@@ -110,9 +110,6 @@ export class ChatService {
 
 		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id}), 1);
 
-		/*if (chatUser.socketId.length === 0)
-			users.splice(users.findIndex((u) => { return u.username === us.username}), 1);*/
-
 		return (chatUser);
 	}
 

@@ -15,7 +15,6 @@ interface	props
 
 function ChatUser(data: props)
 {
-	//console.log(data.currentUserLvl + " " + data.targetUserLvl);
 	function Buttons()
 	{
 		if (data.currentUserLvl <= data.targetUserLvl)
@@ -57,7 +56,7 @@ function ChatUser(data: props)
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}
-							already_admin={data.currentUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
+							already_admin={data.targetUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted}/>
@@ -68,13 +67,10 @@ function ChatUser(data: props)
 		}
 	}
 
-	if (data.isMuted)
-		return (null);
-	else
 	{
 		return (
 			<div className="chat_user" >
-				<div className="chat_user_username">{data.targetUsername + data.targetUserLvl + data.currentUserLvl}</div>
+				<div className="chat_user_username">{data.targetUsername + data.targetUserLvl}</div>
 				<Buttons />
 			</div>
 		);

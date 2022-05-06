@@ -3,8 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
-import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
-import { RoomPassChange } from "../../../Common/Dto/chat/RoomRename";
+import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
 
 /** //fix

@@ -9,7 +9,6 @@ import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
-import Chat from "../Chat/Chat";
 
 interface Prop
 {
@@ -126,13 +125,9 @@ export function MuteUserButton(prop: muteProp)
 		}
 	}
 
-	/*if (prop.isMuted)
-		return (
-		<button className="user_bar_button negative_user_button" onClick={unmute}><img alt="" src={MuteLogo}/>mute</button>
-		);*/
-	return (
-	<button className="user_bar_button negative_user_button" onClick={mute}><img alt="" src={MuteLogo}/>unmute</button>
-	);
+	if (prop.isMuted)
+		return (<button className="user_bar_button positive_user_button" onClick={unmute}><img alt="" src={MuteLogo}/>unmute</button>);
+	return (<button className="user_bar_button negative_user_button" onClick={mute}><img alt="" src={MuteLogo}/>mute</button>);
 }
 
 //todo Friend part
@@ -200,17 +195,9 @@ export function PromoteUserButton(prop: promoteProp)
 	}
 
 	if (prop.already_admin)
-	{
-		return (
-			<button className="user_bar_button negative_user_button flipped" onClick={demote}><img alt="" src={PromoteLogo}/>demote</button>
-		);
-	}
+		return (<button className="user_bar_button negative_user_button flipped" onClick={demote}><img alt="" src={PromoteLogo}/>demote</button>);
 	else
-	{
-		return (
-			<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>
-		);
-	}
+		return (<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>);
 }
 
 export function AddFriendButton(prop: friendProp)

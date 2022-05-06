@@ -231,8 +231,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_BAN')
 	room_block(client:Socket, payload: RoomBanDto): void
 	{
+		const user: ChatUser = this.chatService.getUserFromUsername(payload.user_name);
+
+		if (user === undefined)
+			return; //todo disconect ?
+		
+			
+
+		/*
 		var user_ban : UserBan;
-		let user :ChatUser = this.chatService.getUserFromUsername(payload.user_name);
+		
 		let current_room = this.chatService.getRoom(payload.room_name);
 		if(current_room !== undefined)
 		{
@@ -241,7 +249,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			current_room.banned.push(user_ban);
 		}
 		user.socket.forEach((s) => { s.disconnect(); });
-		this.logger.log(`Banned user ${client.id} from room ${current_room.name}`);
+		this.logger.log(`Banned user ${client.id} from room ${current_room.name}`);*/
 	}
 
 	//todo

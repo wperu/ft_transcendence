@@ -14,7 +14,6 @@ function ChannelUserList ()
 	useEffect(() => {
 		socket.on("USER_LIST", (data: Array<UserRoomDataDto>) => {
 			setUserList(data);
-			console.log(data);
 		})
 
 		return function cleanup() {
@@ -27,26 +26,23 @@ function ChannelUserList ()
 
 	useEffect(() => {
 		socket.emit("USER_LIST", currentRoom?.id);
-	}, [socket])
+	}, [socket, currentRoom?.id])
 
 	useInterval(() => {socket.emit("USER_LIST", currentRoom?.id);}, 2000);
-
-
 	
 	return (
 		<div id="channel_users_list">
 			<ul>
-				{userList.map((user, index) => (
- 				<li key={user.reference_id}>
-					<ChatUser
+				{userList.map((user) => (
+					<ChatUser key={user.reference_id}
 						isBlockedByCurrentUser={false}
 						targetUserLvl={user.level}
 						targetUsername={user.username}
 						refId={user.reference_id}
 						currentUserLvl={user_lvl}
-						isMuted={true}
+						isMuted={user.isMuted}
 						 />
-				</li>))}
+					))}
 			</ul>
 		</div>
 	);
