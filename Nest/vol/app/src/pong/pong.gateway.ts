@@ -51,16 +51,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				return ;
 			}
 		}
-		else if (user.socket.find((s) => { return s.id === client.id}) === undefined)
+		else if (user.socket.id !== client.id)
 		{
-			user.socket.push(client);
-		}
-
-		if (user === undefined)
-		{
-			this.logger.log(`PONG warning: Unable to retrieve users informations on socket ${client.id}`);
+			// REVIEW reject double socket ? is this reachable ?
 			client.disconnect();
-			return ;
 		}
 
 		// let the client know that we have authentificated him as a PongUser
@@ -84,10 +78,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
 	{
-		this.pongService.updatePlayer(data);
-	}
-	
-
-	
-	
+		this.pongService.updatePlayer(client, data);
+	}	
 }

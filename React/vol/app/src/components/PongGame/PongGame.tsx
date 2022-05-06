@@ -8,6 +8,8 @@ import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
 import { IPongBall, IPongContext, IPongRoom, IPongUser, ProvidePong, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
+import { GameConfig } from '../../Common/Game/GameConfig'
+import IUser from "../../interface/User";
 
 interface CanvasProps
 {
@@ -15,19 +17,73 @@ interface CanvasProps
     height: number;
 }
 
+function getPongPlayer(pong_ctx: IPongContext, user: IUser) : number | undefined // 1 - 2
+{
+    if (pong_ctx.room && user.username === pong_ctx.room.player_1.username)
+    {
+        return (1);
+    }
+    else if (pong_ctx.room && user.username === pong_ctx.room.player_2.username)
+    {
+        return (2)
+    }
+    return (undefined);
+}
+
 function update(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, deltaTime: number)
 {
-    if (!pong_ctx.room)
+    let room = pong_ctx.room;
+    if (!room)
         return ;
+
+    if (room.player_1.key !== 0)
+        room.player_1.velocity = room.player_1.key * 0.7
+    else 
+        room.player_1.velocity *= 0.5;
+
+    if (room.player_2.key !== 0)
+        room.player_2.velocity = room.player_2.key * 0.7
+    else 
+        room.player_2.velocity *= 0.5;
+
+
     
-    pong_ctx.room.ball.pos_x += pong_ctx.room.ball.vel_x * deltaTime;
-    pong_ctx.room.ball.pos_y += pong_ctx.room.ball.vel_y * deltaTime;
-    pong_ctx.room.player_1.position += pong_ctx.room.player_1.velocity * deltaTime;
-    pong_ctx.room.player_2.position += pong_ctx.room.player_2.velocity * deltaTime;
+    room.ball.pos_x += room.ball.vel_x * deltaTime;
+    room.ball.pos_y += room.ball.vel_y * deltaTime;
+    room.player_1.position += room.player_1.velocity * deltaTime;
+    room.player_2.position += room.player_2.velocity * deltaTime;
+
+
+    /* Player wall collisions */
+    // 1
+    if (room.player_1.position < 0.13)
+    {
+        room.player_1.velocity = 0;
+        room.player_1.position = 0.13;
+    }
+
+    if (room.player_1.position > 1 - 0.13)
+    {
+        room.player_1.velocity = 0;
+        room.player_1.position = 1 - 0.13;
+    }
+
+    // 2
+    if (room.player_2.position < 0.13)
+    {
+        room.player_2.velocity = 0;
+        room.player_2.position = 0.13;
+    }
+
+    if (room.player_2.position > 1 - 0.13)
+    {
+        room.player_2.velocity = 0;
+        room.player_2.position = 1 - 0.13;
+    }
 }
 
 
-async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, last_time: number = Date.now())
+async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_time: number = Date.now())
 {
     /* timed update  */
     let current_time = Date.now();
@@ -94,19 +150,36 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
 
     let terrain_padding = terrain_w * 0.03;
 
-    player_1_x = terrain_x + terrain_padding;
-    player_1_y = terrain_y + (pong_ctx.room.player_1.position) * terrain_h - player_1_sz_y * 0.5;
-
-    player_2_x = terrain_x + terrain_w - terrain_padding - player_2_sz_x;
-    player_2_y = terrain_y + (pong_ctx.room.player_2.position) * terrain_h - player_2_sz_y * 0.5;
-
+    let player_pos = 0;
+    let opponent_pos = 0;
 
     let ball_x = 0, ball_y = 0;
-    if (pong_ctx !== null && pong_ctx.room !== null)
+
+    /* Player 1-2 in the context ARE NOT the same as player_1 and player_2 in front-end
+       player_1 is always the current player, and player_2 is the opponent */    
+    if (user.username === pong_ctx.room.player_1.username)
     {
+        player_pos = pong_ctx.room.player_1.position;
+        opponent_pos = pong_ctx.room.player_2.position;
+
         ball_x = terrain_x + (pong_ctx.room.ball.pos_x) * (terrain_w * 0.5);
         ball_y = terrain_y + (pong_ctx.room.ball.pos_y) * terrain_h;
     }
+    else if (user.username === pong_ctx.room.player_2.username)
+    {
+        player_pos = pong_ctx.room.player_2.position;
+        opponent_pos = pong_ctx.room.player_1.position;  
+
+        ball_x = terrain_x + terrain_w - ((pong_ctx.room.ball.pos_x) * (terrain_w * 0.5));
+        ball_y = terrain_y +  (pong_ctx.room.ball.pos_y) * terrain_h;
+    }
+
+    player_1_x = terrain_x + terrain_padding;
+    player_1_y = terrain_y + (player_pos) * terrain_h - player_1_sz_y * 0.5;
+
+    player_2_x = terrain_x + terrain_w - terrain_padding - player_2_sz_x;
+    player_2_y = terrain_y + (opponent_pos) * terrain_h - player_2_sz_y * 0.5;
+
 
     ctx.fillStyle = '#FFFFFF'
     ctx.fillRect(player_1_x, player_1_y, player_1_sz_x, player_1_sz_y);
@@ -115,16 +188,16 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
 
 
     /* Ball */
-    
+    let ball_size = terrain_h * 0.02;
     ctx.fillStyle = '#FFFFFF'
     ctx.ellipse(ball_x,
                 ball_y, 
-                pong_ctx && pong_ctx.room ? pong_ctx.room.ball.size : 20,
-                pong_ctx && pong_ctx.room ? pong_ctx.room.ball.size : 20,
+                ball_size,
+                ball_size,
                 Math.PI / 4, 0, 2 * Math.PI);
     ctx.fill();
 
-    requestAnimationFrame(() => draw(pong_ctx, ctx, canvas, current_time));
+    requestAnimationFrame(() => draw(pong_ctx, ctx, canvas, user, current_time));
 }
 
 const PongGame = (props: CanvasProps) => {
@@ -139,6 +212,14 @@ const PongGame = (props: CanvasProps) => {
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
+                let player_id = getPongPlayer(pongCtx, user);
+                if (player_id !== undefined)
+                {
+                    if (player_id === 1)
+                        pongCtx.room.player_1.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
+                    else 
+                        pongCtx.room.player_2.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
+                }
                 pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
                     room_id: pongCtx.room.room_id,
                     player_id: pongCtx.room.player_1.username === user.username ? 1 : 2,
@@ -154,6 +235,14 @@ const PongGame = (props: CanvasProps) => {
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
+                let player_id = getPongPlayer(pongCtx, user);
+                if (player_id !== undefined)
+                {
+                    if (player_id === 1)
+                        pongCtx.room.player_1.key = 0;
+                    else 
+                        pongCtx.room.player_2.key = 0;
+                }
                 pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
                     room_id: pongCtx.room.room_id,
                     player_id: pongCtx.room.player_1.username === user.username ? 1 : 2,
@@ -197,7 +286,7 @@ const PongGame = (props: CanvasProps) => {
     })
 
     useEffect(() => {
-        if (canvasRef.current)
+        if (canvasRef.current && user)
         {
             const canvas = canvasRef.current;
             const context = canvas.getContext('2d');
@@ -205,7 +294,7 @@ const PongGame = (props: CanvasProps) => {
             if (context !== null)
             {
                 context.restore();
-                draw(pongCtx, context, canvas);
+                draw(pongCtx, context, canvas, user);
             }
         }       
     });

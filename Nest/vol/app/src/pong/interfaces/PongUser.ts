@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 
 export interface PongUser
 {
-    socket: Array<Socket>
+    socket: Socket,
     username: string,
     points: number,
     position: number,

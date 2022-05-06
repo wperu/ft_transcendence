@@ -15,6 +15,7 @@ export interface PongRoom
     player_2: PongUser,
     ball: PongBall,
     spectators: Array<PongUser>,
-    state: RoomState
+    state: RoomState,
+    interval?: NodeJS.Timer,
 }
 

@@ -11,9 +11,9 @@ import { UpdatePongRoomDTO } from '../Common/Dto/pong/UpdatePongRoomDTO'
 import { PongBall } from './interfaces/PongBall';
 import { threadId } from 'worker_threads';
 import { UpdatePongBallDTO } from 'src/Common/Dto/pong/UpdatePongBallDTO';
+import { GameConfig } from 'src/Common/Game/GameConfig';
 import { randomInt } from 'crypto';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
-import { Z_BEST_SPEED } from 'zlib';
 import { UpdatePongPlayerDTO } from 'src/Common/Dto/pong/UpdatePongPlayerDTO';
 
 
@@ -27,7 +27,7 @@ export class PongService {
 
     private TICK_RATE: number = 10; // tick every 10 frames
     private GAME_RATE: number = 16; // refresh time on server side (about 60fps)
-
+/*
     private BALL_SIZE: number = 0.1;
     private BALL_SPEED: number = 1.1;
     private PLAYER_SIZE: number = 0.25;
@@ -35,7 +35,7 @@ export class PongService {
     private PLAYER_FRICTION: number = 0.5;
     private PLAYER_SWEEP_FORCE: number = 0.47;
     private TERRAIN_PADDING_X: number = 0.05;
-    private TERRAIN_PADDING_Y: number = 0.11;
+    private TERRAIN_PADDING_Y: number = 0.13;*/
 
     private frameCount: number = 0;
     private deltaTime: number = 0;
@@ -73,7 +73,7 @@ export class PongService {
         }
 
 		let idx = this.users.push({
-			socket: [socket], 
+			socket: socket, 
 			username: user_info.username,
             points: 0,
             position: 0.5,
@@ -101,7 +101,7 @@ export class PongService {
 
 			if (user_info === undefined)
 			{
-				console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
+				console.log(`[PONG] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
 				socket.disconnect();
 				return (undefined);
 			}
@@ -131,11 +131,11 @@ export class PongService {
             ball: {
                 pos_x: 1,
                 pos_y: 0.5,
-                vel_x: randomInt(1) > 0.5 ? -this.BALL_SPEED : this.BALL_SPEED,
+                vel_x: randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
                 vel_y: randomInt(-100, 100) / 1000
             } as PongBall,
             spectators: [],
-            state: RoomState.WAITING
+            state: RoomState.WAITING,
         });
     }
 
@@ -146,11 +146,12 @@ export class PongService {
     {
         room.ball.pos_x = 1;
         room.ball.pos_y = 0.5;
-        room.ball.vel_x = randomInt(1) > 0.5 ? -this.BALL_SPEED : this.BALL_SPEED,
+        room.ball.vel_x = randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
         room.ball.vel_y = randomInt(-100, 100) / 1000
 
         this.sendBallUpdate(room);
-        this.sendPlayerUpdate(room);
+        this.sendPlayerUpdate(room, 1);
+        this.sendPlayerUpdate(room, 2);
     }
 
 
@@ -212,35 +213,31 @@ export class PongService {
         }
 
         room.state = RoomState.PLAYING;
-        room.player_1.socket.forEach((s) => {
-            s.emit('STARTING_ROOM', starting_obj);
-        })
-
-        room.player_2.socket.forEach((s) => {
-            s.emit('STARTING_ROOM', starting_obj);
-        })
+        room.player_1.socket.emit('STARTING_ROOM', starting_obj);
+        room.player_2.socket.emit('STARTING_ROOM', starting_obj);
+    
 
         console.log("sent start request to players");
 
         room.spectators.forEach((usr) => {
-            usr.socket.forEach((s) => {
-                s.emit('STARTING_ROOM', starting_obj);
-            }
-        )})
+            usr.socket.emit('STARTING_ROOM', starting_obj);
+        })
 
         console.log("sent start request to spectators");
 
-        setInterval(() => this.runRoom(room), this.GAME_RATE);
+        room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
     }
 
 
     // FIX DECONNECTION CHECK                                                                         
     async runRoom(room: PongRoom) : Promise<PongRoom>
     {
-        if (room.player_1.socket.forEach((s) => { s.connected === false }) !== undefined
-         || room.player_2.socket.forEach((s) => { s.connected === false }) !== undefined)
+        if (room.player_1.socket.connected === false
+         || room.player_2.socket.connected === false)
         {
             room.state = RoomState.FINISHED;
+            if (room.interval !== undefined)
+                clearInterval(room.interval);
             this.logger.log("Room ended");
             // TODO push room in history 
             return room;
@@ -274,7 +271,7 @@ export class PongService {
             // OPTIMIZE there is no need to update player's position every time,               
             // OPTIMIZE we could reduce bandwidth by sending only opponent's informations      
             // OPTIMIZE supposing that the client calculated it's position right (time issues) 
-            this.sendPlayerUpdate(room);
+            //this.sendPlayerUpdate(room);
         }
 
         /* Increment frame Count */
@@ -291,19 +288,43 @@ export class PongService {
             vel_x: room.ball.vel_x,
             vel_y: room.ball.vel_y,
         };
-        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
-        room.player_2.socket.forEach((s) => { s.emit('UPDATE_PONG_BALL',  ball_infos) });
+        room.player_1.socket.emit('UPDATE_PONG_BALL',  ball_infos);
+        room.player_2.socket.emit('UPDATE_PONG_BALL',  ball_infos);
     }
 
 
-    sendPlayerUpdate(room: PongRoom)
+    sendPlayerUpdate(room: PongRoom, player_id: number)
     {
-        room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
-            player_id: 1,
-            position: room.player_1.position,
-            velocity: room.player_1.velocity,
-        } as UpdatePongPlayerDTO) });
+        if (player_id === 1)
+        {
+            room.player_1.socket.emit('UPDATE_PONG_PLAYER', {
+                player_id: 2,
+                position: room.player_2.position,
+                velocity: room.player_2.velocity,
+            } as UpdatePongPlayerDTO);    
 
+            room.player_1.socket.emit('UPDATE_PONG_PLAYER', {
+                player_id: 1,
+                position: room.player_1.position,
+                velocity: room.player_1.velocity,
+            } as UpdatePongPlayerDTO);
+        }
+        else
+        {
+            room.player_2.socket.emit('UPDATE_PONG_PLAYER', {
+                player_id: 2,
+                position: room.player_2.position,
+                velocity: room.player_2.velocity,
+            } as UpdatePongPlayerDTO);    
+
+            room.player_2.socket.emit('UPDATE_PONG_PLAYER', {
+                player_id: 1,
+                position: room.player_1.position,
+                velocity: room.player_1.velocity,
+            } as UpdatePongPlayerDTO);        
+        }
+
+        /*
         room.player_1.socket.forEach((s) => { s.emit('UPDATE_PONG_PLAYER', {
             player_id: 2,
             position: room.player_2.position,
@@ -321,14 +342,16 @@ export class PongService {
             position: room.player_2.position,
             velocity: room.player_2.velocity,
         } as UpdatePongPlayerDTO) });
+        */
     }
 
 
 
 
-    updatePlayer(data: SendPlayerKeystrokeDTO)
+    async updatePlayer(client: Socket, data: SendPlayerKeystrokeDTO)
     {
         let room = this.rooms.find ((r) => r.room_id === data.room_id);
+        let user = await this.getUserFromSocket(client);
 
         if (room === undefined)
         {
@@ -336,15 +359,24 @@ export class PongService {
             return ;
         }
 
-        // HACK retrieve user 1 & 2 with socket instead of the player_id from an untrustable user to avoid position cheating 
-        if (data.player_id === 1)
+        if (user === undefined)
+        {
+            console.log(`cannot update undefined user`);
+            return ;
+        }
+
+        // REVIEW unique socket or username ?
+        if (user.username === room.player_1.username)
         {
             if (data.state === 0)
                 room.player_1.key = 0;
             else
                 room.player_1.key = data.key === 1 ? -1 : 1;
+          
+            this.sendPlayerUpdate(room, 1);
+            this.sendPlayerUpdate(room, 2);
         }
-        else if (data.player_id === 2)
+        else if (user.username === room.player_2.username)
         {
             if (data.state === 0)
             {
@@ -352,6 +384,9 @@ export class PongService {
             }
             else
                 room.player_2.key = data.key === 1 ? -1 : 1;
+          
+            this.sendPlayerUpdate(room, 1);
+            this.sendPlayerUpdate(room, 2);
         }
     }
 
@@ -389,36 +424,36 @@ export class PongService {
 
         // player
         if (room.player_1.key !== 0)
-            room.player_1.velocity = room.player_1.key * this.PLAYER_SPEED
+            room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED
         else 
-            room.player_1.velocity *= this.PLAYER_FRICTION;
+            room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
 
         if (room.player_2.key !== 0)
-            room.player_2.velocity = room.player_2.key * this.PLAYER_SPEED;
+            room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED;
         else 
-            room.player_2.velocity *= this.PLAYER_FRICTION;
+            room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
 
 
         // ball collision with player
-        if (room.ball.pos_x > this.TERRAIN_PADDING_X
-            && room.ball.pos_x < this.TERRAIN_PADDING_X + this.BALL_SIZE
-            && room.ball.pos_y > room.player_1.position - this.PLAYER_SIZE * 0.5
-            && room.ball.pos_y < room.player_1.position + this.PLAYER_SIZE * 0.5
+        if (room.ball.pos_x > GameConfig.TERRAIN_PADDING_X
+            && room.ball.pos_x < GameConfig.TERRAIN_PADDING_X + GameConfig.BALL_SIZE
+            && room.ball.pos_y > room.player_1.position - GameConfig.PLAYER_SIZE * 0.5
+            && room.ball.pos_y < room.player_1.position + GameConfig.PLAYER_SIZE * 0.5
             && room.ball.vel_x < 0)
         {
-            room.ball.vel_y -= ((room.ball.pos_y - room.player_1.position) / this.PLAYER_SIZE) * this.PLAYER_SWEEP_FORCE;
+            room.ball.vel_y += ((room.ball.pos_y - room.player_1.position) / GameConfig.PLAYER_SIZE) * GameConfig.PLAYER_SWEEP_FORCE;
             room.ball.vel_x *= -1;
             this.sendBallUpdate(room);
         }
         
 
         if (room.ball.pos_x < 2.0
-            && room.ball.pos_x > 2.0 - this.TERRAIN_PADDING_X - this.BALL_SIZE
-            && room.ball.pos_y > room.player_2.position - this.PLAYER_SIZE * 0.5
-            && room.ball.pos_y < room.player_2.position + this.PLAYER_SIZE * 0.5
+            && room.ball.pos_x > 2.0 - GameConfig.TERRAIN_PADDING_X - GameConfig.BALL_SIZE
+            && room.ball.pos_y > room.player_2.position - GameConfig.PLAYER_SIZE * 0.5
+            && room.ball.pos_y < room.player_2.position + GameConfig.PLAYER_SIZE * 0.5
             && room.ball.vel_x > 0)
         {
-            room.ball.vel_y -= ((room.ball.pos_y - room.player_1.position) / this.PLAYER_SIZE) * this.PLAYER_SWEEP_FORCE;
+            room.ball.vel_y += ((room.ball.pos_y - room.player_2.position) / GameConfig.PLAYER_SIZE) * GameConfig.PLAYER_SWEEP_FORCE;
             room.ball.vel_x *= -1;
             this.sendBallUpdate(room);
         }
@@ -433,29 +468,29 @@ export class PongService {
 
         /* Player wall collisions */
         // 1
-        if (room.player_1.position < this.TERRAIN_PADDING_Y)
+        if (room.player_1.position < GameConfig.TERRAIN_PADDING_Y)
         {
             room.player_1.velocity = 0;
-            room.player_1.position = this.TERRAIN_PADDING_Y;
+            room.player_1.position = GameConfig.TERRAIN_PADDING_Y;
         }
 
-        if (room.player_1.position > 1 - this.TERRAIN_PADDING_Y)
+        if (room.player_1.position > 1 - GameConfig.TERRAIN_PADDING_Y)
         {
             room.player_1.velocity = 0;
-            room.player_1.position = 1 - this.TERRAIN_PADDING_Y;
+            room.player_1.position = 1 - GameConfig.TERRAIN_PADDING_Y;
         }
 
         // 2
-        if (room.player_2.position < this.TERRAIN_PADDING_Y)
+        if (room.player_2.position < GameConfig.TERRAIN_PADDING_Y)
         {
             room.player_2.velocity = 0;
-            room.player_2.position = this.TERRAIN_PADDING_Y;
+            room.player_2.position = GameConfig.TERRAIN_PADDING_Y;
         }
 
-        if (room.player_2.position > 1 - this.TERRAIN_PADDING_Y)
+        if (room.player_2.position > 1 - GameConfig.TERRAIN_PADDING_Y)
         {
             room.player_2.velocity = 0;
-            room.player_2.position = 1 - this.TERRAIN_PADDING_Y;
+            room.player_2.position = 1 - GameConfig.TERRAIN_PADDING_Y;
         }
     }
 }

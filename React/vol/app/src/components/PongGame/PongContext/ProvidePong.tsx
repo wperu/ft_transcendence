@@ -11,7 +11,8 @@ export interface IPongUser
     username: string,
     points: number,
     position: number,
-    velocity: number;
+    velocity: number,
+    key: number,
 }
 
 export interface IPongBall
@@ -67,19 +68,25 @@ function usePongProvider() : IPongContext
                 player_1: {
                     username: data.player_1.username,
                     points: 0,
-                    position: 500, // default position ( 0 - 1000 )
+                    position: 0.5,
+                    velocity: 0,
+                    key: 0,
                 } as IPongUser,
 
                 player_2: {
                     username: data.player_2.username,
                     points: 0,
-                    position: 500,
+                    position: 0.5,
+                    velocity: 0,
+                    key: 0,
                 } as IPongUser,
 
                 ball: {
-                    pos_x: 0,
-                    pos_y: 0,
+                    pos_x: 1,
+                    pos_y: 0.5,
                     size: 14,
+                    vel_x: 0,
+                    vel_y: 0
                 } as IPongBall,
 
                 spectators: [],
