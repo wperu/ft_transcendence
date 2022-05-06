@@ -5,8 +5,8 @@ import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
-import { CreateRoom, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
-import { ELevelInRoom, JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
+import { CreateRoom, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { ELevelInRoom, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
@@ -170,10 +170,16 @@ export class ChatService {
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, roomName: string, pass: string)
+	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto)
 	{
 		let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		let resp = await this.roomService.joinRoom(roomName, userRoom, pass);
+		let resp;
+
+		if (data.id !== undefined)
+			resp = await this.roomService.joinRoomById(data.id, userRoom, data.password);
+		else
+			resp = await this.roomService.joinRoomByName(data.roomName, userRoom, data.password);
+
 
 		if (resp instanceof ChatRoomEntity)
 		{
@@ -189,7 +195,8 @@ export class ChatService {
 					protected: (room.password_key !== null),
 					level: ELevelInRoom.casual,
 				}
-				s.join(roomName);
+
+				s.join(room.name); //fix
 				s.emit("JOINED_ROOM", data);
 			});
 			
@@ -242,6 +249,50 @@ export class ChatService {
 		{
 			client.emit("USER_LIST", resp);
 		}
+	}
+
+	async roomBanUser(client: Socket, user: ChatUser, data: RoomBanDto): Promise<void>
+	{
+		let resp;
+
+		if (data.isBan)
+		{
+			const ban_expire = new Date(Date.now() + data.expires_in);
+			resp = await this.roomService.banUser(data.id, user.reference_id, data.refId, ban_expire);
+		}
+		else
+			resp = await this.roomService.unbanUser(data.id, user.reference_id, data.refId);
+		
+		let dto : NoticeDTO;
+		if (resp instanceof ChatRoomEntity)
+		{
+			let left_dto : RoomLeftDto;
+
+			left_dto = {
+				id : resp.id,
+				room_name: resp.name,
+			}
+			dto =  { level: ELevel.info, content: "User " + ((data.isBan) ? "ban" : "unban") + " !" };
+			if (data.isBan)
+			{
+				const banUser = this.getUserFromID(data.refId);
+				if (banUser !== undefined)
+				{
+					for (const s of banUser.socket)
+					{
+						s.leave(resp.name);
+						s.emit('LEFT_ROOM', left_dto);
+						s.emit("NOTIFICATION", { level: ELevel.error, content: `Banned from ${resp.name} !` });	
+					}
+				}
+			}
+		}
+		else
+		{
+			dto = { level: ELevel.error, content: resp };
+		}
+		
+		client.emit("NOTIFICATION", dto);	
 	}
 
 	async roomChangePass(client: Socket, user: ChatUser, roomId: number ,pass: string)

@@ -1,8 +1,4 @@
-interface JoinRoomDto
-{
-	room_name: string,
-	password?: string
-}
+
 
 interface SendMessageDto
 {
@@ -12,4 +8,4 @@ interface SendMessageDto
 
 
 
-export type {SendMessageDto, JoinRoomDto};
+export type {SendMessageDto};

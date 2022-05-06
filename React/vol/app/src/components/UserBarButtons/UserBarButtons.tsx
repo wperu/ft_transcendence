@@ -78,9 +78,10 @@ export function BanUserButton(prop: Prop)
 		{
 			const dto : RoomBanDto =
 			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
-				expires_in: 50000
+				id: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				expires_in: 50000,
+				isBan: true,
 			} 
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}

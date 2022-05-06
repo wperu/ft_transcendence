@@ -1,12 +1,12 @@
 import React from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
-import { JoinRoomDto } from "../../interface/chat/chatDto";
-
 import "./UnjoinedChan.css";
 import { join } from "path/posix";
+import { JoinRoomDto } from "../../Common/Dto/chat/room";
 
 interface	chan_props
 {
+	id: number,
 	name: string;
 	is_protected: boolean;
 }
@@ -30,9 +30,9 @@ function UnjoinedChan(props: chan_props)
 		};
 		var data : JoinRoomDto;
 		if (props.is_protected === false) 
-			data = {room_name: props.name, password: null!};
+			data = {id: props.id, password: null!};
 		else
-			data = {room_name: props.name, password: target.password.value};
+			data = {id: props.id, password: target.password.value};
 		chatCtx.socket.emit("JOIN_ROOM", data);
 		target.password.value = "";
 	}

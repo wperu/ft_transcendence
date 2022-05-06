@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { id } from 'date-fns/locale';
-import { retry } from 'rxjs';
-import { RoomListDTO, RoomMuteDto, UserDataDto, UserRoomDataDto } from 'src/Common/Dto/chat/room';
+import { RoomListDTO, UserRoomDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
-import { RoomModule } from './room.module';
 
 /** //todo
  * 	encrypte passwrd /!\
@@ -93,9 +90,12 @@ export class RoomService
 	{
 		const ret = await this.findRelOf(room.id, refId);
 
-		if (ret !== undefined)
-			return true;
-		return false;
+		
+		if (ret === undefined)
+			return false;
+		if (ret.ban_expire !== null)
+			false
+		return true;
 	}
 
 	/**
@@ -156,28 +156,19 @@ export class RoomService
 		return room;
 	}
 
-	/**
-	 * add user in room
-	 * 
-	 * 
-	 * @param name 
-	 * @param user 
-	 * @returns  string with error or undefined
-	 */
-	async joinRoom(name: string, user: User, password_key: string) : Promise<string | ChatRoomEntity>
-	{
-		const room = await this.findRoomByName(name);
 
+	async joinRoom(room: ChatRoomEntity, user: User, password_key: string) : Promise<ChatRoomEntity | string>
+	{
 		if (room === undefined)
 			return ("no room exist !");
-
+		if (await this.checkBan(room.id, user.reference_id) === true)
+			return ("banned !");
 		if (await this.isInRoom(room, user.reference_id) === true)
-			return ("already in room !");
-		
+			return ("already in room !");		
 		if (password_key !== room.password_key)
 			return ("Wrong password !");
-		
-		
+	
+	
 		let roomRel	: ChatRoomRelationEntity	=  new ChatRoomRelationEntity();
 
 		roomRel.room = room;
@@ -186,6 +177,28 @@ export class RoomService
 		await this.roomRelRepo.save(roomRel);
 
 		return (room);
+	}
+
+	/**
+	 * add user in room
+	 * 
+	 * 
+	 * @param name 
+	 * @param user 
+	 * @returns  string with error or undefined
+	 */
+	async joinRoomById(id: number, user: User, password_key: string) : Promise<string | ChatRoomEntity>
+	{
+		const room = await this.findRoomById(id);
+
+		return (await this.joinRoom(room, user, password_key));
+	}
+
+	async joinRoomByName(name: string, user: User, password_key: string) : Promise<string | ChatRoomEntity>
+	{
+		const room = await this.findRoomByName(name);
+
+		return (await this.joinRoom(room, user, password_key));
 	}
 
 	/**
@@ -274,7 +287,8 @@ export class RoomService
 		const rel = await this.roomRelRepo.find({
 			relations: ["user", "room"],
 			where: {
-				room : { id : room.id },
+				room: { id : room.id },
+				ban_expire: null,
 			}
 		})
 		let ret : UserRoomDataDto[];
@@ -282,12 +296,16 @@ export class RoomService
 
 		for(const r of rel)
 		{
-			ret.push({
-				reference_id :	r.user.reference_id,
-				username:		r.user.username,
-				level:			await this.getUserLevel(room.id, room.owner, r.user.reference_id),
-				isMuted:		await this.isMute(room.id, r.user.reference_id),
-			})
+			if (r.ban_expire === null || (this.checkBan(room.id, refId)))
+			{
+				ret.push({
+					reference_id :	r.user.reference_id,
+					username:		r.user.username,
+					level:			await this.getUserLevel(room.id, room.owner, r.user.reference_id),
+					isMuted:		await this.isMute(room.id, r.user.reference_id),
+					isBan:			!(r.ban_expire === null),
+				})
+			}
 		}
 
 		return (ret);
@@ -303,7 +321,8 @@ export class RoomService
 		const rooms_list = await this.roomRelRepo.find({
 			relations : ["user", "room"],
 			where : {
-				user : { reference_id : refId}
+				user : { reference_id : refId},
+				ban_expire: null
 			}
 		})
 
@@ -327,6 +346,67 @@ export class RoomService
 		});
 
 		return ret;
+	}
+
+	/**
+	 * 
+	 * @param id 
+	 * @param refId 
+	 * @returns 
+	 */
+	async checkBan(id: number, refId: number) : Promise<boolean>
+	{
+		let rel = await this.findRelOf(id, refId);
+
+		if (rel === undefined)
+			return false;
+		if (rel.ban_expire === null)
+			return (false);
+		
+		if (rel.ban_expire <= new Date())
+		{
+			await this.roomRelRepo.remove(rel); //todo
+			return (false);
+		}
+		else
+			return (true);
+	}
+
+	async banUser(id: number, senderRefId: number, refId: number, expires_in: Date) : Promise<string | ChatRoomEntity>
+	{
+		const room = await this.findRoomById(id);
+
+		if (await this.isAdmin(room.id, senderRefId) === false)
+			return "No Right !";
+		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
+			return "You can't mute room operator !";
+
+		const rel = await this.findRelOf(id, refId);
+		if (rel === undefined)
+			return "User not in room !";
+
+		rel.ban_expire = expires_in;
+		await this.roomRelRepo.save(rel);
+		
+		return room;
+	}
+
+	async unbanUser(id: number, senderRefId: number, refId: number) : Promise<string | undefined>
+	{
+		const room = await this.findRoomById(id);
+
+		if (await this.isAdmin(room.id, senderRefId) === false)
+			return "No Right !";
+		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
+			return "You can't mute room operator !";
+
+		const rel = await this.findRelOf(id, refId);
+		if (rel === undefined)
+			return "User not in room !";
+
+		await this.roomRelRepo.remove(rel);
+		
+		return undefined;
 	}
 
 	/**

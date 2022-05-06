@@ -33,9 +33,10 @@ export interface RoomMuteDto
 
 export interface RoomBanDto
 {
-	room_name: string,
-	user_name: string,
+	id:			number,
+	refId:		number,
 	expires_in: number,
+	isBan:		boolean,
 }
 
 export interface RoomLeftDto
@@ -57,6 +58,7 @@ export interface UserRoomDataDto
     reference_id:	number,
 	is_connected?:	boolean,
 	isMuted:		boolean,
+	isBan:			boolean,
 	level:			ELevelInRoom,
 }
 
@@ -84,5 +86,12 @@ export interface RoomUpdataDTO
 	name?:		string,
 	isPrivate?: boolean,
 	isAdmin:	boolean,
+}
+
+export interface JoinRoomDto
+{
+	id?:		number,
+	roomName?:	string,
+	password?:	string
 }
 

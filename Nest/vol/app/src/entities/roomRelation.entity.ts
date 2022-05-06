@@ -21,4 +21,7 @@ export class ChatRoomRelationEntity
 
 	@Column({ nullable: true })
 	mute_expire: Date;
+
+	@Column({ nullable: true })
+	ban_expire: Date;
 }

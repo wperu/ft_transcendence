@@ -7,9 +7,8 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto} from '../Common/Dto/chat/room';
+import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto, JoinRoomDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
-import RoomJoin from '../Common/Dto/chat/RoomJoin';
 import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { Room } from "./interface/room";
@@ -102,13 +101,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * upgrade room protection using 'PROTECT_ROOM' event
 	 */
 	@SubscribeMessage('JOIN_ROOM')
-	async joinRoom(client: Socket, payload: RoomJoin): Promise<void>
+	async joinRoom(client: Socket, payload: JoinRoomDto): Promise<void>
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.joinRoom(client, user, payload.room_name, payload.password);
+		await this.chatService.joinRoom(client, user, payload);
 	}
 
 
@@ -229,27 +228,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	//todo
 	@SubscribeMessage('ROOM_BAN')
-	room_block(client:Socket, payload: RoomBanDto): void
+	async room_block(client:Socket, payload: RoomBanDto): Promise<void>
 	{
-		const user: ChatUser = this.chatService.getUserFromUsername(payload.user_name);
+		const user: ChatUser = this.chatService.getUserFromSocket(client);
 
 		if (user === undefined)
 			return; //todo disconect ?
 		
-			
-
-		/*
-		var user_ban : UserBan;
-		
-		let current_room = this.chatService.getRoom(payload.room_name);
-		if(current_room !== undefined)
-		{
-			user_ban.reference_id = user.reference_id;
-			user_ban.expires_in = new Date(Date.now()+ payload.expires_in * 1000)
-			current_room.banned.push(user_ban);
-		}
-		user.socket.forEach((s) => { s.disconnect(); });
-		this.logger.log(`Banned user ${client.id} from room ${current_room.name}`);*/
+		await this.chatService.roomBanUser(client, user, payload);
 	}
 
 	//todo
