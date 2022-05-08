@@ -136,13 +136,13 @@ export class RoomService
 			const resp = await this.roomRelRepo.find({
 				relations : ["user", "room"],
 				where: [
-					{room: r},
-					{user: user1},
-					{user: user2},
+					{room: r, user: user1},
+					{room: r, user: user2},
 				],
 			})
 			if (resp.length === 2)
 			{
+				
 				console.log (resp)
 				return true
 			}
