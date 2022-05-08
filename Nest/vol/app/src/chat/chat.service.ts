@@ -308,7 +308,7 @@ export class ChatService {
 				{
 					for (const s of banUser.socket)
 					{
-						s.leave(resp.name);
+						s.leave(resp.id.toString());
 						s.emit('LEFT_ROOM', left_dto);
 						s.emit("NOTIFICATION", { level: ELevel.error, content: `Banned from ${resp.name} !` });	
 					}

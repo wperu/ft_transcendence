@@ -7,7 +7,7 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoomDTO ,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto, JoinRoomDto} from '../Common/Dto/chat/room';
+import { CreateRoomDTO ,RoomProtect, SendMessageDTO, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto, JoinRoomDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
@@ -50,10 +50,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field room: The room name to send the message to
 	 */
 	@SubscribeMessage('SEND_MESSAGE')
-	handleMessage(client: Socket, payload: {
-		message: string,
-		room_name: string
-	}) : void
+	handleMessage(client: Socket, payload: SendMessageDTO) : void
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
 
@@ -64,14 +61,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			sender:		user.username,
 			refId:		user.reference_id,
 			send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
-			room_name:	payload.room_name
+			room_id:	payload.room_id
 		};
 
 		// TODO check if user is actually in room           
 		// TODO maybe store in DB if we want chat history ? 
 
 		this.logger.log("[Socket io] new message: " + msg_obj.message);
-		this.server.to(payload.room_name).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		this.server.to(payload.room_id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
 	}
 
 

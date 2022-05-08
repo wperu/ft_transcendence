@@ -70,8 +70,8 @@ export interface RcvMessageDto
 	sender: string,
 	refId: number,
 	send_date: string,
-	room_name: string
-};
+	room_id: number,
+}
 
 export interface RoomListDTO
 {
@@ -98,3 +98,9 @@ export interface JoinRoomDto
 	password?:	string,
 }
 
+export interface SendMessageDTO
+{
+	message: string;
+	room_id: number;
+
+}

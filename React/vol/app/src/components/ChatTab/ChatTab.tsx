@@ -1,10 +1,9 @@
 import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import { SendMessageDto } from "../../interface/chat/chatDto";
 import "./ChatTab.css"
 import useInterval from '../../hooks/useInterval';
-import { RcvMessageDto } from "../../Common/Dto/chat/room";
+import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
 
 function ChatTab ()
 {
@@ -19,10 +18,10 @@ function ChatTab ()
 		if (chatCtx.socket !== undefined && chatCtx.currentRoom !== undefined 
 			&& event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
-			let data : SendMessageDto =
+			let data : SendMessageDTO =
 			{
 				message: event.currentTarget.value,
-				room_name: chatCtx.currentRoom.room_name
+				room_id: chatCtx.currentRoom.id,
 			};
 			chatCtx.socket.emit('SEND_MESSAGE', data);
 			console.log("[CHAT] sending: " + event.currentTarget.value);

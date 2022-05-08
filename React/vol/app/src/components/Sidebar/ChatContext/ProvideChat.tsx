@@ -163,6 +163,13 @@ function useChatProvider() : IChatContext
 		}));
 	}, [rooms]);
 
+	const findRoomById = useCallback((id: number) => 
+	{
+		return (rooms.find(o => {
+			return (o.id === id);
+		}));
+	}, [rooms]);
+
 	useEffect(() => {
 		if (jumpDm !== undefined)
 		{
@@ -180,7 +187,7 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-			let targetRoom = findRoomByName(data.room_name);
+			let targetRoom = findRoomById(data.room_id);
 			if (targetRoom !== undefined)
 			{
 				targetRoom.room_message.push(data);
@@ -193,7 +200,7 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_MSG');
 			}
 		};
-	}, [rooms, findRoomByName, socket]);
+	}, [rooms, findRoomById, socket]);
 
 	useEffect(() => {
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
