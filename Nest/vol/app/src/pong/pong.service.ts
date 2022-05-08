@@ -7,9 +7,7 @@ import { UsersService } from 'src/users/users.service';
 import { PongRoom, RoomState } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { StartPongRoomDTO } from '../Common/Dto/pong/StartPongRoomDTO'
-import { UpdatePongRoomDTO } from '../Common/Dto/pong/UpdatePongRoomDTO'
 import { PongBall } from './interfaces/PongBall';
-import { threadId } from 'worker_threads';
 import { UpdatePongBallDTO } from 'src/Common/Dto/pong/UpdatePongBallDTO';
 import { GameConfig } from 'src/Common/Game/GameConfig';
 import { randomInt } from 'crypto';
@@ -229,7 +227,7 @@ export class PongService {
     }
 
 
-    // FIX DECONNECTION CHECK                                                                         
+
     async runRoom(room: PongRoom) : Promise<PongRoom>
     {
         if (room.player_1.socket.connected === false
@@ -292,12 +290,14 @@ export class PongService {
                 player_id: 2,
                 position: room.player_2.position,
                 velocity: room.player_2.velocity,
+                key: room.player_2.key,
             } as UpdatePongPlayerDTO);    
 
             room.player_1.socket.emit('UPDATE_PONG_PLAYER', {
                 player_id: 1,
                 position: room.player_1.position,
                 velocity: room.player_1.velocity,
+                key: room.player_1.key,
             } as UpdatePongPlayerDTO);
         }
         else
@@ -306,12 +306,14 @@ export class PongService {
                 player_id: 2,
                 position: room.player_2.position,
                 velocity: room.player_2.velocity,
+                key: room.player_2.key,
             } as UpdatePongPlayerDTO);    
 
             room.player_2.socket.emit('UPDATE_PONG_PLAYER', {
                 player_id: 1,
                 position: room.player_1.position,
                 velocity: room.player_1.velocity,
+                key: room.player_1.key,
             } as UpdatePongPlayerDTO);        
         }
     }
@@ -343,22 +345,18 @@ export class PongService {
                 room.player_1.key = 0;
             else
                 room.player_1.key = data.key === 1 ? -1 : 1;
-          
-            this.sendPlayerUpdate(room, 1);
-            this.sendPlayerUpdate(room, 2);
         }
         else if (user.username === room.player_2.username)
         {
             if (data.state === 0)
-            {
                 room.player_2.key = 0;
-            }
             else
                 room.player_2.key = data.key === 1 ? -1 : 1;
-          
-            this.sendPlayerUpdate(room, 1);
-            this.sendPlayerUpdate(room, 2);
         }
+
+        this.updateRoom(room);
+        this.sendPlayerUpdate(room, 1);
+        this.sendPlayerUpdate(room, 2);
     }
 
 
@@ -380,7 +378,8 @@ export class PongService {
 
         /* Calculating next frame velocities */
         // ball
-        if (room.ball.pos_y > terrain_sy || room.ball.pos_y < 0)
+        if ((room.ball.pos_y > terrain_sy - GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y > 0)
+          || (room.ball.pos_y < GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y < 0))
         {
             room.ball.vel_y *= -1;
             this.sendBallUpdate(room);
@@ -412,7 +411,9 @@ export class PongService {
             && room.ball.pos_y < room.player_1.position + GameConfig.PLAYER_SIZE * 0.5
             && room.ball.vel_x < 0)
         {
-            room.ball.vel_y += ((room.ball.pos_y - room.player_1.position) / GameConfig.PLAYER_SIZE) * GameConfig.PLAYER_SWEEP_FORCE;
+            let sweep_dir = ((room.ball.pos_y - room.player_1.position) / GameConfig.PLAYER_SIZE)
+            let sweep_force = room.player_1.velocity * 0.5;
+            room.ball.vel_y += (sweep_dir + sweep_force) * GameConfig.PLAYER_SWEEP_FORCE;
             room.ball.vel_x *= -1;
             this.sendBallUpdate(room);
         }
@@ -424,7 +425,9 @@ export class PongService {
             && room.ball.pos_y < room.player_2.position + GameConfig.PLAYER_SIZE * 0.5
             && room.ball.vel_x > 0)
         {
-            room.ball.vel_y += ((room.ball.pos_y - room.player_2.position) / GameConfig.PLAYER_SIZE) * GameConfig.PLAYER_SWEEP_FORCE;
+            let sweep_dir = ((room.ball.pos_y - room.player_2.position) / GameConfig.PLAYER_SIZE)
+            let sweep_force = room.player_2.velocity * 0.5;
+            room.ball.vel_y += (sweep_dir + sweep_force) * GameConfig.PLAYER_SWEEP_FORCE;
             room.ball.vel_x *= -1;
             this.sendBallUpdate(room);
         }

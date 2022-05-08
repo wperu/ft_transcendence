@@ -10,6 +10,7 @@ import { IPongBall, IPongContext, IPongRoom, IPongUser, ProvidePong, usePongCont
 import { useAuth } from "../../auth/useAuth";
 import { GameConfig } from '../../Common/Game/GameConfig'
 import IUser from "../../interface/User";
+import userEvent from "@testing-library/user-event";
 
 interface CanvasProps
 {
@@ -30,22 +31,34 @@ function getPongPlayer(pong_ctx: IPongContext, user: IUser) : number | undefined
     return (undefined);
 }
 
-function update(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, deltaTime: number)
+function update(pong_ctx: IPongContext, deltaTime: number, user: IUser)
 {
     let room = pong_ctx.room;
     if (!room)
         return ;
 
-    if (room.player_1.key !== 0)
-        room.player_1.velocity = room.player_1.key * 0.9
-    else 
-        room.player_1.velocity *= 0.5;
-
-    if (room.player_2.key !== 0)
-        room.player_2.velocity = room.player_2.key * 0.9
-    else 
-        room.player_2.velocity *= 0.5;
-
+    // REVIEW rewrap this, no more jumps
+    if (user.username === room.player_1.username)
+    {
+        if (room.player_1.key !== 0)
+            room.player_1.velocity = room.player_1.key * 0.9
+        else 
+            room.player_1.velocity *= 0.5; 
+    
+        if (room.player_1.key === 0)
+            room.player_2.velocity *= 0.5;
+    }
+    else if (user.username === room.player_2.username)
+    {
+        if (room.player_2.key !== 0)
+            room.player_2.velocity = room.player_2.key * 0.9
+        else 
+            room.player_2.velocity *= 0.5;
+        
+        if (room.player_1.key === 0)
+            room.player_1.velocity *= 0.5; 
+    }
+    
 
     
     room.ball.pos_x += room.ball.vel_x * deltaTime;
@@ -84,11 +97,11 @@ function update(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, c
 
 
 async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_time: number = performance.now())
-{
+{ 
     /* timed update  */
     let current_time = performance.now();
     let delta = (current_time - last_time) / 1000.0
-    update(pong_ctx, ctx, canvas, delta);
+    update(pong_ctx, delta, user);
 
     /* Background */
     ctx = canvas.getContext('2d');     // gets reference to canvas context
@@ -110,6 +123,7 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
     ctx.fillStyle = '#101016'
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 
 
 
@@ -146,6 +160,12 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
 
     /* ******** */
 
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillText("~" + (1 / delta) + " FPS", terrain_x, terrain_y - 50);
+    ctx.stroke();
+
+    ctx.fillText(delta + " delta", terrain_x, terrain_y - 40);
+    ctx.stroke();
 
     
     /* Players */
@@ -218,19 +238,20 @@ const PongGame = (props: CanvasProps) => {
     let pongCtx: IPongContext = usePongContext();
 
 
-    window.addEventListener('keypress', (event: KeyboardEvent) => {
+    /* Keypress */
+    window.addEventListener('keypress', async (event: KeyboardEvent) => {
         if (pongCtx.room !== null && user !== null)
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
                 let player_id = getPongPlayer(pongCtx, user);
-                if (player_id !== undefined)
-                {
-                    if (player_id === 1)
+                //if (player_id !== undefined)
+                //{
+                 //   if (player_id === 1)
                         pongCtx.room.player_1.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
-                    else 
+                 //   else 
                         pongCtx.room.player_2.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
-                }
+                //}
                 pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
                     room_id: pongCtx.room.room_id,
                     player_id: pongCtx.room.player_1.username === user.username ? 1 : 2,
@@ -241,19 +262,28 @@ const PongGame = (props: CanvasProps) => {
         }   
     });
 
-    window.addEventListener('keyup', (event: KeyboardEvent) => {
+    /* Keyrelease */
+    window.addEventListener('keyup', async (event: KeyboardEvent) => {
         if (pongCtx.room !== null && user !== null)
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
-                let player_id = getPongPlayer(pongCtx, user);
-                if (player_id !== undefined)
-                {
-                    if (player_id === 1)
-                        pongCtx.room.player_1.key = 0;
+                //let player_id = getPongPlayer(pongCtx, user);
+              //  if (player_id !== undefined)
+               // {
+                 //   if (player_id === 1)
+                   // {
+                    if ((event.key === "z" || event.key === "Z" && pongCtx.room.player_1.key === 1)
+                     || (event.key === "s" || event.key === "S" && pongCtx.room.player_1.key === -1))
+                            pongCtx.room.player_1.key = 0;
+                   /* }
                     else 
-                        pongCtx.room.player_2.key = 0;
-                }
+                    {*/
+                     if ((event.key === "z" || event.key === "Z" && pongCtx.room.player_1.key === 1)
+                     || (event.key === "s" || event.key === "S" && pongCtx.room.player_1.key === -1))
+                            pongCtx.room.player_2.key = 0;
+                    //}
+                //}
                 pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
                     room_id: pongCtx.room.room_id,
                     player_id: pongCtx.room.player_1.username === user.username ? 1 : 2,
@@ -265,6 +295,7 @@ const PongGame = (props: CanvasProps) => {
     });
 
 
+    /* Updates */
     useEffect(() => {
         if (pongCtx.room)
         {
@@ -279,17 +310,23 @@ const PongGame = (props: CanvasProps) => {
             });
 
             pongCtx.room.socket.on("UPDATE_PONG_PLAYER", (data: UpdatePongPlayerDTO) => {
-                if (pongCtx.room)
+                if (pongCtx.room && user)
                 {
                     if (data.player_id === 1) 
                     {
                         pongCtx.room.player_1.position = data.position;
                         pongCtx.room.player_1.velocity = data.velocity;
+
+                        if (pongCtx.room.player_1.username !== user.username)
+                            pongCtx.room.player_1.key = data.key;
                     }
                     else if (data.player_id === 2)
                     {
                         pongCtx.room.player_2.position = data.position;
                         pongCtx.room.player_2.velocity = data.velocity;
+
+                        if (pongCtx.room.player_2.username !== user.username)
+                            pongCtx.room.player_2.key = data.key;
                     }
                 }
             });

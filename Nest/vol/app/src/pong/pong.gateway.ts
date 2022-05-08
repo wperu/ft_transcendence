@@ -3,7 +3,6 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server } from 'http';
 import { Socket } from 'socket.io';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
-import { PongRoom } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
 
