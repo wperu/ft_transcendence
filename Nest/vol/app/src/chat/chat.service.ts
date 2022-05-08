@@ -14,6 +14,13 @@ import { RoomService } from 'src/room/room.service';
 import { UsersService } from 'src/users/users.service';
 import { Room } from './interface/room';
 
+
+/** //todo
+ * 	get friend response and send notice
+ * 	rm old rooms stuff
+ *  rework message system ?
+ */
+
 @Injectable()
 export class ChatService {
     constructor (
@@ -218,7 +225,7 @@ export class ChatService {
 					owner: room.owner,
 				}
 
-				s.join(room.id.toString()); //fix
+				s.join(room.id.toString());
 				s.emit("JOINED_ROOM", data);
 			});
 			

@@ -9,12 +9,13 @@ import { In, Repository } from 'typeorm';
  * * Request avoid friend
  * * unfriend
  * * add Try Catch on save (prevent thow from duplication of relation)
- *
+ * * send response with string return like roomService
+ * * add Date() to request.
+ * * maybe add getter to make a request ?
  */
 @Injectable()
 export class FriendsService
 {
-
 	constructor(
 		@InjectRepository(FriendShip)
 		private friendRepository: Repository<FriendShip>,

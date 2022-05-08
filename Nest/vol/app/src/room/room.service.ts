@@ -10,7 +10,7 @@ import { In, Repository } from 'typeorm';
 
 /** //todo
  * 	encrypte passwrd /!\
- *  ban system
+ *	avoid update of DM rooms & send response
  */
 @Injectable()
 export class RoomService
