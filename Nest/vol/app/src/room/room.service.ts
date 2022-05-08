@@ -254,12 +254,12 @@ export class RoomService
 	 * @param userId 
 	 * @returns 
 	 */
-	 async leaveRoomById(chanId: number, refId: number) : Promise<boolean>
+	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string>
 	 {
 		 const room = await this.findRoomById(chanId);
  
 		 if (room === undefined)
-			 return false;
+			 return "no room !";
  
 		 const ret = await this.roomRelRepo.findOne({
 			 relations : ["user", "room"],
@@ -269,7 +269,7 @@ export class RoomService
 			 }
 		 })
 		 if (ret === undefined)
-		 	return (false);
+		 	return ("your are not in room");
 
 		await this.roomRelRepo.remove(ret);
 		const rels = await this.roomRelRepo.find({
@@ -283,7 +283,7 @@ export class RoomService
 
 		if (rels.length === 0)
 			await this.roomRepo.remove(room);
-		return (true);
+		return (undefined);
 	 }
 
 	/**

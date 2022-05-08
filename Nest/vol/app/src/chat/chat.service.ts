@@ -233,11 +233,15 @@ export class ChatService {
 		return;
 	}
 
-	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string) //fix rework me
+	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string)
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		if (await this.roomService.leaveRoomById(id, user.reference_id) === false)
+		const resp = await this.roomService.leaveRoomById(id, user.reference_id)
+		if (typeof resp === "string")
 		{
+			let data : NoticeDTO;
+			data = { level: ELevel.error, content: resp };
+			client.emit("NOTIFICATION", data);
 			return ;
 		}
 
