@@ -1,16 +1,10 @@
-import { truncate } from "fs/promises";
 import { useEffect, useRef, useState } from "react";
-import { Socket } from "socket.io-client";
-import { deflateRawSync } from "zlib";
-import { UpdatePongRoomDTO } from "../../Common/Dto/pong/UpdatePongRoomDTO";
 import { UpdatePongBallDTO } from "../../Common/Dto/pong/UpdatePongBallDTO";
 import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
-import { IPongBall, IPongContext, IPongRoom, IPongUser, ProvidePong, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
+import { IPongBall, IPongContext, IPongRoom, IPongUser, ProvidePong, TrailParticle, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
-import { GameConfig } from '../../Common/Game/GameConfig'
 import IUser from "../../interface/User";
-import userEvent from "@testing-library/user-event";
 
 interface CanvasProps
 {
@@ -96,6 +90,91 @@ function update(pong_ctx: IPongContext, deltaTime: number, user: IUser)
 }
 
 
+function toHex(n: number)
+{
+    var str = Number(n).toString(16);
+    return str.length == 1 ? "0" + str : str;
+};
+
+function plot_trail(pong_ctx: IPongContext, ctx: CanvasRenderingContext2D, x: number, y: number)
+{
+    /* Update */
+    if (pong_ctx.room)
+    console.log("ball vel: " + (Math.abs(pong_ctx.room.ball.vel_y)));
+   // FIRE MODE
+    if (pong_ctx.room && Math.abs(pong_ctx.room.ball.vel_y) > 0.95)
+    {
+        if (Math.random() < 0.4)
+        {
+            pong_ctx.fx.trail.points.push({
+                x: x,
+                y: y,
+                vel_x: Math.random() * 0.6 - 0.3,
+                vel_y: Math.random() * 0.6 - 0.3,
+                id: 1 // SMOKE PARTICLE
+            })
+        }
+        else
+        { 
+            pong_ctx.fx.trail.points.push({
+                x: x,
+                y: y,
+                vel_x: Math.random() * 1.2 - 0.6,
+                vel_y: Math.random() * 1.2 - 0.6,
+                id: 2 // FIRE PARTICLE
+            })
+        }
+    }
+    // NORMAL MODE
+    else
+    {
+        pong_ctx.fx.trail.points.push({
+            x: x,
+            y: y,
+            vel_x: Math.random() * 0.2 - 0.1,
+            vel_y: Math.random() * 0.2 - 0.1,
+            id: 0 // NORMAL PARTICLE
+        })
+    }
+
+    if (pong_ctx.fx.trail.points.length > 40)
+    {
+        pong_ctx.fx.trail.points.shift();
+    }
+
+    /* draw */
+    let i: number = 0;
+    pong_ctx.fx.trail.points.forEach((p: TrailParticle) => {
+        p.x += p.vel_x;
+        p.y += p.vel_y;
+        let ratio = (i / pong_ctx.fx.trail.points.length);
+        let size = 10 * ratio;
+
+        switch (p.id)
+        {
+            case 0: 
+                ctx.fillStyle = '#FFFFFF' + toHex(100.0 * ratio)
+                break;
+            case 1: 
+                ctx.fillStyle = '#FFFFFF' + toHex(100.0 * ratio)
+                size = 14 * ratio;
+                break;
+            case 2: 
+                ctx.fillStyle = '#F0A010'
+                size = 4 * ratio;
+                break;
+        }
+        ctx.beginPath();
+        ctx.ellipse(p.x,
+                    p.y, 
+                    size, size,
+                    Math.PI / 4, 0, 2 * Math.PI);
+        ctx.fill();
+        i++;
+    });
+}
+
+
 async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_time: number = performance.now())
 { 
     /* timed update  */
@@ -112,6 +191,7 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
         console.log("ctx is null");
         return ;
     }
+
 
     // TODO review clearing pattern     
     ctx.beginPath();    // clear existing drawing paths
@@ -216,7 +296,7 @@ async function draw(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | nul
     ctx.fillRect(player_2_x, player_2_y, player_2_sz_x, player_2_sz_y);
 
 
-
+    plot_trail(pong_ctx, ctx, ball_x, ball_y);
     /* Ball */
     let ball_size = terrain_h * 0.03;
     ctx.fillStyle = '#FFFFFF'
@@ -268,22 +348,22 @@ const PongGame = (props: CanvasProps) => {
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
-                //let player_id = getPongPlayer(pongCtx, user);
-              //  if (player_id !== undefined)
-               // {
-                 //   if (player_id === 1)
-                   // {
-                    if ((event.key === "z" || event.key === "Z" && pongCtx.room.player_1.key === 1)
-                     || (event.key === "s" || event.key === "S" && pongCtx.room.player_1.key === -1))
+            let player_id = getPongPlayer(pongCtx, user);
+               if (player_id !== undefined)
+               {
+                   if (player_id === 1)
+                   {
+                   // if (((event.key === "z" || event.key === "Z") && pongCtx.room.player_1.key === -1)
+                   //  || ((event.key === "s" || event.key === "S") && pongCtx.room.player_1.key === 1))
                             pongCtx.room.player_1.key = 0;
-                   /* }
+                   }
                     else 
-                    {*/
-                     if ((event.key === "z" || event.key === "Z" && pongCtx.room.player_1.key === 1)
-                     || (event.key === "s" || event.key === "S" && pongCtx.room.player_1.key === -1))
+                    {
+                     //if (((event.key === "z" || event.key === "Z") && pongCtx.room.player_1.key === -1)
+                     //|| ((event.key === "s" || event.key === "S") && pongCtx.room.player_1.key === 1))
                             pongCtx.room.player_2.key = 0;
-                    //}
-                //}
+                    }
+                }
                 pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
                     room_id: pongCtx.room.room_id,
                     player_id: pongCtx.room.player_1.username === user.username ? 1 : 2,

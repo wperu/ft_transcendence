@@ -41,9 +41,29 @@ export interface IPongRoom
     socket: Socket,
 }
 
+export interface TrailParticle
+{
+    x: number,
+    y: number,
+    vel_x: number,
+    vel_y: number,
+    id: number,
+}
+
+export interface TrailFX
+{
+    points: Array<TrailParticle>,
+}
+
+export interface FX
+{
+    trail: TrailFX
+}
+
 export interface IPongContext
 {
     room: IPongRoom | null,
+    fx: FX,
 }
 
 
@@ -129,8 +149,18 @@ function usePongProvider() : IPongContext
     })
 
     return ({
-        room: room
+        room: room,
+        fx: initFx(),
     });
+}
+
+function initFx() : FX
+{
+    return ({
+        trail: {
+            points: []
+        } as TrailFX
+    } as FX)
 }
 
 

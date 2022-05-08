@@ -22,18 +22,7 @@ export class PongService {
 
     private logger: Logger = new Logger('AppService');
 
-
-    private TICK_RATE: number = 10; // tick every 10 frames
     private GAME_RATE: number = 16; // refresh time on server side (about 60fps)
-/*
-    private BALL_SIZE: number = 0.1;
-    private BALL_SPEED: number = 1.1;
-    private PLAYER_SIZE: number = 0.25;
-    private PLAYER_SPEED: number = 0.9;
-    private PLAYER_FRICTION: number = 0.5;
-    private PLAYER_SWEEP_FORCE: number = 0.47;
-    private TERRAIN_PADDING_X: number = 0.05;
-    private TERRAIN_PADDING_Y: number = 0.13;*/
 
     private frameCount: number = 0;
     private deltaTime: number = 0;
