@@ -5,6 +5,7 @@ import { ELevelInRoom } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 
 /** //todo
@@ -19,7 +20,9 @@ export class RoomService
 		private roomRepo: Repository<ChatRoomEntity>,
 
 		@InjectRepository(ChatRoomRelationEntity)
-		private roomRelRepo: Repository<ChatRoomRelationEntity>
+		private roomRelRepo: Repository<ChatRoomRelationEntity>,
+
+		private userService: UsersService,
 	) {}
 	
 
@@ -123,6 +126,7 @@ export class RoomService
 	/**
 	 * //todo : name already exist /!\
 	 * //todo : encrypt password
+	 * //todo : dm already exist
 	 *
 	 * @param name 			-> name
 	 * @param user			-> owner
@@ -130,26 +134,40 @@ export class RoomService
 	 * @param password_key	-> Protect chan with password
 	 * @param isDm			-> private message
 	 */
-	async createRoom(name: string, user: User, isPrivate: boolean, password_key: string, isDm: boolean) : Promise<string | ChatRoomEntity>
+	async createRoom(name: string, user: User, isPrivate: boolean, password_key: string, isDm: boolean, user2: User) : Promise<string | ChatRoomEntity>
 	{
 		let room	: ChatRoomEntity 			= new ChatRoomEntity();
 		let roomRel	: ChatRoomRelationEntity	= new ChatRoomRelationEntity();
 		
-		if (await this.findRoomByName(name) !== undefined)
+		if (isDm !== true && await this.findRoomByName(name) !== undefined) //useless check if is Dm
 			return "room already exist";
+		if (isDm && user2 === undefined)
+			return "User doesn't exist !";
+		if (0 /* findDm() */) //fix
+			return "dm room already exist";
 
-		room.name = name;
-		room.owner = user.reference_id;
-		room.creation_date = new Date();
-		room.isPrivate = isPrivate;
-		room.password_key = password_key;
-		room.isDm = isDm;
+		room.name			= name;
+		room.owner			= user.reference_id;
+		room.creation_date	= new Date();
+		room.isPrivate		= isPrivate;
+		room.password_key	= password_key;
+		room.isDm			= isDm;
 
 		room = await this.roomRepo.save(room);
 
 		roomRel.room	= room;
 		roomRel.user	= user;
-		roomRel.isAdmin = true;
+		roomRel.isAdmin = false;
+
+		if (isDm)
+		{
+			let roomRel2	: ChatRoomRelationEntity	= new ChatRoomRelationEntity();
+
+			roomRel2.room	= room;
+			roomRel2.user	= user2;
+			roomRel2.isAdmin = false;
+			await this.roomRelRepo.save(roomRel2);
+		}
 
 		await this.roomRelRepo.save(roomRel);
 
@@ -333,17 +351,39 @@ export class RoomService
 		if (rooms_list === [])
 			return [];
 		
-		rooms_list.forEach(({room}) => {
+		//rooms_list.forEach(({room}) => {
+
+		for (let rel of rooms_list)
+		{
+			let room = rel.room;
 			/**
 			 * create room dto
 			 */
+
+			if (room.isDm)
+			{
+				const rel2 = await this.roomRelRepo.find({
+					relations : ["user", "room"],
+					where : {
+						room: room,
+					}
+				})
+
+				rel2.forEach(r => {
+					if (r.user.reference_id !== refId)
+						room.name = r.user.username;
+						room.owner = r.user.reference_id;
+				});
+			}
+
 			ret.push({
 				id:				room.id,
 				name:			room.name,
 				owner:			room.owner,
 				has_password:	room.password_key !== null,
+				isDm:			room.isDm,
 			})
-		});
+		};
 
 		return ret;
 	}
@@ -540,6 +580,7 @@ export class RoomService
 				name: room.name,
 				owner: room.owner,
 				has_password: room.password_key !== null,
+				isDm: room.isPrivate,
 			})
 		});
 

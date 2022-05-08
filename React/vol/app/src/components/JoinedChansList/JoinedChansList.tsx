@@ -19,7 +19,7 @@ function Joined_chans_list()
 			return (
 				<div id="joined_chans_list">
 					<ul>
-						{chatCtx.rooms.map(({room_name}, index) => <li key={index}><JoinedChan name={room_name}/></li>)}
+						{chatCtx.rooms.map(({room_name, id}, index) => <li key={index}><JoinedChan id={id} name={room_name}/></li>)}
 					</ul>
 				</div>
 			);

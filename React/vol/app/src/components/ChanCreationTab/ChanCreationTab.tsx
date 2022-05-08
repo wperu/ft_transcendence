@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { useNotifyContext, ELevel } from "../NotifyContext/NotifyContext";
 import "./ChanCreationTab.css";
-import { CreateRoom } from "../../Common/Dto/chat/room";
+import { CreateRoomDTO } from "../../Common/Dto/chat/room";
 
 function ChanCreationTab()
 {
@@ -37,7 +37,7 @@ function ChanCreationTab()
 		}
 		else
 		{
-			var data: CreateRoom;
+			var data: CreateRoomDTO;
 			if (is_protected == true)
 			{
 				if (target.password.value.length === 0)
@@ -48,9 +48,10 @@ function ChanCreationTab()
 				{
 					data =
 					{
-						room_name: target.channel_name.value,
-						private_room: (target.channel_visibility.value === "private_chan"),
-						password: target.password.value,
+						room_name:		target.channel_name.value,
+						private_room:	(target.channel_visibility.value === "private_chan"),
+						password:		target.password.value,
+						isDm:			false,
 					};
 					chatCtx.socket.emit("CREATE_ROOM", data);
 					target.channel_name.value = '';
@@ -66,6 +67,7 @@ function ChanCreationTab()
 				{
 					room_name: target.channel_name.value,
 					private_room: (target.channel_visibility.value === "private_chan"),
+					isDm: false,
 				};
 				chatCtx.socket.emit("CREATE_ROOM", data);
 				target.channel_name.value = '';

@@ -7,7 +7,7 @@ import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
 import { User } from 'src/entities/user.entity';
 import { useContainer } from 'typeorm';
 import { isInt8Array } from 'util/types';
-import { CreateRoom,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto, JoinRoomDto} from '../Common/Dto/chat/room';
+import { CreateRoomDTO ,RoomProtect, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto, JoinRoomDto} from '../Common/Dto/chat/room';
 import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
@@ -78,7 +78,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	
 	@SubscribeMessage('CREATE_ROOM')
-	async createRoom(client: Socket, payload: CreateRoom): Promise<void>
+	async createRoom(client: Socket, payload: CreateRoomDTO): Promise<void>
 	{
 		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		if (user === undefined)

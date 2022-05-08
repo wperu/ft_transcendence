@@ -5,7 +5,7 @@ import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
-import { CreateRoom, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { CreateRoomDTO, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
@@ -122,10 +122,12 @@ export class ChatService {
 
 	
 
-	async createRoom(client: Socket, user: ChatUser, data : CreateRoom) : Promise<void>
+	async createRoom(client: Socket, user: ChatUser, data : CreateRoomDTO) : Promise<void>
 	{
-		
-		const resp = await this.roomService.createRoom(data.room_name, await this.userService.findUserByReferenceID(user.reference_id), data.private_room, data.password, false);
+		const user1 = await this.userService.findUserByReferenceID(user.reference_id);
+		const user2 = await this.userService.findUserByReferenceID(data.with);
+
+		const resp = await this.roomService.createRoom(data.room_name, user1, data.private_room, data.password, data.isDm, user2);
 		this.rooms.push({
 			name: data.room_name,
 			private_room: data.private_room,
@@ -142,30 +144,46 @@ export class ChatService {
 		{
 			let room = resp;
 
+			let dto : RoomJoinedDTO;
+
+			dto = {
+				id: room.id,
+				room_name: (data.isDm === false) ? room.name : user2.username,
+				protected: (room.password_key !== null),
+				level: await this.roomService.getUserLevel(room.id, room.owner, user.reference_id),
+				isDm: data.isDm,
+				owner: (data.isDm === false) ? room.owner : user2.reference_id,
+			}
+			
 			for (const s of user.socket) 
 			{
-
-				let data : RoomJoinedDTO;
-
-				data = {
-					id: room.id,
-					room_name:  room.name,
-					protected: (room.password_key !== null),
-					level: await this.roomService.getUserLevel(room.id, room.owner, user.reference_id),
-				}
-				s.join(data.room_name);
-				s.emit("JOINED_ROOM", data);
+				s.join(dto.room_name);
+				s.emit("JOINED_ROOM", dto);
 			};
 
-			let data : NoticeDTO;
-			data = { level: ELevel.info, content: "Room " + room.name + " created" };
-			client.emit("NOTIFICATION", data);	
+			if (data.isDm)
+			{
+				const us = this.getUserFromID(user2.reference_id);
+
+				dto.room_name = user1.username;
+				for (const s of us.socket) 
+				{
+					s.join(dto.room_name);
+					s.emit("JOINED_ROOM", dto);
+				};
+			}
+			else
+			{
+				let nDto : NoticeDTO;
+				nDto = { level: ELevel.info, content: "Room " + room.name + " created" };
+				client.emit("NOTIFICATION", nDto);
+			}
 		}
 		else
 		{
-			let data : NoticeDTO;
-			data = { level: ELevel.error, content: resp };
-			client.emit("NOTIFICATION", data);
+			let nDto : NoticeDTO;
+			nDto = { level: ELevel.error, content: resp };
+			client.emit("NOTIFICATION", nDto);
 		}
 		return;
 	}
@@ -191,9 +209,11 @@ export class ChatService {
 
 				data = {
 					id: room.id,
-					room_name:  room.name,
+					room_name: room.name,
 					protected: (room.password_key !== null),
 					level: ELevelInRoom.casual,
+					isDm: false,
+					owner: room.owner,
 				}
 
 				s.join(room.name); //fix
@@ -240,7 +260,9 @@ export class ChatService {
 		client.emit("NOTIFICATION", data);	
 	}
 
-
+	/***
+	 * Send list of user for roomID
+	 */
 	async roomUserList(client: Socket, user: ChatUser, roomId: number)
 	{
 		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
@@ -393,7 +415,9 @@ export class ChatService {
 				id: r.id,
 				room_name: r.name,		
 				protected: r.has_password,
-				level: await this.roomService.getUserLevel(r.id, r.owner, user.reference_id)
+				level: await this.roomService.getUserLevel(r.id, r.owner, user.reference_id),
+				isDm: r.isDm,
+				owner: r.owner,
 			}
 			client.join(r.name);
 			user.room_list.push(r.name);

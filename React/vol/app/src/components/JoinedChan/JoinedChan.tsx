@@ -4,6 +4,7 @@ import "./JoinedChan.css";
 
 interface	chan_props
 {
+	id: number
 	name: string;
 }
 
@@ -17,7 +18,7 @@ function JoinedChan(props: chan_props)
 
 	function joinChan()
 	{
-		chatCtx.setCurrentRoomByName(props.name);
+		chatCtx.setCurrentRoomById(props.id);
 		chatCtx.setCurrentTab(ECurrentTab["chat"]);
 	}
 	

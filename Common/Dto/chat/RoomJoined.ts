@@ -10,6 +10,8 @@ export interface RoomJoinedDTO
 	room_name:			string,
 	protected:			boolean,
 	level:				ELevelInRoom,
+	isDm:				boolean,
+	owner:				number, // (if is dm owner alway user2)
 }
 
 export enum JOINSTATUS

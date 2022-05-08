@@ -8,7 +8,7 @@ import AcceptInvitationLogo from "../../ressources/images/accept.png";
 import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
-import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
+import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
 
 interface Prop
 {
@@ -246,8 +246,23 @@ export function AcceptGameInvitation(prop: gameInvitationProp)
 
 export function DirectMessage(prop: dmProp)
 {
+	const { socket, awaitDm } = useChatContext();
+
 	function goDM()
 	{
+		//first step find if dm
+
+
+		//else create him
+		awaitDm(prop.refId);
+		const dto : CreateRoomDTO = {
+				room_name:		prop.name,
+				private_room:	true,
+				isDm:			true,
+				with:			prop.refId,
+		}
+		socket.emit("CREATE_ROOM", dto);
+		
 		console.log("go dm avec " + prop.name)
 	}
 	return (

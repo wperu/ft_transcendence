@@ -8,11 +8,13 @@ export interface RoomProtect
     opt?: string
 }
 
-export interface CreateRoom
+export interface CreateRoomDTO
 {
-	room_name: string,
-	private_room: boolean,
-	password?: string
+	room_name:			string,
+	private_room:		boolean,
+	password?:			string,
+	isDm:				boolean,
+	with?:				number,
 }
 
 
@@ -75,8 +77,9 @@ export interface RoomListDTO
 {
 	id:				number;
 	name:			string;
-	owner:			number; //refId
+	owner:			number; //refId if (isDm return refId of second user)
 	has_password:	boolean;
+	isDm:			boolean;
 }
 
 export interface RoomUpdataDTO
@@ -92,6 +95,6 @@ export interface JoinRoomDto
 {
 	id?:		number,
 	roomName?:	string,
-	password?:	string
+	password?:	string,
 }
 

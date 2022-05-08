@@ -5,6 +5,7 @@ import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
 import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
+import { BlockLike } from "typescript";
 
 /** //fix
  *  NOTIF rework notif system
@@ -59,6 +60,8 @@ export interface IRoom
 	user_level:		ELevelInRoom;
 	room_name:		string;
 	room_message:	RcvMessageDto[];
+	isDm:			boolean;
+	owner:			number;
 }
 
 interface IChatContext
@@ -67,10 +70,10 @@ interface IChatContext
 	currentRoom?:	IRoom;
 
 	setCurrentRoom:			(room: IRoom | undefined) => void;
-	setCurrentRoomByName:	(rname: string) => void;
+	setCurrentRoomById:		(id: number) => void;
 	
 	rooms: IRoom[];
-	addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
+	//addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
 
 	notification:	INotif[];
 	rmNotif:		(id: string) => void;
@@ -78,6 +81,7 @@ interface IChatContext
 
 	currentTab:		ECurrentTab;
 	setCurrentTab:	(tab: ECurrentTab) => void;
+	awaitDm:		(refId: number) => void;
 
 	friendsList:			Array<UserDataDto>;
 	blockList:				Array<UserDataDto>;
@@ -86,8 +90,8 @@ interface IChatContext
 
 function useChatProvider() : IChatContext
 {
-	const notify = useNotifyContext();
-	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
+	const notify	= useNotifyContext();
+	const [socket]	= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
 			token: useAuth().user?.access_token_42
 		}
@@ -99,31 +103,35 @@ function useChatProvider() : IChatContext
 	const [friendsList, setFriendsList]		= useState<Array<UserDataDto>>([]);
 	const [requestList, setRequestList]		= useState<Array<UserDataDto>>([]);
 	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
+	const [jumpDm, awaitDm]					= useState<number | undefined>(undefined);
 
 	/**
 	 * ***** Room *****
 	 */
 
-	const setCurrentRoomByName = useCallback((name: string) => {
+	const setCurrentRoomById = useCallback((id: number) => {
 		setCurrentRoom(rooms.find(o => {
-			return (o.room_name === name);
+			return (o.id === id);
 		}));
 	}, [rooms]);
 	
-    const addRoom = useCallback((id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => {
+    const addRoom = useCallback((room: RoomJoinedDTO) => {
 		const newRoom : IRoom = {
-			id: id,
-			user_level: level,
-			room_name: room_name,
+			id: room.id,
+			user_level: room.level,
+			room_name: room.room_name,
 			room_message: [],
-			private: false,
-			protected: is_protected,
+			private: false, //fix me ?!
+			protected: room.protected,
+			isDm: room.isDm,
+			owner: room.owner,
 		};
 		
 		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
 		if (currentRoom !== undefined)
-			setCurrentRoomByName(currentRoom.room_name);
-    }, [currentRoom, setCurrentRoomByName]);
+			setCurrentRoomById(currentRoom.id);
+
+    }, [currentRoom, setCurrentRoomById]);
 
 
 	const rmRoom = useCallback((room_name: string) => {
@@ -142,6 +150,20 @@ function useChatProvider() : IChatContext
 			return (o.room_name === name);
 		}));
 	}, [rooms]);
+
+	useEffect(() => {
+		if (jumpDm !== undefined)
+		{
+			const room = rooms.find(r => (r.isDm === true && r.owner === jumpDm))
+			if (room !== undefined)
+			{
+				setCurrentRoomById(room.id);
+				setCurrentTab(ECurrentTab.chat);
+				awaitDm(undefined);
+				console.log(currentRoom);
+			}
+		}
+	}, [jumpDm, rooms])
 
 	useEffect(() => {
 		
@@ -198,7 +220,7 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 
 		socket.on("JOINED_ROOM", (data: RoomJoinedDTO) => {
-			addRoom(data.id, data.room_name, data.protected, data.level);
+			addRoom(data);
 		});
 
 		return function cleanup() {
@@ -363,14 +385,15 @@ function useChatProvider() : IChatContext
 		socket,
 		currentRoom,
 		setCurrentRoom,
-		setCurrentRoomByName,
+		setCurrentRoomById,
 		currentTab,
 		setCurrentTab,
-    rooms,
-    addRoom,
+	    rooms,
+	   // addRoom,
 		notification,
 		rmNotif,
 		rmFriendNotif,
+		awaitDm,
 		friendsList,
 		blockList,
     });
