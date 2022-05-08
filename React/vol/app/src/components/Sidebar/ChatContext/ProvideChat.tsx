@@ -82,6 +82,7 @@ interface IChatContext
 	currentTab:		ECurrentTab;
 	setCurrentTab:	(tab: ECurrentTab) => void;
 	awaitDm:		(refId: number) => void;
+	goToDmWith		(id: number) : boolean;
 
 	friendsList:			Array<UserDataDto>;
 	blockList:				Array<UserDataDto>;
@@ -108,6 +109,17 @@ function useChatProvider() : IChatContext
 	/**
 	 * ***** Room *****
 	 */
+
+
+	const goToDmWith = useCallback((id: number) => {
+		const res = rooms.find((r) => (r.isDm === true && r.owner === id));
+		
+		if (res === undefined)
+			return false;
+		setCurrentRoom(res);
+		setCurrentTab(ECurrentTab.chat);
+		return true;
+	}, [rooms])
 
 	const setCurrentRoomById = useCallback((id: number) => {
 		setCurrentRoom(rooms.find(o => {
@@ -207,6 +219,7 @@ function useChatProvider() : IChatContext
 		socket.on("disconnect", () => {
 			setRooms([]); //clean rooms
 			setCurrentRoom(undefined);
+			awaitDm(undefined);
 		  });
 
 		return function cleanup() {
@@ -359,13 +372,10 @@ function useChatProvider() : IChatContext
 						req_id: req.reference_id,
 						username: req.username
 					});
-				}
-				
+				}	
 			})
 			addNotif(not);
-
 			setRequestList(data);
-			
 		});
 
 		return function cleanup() {		
@@ -394,6 +404,7 @@ function useChatProvider() : IChatContext
 		rmNotif,
 		rmFriendNotif,
 		awaitDm,
+		goToDmWith,
 		friendsList,
 		blockList,
     });

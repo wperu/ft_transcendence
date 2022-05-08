@@ -166,6 +166,8 @@ export class ChatService {
 				const us = this.getUserFromID(user2.reference_id);
 
 				dto.room_name = user1.username;
+				dto.owner= user1.reference_id;
+
 				for (const s of us.socket) 
 				{
 					s.join(room.id.toString());

@@ -6,7 +6,7 @@ import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 /** //todo
  * 	encrypte passwrd /!\
@@ -123,6 +123,34 @@ export class RoomService
 		return false;
 	}
 
+	async findDm(user1 : User, user2: User): Promise<boolean>
+	{
+		const roomsDm = await this.roomRepo.find({
+			where : {
+			 	isDm: true,
+			}
+		});
+
+		for (let r of roomsDm)
+		{
+			const resp = await this.roomRelRepo.find({
+				relations : ["user", "room"],
+				where: [
+					{room: r},
+					{user: user1},
+					{user: user2},
+				],
+			})
+			if (resp.length === 2)
+			{
+				console.log (resp)
+				return true
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * //todo : name already exist /!\
 	 * //todo : encrypt password
@@ -143,7 +171,7 @@ export class RoomService
 			return "room already exist";
 		if (isDm && user2 === undefined)
 			return "User doesn't exist !";
-		if (0 /* findDm() */) //fix
+		if (isDm && await this.findDm(user, user2)) //fix
 			return "dm room already exist";
 
 		room.name			= name;
@@ -249,6 +277,7 @@ export class RoomService
 
 	/**
 	 * //todo destroy chan when user last user leave
+	 * //todo cn't leave dm room
 	 * Join room using room's Id
 	 * @param chanName 
 	 * @param userId 
@@ -260,7 +289,8 @@ export class RoomService
  
 		 if (room === undefined)
 			 return "no room !";
- 
+		
+		
 		 const ret = await this.roomRelRepo.findOne({
 			 relations : ["user", "room"],
 			 where : {
@@ -371,8 +401,10 @@ export class RoomService
 
 				rel2.forEach(r => {
 					if (r.user.reference_id !== refId)
+					{
 						room.name = r.user.username;
 						room.owner = r.user.reference_id;
+					}
 				});
 			}
 

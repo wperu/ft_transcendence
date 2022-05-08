@@ -246,22 +246,22 @@ export function AcceptGameInvitation(prop: gameInvitationProp)
 
 export function DirectMessage(prop: dmProp)
 {
-	const { socket, awaitDm } = useChatContext();
+	const { socket, awaitDm, goToDmWith } = useChatContext();
 
 	function goDM()
 	{
 		//first step find if dm
-
-
-		//else create him
-		awaitDm(prop.refId);
-		const dto : CreateRoomDTO = {
-				room_name:		prop.name,
-				private_room:	true,
-				isDm:			true,
-				with:			prop.refId,
+		if (goToDmWith(prop.refId) === false)
+		{
+			awaitDm(prop.refId);
+			const dto : CreateRoomDTO = {
+					room_name:		prop.name,
+					private_room:	true,
+					isDm:			true,
+					with:			prop.refId,
+			}
+			socket.emit("CREATE_ROOM", dto);
 		}
-		socket.emit("CREATE_ROOM", dto);
 		
 		console.log("go dm avec " + prop.name)
 	}
