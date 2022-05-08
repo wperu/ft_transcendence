@@ -134,10 +134,10 @@ function useChatProvider() : IChatContext
     }, [currentRoom, setCurrentRoomById]);
 
 
-	const rmRoom = useCallback((room_name: string) => {
+	const rmRoom = useCallback((id: number) => {
 		setRooms(prev => {
 			return prev.filter((o) => {
-				return (o.room_name !== room_name);
+				return (o.id !== id);
 			})
 		});
 	}, []);
@@ -185,10 +185,10 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
-			if (currentRoom !== undefined && currentRoom.room_name === data.room_name)
+			if (currentRoom !== undefined && currentRoom.id === data.id)
 				setCurrentRoom(undefined);
-			if (data.room_name !== undefined)
-				rmRoom(data.room_name);
+			if (data.id !== undefined)
+				rmRoom(data.id);
 		})
 
 		return function cleanup() {		

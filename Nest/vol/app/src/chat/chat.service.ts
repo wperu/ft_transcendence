@@ -157,7 +157,7 @@ export class ChatService {
 			
 			for (const s of user.socket) 
 			{
-				s.join(dto.room_name);
+				s.join(room.id.toString());
 				s.emit("JOINED_ROOM", dto);
 			};
 
@@ -168,7 +168,7 @@ export class ChatService {
 				dto.room_name = user1.username;
 				for (const s of us.socket) 
 				{
-					s.join(dto.room_name);
+					s.join(room.id.toString());
 					s.emit("JOINED_ROOM", dto);
 				};
 			}
@@ -216,7 +216,7 @@ export class ChatService {
 					owner: room.owner,
 				}
 
-				s.join(room.name); //fix
+				s.join(room.id.toString()); //fix
 				s.emit("JOINED_ROOM", data);
 			});
 			
@@ -233,7 +233,7 @@ export class ChatService {
 		return;
 	}
 
-	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string)
+	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string) //fix rework me
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
 		if (await this.roomService.leaveRoomById(id, user.reference_id) === false)
@@ -246,12 +246,12 @@ export class ChatService {
 		let dto: RoomLeftDto;
 		
 		dto = {
-			id: 0,
+			id: id,
 			room_name: roomName,
 			//room_name: roomName,
 		}
 		user.socket.forEach((s) => {
-			s.leave(roomName);
+			s.leave(id.toString());
 			s.emit('LEFT_ROOM', dto);
 		});
 
@@ -419,7 +419,7 @@ export class ChatService {
 				isDm: r.isDm,
 				owner: r.owner,
 			}
-			client.join(r.name);
+			client.join(r.id.toString());
 			user.room_list.push(r.name);
 			client.emit("JOINED_ROOM", data);
 		}
