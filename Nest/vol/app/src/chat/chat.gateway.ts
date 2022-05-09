@@ -1,18 +1,11 @@
 import { BadRequestException, Logger, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
-import { format, getISOWeeksInYear } from 'date-fns';
+import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
-import { TokenService } from 'src/auth/token.service';
-import { ChatUser, UserData } from 'src/chat/interface/ChatUser';
-import { User } from 'src/entities/user.entity';
-import { useContainer } from 'typeorm';
-import { isInt8Array } from 'util/types';
+import { ChatUser } from 'src/chat/interface/ChatUser';
 import { CreateRoomDTO ,RoomProtect, SendMessageDTO, RoomMuteDto, RoomPromoteDto, RoomBanDto, UserDataDto, RcvMessageDto, JoinRoomDto} from '../Common/Dto/chat/room';
-import { UserBan } from 'src/Common/Dto/chat/UserBlock';
 import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
-import { Room } from "./interface/room";
-import { RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 
 
@@ -480,12 +473,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('BLOCK_LIST')
 	async block_list(client: Socket) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		const user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
 		if (user !== undefined)
 		{
-			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
+			const ret = await this.chatService.getBlockList(user) as UserDataDto[];
 			
-		//	console.log(ret);
 			client.emit('BLOCK_LIST', ret);
 		}
 	}

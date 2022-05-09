@@ -26,13 +26,11 @@ export class ChatService {
     constructor (
         private tokenService: TokenService,
 		private friendService: FriendsService,
-		private rooms: Room[],
 		private users: ChatUser[],
 		private userService: UsersService,
 		private roomService: RoomService
-
     )
-    { this.rooms = [];}
+    {}
 
 
 	connectUserFromSocket(socket: Socket): ChatUser | undefined
@@ -46,7 +44,6 @@ export class ChatService {
 			socket: [socket], 
 			username: data.username,
 			reference_id: data.reference_id,
-			room_list: [],
 		})
 
 
@@ -135,17 +132,6 @@ export class ChatService {
 		const user2 = await this.userService.findUserByReferenceID(data.with);
 
 		const resp = await this.roomService.createRoom(data.room_name, user1, data.private_room, data.password, data.isDm, user2);
-		this.rooms.push({
-			name: data.room_name,
-			private_room: data.private_room,
-			users: [user],
-			admins: [], // admin =/= owner
-			invited : [],
-			muted: [],
-			banned : [],
-			owner: user,
-			password : data.password,
-		})
 
 		if (resp instanceof ChatRoomEntity)
 		{
@@ -364,36 +350,6 @@ export class ChatService {
 		client.emit("NOTIFICATION", dto);
 	}
 
-	roomExists(room_name: string) : boolean
-	{
-		return (this.rooms.find((r) => {return r.name === room_name}) !== undefined);
-	}
-
-
-
-	getRoom(room_name: string): Room
-	{
-		if (this.roomExists(room_name) === true)
-		{
-			const el = this.rooms.find((r) => { return r.name === room_name});
-			return (el);
-		}
-		else
-			return (undefined);
-	}
-
-
-
-	removeRoom(room_name: string): boolean
-	{
-		let to_remove: Room = this.getRoom(room_name);
-		if (to_remove === undefined)
-			return (false);
-		this.rooms.splice(this.rooms.indexOf(to_remove), 1);
-		return (true);
-	}
-
-
 	removeUser(username: string) 
 	{
 		this.users.splice(this.users.findIndex((u) => { return u.username === username}))
@@ -407,12 +363,6 @@ export class ChatService {
 	isAdmin(user: ChatUser, room: Room) : boolean
 	{
 		return (room.admins.find((u) => { u === user }) !== undefined)
-	}
-
-	getAllRooms(): Room[]
-	{
-		const ref = this.rooms;
-		return (ref);
 	}
 
 	//remake that
@@ -433,7 +383,6 @@ export class ChatService {
 				owner: r.owner,
 			}
 			client.join(r.id.toString());
-			user.room_list.push(r.name);
 			client.emit("JOINED_ROOM", data);
 		}
 		

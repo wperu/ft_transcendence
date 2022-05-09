@@ -12,6 +12,5 @@ export interface ChatUser
 
     username: string,
     reference_id: number,
-    room_list: string[],
     /* ... */
 }
