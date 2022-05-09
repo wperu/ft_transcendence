@@ -15,6 +15,7 @@ export class GameHistoryService {
 	async getUserGameHistory(user: User): Promise<FinishedGame []>
 	{
 		return (await this.finishedGames.find({
+			relations: ["player_one", "player_two"],
 			where: [
 				{ player_one: user},
 				{ player_two: user},
