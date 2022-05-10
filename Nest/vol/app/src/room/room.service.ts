@@ -24,7 +24,6 @@ export class RoomService
 
 		private userService: UsersService,
 	) {}
-	
 
 	async findRoomByName(name: string) : Promise<ChatRoomEntity | undefined>
 	{
@@ -544,6 +543,10 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
+		if (room === undefined)
+			return ("Room doesn't exist !")
+		if (room.isDm === true)
+			return ("You can't do that in dm room !");
 		if (await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
