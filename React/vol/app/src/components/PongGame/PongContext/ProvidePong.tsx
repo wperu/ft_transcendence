@@ -1,10 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate, useNavigationType } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
-import { NumberLiteralType } from "typescript";
 import { useAuth } from "../../../auth/useAuth";
 import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
-import { UpdatePongRoomDTO } from '../../../Common/Dto/pong/UpdatePongRoomDTO'
+import { TrailFX } from "../PongTrail";
 
 export interface IPongUser
 {
@@ -39,20 +38,6 @@ export interface IPongRoom
     spectators: Array<IPongUser>,
     state: RoomState,
     socket: Socket,
-}
-
-export interface TrailParticle
-{
-    x: number,
-    y: number,
-    vel_x: number,
-    vel_y: number,
-    id: number,
-}
-
-export interface TrailFX
-{
-    points: Array<TrailParticle>,
 }
 
 export interface FX

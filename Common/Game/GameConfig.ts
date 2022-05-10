@@ -1,14 +1,14 @@
 
-class GameConfig
+const GameConfig =
 {
-    public static readonly BALL_SIZE: number = 0.1;
-    public static readonly BALL_SPEED: number = 1.1;
-    public static readonly PLAYER_SIZE: number = 0.25;
-    public static readonly PLAYER_SPEED: number = 0.9;
-    public static readonly PLAYER_FRICTION: number = 0.5;
-    public static readonly PLAYER_SWEEP_FORCE: number = 0.47;
-    public static readonly TERRAIN_PADDING_X: number = 0.05;
-    public static readonly TERRAIN_PADDING_Y: number = 0.13;
+    BALL_SIZE: 0.1,
+    BALL_SPEED: 1.1,
+    PLAYER_SIZE: 0.25,
+    PLAYER_SPEED: 0.9,
+    PLAYER_FRICTION: 0.5,
+    PLAYER_SWEEP_FORCE: 0.47,
+    TERRAIN_PADDING_X: 0.05,
+    TERRAIN_PADDING_Y: 0.13,
 }
 
 export { GameConfig } 

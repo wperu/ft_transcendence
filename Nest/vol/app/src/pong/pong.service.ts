@@ -112,7 +112,7 @@ export class PongService {
     initRoom(creator: PongUser) : PongRoom
     {
         return ({
-            room_id: randomInt(9999999),
+            id: randomInt(9999999),
             player_1: creator,
             player_2: undefined,
             ball: {
@@ -149,9 +149,9 @@ export class PongService {
     {
         let new_room = this.initRoom(creator);
 
-        while(this.rooms.find((r) => (r.room_id === new_room.room_id)) !== undefined)
+        while(this.rooms.find((r) => (r.id === new_room.id)) !== undefined)
         {
-            new_room.room_id = randomInt(9999999);
+            new_room.id = randomInt(9999999);
         }
 
         this.rooms.push(new_room)
@@ -188,7 +188,7 @@ export class PongService {
     async startRoom(room: PongRoom)
     {
         let starting_obj: StartPongRoomDTO = {
-            room_id: room.room_id,
+            room_id: room.id,
 
             player_1: {
                 username: room.player_1.username,
@@ -312,7 +312,7 @@ export class PongService {
 
     async updatePlayer(client: Socket, data: SendPlayerKeystrokeDTO)
     {
-        let room = this.rooms.find ((r) => r.room_id === data.room_id);
+        let room = this.rooms.find ((r) => r.id === data.room_id);
         let user = await this.getUserFromSocket(client);
 
         if (room === undefined)

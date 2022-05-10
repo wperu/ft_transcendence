@@ -1,5 +1,6 @@
 import { PongUser } from "./PongUser"
 import { PongBall } from "./PongBall"
+import { Socket } from "socket.io"
 
 export enum RoomState
 {
@@ -10,7 +11,7 @@ export enum RoomState
 
 export interface PongRoom
 {
-    room_id: number,
+    id: number,
     player_1: PongUser,
     player_2: PongUser,
     ball: PongBall,
@@ -18,4 +19,6 @@ export interface PongRoom
     state: RoomState,
     interval?: NodeJS.Timer,
 }
+
+Socket
 
