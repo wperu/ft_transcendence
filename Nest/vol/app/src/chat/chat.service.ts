@@ -17,7 +17,6 @@ import { Room } from './interface/room';
 
 /** //todo
  * 	get friend response and send notice
- * 	rm old rooms stuff
  *  rework message system ?
  */
 
@@ -98,7 +97,7 @@ export class ChatService {
     }
 
 
-	disconnectClient(socket: Socket): ChatUser | undefined
+	async disconnectClient(socket: Socket): Promise<ChatUser | undefined>
 	{
 		const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
 
@@ -111,9 +110,7 @@ export class ChatService {
 		if (chatUser === undefined)
 			return undefined;//throw error
 		
-
 		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id}), 1);
-
 		return (chatUser);
 	}
 
@@ -424,8 +421,15 @@ export class ChatService {
 	 *
 	 */
 
-	//Todo create userDto 
-	//todo Status of user
+	isConnected(refId: number) : boolean
+	{
+		const ret = this.getUserFromID(refId);
+		if (ret === undefined)
+		 return false;
+		return true;
+	}
+	
+	//todo Status of user is In game ?
 	async getFriendList(user: ChatUser) : Promise<UserDataDto[]>
 	{
 		const relation = await this.friendService.findFriendOf(user.reference_id);
@@ -440,12 +444,12 @@ export class ChatService {
 			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
 
 			let username = user2?.username || "default";
-			//let status = user.is_connected; //todo
+			let status = this.isConnected(rel.id_two);
 
 			ret.push({
 				username: username,
 				reference_id: rel.id_two,
-				is_connected: user2.is_connected,
+				is_connected: status,
 			});
 		};
 		return ret;
@@ -500,6 +504,8 @@ export class ChatService {
 	}
 
 
+
+	
 	
 	/**
 	 * Return true if a newRequest was created

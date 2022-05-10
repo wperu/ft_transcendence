@@ -10,6 +10,7 @@ import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 
 
 // Todo fix origin
+// Todo add namespace
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
 	/*namespace: "/chat/", */
@@ -137,7 +138,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('PROTECT_ROOM')
 	protectRoom(client: Socket, payload: RoomProtect)
 	{
-		let local_room = this.chatService.getRoom(payload.room_name)
+		/*let local_room = this.chatService.getRoom(payload.room_name)
 		if (local_room === undefined)
 		{
 			console.error(`Cannot set protection to unknown room: ${payload.room_name}`);
@@ -156,7 +157,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				local_room.private_room = false;
 				local_room.password = payload.opt;
 			}
-		}
+		}*/
 	}
 
 
@@ -229,8 +230,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.logger.log(`Client emit promote: ${client.id}`);
 	}
 
-
-	// TODO do some RoomListDTO  
 	@SubscribeMessage('ROOM_LIST')
 	async room_list(client: Socket): Promise<void>
 	{
@@ -273,19 +272,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
-
-	handleDisconnect(client: Socket)
+	/**
+	 * Upon disconnection, sockets leave all the channels they were part of automatically, and no special teardown is needed on your part.
+	 * https://socket.io/docs/v3/rooms/#disconnection
+	 * @param client 
+	 */
+	async handleDisconnect(client: Socket)
 	{
 		this.logger.log(`Client disconnected: ${client.id}`);
 		//this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
 		
-		let userInfo : ChatUser | undefined = this.chatService.disconnectClient(client);
+		let userInfo : ChatUser | undefined = await this.chatService.disconnectClient(client);
 		if (userInfo !== undefined)
 		{
 			
 			if(userInfo.socket.length === 0)
 			{
-				userInfo.room_list.forEach(room => {this.leaveRoom(client,room)});
 				this.chatService.removeUser(userInfo.username);
 			}
 		}
