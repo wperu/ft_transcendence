@@ -205,6 +205,8 @@ export class RoomService
 
 	async joinRoom(room: ChatRoomEntity, user: User, password_key: string) : Promise<ChatRoomEntity | string>
 	{
+		if(room.isDm === true)
+			return ("You can't join dm room");
 		if (room === undefined)
 			return ("no room exist !");
 		if (await this.checkBan(room.id, user.reference_id) === true)
@@ -285,11 +287,12 @@ export class RoomService
 	 */
 	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string>
 	 {
-		 const room = await this.findRoomById(chanId);
+		const room = await this.findRoomById(chanId);
  
-		 if (room === undefined)
+		if (room === undefined)
 			 return "no room !";
-		
+		if (room.isDm === true)
+			return ("You can't leave dm room !");
 		
 		 const ret = await this.roomRelRepo.findOne({
 			 relations : ["user", "room"],
@@ -448,6 +451,10 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
+		if (room === undefined)
+			return ("Room doesn't exist !")
+		if (room.isDm === true)
+			return ("You can't do that in dm room !");
 		if (await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
@@ -467,6 +474,10 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
+		if (room === undefined)
+			return ("Room doesn't exist !")
+		if (room.isDm === true)
+			return ("You can't do that in dm room !");
 		if (await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
@@ -494,8 +505,10 @@ export class RoomService
 		const room = await this.findRoomById(id);
 
 		if (room === undefined)
-			return "Unknown room";
-		
+		return ("Room doesn't exist !")
+		if (room.isDm === true)
+			return ("You can't do that in dm room !");
+
 		if (await this.isAdmin(room.id, refId) === false)
 			return "Only the room owner can change the password !";
 		
@@ -549,6 +562,10 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
+		if (room === undefined)
+			return ("Room doesn't exist !")
+		if (room.isDm === true)
+			return ("You can't do that in dm room !");
 		if (await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
@@ -571,7 +588,8 @@ export class RoomService
 
 		if (room === undefined)
 			return "Unknown room";
-
+		if (room.isDm === true)
+			return ("You can't do that in dm room !");
 		if (room.owner !== senderId)
 			return "Only the room owner can promote/demote !";
 
