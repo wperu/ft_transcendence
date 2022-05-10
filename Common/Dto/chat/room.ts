@@ -1,4 +1,9 @@
-
+export enum ELevelInRoom
+{
+	casual = 0,
+	admin = 1,
+	owner = 2,
+}
 
 export interface RoomProtect
 {
@@ -47,6 +52,14 @@ export interface UserDataDto
 	username: string,
     reference_id: number,
 	is_connected?: boolean,
+}
+
+export interface ChatUserDto
+{
+	username: string,
+	reference_id: number,
+	level: ELevelInRoom,
+	is_mute: boolean,
 }
 
 export interface RcvMessageDto
