@@ -1,28 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import { ChatPasswordService } from './room.password.service';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoomListDTO, UserRoomDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { ChatMessageService } from './room.message.service';
 
-/** //todo
- * 	encrypte passwrd /!\
- */
 @Injectable()
 export class RoomService
 {
 	constructor(
+		
+
+		@Inject(ChatMessageService)
+		private readonly msgService: ChatMessageService,
+
+		@Inject(ChatPasswordService)
+		private readonly passwordService: ChatPasswordService,
+
 		@InjectRepository(ChatRoomEntity)
 		private roomRepo: Repository<ChatRoomEntity>,
 
 		@InjectRepository(ChatRoomRelationEntity)
 		private roomRelRepo: Repository<ChatRoomRelationEntity>,
 
-		private userService: UsersService,
-	) {}
+		
+	) {
+
+	}
 
 	async findRoomByName(name: string) : Promise<ChatRoomEntity | undefined>
 	{
@@ -176,7 +184,7 @@ export class RoomService
 		room.owner			= user.reference_id;
 		room.creation_date	= new Date();
 		room.isPrivate		= isPrivate;
-		room.password_key	= password_key;
+		room.password_key	= (password_key !== undefined) ? await this.passwordService.genHash(password_key) : null;
 		room.isDm			= isDm;
 
 		room = await this.roomRepo.save(room);
@@ -211,7 +219,7 @@ export class RoomService
 			return ("banned !");
 		if (await this.isInRoom(room, user.reference_id) === true)
 			return ("already in room !");		
-		if (password_key !== room.password_key)
+		if (await this.passwordService.isMatch(password_key, room.password_key) !== true)
 			return ("Wrong password !");
 	
 	
@@ -381,8 +389,6 @@ export class RoomService
 
 		if (rooms_list === [])
 			return [];
-		
-		//rooms_list.forEach(({room}) => {
 
 		for (let rel of rooms_list)
 		{
@@ -491,8 +497,6 @@ export class RoomService
 	}
 
 	/**
-	 * //todo encrypt password
-	 * //todo "Same password"
 	 * @param id 
 	 * @param refId 
 	 * @param password 
@@ -510,7 +514,7 @@ export class RoomService
 		if (await this.isAdmin(room.id, refId) === false)
 			return "Only the room owner can change the password !";
 		
-		room.password_key = password;
+		room.password_key = await this.passwordService.genHash(password);
 
 		await this.roomRepo.save(room);
 	}
@@ -582,8 +586,6 @@ export class RoomService
 		return (true);
 	}
 
-
-	//todo already admin
 	async setIsAdmin(id: number, refId: number, senderId: number, isAdmin: boolean) : Promise<string | undefined> 
 	{
 		const room = await this.findRoomById(id);
