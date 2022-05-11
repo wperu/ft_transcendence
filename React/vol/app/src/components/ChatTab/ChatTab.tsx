@@ -1,9 +1,9 @@
 import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import "./ChatTab.css"
 import useInterval from '../../hooks/useInterval';
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
+import "./ChatTab.css";
 
 function ChatTab ()
 {
@@ -66,6 +66,8 @@ function ChatTab ()
 
 	useEffect( () =>
 	{
+		if (chatCtx.currentRoom)
+			chatCtx.currentRoom.nb_notifs = 0;
 		if (msg_list_ref.current && updated === true)
 		{
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
@@ -90,7 +92,6 @@ function ChatTab ()
 						<li key={index}>
 							<ChatMessage src_name={sender} content={message} time={send_date} refId={refId} />
 						</li>))
-					
 				}
 				</ul>
 			</div>

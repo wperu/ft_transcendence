@@ -11,13 +11,14 @@ interface	props
 	targetUserLvl: ELevelInRoom;
 	isBlockedByCurrentUser: boolean;
 	isMuted: boolean;
+	isDm: boolean;
 }
 
 function ChatUser(data: props)
 {
 	function Buttons()
 	{
-		if (data.currentUserLvl <= data.targetUserLvl)
+		if (data.currentUserLvl <= data.targetUserLvl || data.isDm)
 		{
 			return (
 				<div className="chat_user_button_div">

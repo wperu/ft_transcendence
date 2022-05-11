@@ -73,7 +73,7 @@ function JoinedChansList()
 	}
 
 	return (
-		<div>
+		<div id="joined_chans_tab">
 			<header id="channels_pms_buttons">
 				<input className="channels_pms_tab_button" type="radio"
 					name="channels_or_pms" id="channel_list"
