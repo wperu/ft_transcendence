@@ -55,7 +55,7 @@ export function NewFriendNotification(props: fren)
 			<div className="friends_notif_name">{props.name}</div>
 			<div className="friends_interactive_notif_content"> t'as ajouté à ses amis</div>
 			<div className="notif_button_div">
-				<InviteUserButton />
+				<InviteUserButton refId={props.refId}/>
 				<DirectMessage name={props.name} refId={props.refId}/>
 				<AddFriendButton user_name={props.name} already_friend={false} refId={props.refId}/>
 				<BlockUserButton user_name={props.name} already_blocked={false} refId={props.refId}/>

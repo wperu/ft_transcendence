@@ -33,7 +33,7 @@ export function Friend(props: user_props)
 				<div className="friends_user_username">{props.name}</div>
 			</div>
 			<div className="chat_user_button_div">
-				<InviteUserButton />
+				<InviteUserButton refId={props.ref_id}/>
 				<DirectMessage name={props.name} refId={props.ref_id}/>
 				<AddFriendButton user_name={props.name}
 							already_friend={true} refId={props.ref_id}/>

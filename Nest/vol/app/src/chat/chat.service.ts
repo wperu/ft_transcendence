@@ -18,7 +18,6 @@ import { Room } from './interface/room';
 /** //todo
  * 	get friend response and send notice
  *  rework message system ?
- *  //fix dm room create !
  */
 
 @Injectable()

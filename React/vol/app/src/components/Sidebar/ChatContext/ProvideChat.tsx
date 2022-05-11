@@ -286,13 +286,12 @@ function useChatProvider() : IChatContext
 	 * ***** Notification *****
 	 */
 
-	function addNotif(notif: INotif[])
-	{
+	const addNotif = useCallback((notif: INotif[]) =>{
 		setNotification(prev => {
 			//notif.filter((n) => {return (!(prev.find((p) => (n.req_id && p.req_id && n.req_id === p.req_id))))});
 			return [...prev, ...notif];
 		});
-	};
+	}, []);
 
 	function rmNotif(id: string)
 	{
@@ -314,7 +313,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
-			//addNotif(data);
+			addNotif(data);
 		});
 		
 		return function cleanup() {
@@ -323,7 +322,7 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_NOTIF');
 			}
 		};
-	}, [socket]);
+	}, [socket, addNotif]);
 
 	/**
 	 * ***** Relation Ship *****
@@ -395,6 +394,7 @@ function useChatProvider() : IChatContext
 	}, [notification, isNotified, socket])
 
 	useEffect(() => {
+		console.log(notification);
 		rmDeadNotif(requestList);
 	}, [requestList]);
 

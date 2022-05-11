@@ -7,6 +7,7 @@ import { CreateRoomDTO ,RoomProtect, SendMessageDTO, RoomMuteDto, RoomPromoteDto
 import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
+import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
 
 
 // Todo fix origin
@@ -324,6 +325,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					req_id: user.reference_id,
 					username: user.username,
 					content: undefined,
+					date: new Date(),
 				}]
 				
 				let ret = await this.chatService.getFriendList(us) as UserDataDto[];
@@ -374,6 +376,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					req_id: user.reference_id,
 					username: user.username,
 					content: undefined,
+					date: new Date(),
 				}]
 				
 				let ret = await this.chatService.getFriendList(recv) as UserDataDto[];
@@ -458,6 +461,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 	}
 
+
+	//todo rework emit (use date)
 	@SubscribeMessage('FRIEND_REQUEST_LIST')
 	async request_list(client: Socket) : Promise<void>
 	{
@@ -481,6 +486,39 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			const ret = await this.chatService.getBlockList(user) as UserDataDto[];
 			
 			client.emit('BLOCK_LIST', ret);
+		}
+	}
+
+	@SubscribeMessage('GAME_INVITE')
+	async game_invite(client: Socket, data: GameInviteDTO)
+	{
+		const user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		if (user !== undefined)
+		{
+			let dto: NotifDTO[];
+			
+			const dest = this.chatService.getUserFromID(data.refId);
+			if (dest === undefined)
+			{
+				//todo user is not connected;
+			}
+			else
+			{
+				dto =[
+				{
+					type: ENotification.GAME_REQUEST,
+					req_id: data.roomId,
+					content: undefined,
+					username: await this.chatService.getUsernameFromID(user.reference_id),
+					date: new Date(),
+				}]
+
+				console.log(dto);
+				for (const s of dest.socket)
+				{
+					s.emit('RECEIVE_NOTIF', dto);
+				}
+			}
 		}
 	}
 

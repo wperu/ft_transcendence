@@ -256,6 +256,7 @@ export class FriendsService
 				id_one: userIdOne,
 				id_two: userIdTwo,
 				status: EStatus.BLOCK,
+				date: new Date(),
 			}
 		}
 		relation.status	= EStatus.BLOCK;

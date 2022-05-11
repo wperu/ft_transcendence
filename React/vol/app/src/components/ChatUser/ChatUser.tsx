@@ -22,7 +22,7 @@ function ChatUser(data: props)
 			return (
 				<div className="chat_user_button_div">
 					<DirectMessage name={data.targetUsername} refId={data.refId}/>
-					<InviteUserButton />
+					<InviteUserButton  refId={data.refId}/>
 					<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 					<BlockUserButton user_name={data.targetUsername}
@@ -37,7 +37,7 @@ function ChatUser(data: props)
 				return (
 					<div className="chat_user_button_div">
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
-						<InviteUserButton />
+						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
@@ -52,7 +52,7 @@ function ChatUser(data: props)
 				return (
 					<div className="chat_user_button_div">
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
-						<InviteUserButton />
+						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}

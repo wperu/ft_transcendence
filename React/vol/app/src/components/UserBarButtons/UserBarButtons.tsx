@@ -44,7 +44,7 @@ interface blockProp
 	refId: number;
 }
 
-interface gameInvitationProp
+interface acceptGameInvitationProp
 {
 	src_name: string;
 	refId: number;
@@ -56,12 +56,23 @@ interface dmProp
 	refId: number;
 }
 
-
-export function InviteUserButton()
+interface gameInvitationProp
 {
+	refId: number;
+}
+
+export function InviteUserButton(prop: gameInvitationProp)
+{
+	const {socket} = useChatContext();
 	function onClick()
 	{
 		console.log("user invited");
+		let dto = {
+			roomId: 0, //todo create room and send
+			refId: prop.refId,
+		}
+		socket.emit('GAME_INVITE', dto);
+		
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={onClick}><img alt="" src={InviteLogo}/>invite</button>
@@ -233,7 +244,7 @@ export function AddFriendButton(prop: friendProp)
 	}
 }
 
-export function AcceptGameInvitation(prop: gameInvitationProp)
+export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 {
 	function accept()
 	{
