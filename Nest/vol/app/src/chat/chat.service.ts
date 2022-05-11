@@ -141,7 +141,7 @@ export class ChatService {
 				id: room.id,
 				room_name: (data.isDm === false) ? room.name : user2.username,
 				protected: (room.password_key !== null),
-				level: await this.roomService.getUserLevel(room.id, room.owner, user.reference_id),
+				level: (data.isDm) ? ELevelInRoom.casual : await this.roomService.getUserLevel(room.id, room.owner, user.reference_id),
 				isDm: data.isDm,
 				owner: (data.isDm === false) ? room.owner : user2.reference_id,
 			}
