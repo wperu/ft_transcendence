@@ -288,7 +288,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			
 			if(userInfo.socket.length === 0)
 			{
-				this.chatService.removeUser(userInfo.username);
+				this.chatService.removeUser(userInfo.reference_id);
 			}
 		}
 	}

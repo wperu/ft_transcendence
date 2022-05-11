@@ -13,6 +13,7 @@ import { RoomModule } from './room/room.module';
 import DatabaseFile from './entities/databaseFile.entity';
 import { ChatRoomEntity } from './entities/room.entity';
 import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
+import { ChatMessageEntity } from './entities/message.entity';
 
 
 @Module({
@@ -30,7 +31,8 @@ import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
 				FriendShip,
 				DatabaseFile,
 				ChatRoomRelationEntity,
-				ChatRoomEntity
+				ChatRoomEntity,
+				ChatMessageEntity
 			],
 			synchronize: true,
 		}

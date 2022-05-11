@@ -18,6 +18,7 @@ import { Room } from './interface/room';
 /** //todo
  * 	get friend response and send notice
  *  rework message system ?
+ *  //fix dm room create !
  */
 
 @Injectable()
@@ -347,9 +348,9 @@ export class ChatService {
 		client.emit("NOTIFICATION", dto);
 	}
 
-	removeUser(username: string) 
+	removeUser(refId: number) 
 	{
-		this.users.splice(this.users.findIndex((u) => { return u.username === username}))
+		this.users.splice(this.users.findIndex((u) => { return u.reference_id === refId}))
 	}
 
 	isOwner(user: ChatUser, room: Room): boolean
@@ -428,7 +429,7 @@ export class ChatService {
 		 return false;
 		return true;
 	}
-	
+
 	//todo Status of user is In game ?
 	async getFriendList(user: ChatUser) : Promise<UserDataDto[]>
 	{
