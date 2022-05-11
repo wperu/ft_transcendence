@@ -36,20 +36,18 @@ export class ChatMessageService
 	/** //todo
 	 * 
 	 */
-	async addMessage(chatmessage: ChatMessageEntity, message: string, sender: User) : Promise<ChatMessageEntity | string>
+	async addMessage(message: string, sender: User) : Promise<ChatMessageEntity | string>
 	{
-		
-		if(chatmessage === undefined)
-			return("no Chatmessage exist !");
+		if(message === undefined)
+			return("message no exist");
 		
 		let chatmessageRel: ChatMessageEntity = new ChatMessageEntity();
 		
 		chatmessageRel.Content = message;
 		chatmessageRel.sender = sender;
 
-		await this.msgRepo.save(chatmessageRel);
+		return(await this.msgRepo.save(chatmessageRel));
 
-		return(chatmessage);
 	}
 
 	/**
