@@ -41,6 +41,7 @@ function ChannelUserList ()
 						refId={user.reference_id}
 						currentUserLvl={user_lvl}
 						isMuted={user.isMuted}
+						isDm={currentRoom !== undefined? currentRoom.isDm : false}
 						 />
 					))}
 			</ul>

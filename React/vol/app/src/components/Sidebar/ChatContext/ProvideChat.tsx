@@ -62,6 +62,7 @@ export interface IRoom
 	room_message:	RcvMessageDto[];
 	isDm:			boolean;
 	owner:			number;
+	nb_notifs:		number;
 }
 
 interface IChatContext
@@ -71,6 +72,7 @@ interface IChatContext
 
 	setCurrentRoom:			(room: IRoom | undefined) => void;
 	setCurrentRoomById:		(id: number) => void;
+	findRoomById:			(id: number) => IRoom | undefined;
 	
 	rooms: IRoom[];
 	//addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
@@ -137,6 +139,7 @@ function useChatProvider() : IChatContext
 			protected: room.protected,
 			isDm: room.isDm,
 			owner: room.owner,
+			nb_notifs: 0,
 		};
 		
 		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
@@ -191,6 +194,7 @@ function useChatProvider() : IChatContext
 			if (targetRoom !== undefined)
 			{
 				targetRoom.room_message.push(data);
+				targetRoom.nb_notifs++;
 			}
 		});
 
@@ -403,6 +407,7 @@ function useChatProvider() : IChatContext
 		currentRoom,
 		setCurrentRoom,
 		setCurrentRoomById,
+		findRoomById,
 		currentTab,
 		setCurrentTab,
 	    rooms,
