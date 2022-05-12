@@ -8,6 +8,7 @@ import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
+import { findIndex } from 'rxjs';
 
 
 // Todo fix origin
@@ -286,10 +287,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let userInfo : ChatUser | undefined = await this.chatService.disconnectClient(client);
 		if (userInfo !== undefined)
 		{
-			
 			if(userInfo.socket.length === 0)
 			{
 				this.chatService.removeUser(userInfo.reference_id);
+			}
+			else
+			{
+				userInfo.socket.splice(userInfo.socket.findIndex((s) => (client === s)))
 			}
 		}
 	}
