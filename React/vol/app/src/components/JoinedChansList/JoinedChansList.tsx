@@ -43,8 +43,8 @@ function PrivateMessages()
 		return (
 			<div id="pms_list">
 				<ul>
-					{chatCtx.rooms.map(({room_name, id, isDm}, index) => {
-						if (isDm)
+					{chatCtx.rooms.map(({room_name, id, isDm, owner}, index) => {
+						if (isDm && chatCtx.blockList.find(b => (b.reference_id === owner)) === undefined)
 							return (<li key={index}><JoinedChan id={id} name={room_name}/></li>);
 						else
 							return (null);

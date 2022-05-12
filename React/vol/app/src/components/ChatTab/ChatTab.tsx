@@ -88,11 +88,11 @@ function ChatTab ()
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date, refId} , index) => (
-						<li key={index}>
-							<ChatMessage src_name={sender} content={message} time={send_date} refId={refId} />
-						</li>))
-				}
+					messages.map(({message, sender, send_date, refId} , index) => {
+						if (chatCtx.blockList.find(b => (b.reference_id === refId)) === undefined)
+							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
+						return (null);
+						})}
 				</ul>
 			</div>
 			<footer id="msg_footer">
