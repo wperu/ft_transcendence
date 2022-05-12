@@ -29,7 +29,6 @@ interface promoteProp
 	refId: number;
 }
 
-
 interface friendProp
 {
 	user_name: string;
@@ -212,21 +211,21 @@ export function PromoteUserButton(prop: promoteProp)
 		return (<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>);
 }
 
+
+
+
 export function AddFriendButton(prop: friendProp)
 {
 	const chtCtx = useChatContext();
 
 	function addFriend()
 	{
-		console.log(prop.user_name + " friend :D");
-
 		chtCtx.rmFriendNotif(prop.refId);
 		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
 	
 	function removeFriend()
 	{
-		console.log(prop.user_name + " not friend anymore");
 		chtCtx.socket.emit('RM_FRIEND', prop.refId);
 	}
 
@@ -261,7 +260,6 @@ export function DirectMessage(prop: dmProp)
 
 	function goDM()
 	{
-		//first step find if dm
 		if (goToDmWith(prop.refId) === false)
 		{
 			awaitDm(prop.refId);
@@ -273,8 +271,6 @@ export function DirectMessage(prop: dmProp)
 			}
 			socket.emit("CREATE_ROOM", dto);
 		}
-		
-		console.log("go dm avec " + prop.name)
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={goDM}><img alt="" src={ChatLogo}/>DM</button>

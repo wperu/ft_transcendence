@@ -513,12 +513,26 @@ export class ChatService {
 	 * @param ref_id 
 	 * @returns 
 	 */
-	async addFriend(user: ChatUser, ref_id : number) : Promise<boolean>
+	async addFriend(client: Socket, user: ChatUser, ref_id : number) : Promise<boolean>
 	{
-		if (await this.friendService.addRequestFriend(user.reference_id, ref_id) !== undefined)
+		const ret = await this.friendService.addRequestFriend(user.reference_id, ref_id)
+		
+		if (ret === undefined)
+		{
+			return false;
+		}
+		else if (typeof ret === 'string')
+		{
+			const dto : NoticeDTO = { level: ELevel.error, content: ret };
+			client.emit("NOTIFICATION", dto);
+			return false;
+		}
+		else
+		{
+			const dto : NoticeDTO = { level: ELevel.info, content: "Request Send !" };
+			client.emit("NOTIFICATION", dto);
 			return true;
-
-		return false;
+		}
 	}
 
 	async getUserByUsername(username : string) : Promise<User>

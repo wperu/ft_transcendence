@@ -8,7 +8,6 @@ import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
-import { findIndex } from 'rxjs';
 
 
 // Todo fix origin
@@ -315,7 +314,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user !== undefined)
 		{
-			if (await this.chatService.addFriend(user, payload) === false)
+			if (await this.chatService.addFriend(client, user, payload) === false)
 				return ;
 
 			let us = this.chatService.getUserFromID(payload);
@@ -366,7 +365,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let us = await this.chatService.getUserByUsername(payload);
 		if (us !== undefined)
 		{
-			if(await this.chatService.addFriend(user, us.reference_id) === false)
+			if(await this.chatService.addFriend(client, user, us.reference_id) === false)
 				return ;
 
 			let recv = this.chatService.getUserFromID(us.reference_id);
@@ -460,7 +459,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
 			
-		//	console.log(ret);
 			client.emit('FRIEND_LIST', ret);
 		}
 	}
@@ -517,7 +515,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					date: new Date(),
 				}]
 
-				console.log(dto);
 				for (const s of dest.socket)
 				{
 					s.emit('RECEIVE_NOTIF', dto);

@@ -21,7 +21,6 @@ interface fren
 	refId: number;
 }
 
-//fix me refID
 export function InfoNotification(props: infos)
 {
 	return (
@@ -31,6 +30,7 @@ export function InfoNotification(props: infos)
 		</div>
 	);
 }
+
 
 export function InviteNotification(props: invite)
 {
