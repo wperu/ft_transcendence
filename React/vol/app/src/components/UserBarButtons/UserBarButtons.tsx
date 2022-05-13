@@ -6,6 +6,7 @@ import PromoteLogo from "../../ressources/images/promote.png";
 import AddFriendLogo from "../../ressources/images/add-friend.png";
 import AcceptInvitationLogo from "../../ressources/images/accept.png";
 import ChatLogo from "../../ressources/images/chatting.png";
+import CloseLogo from "../../ressources/images/close.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
@@ -14,7 +15,6 @@ interface Prop
 {
 	user_name: string;
 	refId: number;
-	
 }
 
 interface muteProp extends Prop
@@ -56,6 +56,11 @@ interface dmProp
 }
 
 interface gameInvitationProp
+{
+	refId: number;
+}
+
+interface refuseProp
 {
 	refId: number;
 }
@@ -252,6 +257,15 @@ export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 	return (
 		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitationLogo}/>play</button>
 	);
+}
+
+export function DeleteNotification(prop: refuseProp)
+{
+	function close()
+	{
+		console.log("refuse invitation");
+	}
+	return (<button className="close_notification_button" onClick={close}><img alt="" src={CloseLogo}/></button>)
 }
 
 export function DirectMessage(prop: dmProp)

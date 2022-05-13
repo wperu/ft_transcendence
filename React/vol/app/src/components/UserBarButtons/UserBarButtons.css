@@ -35,3 +35,23 @@
 {
 	transform: rotate(180deg);
 }
+
+.close_notification_button
+{
+	margin: 0 0.3em;
+	opacity: 50%;
+	height: 30%;
+	width: max-content;
+	background-color: transparent;
+	border: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.close_notification_button img
+{
+	max-width: auto;
+	max-height: 100%;
+	vertical-align: middle;
+}
