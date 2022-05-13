@@ -1,5 +1,9 @@
-import { ELevelInRoom } from "./RoomJoined"
-
+export enum ELevelInRoom
+{
+	casual = 0,
+	admin = 1,
+	owner = 2,
+}
 
 export interface RoomProtect
 {
@@ -54,6 +58,7 @@ export interface UserDataDto
 	is_connected?: boolean,
 }
 
+
 export interface UserRoomDataDto
 {
 	username:		string,
@@ -62,6 +67,13 @@ export interface UserRoomDataDto
 	isMuted:		boolean,
 	isBan:			boolean,
 	level:			ELevelInRoom,
+}
+export interface ChatUserDto
+{
+	username: string,
+	reference_id: number,
+	level: ELevelInRoom,
+	is_mute: boolean,
 }
 
 export interface RcvMessageDto

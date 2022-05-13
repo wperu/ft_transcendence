@@ -522,6 +522,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 		}
 	}
-
+  
 }
-

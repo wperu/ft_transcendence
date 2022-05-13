@@ -214,7 +214,7 @@ export class ChatService {
 			
 			let data : NoticeDTO;
 			data = { level: ELevel.info, content: "Room " + room.name + " joined" };
-			client.emit("NOTIFICATION", data);	
+			client.emit("NOTIFICATION", data);
 		}
 		else
 		{

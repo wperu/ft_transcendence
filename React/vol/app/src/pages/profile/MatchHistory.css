@@ -12,29 +12,29 @@
 	}
 }
 
-.history_match > *
+.history_match_infos > *
 {
 	display: inline;
 	text-align: center;
 }
 
-.match_score_separator
-{
-	width: fit-content;
-	color: lightblue;
-}
-
 .history_match
 {
+	font-size: 1.1em;
 	background-color: #2d3444;
 	color: whitesmoke;
-	width: 55%;
+	width: 60%;
+	margin: 0.5em auto;
+	border: 1px solid whitesmoke;
+	list-style-type: none;
+}
+
+.history_match_infos
+{
 	display: flex;
 	justify-content: space-around;
 	align-items: center;
 	height: 1.7em;
-	margin: 0.5em auto;
-	border: 1px solid whitesmoke;
 }
 
 .history_match_user
@@ -47,10 +47,16 @@
 	width: 10%;
 }
 
-.victory, .defeat, .draw, .outcome_counterweight
+.match_score_separator
+{
+	width: fit-content;
+	color: lightblue;
+}
+
+.victory, .defeat, .draw, .history_match_date
 {
 	height: fit-content;
-	width: 13%;
+	width: 15%;
 }
 
 .victory, .defeat, .draw
@@ -61,12 +67,12 @@
 	text-justify: center;
 }
 
-.victory
+.victory, .match_option_on
 {
 	color: greenyellow;
 }
 
-.defeat
+.defeat, .match_option_off
 {
 	color: red;
 }
@@ -74,4 +80,19 @@
 .draw
 {
 	color: lightgrey;
+}
+
+.history_match_date
+{
+	font-size: 0.55em;
+	display: flex;
+	flex-direction: column;
+	color: rgb(194, 192, 192);
+}
+
+.history_match_settings
+{
+	display: flex;
+	justify-content: space-evenly;
+	font-size: 0.5em;
 }
