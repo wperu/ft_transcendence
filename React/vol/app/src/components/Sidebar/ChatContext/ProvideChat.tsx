@@ -48,7 +48,7 @@ export interface INotif
 	req_id?: number;
 	username?: string;
 	content? : string;
-
+	refId?: number;
 }
 
 export interface IRoom
@@ -377,7 +377,8 @@ function useChatProvider() : IChatContext
 						id: "",
 						type: ENotification.FRIEND_REQUEST,
 						req_id: req.reference_id,
-						username: req.username
+						username: req.username,
+						refId: req.reference_id,
 					});
 				}	
 			})

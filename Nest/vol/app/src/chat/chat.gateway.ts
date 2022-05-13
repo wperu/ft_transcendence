@@ -513,6 +513,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					content: undefined,
 					username: await this.chatService.getUsernameFromID(user.reference_id),
 					date: new Date(),
+					refId: user.reference_id,
 				}]
 
 				for (const s of dest.socket)

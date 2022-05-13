@@ -25,6 +25,7 @@ export interface NotifDTO
 	content:	string;
 	username:	string;
 	date:		Date;
+	refId?:		number;
 }
 
 export interface FriendDTO
