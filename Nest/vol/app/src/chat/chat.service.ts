@@ -412,6 +412,10 @@ export class ChatService {
 		if (newAdmin !== undefined)
 		{
 			//todo send update
+			for (const s of newAdmin.socket)
+			{
+				s.emit("UPDATE_ROOM", {id: data.room_id, level: ((data.isPromote) ? ELevelInRoom.admin : ELevelInRoom.casual)});
+			}
 		}
 	}
 

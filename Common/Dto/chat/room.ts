@@ -94,7 +94,7 @@ export interface RoomListDTO
 	isDm:			boolean;
 }
 
-export interface RoomUpdataDTO
+export interface RoomUpdatedDTO
 {
 	id:			number,
 	level?:		ELevelInRoom,

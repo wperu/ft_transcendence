@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
-import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
+import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
 import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
 
@@ -245,8 +245,16 @@ function useChatProvider() : IChatContext
 	}, [socket, addRoom]);
 
 	useEffect(() => {
-		socket.on("UPDATE_ROOM", (data: RoomJoinedDTO) => {
+		socket.on("UPDATE_ROOM", (data: RoomUpdatedDTO) => {
 			//todo for each modification
+			let refR = findRoomById(data.id);
+			if (refR !== undefined)
+			{
+				if (data.isPrivate !== undefined) refR.private = data.isPrivate;
+				if (data.name !== undefined) refR.room_name = data.name;
+				if (data.level !== undefined) refR.user_level = data.level;
+			}
+
 		});
 
 		return function cleanup() {
