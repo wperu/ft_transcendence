@@ -3,9 +3,9 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
-import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
-import { RoomPassChange } from "../../../Common/Dto/chat/RoomRename";
+import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
+import { BlockLike } from "typescript";
 
 /** //fix
  *  NOTIF rework notif system
@@ -60,6 +60,9 @@ export interface IRoom
 	user_level:		ELevelInRoom;
 	room_name:		string;
 	room_message:	RcvMessageDto[];
+	isDm:			boolean;
+	owner:			number;
+	nb_notifs:		number;
 }
 
 interface IChatContext
@@ -68,10 +71,11 @@ interface IChatContext
 	currentRoom?:	IRoom;
 
 	setCurrentRoom:			(room: IRoom | undefined) => void;
-	setCurrentRoomByName:	(rname: string) => void;
+	setCurrentRoomById:		(id: number) => void;
+	findRoomById:			(id: number) => IRoom | undefined;
 	
 	rooms: IRoom[];
-	addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
+	//addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
 
 	notification:	INotif[];
 	rmNotif:		(id: string) => void;
@@ -79,6 +83,8 @@ interface IChatContext
 
 	currentTab:		ECurrentTab;
 	setCurrentTab:	(tab: ECurrentTab) => void;
+	awaitDm:		(refId: number) => void;
+	goToDmWith		(id: number) : boolean;
 
 	friendsList:			Array<UserDataDto>;
 	blockList:				Array<UserDataDto>;
@@ -87,8 +93,8 @@ interface IChatContext
 
 function useChatProvider() : IChatContext
 {
-	const notify = useNotifyContext();
-	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
+	const notify	= useNotifyContext();
+	const [socket]	= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
 			token: useAuth().user?.access_token_42
 		}
@@ -100,37 +106,53 @@ function useChatProvider() : IChatContext
 	const [friendsList, setFriendsList]		= useState<Array<UserDataDto>>([]);
 	const [requestList, setRequestList]		= useState<Array<UserDataDto>>([]);
 	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
+	const [jumpDm, awaitDm]					= useState<number | undefined>(undefined);
 
 	/**
 	 * ***** Room *****
 	 */
 
-	const setCurrentRoomByName = useCallback((name: string) => {
+
+	const goToDmWith = useCallback((id: number) => {
+		const res = rooms.find((r) => (r.isDm === true && r.owner === id));
+		
+		if (res === undefined)
+			return false;
+		setCurrentRoom(res);
+		setCurrentTab(ECurrentTab.chat);
+		return true;
+	}, [rooms])
+
+	const setCurrentRoomById = useCallback((id: number) => {
 		setCurrentRoom(rooms.find(o => {
-			return (o.room_name === name);
+			return (o.id === id);
 		}));
 	}, [rooms]);
 	
-    const addRoom = useCallback((id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => {
+    const addRoom = useCallback((room: RoomJoinedDTO) => {
 		const newRoom : IRoom = {
-			id: id,
-			user_level: level,
-			room_name: room_name,
+			id: room.id,
+			user_level: room.level,
+			room_name: room.room_name,
 			room_message: [],
-			private: false,
-			protected: is_protected,
+			private: false, //fix me ?!
+			protected: room.protected,
+			isDm: room.isDm,
+			owner: room.owner,
+			nb_notifs: 0,
 		};
 		
 		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
 		if (currentRoom !== undefined)
-			setCurrentRoomByName(currentRoom.room_name);
-    }, [currentRoom, setCurrentRoomByName]);
+			setCurrentRoomById(currentRoom.id);
+
+    }, [currentRoom, setCurrentRoomById]);
 
 
-	const rmRoom = useCallback((room_name: string) => {
+	const rmRoom = useCallback((id: number) => {
 		setRooms(prev => {
 			return prev.filter((o) => {
-				return (o.room_name !== room_name);
+				return (o.id !== id);
 			})
 		});
 	}, []);
@@ -144,13 +166,35 @@ function useChatProvider() : IChatContext
 		}));
 	}, [rooms]);
 
+	const findRoomById = useCallback((id: number) => 
+	{
+		return (rooms.find(o => {
+			return (o.id === id);
+		}));
+	}, [rooms]);
+
+	useEffect(() => {
+		if (jumpDm !== undefined)
+		{
+			const room = rooms.find(r => (r.isDm === true && r.owner === jumpDm))
+			if (room !== undefined)
+			{
+				setCurrentRoomById(room.id);
+				setCurrentTab(ECurrentTab.chat);
+				awaitDm(undefined);
+				console.log(currentRoom);
+			}
+		}
+	}, [jumpDm, rooms])
+
 	useEffect(() => {
 		
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-			let targetRoom = findRoomByName(data.room_name);
+			let targetRoom = findRoomById(data.room_id);
 			if (targetRoom !== undefined)
 			{
 				targetRoom.room_message.push(data);
+				targetRoom.nb_notifs++;
 			}
 		});
 
@@ -160,14 +204,14 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_MSG');
 			}
 		};
-	}, [rooms, findRoomByName, socket]);
+	}, [rooms, findRoomById, socket]);
 
 	useEffect(() => {
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
-			if (currentRoom !== undefined && currentRoom.room_name === data.room_name)
+			if (currentRoom !== undefined && currentRoom.id === data.id)
 				setCurrentRoom(undefined);
-			if (data.room_name !== undefined)
-				rmRoom(data.room_name);
+			if (data.id !== undefined)
+				rmRoom(data.id);
 		})
 
 		return function cleanup() {		
@@ -186,6 +230,7 @@ function useChatProvider() : IChatContext
 		socket.on("disconnect", () => {
 			setRooms([]); //clean rooms
 			setCurrentRoom(undefined);
+			awaitDm(undefined);
 		  });
 
 		return function cleanup() {
@@ -199,30 +244,29 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 
 		socket.on("JOINED_ROOM", (data: RoomJoinedDTO) => {
-			if (data.status === JOINSTATUS.JOIN && data.room_name !== undefined)
-			{
-				//if (data.protected !== undefined && data.user_is_owner !== undefined)
-				addRoom(data.id, data.room_name, data.protected, (data.user_is_owner
-						? ELevelInRoom.owner : ELevelInRoom.casual));
-			}
-		});
-
-		socket.on('ROOM_PASS_CHANGE', (data : RoomPassChange) => {
-			if (data.status == 0)
-				notify.addNotice(ELevel.info, "Password modification of room " +
-					data.room_name + " successful", 4000);
-			else if (data.status_message)
-				notify.addNotice(ELevel.error, data.status_message, 4000);
+			addRoom(data);
 		});
 
 		return function cleanup() {
 			if (socket !== undefined)
 			{
-				socket.off('ROOM_PASS_CHANGE');
 				socket.off('JOINED_ROOM');
 			}
 		};
 	}, [socket, addRoom]);
+
+	useEffect(() => {
+		socket.on("UPDATE_ROOM", (data: RoomJoinedDTO) => {
+			//todo for each modification
+		});
+
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('ROOM_UPDATE');
+			}
+		};
+	}, [rooms, socket])
 
 	/**
 	 * **** Notice *****
@@ -246,13 +290,12 @@ function useChatProvider() : IChatContext
 	 * ***** Notification *****
 	 */
 
-	function addNotif(notif: INotif[])
-	{
+	const addNotif = useCallback((notif: INotif[]) =>{
 		setNotification(prev => {
 			//notif.filter((n) => {return (!(prev.find((p) => (n.req_id && p.req_id && n.req_id === p.req_id))))});
 			return [...prev, ...notif];
 		});
-	};
+	}, []);
 
 	function rmNotif(id: string)
 	{
@@ -274,7 +317,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
-			//addNotif(data);
+			addNotif(data);
 		});
 		
 		return function cleanup() {
@@ -283,7 +326,7 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_NOTIF');
 			}
 		};
-	}, [socket]);
+	}, [socket, addNotif]);
 
 	/**
 	 * ***** Relation Ship *****
@@ -339,13 +382,10 @@ function useChatProvider() : IChatContext
 						req_id: req.reference_id,
 						username: req.username
 					});
-				}
-				
+				}	
 			})
 			addNotif(not);
-
 			setRequestList(data);
-			
 		});
 
 		return function cleanup() {		
@@ -358,6 +398,7 @@ function useChatProvider() : IChatContext
 	}, [notification, isNotified, socket])
 
 	useEffect(() => {
+		console.log(notification);
 		rmDeadNotif(requestList);
 	}, [requestList]);
 
@@ -365,14 +406,17 @@ function useChatProvider() : IChatContext
 		socket,
 		currentRoom,
 		setCurrentRoom,
-		setCurrentRoomByName,
+		setCurrentRoomById,
+		findRoomById,
 		currentTab,
 		setCurrentTab,
-    rooms,
-    addRoom,
+	    rooms,
+	   // addRoom,
 		notification,
 		rmNotif,
 		rmFriendNotif,
+		awaitDm,
+		goToDmWith,
 		friendsList,
 		blockList,
     });

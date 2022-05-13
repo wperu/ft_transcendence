@@ -13,8 +13,10 @@ import { RoomModule } from './room/room.module';
 import DatabaseFile from './entities/databaseFile.entity';
 import { ChatRoomEntity } from './entities/room.entity';
 import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
+import { ChatMessageEntity } from './entities/message.entity';
 import { GameHistoryModule } from './game-history/game-history.module';
 import { FinishedGame } from './entities/finishedGame.entity';
+
 
 
 @Module({
@@ -33,7 +35,8 @@ import { FinishedGame } from './entities/finishedGame.entity';
 				DatabaseFile,
 				FinishedGame,
 				ChatRoomRelationEntity,
-				ChatRoomEntity
+				ChatRoomEntity,
+				ChatMessageEntity
 			],
 			synchronize: true,
 		}

@@ -9,12 +9,13 @@ import { In, Repository } from 'typeorm';
  * * Request avoid friend
  * * unfriend
  * * add Try Catch on save (prevent thow from duplication of relation)
- *
+ * * send response with string return like roomService
+ * * add Date() to request.
+ * * maybe add getter to make a request ?
  */
 @Injectable()
 export class FriendsService
 {
-
 	constructor(
 		@InjectRepository(FriendShip)
 		private friendRepository: Repository<FriendShip>,
@@ -91,18 +92,20 @@ export class FriendsService
 	//Todo if user1 and user2 request call -> accepteRequestFriend
 	/**
 	 * add new friend Request
+	 * 
+	 * Send new request create or string with error or undefined for dupRequest
 	 * @param userIdOne 
 	 * @param userIdTwo 
-	 * @returns friendRequest if newRequest was create else undefined
+	 * @returns
 	 */
-	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | undefined>
+	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | string | undefined>
 	{
 		if (userIdOne === userIdTwo)
-			return undefined;
+			return "You don't have friend ?";
 		const rel = await this.findFriendRelationOf(userIdOne, userIdTwo);
 		if (rel !== undefined ) //request already exist or isFriend
 		{
-			return undefined;
+			return "Request already send !";
 		}
 		else
 		{
@@ -110,7 +113,7 @@ export class FriendsService
 			const rel_two = await this.findFriendRelationOf(userIdTwo, userIdOne);
 
 			if (rel_two !== undefined && rel_two.status === EStatus.BLOCK)
-				return undefined
+				return "Request impossible !"
 
 			if (rel_two !== undefined && rel_two.status === EStatus.REQUEST)
 			{
@@ -120,7 +123,7 @@ export class FriendsService
 				}
 				catch (e)
 				{
-
+					return undefined;
 				}
 
 				req.status = EStatus.FRIEND;
@@ -255,6 +258,7 @@ export class FriendsService
 				id_one: userIdOne,
 				id_two: userIdTwo,
 				status: EStatus.BLOCK,
+				date: new Date(),
 			}
 		}
 		relation.status	= EStatus.BLOCK;

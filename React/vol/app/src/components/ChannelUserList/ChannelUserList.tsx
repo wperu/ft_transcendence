@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { UserDataDto } from "../../Common/Dto/chat/room";
+import { UserRoomDataDto } from "../../Common/Dto/chat/room";
 import useInterval from "../../hooks/useInterval";
 import ChatUser from "../ChatUser/ChatUser";
 import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
@@ -7,45 +7,43 @@ import "./ChannelUserList.css"
 
 function ChannelUserList ()
 {
-	const chatCtx = useChatContext();
-	let user_lvl : ELevelInRoom = ELevelInRoom.casual;
-	const [userList, setUserList] = useState<Array<UserDataDto>>([]);
+	const {socket, currentRoom} = useChatContext();
+	const user_lvl = (currentRoom !== undefined ) ? currentRoom.user_level : ELevelInRoom.casual;
+	const [userList, setUserList] = useState<Array<UserRoomDataDto>>([]);
 	
 	useEffect(() => {
-		chatCtx.socket.on("USER_LIST", (data: Array<UserDataDto>) => {
+		socket.on("USER_LIST", (data: Array<UserRoomDataDto>) => {
 			setUserList(data);
 		})
 
 		return function cleanup() {
-			if (chatCtx.socket !== undefined)
+			if (socket !== undefined)
 			{
-				chatCtx.socket.off("USER_LIST");
+				socket.off("USER_LIST");
 			}
 		};
 	}, []);
 
 	useEffect(() => {
-		chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.id);
-	}, [chatCtx.socket])
+		socket.emit("USER_LIST", currentRoom?.id);
+	}, [socket, currentRoom?.id])
 
-	useInterval(() => {chatCtx.socket.emit("USER_LIST", chatCtx.currentRoom?.id);}, 1000);
-
-
-	if (chatCtx.currentRoom)
-		user_lvl = chatCtx.currentRoom.user_level;
+	useInterval(() => {socket.emit("USER_LIST", currentRoom?.id);}, 2000);
+	
 	return (
 		<div id="channel_users_list">
 			<ul>
-				{userList.map((user, index) => (
- 				<li key={user.reference_id}>
-					<ChatUser
-						isMuted={false}
+				{userList.map((user) => (
+					<ChatUser key={user.reference_id}
 						isBlockedByCurrentUser={false}
-						targetUserLvl={ELevelInRoom.casual}
+						targetUserLvl={user.level}
 						targetUsername={user.username}
 						refId={user.reference_id}
-						currentUserLvl={user_lvl}/>
-				</li>))}
+						currentUserLvl={user_lvl}
+						isMuted={user.isMuted}
+						isDm={currentRoom !== undefined? currentRoom.isDm : false}
+						 />
+					))}
 			</ul>
 		</div>
 	);

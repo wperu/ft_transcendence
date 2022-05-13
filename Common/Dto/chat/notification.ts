@@ -20,10 +20,11 @@ export type ENotification = //'INFO' | 'GAME_REQUEST' | 'GAME_REQUEST';
 
 export interface NotifDTO
 {
-	type: ENotification;
-	req_id: number;
-	content: string;
-	username: string;
+	type:		ENotification;
+	req_id:		number;
+	content:	string;
+	username:	string;
+	date:		Date;
 }
 
 export interface FriendDTO

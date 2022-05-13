@@ -5,8 +5,8 @@ import { TokenService } from 'src/auth/token.service';
 
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
-import { CreateRoom, RoomLeftDto, UserDataDto } from 'src/Common/Dto/chat/room';
-import { JOINSTATUS, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
+import { CreateRoomDTO, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { ELevelInRoom, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
@@ -14,18 +14,22 @@ import { RoomService } from 'src/room/room.service';
 import { UsersService } from 'src/users/users.service';
 import { Room } from './interface/room';
 
+
+/** //todo
+ * 	get friend response and send notice
+ *  rework message system ?
+ */
+
 @Injectable()
 export class ChatService {
     constructor (
         private tokenService: TokenService,
 		private friendService: FriendsService,
-		private rooms: Room[],
 		private users: ChatUser[],
 		private userService: UsersService,
 		private roomService: RoomService
-
     )
-    { this.rooms = [];}
+    {}
 
 
 	connectUserFromSocket(socket: Socket): ChatUser | undefined
@@ -39,7 +43,6 @@ export class ChatService {
 			socket: [socket], 
 			username: data.username,
 			reference_id: data.reference_id,
-			room_list: [],
 		})
 
 
@@ -94,7 +97,7 @@ export class ChatService {
     }
 
 
-	disconnectClient(socket: Socket): ChatUser | undefined
+	async disconnectClient(socket: Socket): Promise<ChatUser | undefined>
 	{
 		const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
 
@@ -107,12 +110,7 @@ export class ChatService {
 		if (chatUser === undefined)
 			return undefined;//throw error
 		
-
 		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id}), 1);
-
-		/*if (chatUser.socketId.length === 0)
-			users.splice(users.findIndex((u) => { return u.username === us.username}), 1);*/
-
 		return (chatUser);
 	}
 
@@ -123,60 +121,75 @@ export class ChatService {
 		return (room.users.find((u) => { u === user }) !== undefined)
 	}
 
+	
 
-
-	async createRoom(client: Socket, user: ChatUser, data : CreateRoom) : Promise<void>
+	async createRoom(client: Socket, user: ChatUser, data : CreateRoomDTO) : Promise<void>
 	{
-		
-		const resp = await this.roomService.createRoom(data.room_name, await this.userService.findUserByReferenceID(user.reference_id), data.private_room, data.password, false);
-		this.rooms.push({
-			name: data.room_name,
-			private_room: data.private_room,
-			users: [user],
-			admins: [], // admin =/= owner
-			invited : [],
-			muted: [],
-			banned : [],
-			owner: user,
-			password : data.password,
-		})
+		const user1 = await this.userService.findUserByReferenceID(user.reference_id);
+		const user2 = await this.userService.findUserByReferenceID(data.with);
+
+		const resp = await this.roomService.createRoom(data.room_name, user1, data.private_room, data.password, data.isDm, user2);
 
 		if (resp instanceof ChatRoomEntity)
 		{
 			let room = resp;
 
-			user.socket.forEach(s => {
+			let dto : RoomJoinedDTO;
 
-				let data : RoomJoinedDTO;
+			dto = {
+				id: room.id,
+				room_name: (data.isDm === false) ? room.name : user2.username,
+				protected: (room.password_key !== null),
+				level: (data.isDm) ? ELevelInRoom.casual : await this.roomService.getUserLevel(room.id, room.owner, user.reference_id),
+				isDm: data.isDm,
+				owner: (data.isDm === false) ? room.owner : user2.reference_id,
+			}
+			
+			for (const s of user.socket) 
+			{
+				s.join(room.id.toString());
+				s.emit("JOINED_ROOM", dto);
+			};
 
-				data = {
-					status: JOINSTATUS.JOIN,
-					id: room.id,
-					room_name:  room.name,
-					protected: (room.password_key != undefined),
-					user_is_owner: room.owner === user.reference_id,
-				}
-				s.join(data.room_name);
-				s.emit("JOINED_ROOM", data);
-			});
+			if (data.isDm)
+			{
+				const us = this.getUserFromID(user2.reference_id);
 
-			let data : NoticeDTO;
-			data = { level: ELevel.info, content: "Room " + room.name + " created" };
-			client.emit("NOTIFICATION", data);	
+				dto.room_name = user1.username;
+				dto.owner= user1.reference_id;
+
+				for (const s of us.socket) 
+				{
+					s.join(room.id.toString());
+					s.emit("JOINED_ROOM", dto);
+				};
+			}
+			else
+			{
+				let nDto : NoticeDTO;
+				nDto = { level: ELevel.info, content: "Room " + room.name + " created" };
+				client.emit("NOTIFICATION", nDto);
+			}
 		}
 		else
 		{
-			let data : NoticeDTO;
-			data = { level: ELevel.error, content: resp };
-			client.emit("NOTIFICATION", data);
+			let nDto : NoticeDTO;
+			nDto = { level: ELevel.error, content: resp };
+			client.emit("NOTIFICATION", nDto);
 		}
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, roomName: string)
+	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto)
 	{
 		let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		let resp = await this.roomService.joinRoom(roomName, userRoom);
+		let resp;
+
+		if (data.id !== undefined)
+			resp = await this.roomService.joinRoomById(data.id, userRoom, data.password);
+		else
+			resp = await this.roomService.joinRoomByName(data.roomName, userRoom, data.password);
+
 
 		if (resp instanceof ChatRoomEntity)
 		{
@@ -187,13 +200,15 @@ export class ChatService {
 				let data : RoomJoinedDTO;
 
 				data = {
-					status: JOINSTATUS.JOIN,
 					id: room.id,
-					room_name:  room.name,
-					protected: (room.password_key != undefined),
-					user_is_owner: room.owner === user.reference_id,
+					room_name: room.name,
+					protected: (room.password_key !== null),
+					level: ELevelInRoom.casual,
+					isDm: false,
+					owner: room.owner,
 				}
-				s.join(roomName);
+
+				s.join(room.id.toString());
 				s.emit("JOINED_ROOM", data);
 			});
 			
@@ -213,9 +228,12 @@ export class ChatService {
 	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string)
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
-		if (await this.roomService.leaveRoomById(id, user.reference_id) === false)
+		const resp = await this.roomService.leaveRoomById(id, user.reference_id)
+		if (typeof resp === "string")
 		{
-
+			let data : NoticeDTO;
+			data = { level: ELevel.error, content: resp };
+			client.emit("NOTIFICATION", data);
 			return ;
 		}
 
@@ -224,12 +242,12 @@ export class ChatService {
 		let dto: RoomLeftDto;
 		
 		dto = {
-			id: 0,
+			id: id,
 			room_name: roomName,
 			//room_name: roomName,
 		}
 		user.socket.forEach((s) => {
-			s.leave(roomName);
+			s.leave(id.toString());
 			s.emit('LEFT_ROOM', dto);
 		});
 
@@ -238,54 +256,100 @@ export class ChatService {
 		client.emit("NOTIFICATION", data);	
 	}
 
-
-
+	/***
+	 * Send list of user for roomID
+	 */
 	async roomUserList(client: Socket, user: ChatUser, roomId: number)
 	{
 		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
-
+		
 		if (typeof resp !== 'string')
 		{
 			client.emit("USER_LIST", resp);
 		}
-		//console.log(ret);
 	}
 
-
-
-	roomExists(room_name: string) : boolean
+	async roomBanUser(client: Socket, user: ChatUser, data: RoomBanDto): Promise<void>
 	{
-		return (this.rooms.find((r) => {return r.name === room_name}) !== undefined);
-	}
+		let resp;
 
-
-
-	getRoom(room_name: string): Room
-	{
-		if (this.roomExists(room_name) === true)
+		if (data.isBan)
 		{
-			const el = this.rooms.find((r) => { return r.name === room_name});
-			return (el);
+			const ban_expire = new Date(Date.now() + data.expires_in);
+			resp = await this.roomService.banUser(data.id, user.reference_id, data.refId, ban_expire);
 		}
 		else
-			return (undefined);
+			resp = await this.roomService.unbanUser(data.id, user.reference_id, data.refId);
+		
+		let dto : NoticeDTO;
+		if (resp instanceof ChatRoomEntity)
+		{
+			let left_dto : RoomLeftDto;
+
+			left_dto = {
+				id : resp.id,
+				room_name: resp.name,
+			}
+			dto =  { level: ELevel.info, content: "User " + ((data.isBan) ? "ban" : "unban") + " !" };
+			if (data.isBan)
+			{
+				const banUser = this.getUserFromID(data.refId);
+				if (banUser !== undefined)
+				{
+					for (const s of banUser.socket)
+					{
+						s.leave(resp.id.toString());
+						s.emit('LEFT_ROOM', left_dto);
+						s.emit("NOTIFICATION", { level: ELevel.error, content: `Banned from ${resp.name} !` });	
+					}
+				}
+			}
+		}
+		else
+		{
+			dto = { level: ELevel.error, content: resp };
+		}
+		
+		client.emit("NOTIFICATION", dto);	
 	}
 
-
-
-	removeRoom(room_name: string): boolean
+	async roomChangePass(client: Socket, user: ChatUser, roomId: number ,pass: string)
 	{
-		let to_remove: Room = this.getRoom(room_name);
-		if (to_remove === undefined)
-			return (false);
-		this.rooms.splice(this.rooms.indexOf(to_remove), 1);
-		return (true);
+		const resp = await this.roomService.roomChangePass(roomId, user.reference_id, pass);
+
+		let data : NoticeDTO;
+		if (typeof resp !== 'string')
+			data =  { level: ELevel.info, content: "Password changed !" };
+		else
+			data = { level: ELevel.error, content: resp };
+		client.emit("NOTIFICATION", data);
 	}
 
-
-	removeUser(username: string) 
+	async roomMute(client: Socket, user: ChatUser, data: RoomMuteDto)
 	{
-		this.users.splice(this.users.findIndex((u) => { return u.username === username}))
+		let resp;
+
+		if (data.isMute)
+		{
+			const mute_expire = new Date(Date.now()+ data.expires_in * 1000);
+			resp = await this.roomService.roomMute(data.roomId, user.reference_id, data.refId, mute_expire);
+		}
+		else
+		{
+			resp = await this.roomService.roomUnmute(data.roomId, user.reference_id, data.refId);
+		}
+
+		let dto : NoticeDTO;
+		if (typeof resp !== 'string')
+			dto =  { level: ELevel.info, content: "User " + ((data.isMute) ? "mute" : "unmute") + " !" };
+		else
+			dto = { level: ELevel.error, content: resp };
+		client.emit("NOTIFICATION", dto);
+	}
+
+	removeUser(refId: number) 
+	{
+		this.users.splice(this.users.findIndex((u) => { return u.reference_id === refId}))
 	}
 
 	isOwner(user: ChatUser, room: Room): boolean
@@ -298,38 +362,74 @@ export class ChatService {
 		return (room.admins.find((u) => { u === user }) !== undefined)
 	}
 
-	getAllRooms(): Room[]
-	{
-		const ref = this.rooms;
-		return (ref);
-	}
-
 	//remake that
 	async ConnectToChan(client: Socket, user: ChatUser)
 	{
 		let rooms_list = await this.roomService.roomListOfUser(user.reference_id);
-
 		
-		rooms_list.forEach((r) => {
-			let data : RoomJoinedDTO;
-			console.log(r);
+		
+		for (const r of rooms_list)
+		{
+			let data : RoomJoinedDTO; 
 			data = {
 				id: r.id,
-				room_name: r.name,
-				status: JOINSTATUS.JOIN,
-				user_is_owner: user.reference_id === r.owner,
+				room_name: r.name,		
 				protected: r.has_password,
+				level: await this.roomService.getUserLevel(r.id, r.owner, user.reference_id),
+				isDm: r.isDm,
+				owner: r.owner,
 			}
-			client.join(r.name);
-			user.room_list.push(r.name);
+			client.join(r.id.toString());
 			client.emit("JOINED_ROOM", data);
-		})
+		}
 		
 	}
 
-	
+	async sendRoomList(client: Socket)
+	{
+		const rooms = await this.roomService.publicRoomList();
+		client.emit('ROOM_LIST', rooms);
+	}
 
-	//Todo create userDto 
+	//todo send to user ?
+	async setIsAdmin(client:Socket, data: RoomPromoteDto)
+	{
+		const user = this.getUserFromSocket(client);
+
+		if (user === undefined)
+			return ;//todo disconnect;
+
+		const resp = await this.roomService.setIsAdmin(data.room_id, data.refId,user.reference_id, data.isPromote);
+
+		let dto : NoticeDTO;
+		if (resp !== undefined)
+			dto = { level: ELevel.error, content: resp };
+		else
+			dto = { level: ELevel.info, content: "User " + ((data.isPromote) ? "promote" : "demote")};
+		client.emit("NOTIFICATION", dto);
+
+		const newAdmin = this.getUserFromID(data.refId);
+		if (newAdmin !== undefined)
+		{
+			//todo send update
+		}
+	}
+
+	/**
+	 * 
+	 * * * * RELATIONSHIP * * * * *
+	 *
+	 */
+
+	isConnected(refId: number) : boolean
+	{
+		const ret = this.getUserFromID(refId);
+		if (ret === undefined)
+		 return false;
+		return true;
+	}
+
+	//todo Status of user is In game ?
 	async getFriendList(user: ChatUser) : Promise<UserDataDto[]>
 	{
 		const relation = await this.friendService.findFriendOf(user.reference_id);
@@ -344,36 +444,15 @@ export class ChatService {
 			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
 
 			let username = user2?.username || "default";
-			//let status = user.is_connected; //todo
+			let status = this.isConnected(rel.id_two);
 
 			ret.push({
 				username: username,
 				reference_id: rel.id_two,
-				is_connected: user2.is_connected,
+				is_connected: status,
 			});
 		};
-
-		//console.log(ret);
 		return ret;
-	}
-
-
-	async sendRoomList(client: Socket)
-	{
-		const rooms = await this.roomService.publicRoomList();
-
-		//var	rooms_list : Array<{name: string, has_password: boolean}> = [];
-
-		/*rooms.forEach(room => {
-
-			rooms_list.push({
-				name: room.name,
-				has_password: room.has_password !== "",
-			}
-		});*/
-
-		console.log(rooms);
-		client.emit('ROOM_LIST', rooms);
 	}
 
 	async getBlockList(user: ChatUser) : Promise<UserData[]>
@@ -423,6 +502,10 @@ export class ChatService {
 
 		return ret;
 	}
+
+
+
+	
 	
 	/**
 	 * Return true if a newRequest was created
@@ -430,12 +513,26 @@ export class ChatService {
 	 * @param ref_id 
 	 * @returns 
 	 */
-	async addFriend(user: ChatUser, ref_id : number) : Promise<boolean>
+	async addFriend(client: Socket, user: ChatUser, ref_id : number) : Promise<boolean>
 	{
-		if (await this.friendService.addRequestFriend(user.reference_id, ref_id) !== undefined)
+		const ret = await this.friendService.addRequestFriend(user.reference_id, ref_id)
+		
+		if (ret === undefined)
+		{
+			return false;
+		}
+		else if (typeof ret === 'string')
+		{
+			const dto : NoticeDTO = { level: ELevel.error, content: ret };
+			client.emit("NOTIFICATION", dto);
+			return false;
+		}
+		else
+		{
+			const dto : NoticeDTO = { level: ELevel.info, content: "Request Send !" };
+			client.emit("NOTIFICATION", dto);
 			return true;
-
-		return false;
+		}
 	}
 
 	async getUserByUsername(username : string) : Promise<User>

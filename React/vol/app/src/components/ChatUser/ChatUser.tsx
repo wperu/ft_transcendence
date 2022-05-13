@@ -11,18 +11,19 @@ interface	props
 	targetUserLvl: ELevelInRoom;
 	isBlockedByCurrentUser: boolean;
 	isMuted: boolean;
+	isDm: boolean;
 }
 
 function ChatUser(data: props)
 {
 	function Buttons()
 	{
-		if (data.currentUserLvl <= data.targetUserLvl)
+		if (data.currentUserLvl <= data.targetUserLvl || data.isDm)
 		{
 			return (
 				<div className="chat_user_button_div">
 					<DirectMessage name={data.targetUsername} refId={data.refId}/>
-					<InviteUserButton />
+					<InviteUserButton  refId={data.refId}/>
 					<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 					<BlockUserButton user_name={data.targetUsername}
@@ -37,12 +38,12 @@ function ChatUser(data: props)
 				return (
 					<div className="chat_user_button_div">
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
-						<InviteUserButton />
+						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
-						<MuteUserButton user_name={data.targetUsername} refId={data.refId} />
+						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
 						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
 					</div>
 				);
@@ -52,14 +53,14 @@ function ChatUser(data: props)
 				return (
 					<div className="chat_user_button_div">
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
-						<InviteUserButton />
+						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
 							already_friend={false} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}
-							already_admin={data.targetUserLvl === ELevelInRoom.admin} refId={data.refId}/>
+							already_admin={data.targetUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
-						<MuteUserButton user_name={data.targetUsername} refId={data.refId}/>
+						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted}/>
 						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
 					</div>
 				);
@@ -67,13 +68,10 @@ function ChatUser(data: props)
 		}
 	}
 
-	if (data.isMuted)
-		return (null);
-	else
 	{
 		return (
 			<div className="chat_user" >
-				<div className="chat_user_username">{data.targetUsername}</div>
+				<div className="chat_user_username">{data.targetUsername + data.targetUserLvl}</div>
 				<Buttons />
 			</div>
 		);

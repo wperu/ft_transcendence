@@ -8,8 +8,7 @@ import AcceptInvitationLogo from "../../ressources/images/accept.png";
 import ChatLogo from "../../ressources/images/chatting.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
-import { RoomMuteDto, RoomPromoteDto, RoomBanDto } from "../../Common/Dto/chat/room";
-import Chat from "../Chat/Chat";
+import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
 
 interface Prop
 {
@@ -18,13 +17,17 @@ interface Prop
 	
 }
 
+interface muteProp extends Prop
+{
+	isMuted: boolean;
+}
+
 interface promoteProp
 {
 	user_name: string;
 	already_admin: boolean;
 	refId: number;
 }
-
 
 interface friendProp
 {
@@ -40,7 +43,7 @@ interface blockProp
 	refId: number;
 }
 
-interface gameInvitationProp
+interface acceptGameInvitationProp
 {
 	src_name: string;
 	refId: number;
@@ -52,12 +55,23 @@ interface dmProp
 	refId: number;
 }
 
-
-export function InviteUserButton()
+interface gameInvitationProp
 {
+	refId: number;
+}
+
+export function InviteUserButton(prop: gameInvitationProp)
+{
+	const {socket} = useChatContext();
 	function onClick()
 	{
 		console.log("user invited");
+		let dto = {
+			roomId: 0, //todo create room and send
+			refId: prop.refId,
+		}
+		socket.emit('GAME_INVITE', dto);
+		
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={onClick}><img alt="" src={InviteLogo}/>invite</button>
@@ -74,9 +88,10 @@ export function BanUserButton(prop: Prop)
 		{
 			const dto : RoomBanDto =
 			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
-				expires_in: 50000
+				id: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				expires_in: 50000,
+				isBan: true,
 			} 
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
@@ -87,26 +102,43 @@ export function BanUserButton(prop: Prop)
 	);
 }
 
-export function MuteUserButton(prop: Prop)
+export function MuteUserButton(prop: muteProp)
 {
 	const chtCtx = useChatContext();
 
-	function onClick()
+	function mute()
 	{
 		if (chtCtx.currentRoom !== undefined)
 		{
 			const dto : RoomMuteDto =
 			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
+				roomId: chtCtx.currentRoom.id,
+				refId: prop.refId,
 				isMute: true,
+				expires_in: 10000,
 			} 
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}
 	}
-	return (
-		<button className="user_bar_button negative_user_button" onClick={onClick}><img alt="" src={MuteLogo}/>mute</button>
-	);
+
+	function unmute()
+	{
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomMuteDto =
+			{
+				roomId: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				isMute: false,
+				expires_in: -1,
+			}
+			chtCtx.socket.emit('ROOM_MUTE', dto);
+		}
+	}
+
+	if (prop.isMuted)
+		return (<button className="user_bar_button positive_user_button" onClick={unmute}><img alt="" src={MuteLogo}/>unmute</button>);
+	return (<button className="user_bar_button negative_user_button" onClick={mute}><img alt="" src={MuteLogo}/>mute</button>);
 }
 
 //todo Friend part
@@ -150,8 +182,8 @@ export function PromoteUserButton(prop: promoteProp)
 		{
 			const dto : RoomPromoteDto =
 			{
-				room_name: chtCtx.currentRoom.room_name,
-				user_name: prop.user_name,
+				room_id: chtCtx.currentRoom.id,
+				refId: prop.refId,
 				isPromote: true,
 			} 
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
@@ -161,22 +193,26 @@ export function PromoteUserButton(prop: promoteProp)
 
 	function demote()
 	{
-		console.log("todo demote");
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomPromoteDto =
+			{
+				room_id: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				isPromote: false,
+			} 
+			chtCtx.socket.emit('ROOM_PROMOTE', dto);
+		}
 	}
 
 	if (prop.already_admin)
-	{
-		return (
-			<button className="user_bar_button negative_user_button flipped" onClick={demote}><img alt="" src={PromoteLogo}/>demote</button>
-		);
-	}
+		return (<button className="user_bar_button negative_user_button flipped" onClick={demote}><img alt="" src={PromoteLogo}/>demote</button>);
 	else
-	{
-		return (
-			<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>
-		);
-	}
+		return (<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>);
 }
+
+
+
 
 export function AddFriendButton(prop: friendProp)
 {
@@ -184,15 +220,12 @@ export function AddFriendButton(prop: friendProp)
 
 	function addFriend()
 	{
-		console.log(prop.user_name + " friend :D");
-
 		chtCtx.rmFriendNotif(prop.refId);
 		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
 	
 	function removeFriend()
 	{
-		console.log(prop.user_name + " not friend anymore");
 		chtCtx.socket.emit('RM_FRIEND', prop.refId);
 	}
 
@@ -210,7 +243,7 @@ export function AddFriendButton(prop: friendProp)
 	}
 }
 
-export function AcceptGameInvitation(prop: gameInvitationProp)
+export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 {
 	function accept()
 	{
@@ -223,9 +256,21 @@ export function AcceptGameInvitation(prop: gameInvitationProp)
 
 export function DirectMessage(prop: dmProp)
 {
+	const { socket, awaitDm, goToDmWith } = useChatContext();
+
 	function goDM()
 	{
-		console.log("go dm avec " + prop.name)
+		if (goToDmWith(prop.refId) === false)
+		{
+			awaitDm(prop.refId);
+			const dto : CreateRoomDTO = {
+					room_name:		prop.name,
+					private_room:	true,
+					isDm:			true,
+					with:			prop.refId,
+			}
+			socket.emit("CREATE_ROOM", dto);
+		}
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={goDM}><img alt="" src={ChatLogo}/>DM</button>

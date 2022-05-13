@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 export enum EStatus
 {
@@ -22,4 +22,7 @@ export class FriendShip
 
 	@Column()
 	status: EStatus;
+
+	@CreateDateColumn()
+	date: Date;
 }

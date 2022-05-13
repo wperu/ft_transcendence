@@ -12,33 +12,37 @@ export interface RoomProtect
     opt?: string
 }
 
-export interface CreateRoom
+export interface CreateRoomDTO
 {
-	room_name: string,
-	private_room: boolean,
-	password?: string
+	room_name:			string,
+	private_room:		boolean,
+	password?:			string,
+	isDm:				boolean,
+	with?:				number,
 }
 
 
 export interface RoomPromoteDto
 {
-	room_name: string,
-	user_name: string,
-	isPromote: boolean, // true = promote; false = demote
+	room_id:	number,
+	refId:		number,
+	isPromote:	boolean, // true = promote; false = demote
 }
 
 export interface RoomMuteDto
 {
-	room_name: string,
-	user_name: string,
-	isMute: boolean // true = mute; false = unmute
+	roomId:		number,
+	refId:		number,
+	expires_in:	number,
+	isMute:		boolean, // true = mute; false = unmute
 }
 
 export interface RoomBanDto
 {
-	room_name: string,
-	user_name: string,
+	id:			number,
+	refId:		number,
 	expires_in: number,
+	isBan:		boolean,
 }
 
 export interface RoomLeftDto
@@ -54,6 +58,16 @@ export interface UserDataDto
 	is_connected?: boolean,
 }
 
+
+export interface UserRoomDataDto
+{
+	username:		string,
+    reference_id:	number,
+	is_connected?:	boolean,
+	isMuted:		boolean,
+	isBan:			boolean,
+	level:			ELevelInRoom,
+}
 export interface ChatUserDto
 {
 	username: string,
@@ -68,14 +82,37 @@ export interface RcvMessageDto
 	sender: string,
 	refId: number,
 	send_date: string,
-	room_name: string
-};
+	room_id: number,
+}
 
 export interface RoomListDTO
 {
 	id:				number;
 	name:			string;
-	owner:			number; //refId
+	owner:			number; //refId if (isDm return refId of second user)
 	has_password:	boolean;
+	isDm:			boolean;
 }
 
+export interface RoomUpdataDTO
+{
+	id:			number,
+	level?:		ELevelInRoom,
+	name?:		string,
+	isPrivate?: boolean,
+	isAdmin:	boolean,
+}
+
+export interface JoinRoomDto
+{
+	id?:		number,
+	roomName?:	string,
+	password?:	string,
+}
+
+export interface SendMessageDTO
+{
+	message: string;
+	room_id: number;
+
+}

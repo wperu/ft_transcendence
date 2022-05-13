@@ -21,7 +21,7 @@ function Chat()
 				return (<ChatTab />);
 			else
 			{
-				if (chatCtx.currentRoom.user_level === ELevelInRoom.owner)
+				if (chatCtx.currentRoom.user_level === ELevelInRoom.owner && !chatCtx.currentRoom.isDm)
 					return (<OwnerChannelSettings />);
 				else
 					return (<ChannelSettings />);

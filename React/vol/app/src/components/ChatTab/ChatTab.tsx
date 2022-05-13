@@ -1,10 +1,9 @@
 import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import { SendMessageDto } from "../../interface/chat/chatDto";
-import "./ChatTab.css"
 import useInterval from '../../hooks/useInterval';
-import { RcvMessageDto } from "../../Common/Dto/chat/room";
+import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
+import "./ChatTab.css";
 
 function ChatTab ()
 {
@@ -19,10 +18,10 @@ function ChatTab ()
 		if (chatCtx.socket !== undefined && chatCtx.currentRoom !== undefined 
 			&& event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
-			let data : SendMessageDto =
+			let data : SendMessageDTO =
 			{
 				message: event.currentTarget.value,
-				room_name: chatCtx.currentRoom.room_name
+				room_id: chatCtx.currentRoom.id,
 			};
 			chatCtx.socket.emit('SEND_MESSAGE', data);
 			console.log("[CHAT] sending: " + event.currentTarget.value);
@@ -67,6 +66,8 @@ function ChatTab ()
 
 	useEffect( () =>
 	{
+		if (chatCtx.currentRoom)
+			chatCtx.currentRoom.nb_notifs = 0;
 		if (msg_list_ref.current && updated === true)
 		{
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
@@ -87,12 +88,11 @@ function ChatTab ()
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date, refId} , index) => (
-						<li key={index}>
-							<ChatMessage src_name={sender} content={message} time={send_date} refId={refId} />
-						</li>))
-					
-				}
+					messages.map(({message, sender, send_date, refId} , index) => {
+						if (chatCtx.blockList.find(b => (b.reference_id === refId)) === undefined)
+							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
+						return (null);
+						})}
 				</ul>
 			</div>
 			<footer id="msg_footer">

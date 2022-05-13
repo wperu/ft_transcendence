@@ -24,24 +24,4 @@ export class ChatRoomEntity
 
 	@Column({ nullable: true })
 	isDm : boolean;
-
 }
-
-/*
-@Entity()
-export class ChatRoomMessageEntity
-{
-	@PrimaryGeneratedColumn()
-	id: number;
-
-	@OneToOne(() => ChatRoomEntity)
-	@JoinColumn()
-	chanId: ChatRoomEntity;
-
-	@OneToOne(() => User)
-	@JoinColumn()
-	UserId: User;
-
-	@Column()
-	content: string;
-}*/
