@@ -400,6 +400,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	  }
 	}
 
+	@SubscribeMessage('RM_REQUEST_FRIEND')
+	async rm_request_friend(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.denyRequestFriend(user, payload);
+		}
+	}
+
 	@SubscribeMessage('RM_FRIEND')
 	async rm_friend(client: Socket, payload: number) : Promise<void>
 	{

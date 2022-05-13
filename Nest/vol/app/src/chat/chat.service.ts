@@ -507,6 +507,11 @@ export class ChatService {
 		return ret;
 	}
 
+	async denyRequestFriend(user: ChatUser, refId: number)
+	{
+		this.friendService.rmRequestFriend(user.reference_id, refId);
+	}
+
 
 
 	

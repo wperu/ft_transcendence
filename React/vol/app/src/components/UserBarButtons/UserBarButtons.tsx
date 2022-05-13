@@ -62,8 +62,9 @@ interface gameInvitationProp
 
 interface refuseProp
 {
-	refId:	number;
-	id:		string;
+	isRequestFriend:	boolean;
+	refId:				number;
+	id:					string;
 }
 
 export function InviteUserButton(prop: gameInvitationProp)
@@ -262,12 +263,17 @@ export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 
 export function DeleteNotification(prop: refuseProp)
 {
-	const {rmNotif} = useChatContext();
+	const {rmNotif, socket} = useChatContext();
 	function close()
 	{
 		rmNotif(prop.id);
 		
 		console.log("refuse invitation");
+
+		if (prop.isRequestFriend === true)
+		{
+			socket.emit("RM_REQUEST_FRIEND", prop.refId);
+		}
 	}
 	return (<button className="close_notification_button" onClick={close}><img alt="" src={CloseLogo}/></button>)
 }
