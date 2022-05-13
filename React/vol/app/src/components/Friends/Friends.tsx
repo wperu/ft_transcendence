@@ -22,14 +22,14 @@ function Notification(prop : IProp) : JSX.Element
 	if (prop.notif.type === ENotification.FRIEND_REQUEST
 		&& prop.notif.username !== undefined
 		&& prop.notif.req_id !== undefined)
-		return <NewFriendNotification name={prop.notif.username} date="today" refId={prop.notif.refId!} />;
+		return <NewFriendNotification name={prop.notif.username} date="today" refId={prop.notif.refId!} id={prop.notif.id} />;
 	else if (prop.notif.type === ENotification.GAME_REQUEST
 			&& prop.notif.username !== undefined
 			&& prop.notif.req_id !== undefined)
-		return <InviteNotification name={prop.notif.username} date="today" refId={prop.notif.refId!} />;
+		return <InviteNotification name={prop.notif.username} date="today" refId={prop.notif.refId!} id={prop.notif.id} />;
 	else if (prop.notif.type === ENotification.INFO
 			&& prop.notif.content !== undefined)
-		return <InfoNotification content={prop.notif.content} date="today" />;	
+		return <InfoNotification content={prop.notif.content} date="today"  id={prop.notif.id} />;	
 	return <></>;
 }
 

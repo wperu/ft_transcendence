@@ -3,12 +3,14 @@ import "./Notification.css";
 
 interface infos
 {
-	content: string;
-	date: string;
+	id:			string;
+	content:	string;
+	date:		string;
 }
 
 interface invite
 {
+	id:			string;
 	name: string;
 	date: string;
 	refId: number;
@@ -16,6 +18,7 @@ interface invite
 
 interface fren
 {
+	id:			string;
 	name: string;
 	date: string;
 	refId: number;
@@ -25,7 +28,7 @@ export function InfoNotification(props: infos)
 {
 	return (
 		<div className="friends_info_notification">
-			<DeleteNotification refId={0} />
+			<DeleteNotification refId={0} id={props.id} />
 			<div className="friends_notification_date">{props.date}</div>
 			<div className="friends_info_notification_content">{props.content}</div>
 		</div>
@@ -37,7 +40,7 @@ export function InviteNotification(props: invite)
 {
 	return (
 		<div className="friends_interactive_notification">
-			<DeleteNotification refId={props.refId} />
+			<DeleteNotification refId={props.refId} id={props.id} />
 			<div className="friends_notification_date">{props.date}</div>
 			<div className="friends_notif_name">{props.name}</div>
 			<div className="friends_interactive_notif_content">t'as invité à jouer</div>
@@ -55,7 +58,7 @@ export function NewFriendNotification(props: fren)
 {
 	return (
 		<div className="friends_interactive_notification">
-			<DeleteNotification refId={props.refId} />
+			<DeleteNotification refId={props.refId} id={props.id} />
 			<div className="friends_notification_date">{props.date}</div>
 			<div className="friends_notif_name">{props.name}</div>
 			<div className="friends_interactive_notif_content"> t'as ajouté à ses amis</div>

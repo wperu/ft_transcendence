@@ -90,6 +90,10 @@ interface IChatContext
 	//RequestList:		Array<UserDataDto>;
 }
 
+const generateKey = (id : number) => {
+    return `${ id }_${ new Date().getTime()}_${Math.random() * 25}`;
+}
+
 function useChatProvider() : IChatContext
 {
 	const notify	= useNotifyContext();
@@ -294,14 +298,13 @@ function useChatProvider() : IChatContext
 		});
 	}, []);
 
-	function rmNotif(id: string)
-	{
+	const rmNotif = useCallback((id: string) => {
 		setNotification(prev => {
 			return prev.filter((o) => {
 				return (o.id !== id);
 			})
 		});
-	};
+	}, []);
 
 	function rmFriendNotif(id: number)
 	{
@@ -314,6 +317,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
+			data.forEach(d => {d.id = generateKey(d.req_id || d.type)})
 			addNotif(data);
 		});
 		
@@ -374,7 +378,7 @@ function useChatProvider() : IChatContext
 				if (!isNotified(req.reference_id))
 				{
 					not.push({
-						id: "",
+						id: generateKey(req.reference_id),
 						type: ENotification.FRIEND_REQUEST,
 						req_id: req.reference_id,
 						username: req.username,

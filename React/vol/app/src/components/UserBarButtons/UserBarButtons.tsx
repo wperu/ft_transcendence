@@ -62,7 +62,8 @@ interface gameInvitationProp
 
 interface refuseProp
 {
-	refId: number;
+	refId:	number;
+	id:		string;
 }
 
 export function InviteUserButton(prop: gameInvitationProp)
@@ -261,8 +262,11 @@ export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 
 export function DeleteNotification(prop: refuseProp)
 {
+	const {rmNotif} = useChatContext();
 	function close()
 	{
+		rmNotif(prop.id);
+		
 		console.log("refuse invitation");
 	}
 	return (<button className="close_notification_button" onClick={close}><img alt="" src={CloseLogo}/></button>)
