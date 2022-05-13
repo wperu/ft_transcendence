@@ -14,6 +14,9 @@ import DatabaseFile from './entities/databaseFile.entity';
 import { ChatRoomEntity } from './entities/room.entity';
 import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
 import { ChatMessageEntity } from './entities/message.entity';
+import { GameHistoryModule } from './game-history/game-history.module';
+import { FinishedGame } from './entities/finishedGame.entity';
+
 
 
 @Module({
@@ -30,13 +33,14 @@ import { ChatMessageEntity } from './entities/message.entity';
 				TokenValidatorEntity,
 				FriendShip,
 				DatabaseFile,
+				FinishedGame,
 				ChatRoomRelationEntity,
 				ChatRoomEntity,
 				ChatMessageEntity
 			],
 			synchronize: true,
 		}
-	), UsersModule, AuthModule, ChatModule, FriendsModule, RoomModule],
+	), UsersModule, AuthModule, ChatModule, FriendsModule, RoomModule, GameHistoryModule],
 	controllers: [AppController],
 	providers: [AppService],
 })

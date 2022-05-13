@@ -1,8 +1,7 @@
 import { ChatPasswordService } from './room.password.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RoomListDTO, UserRoomDataDto } from 'src/Common/Dto/chat/room';
-import { ELevelInRoom } from 'src/Common/Dto/chat/RoomJoined';
+import { RoomListDTO, UserRoomDataDto, ELevelInRoom } from 'src/Common/Dto/chat/room';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';

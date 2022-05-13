@@ -24,14 +24,13 @@ function UnjoinedChansTab()
 				chatCtx.socket.off("ROOM_LIST");
 			}
 		};
-	}, [])
+	}, [chatCtx.socket])
 
 	function refreshList()
 	{
 		chatCtx.socket.emit("ROOM_LIST");
 	}
 	
-	//request List
 	useInterval(refreshList, 2000);
 
 	function joinChan(event: React.SyntheticEvent)

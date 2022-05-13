@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, UnauthorizedException, UseFilters } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
@@ -286,10 +286,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let userInfo : ChatUser | undefined = await this.chatService.disconnectClient(client);
 		if (userInfo !== undefined)
 		{
-			
 			if(userInfo.socket.length === 0)
 			{
 				this.chatService.removeUser(userInfo.reference_id);
+			}
+			else
+			{
+				userInfo.socket.splice(userInfo.socket.findIndex((s) => (client === s)))
 			}
 		}
 	}
@@ -311,7 +314,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user !== undefined)
 		{
-			if (await this.chatService.addFriend(user, payload) === false)
+			if (await this.chatService.addFriend(client, user, payload) === false)
 				return ;
 
 			let us = this.chatService.getUserFromID(payload);
@@ -362,7 +365,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let us = await this.chatService.getUserByUsername(payload);
 		if (us !== undefined)
 		{
-			if(await this.chatService.addFriend(user, us.reference_id) === false)
+			if(await this.chatService.addFriend(client, user, us.reference_id) === false)
 				return ;
 
 			let recv = this.chatService.getUserFromID(us.reference_id);
@@ -456,7 +459,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
 			
-		//	console.log(ret);
 			client.emit('FRIEND_LIST', ret);
 		}
 	}
@@ -513,7 +515,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					date: new Date(),
 				}]
 
-				console.log(dto);
 				for (const s of dest.socket)
 				{
 					s.emit('RECEIVE_NOTIF', dto);
@@ -521,6 +522,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 		}
 	}
-
+  
 }
-

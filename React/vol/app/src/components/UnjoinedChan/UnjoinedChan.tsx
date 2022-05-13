@@ -1,7 +1,6 @@
 import React from "react";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./UnjoinedChan.css";
-import { join } from "path/posix";
 import { JoinRoomDto } from "../../Common/Dto/chat/room";
 
 interface	chan_props

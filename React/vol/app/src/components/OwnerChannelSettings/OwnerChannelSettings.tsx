@@ -19,7 +19,7 @@ function OwnerChannelSettings ()
 			password: {value: string};
 			password_repeat: {value :string};
 		};
-		if (target.password.value.length == 0)
+		if (target.password.value.length === 0)
 			notify.addNotice(ELevel.error, "You can't set an empty password", 3000);
 		else if (target.password.value !== target.password_repeat.value)
 			notify.addNotice(ELevel.error, "Your entries must be identical", 3000);
@@ -58,7 +58,7 @@ function OwnerChannelSettings ()
 
 	function PasswordSettings()
 	{
-		if (chatCtx.currentRoom?.protected == true)
+		if (chatCtx.currentRoom?.protected === true)
 		{
 			return (
 				<div id="password_channel_settings" onSubmit={passwordSubmit}>

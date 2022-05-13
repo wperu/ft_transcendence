@@ -1,4 +1,4 @@
-import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
+import React, {KeyboardEvent, useState, useEffect} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from '../../hooks/useInterval';
@@ -51,7 +51,7 @@ function ChatTab ()
 			setMessages([...chatCtx.currentRoom.room_message]);
 			setUpdated(true);
 		}
-	}, []);
+	}, [chatCtx.currentRoom, messages.length]);
 
 	useInterval(() =>
 	{
@@ -73,7 +73,7 @@ function ChatTab ()
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
 			setUpdated(false);
 		}
-	}, [updated]);
+	}, [updated, msg_list_ref, chatCtx.currentRoom]);
 
 	return (
 		<div id="ChatTab">
@@ -88,11 +88,11 @@ function ChatTab ()
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date, refId} , index) => (
-						<li key={index}>
-							<ChatMessage src_name={sender} content={message} time={send_date} refId={refId} />
-						</li>))
-				}
+					messages.map(({message, sender, send_date, refId} , index) => {
+						if (chatCtx.blockList.find(b => (b.reference_id === refId)) === undefined)
+							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
+						return (null);
+						})}
 				</ul>
 			</div>
 			<footer id="msg_footer">

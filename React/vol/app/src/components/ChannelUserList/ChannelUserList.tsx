@@ -22,7 +22,7 @@ function ChannelUserList ()
 				socket.off("USER_LIST");
 			}
 		};
-	}, []);
+	}, [socket]);
 
 	useEffect(() => {
 		socket.emit("USER_LIST", currentRoom?.id);

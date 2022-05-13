@@ -18,7 +18,7 @@ function JoinedChan(props: chan_props)
 	{
 		setRoom(chatCtx.findRoomById(props.id));
 		console.log("a");
-	}, [chatCtx.rooms]);
+	}, [chatCtx.rooms, chatCtx, props.id]);
 
 	if (chatCtx.currentRoom?.room_name === props.name)
 		labelClassName = "selected_chan";

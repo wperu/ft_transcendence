@@ -5,7 +5,6 @@ import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
 import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
-import { BlockLike } from "typescript";
 
 /** //fix
  *  NOTIF rework notif system
@@ -157,15 +156,6 @@ function useChatProvider() : IChatContext
 		});
 	}, []);
 
-	
-
-	const findRoomByName = useCallback((name: string) => 
-	{
-		return (rooms.find(o => {
-			return (o.room_name === name);
-		}));
-	}, [rooms]);
-
 	const findRoomById = useCallback((id: number) => 
 	{
 		return (rooms.find(o => {
@@ -182,10 +172,9 @@ function useChatProvider() : IChatContext
 				setCurrentRoomById(room.id);
 				setCurrentTab(ECurrentTab.chat);
 				awaitDm(undefined);
-				console.log(currentRoom);
 			}
 		}
-	}, [jumpDm, rooms])
+	}, [jumpDm, rooms, setCurrentRoomById])
 
 	useEffect(() => {
 		
@@ -395,10 +384,9 @@ function useChatProvider() : IChatContext
 			}
 		};
 
-	}, [notification, isNotified, socket])
+	}, [notification, isNotified, socket, addNotif])
 
 	useEffect(() => {
-		console.log(notification);
 		rmDeadNotif(requestList);
 	}, [requestList]);
 
