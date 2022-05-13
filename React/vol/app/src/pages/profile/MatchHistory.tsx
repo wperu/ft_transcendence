@@ -24,7 +24,7 @@ function Match(props: matchProps)
 {
 	function OptionValue(props: matchOption)
 	{
-		if (props.value == true)
+		if (props.value === true)
 		{
 			return (
 				<span className="match_option_on">ON</span>

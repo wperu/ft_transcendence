@@ -38,11 +38,9 @@ function Friends()
 {
 	const chtCtx = useChatContext();
 
-	//const [blocks, setBlocks] = useState();
-
-	const int1 = useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
-	const int3 = useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
-	const int2 = useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
+	useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
+	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
+	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
 	
 	function addFriend(event: React.SyntheticEvent)
 	{

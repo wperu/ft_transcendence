@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import JoinedChan from "../JoinedChan/JoinedChan";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";

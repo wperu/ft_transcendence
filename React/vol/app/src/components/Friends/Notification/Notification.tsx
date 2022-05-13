@@ -1,4 +1,4 @@
-import { AddFriendButton, BlockUserButton, InviteUserButton, AcceptGameInvitation, DirectMessage } from "../../UserBarButtons/UserBarButtons";
+import { AddFriendButton, BlockUserButton, InviteUserButton, DirectMessage } from "../../UserBarButtons/UserBarButtons";
 import "./Notification.css";
 
 interface infos

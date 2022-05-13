@@ -68,14 +68,12 @@ function ChatUser(data: props)
 		}
 	}
 
-	{
-		return (
-			<div className="chat_user" >
-				<div className="chat_user_username">{data.targetUsername + data.targetUserLvl}</div>
-				<Buttons />
-			</div>
-		);
-	}
+	return (
+		<div className="chat_user" >
+			<div className="chat_user_username">{data.targetUsername + data.targetUserLvl}</div>
+			<Buttons />
+		</div>
+	);
 }
 
 export default ChatUser;

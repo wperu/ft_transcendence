@@ -38,7 +38,7 @@ function ChanCreationTab()
 		else
 		{
 			var data: CreateRoomDTO;
-			if (is_protected == true)
+			if (is_protected === true)
 			{
 				if (target.password.value.length === 0)
 					notify.addNotice(ELevel.error, "You can't set an empty password", 3000);

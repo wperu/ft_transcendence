@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, UnauthorizedException, UseFilters } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';

@@ -1,4 +1,4 @@
-import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
+import React, {KeyboardEvent, useState, useEffect} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from '../../hooks/useInterval';
@@ -51,7 +51,7 @@ function ChatTab ()
 			setMessages([...chatCtx.currentRoom.room_message]);
 			setUpdated(true);
 		}
-	}, []);
+	}, [chatCtx.currentRoom, messages.length]);
 
 	useInterval(() =>
 	{
@@ -73,7 +73,7 @@ function ChatTab ()
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
 			setUpdated(false);
 		}
-	}, [updated]);
+	}, [updated, msg_list_ref, chatCtx.currentRoom]);
 
 	return (
 		<div id="ChatTab">
