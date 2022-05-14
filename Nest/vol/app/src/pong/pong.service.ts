@@ -1,5 +1,5 @@
-import { Injectable, Logger, SerializeOptions } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Injectable, Logger, Options, SerializeOptions } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 import { UserToken } from 'src/Common/Dto/User/UserToken';
 import { User } from 'src/entities/user.entity';
@@ -13,6 +13,8 @@ import { GameConfig } from 'src/Common/Game/GameConfig';
 import { randomInt } from 'crypto';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
 import { UpdatePongPlayerDTO } from 'src/Common/Dto/pong/UpdatePongPlayerDTO';
+import { PongModes, PongPool } from './interfaces/PongPool';
+import { SocketAddressInitOptions } from 'net';
 
 
 // REVIEW do we want multiple socket for pong user ? 
@@ -29,15 +31,28 @@ export class PongService {
     private last_time: number = 0;
     private current_time: number = 0;
 
+    private server: Server;
+
     constructor(
         private usersService: UsersService,
-        private rooms: Array<PongRoom>,
         private users: Array<PongUser>,
+        private waitingPool: Array<PongPool>,
+        private rooms: Array<PongRoom>,
         private tokenService: TokenService
     )
-    {}
+    {
+        this.users = [];
+        this.rooms = [];
+        this.waitingPool = [];
+    }
+
+    
 
 
+    setServer(server: Server)
+    {
+        this.server = server;
+    }
 
 
     async connectUserFromSocket(socket: Socket): Promise<PongUser | undefined>
@@ -107,14 +122,53 @@ export class PongService {
     }
 
 
-
-
-    initRoom(creator: PongUser) : PongRoom
+    async removeFromWaitingList(client: Socket)
     {
+        const user : PongUser = await this.getUserFromSocket(client);
+
+        if (user === undefined)
+        {
+            return console.log("cannot remove user from waiting list: undefined user")
+        }
+        if (this.waitingPool !== undefined)
+        {
+            var i = 0;
+            this.waitingPool.forEach((u) => {
+                if (u.user === undefined)
+                {
+                    return console.log("cannot cycle through waiting pool: undefined user")
+                }
+
+                if (u.user.username === user.username)
+                {
+                    console.log(`removed user ${user.username} from waiting list`);
+                    this.waitingPool.splice(i, 1);
+                }
+                i++;
+            })
+        }
+    }
+
+
+
+
+    initRoom(creator: PongUser, other: PongUser = undefined) : PongRoom
+    {
+        function generateID() {
+            return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
+                const r = Math.floor(Math.random() * 16);  
+                return r.toString(16);  
+            }));
+        }
+
+        let room_id = generateID();
+        creator.socket.join(room_id);
+        other.socket.join(room_id);
+
         return ({
-            id: randomInt(9999999),
+            id: room_id,
             player_1: creator,
-            player_2: undefined,
+            player_2: other,
             ball: {
                 pos_x: 1,
                 pos_y: 0.5,
@@ -144,7 +198,7 @@ export class PongService {
 
 
 
-
+/*
     createRoom(creator: PongUser)
     {
         let new_room = this.initRoom(creator);
@@ -156,30 +210,38 @@ export class PongService {
 
         this.rooms.push(new_room)
         return (new_room);
-    }
+    }*/
 
 
 
-    searchRoom(user: PongUser)
+    searchRoom(user: PongUser, modes: PongModes = PongModes.DEFAULT)
     {
-        let room = this.rooms.find((r) => { return r.state === RoomState.WAITING });
-
-        this.logger.log("searching room");
-
-        if (room === undefined || this.rooms === null)
-        {
-            this.createRoom(user);
-            this.logger.log("created new room for user ");
-            return ;
-        }
-
+        let other = this.waitingPool.find((r) => r.modes === modes);
+        this.logger.log("searching other player");
         if (user === undefined)
         {
-            this.logger.log("undefined user tried to join room")
+            this.logger.log("undefined user tried to sneak into waiting list")
             return ;
         }
-        this.logger.log("joined waiting room");
-        room.player_2 = user;
+        console.log(other);
+
+        if (other === undefined || this.waitingPool.length === 0)
+        {
+            //this.createRoom(user);
+            let pool_usr: PongPool = {
+                user: user,
+                modes: modes,
+            };
+
+            this.waitingPool.push(pool_usr);
+            this.logger.log("joined waiting room: " + pool_usr.user.username);
+            return ;
+        }
+
+        console.log("found opponent")
+        this.waitingPool.splice(this.waitingPool.indexOf(other), 1);
+        let room = this.initRoom(other.user, user);
+        this.rooms.push(room);
         this.startRoom(room);
     }
 
@@ -200,17 +262,17 @@ export class PongService {
         }
 
         room.state = RoomState.PLAYING;
-        room.player_1.socket.emit('STARTING_ROOM', starting_obj);
-        room.player_2.socket.emit('STARTING_ROOM', starting_obj);
+        this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
+        //room.player_2.socket.to(room.id).emit('STARTING_ROOM', starting_obj);
     
 
-        console.log("sent start request to players");
+       // console.log("sent start request to players");
 
-        room.spectators.forEach((usr) => {
+      /*  room.spectators.forEach((usr) => {
             usr.socket.emit('STARTING_ROOM', starting_obj);
-        })
+        })*/
 
-        console.log("sent start request to spectators");
+        console.log("sent start request");
 
         room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
     }
@@ -266,29 +328,28 @@ export class PongService {
             vel_x: room.ball.vel_x,
             vel_y: room.ball.vel_y,
         };
-        room.player_1.socket.emit('UPDATE_PONG_BALL',  ball_infos);
-        room.player_2.socket.emit('UPDATE_PONG_BALL',  ball_infos);
+        this.server.to(room.id).emit('UPDATE_PONG_BALL',  ball_infos);
     }
 
 
     sendPlayerUpdate(room: PongRoom, player_id: number)
     {
-        if (player_id === 1)
-        {
-            room.player_1.socket.emit('UPDATE_PONG_PLAYER', {
+       // if (player_id === 1)
+       // {
+            this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
                 player_id: 2,
                 position: room.player_2.position,
                 velocity: room.player_2.velocity,
                 key: room.player_2.key,
             } as UpdatePongPlayerDTO);    
 
-            room.player_1.socket.emit('UPDATE_PONG_PLAYER', {
+            this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
                 player_id: 1,
                 position: room.player_1.position,
                 velocity: room.player_1.velocity,
                 key: room.player_1.key,
             } as UpdatePongPlayerDTO);
-        }
+     /*   }
         else
         {
             room.player_2.socket.emit('UPDATE_PONG_PLAYER', {
@@ -304,7 +365,7 @@ export class PongService {
                 velocity: room.player_1.velocity,
                 key: room.player_1.key,
             } as UpdatePongPlayerDTO);        
-        }
+        }*/
     }
 
 
@@ -345,7 +406,7 @@ export class PongService {
 
         this.updateRoom(room);
         this.sendPlayerUpdate(room, 1);
-        this.sendPlayerUpdate(room, 2);
+        //this.sendPlayerUpdate(room, 2);
     }
 
 

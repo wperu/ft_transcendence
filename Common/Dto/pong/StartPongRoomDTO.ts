@@ -1,7 +1,7 @@
 
 export interface StartPongRoomDTO
 {
-    room_id: number,
+    room_id: string,
 
     player_1: {
         username: string,

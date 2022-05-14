@@ -1,7 +1,6 @@
 import { Logger, OnModuleInit } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'http';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
@@ -22,7 +21,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	constructor(
 		private pongService: PongService
 	)
-	{}
+	{
+	}
 
 	onModuleInit()
 	{
@@ -32,6 +32,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	afterInit(server: Server) 
 	{
 		this.logger.log("Server listening on ");
+		this.pongService.setServer(server);
 	}
 	
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
@@ -52,8 +53,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else if (user.socket.id !== client.id)
 		{
-			// REVIEW reject double socket ? is this reachable ?
-			client.disconnect();
+			user.socket.emit("CHANGING_SOCKET");
+			user.socket = client;
 		}
 
 		// let the client know that we have authentificated him as a PongUser
@@ -63,6 +64,8 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	handleDisconnect(client: Socket)
 	{
+		// TODO handle is user in game ;
+		this.pongService.removeFromWaitingList(client);
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
 
@@ -70,9 +73,49 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('SEARCH_ROOM')
 	async searchRoom(client: Socket)
 	{
-		this.pongService.searchRoom(await this.pongService.getUserFromSocket(client));
+		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		this.pongService.searchRoom(user);
 	}
 
+
+	/*
+	@SubscribeMessage("REQUEST_ROOM")
+	async requestRoom(client: Socket)
+	{
+		let room = this.pongService.createMatch(client);
+
+		// pass back room_id to frontend
+		client.emit("ROOM_CREATED", {
+			room_id: room.id,
+		})
+	}
+
+	@SubscribeMessage("START_ROOM")
+	async startRoom(client: Socket)
+	{
+		let room = this.pongService.startRoom(client);
+	}
+
+	@SubscribeMessage("UPDATE_ROOM")
+	async startRoom(client: Socket, data: {
+
+	})
+	{
+		let room = this.pongService.updateMatch(data);
+
+		// pass back room_id to frontend
+		client.emit("ROOM_CREATED", {
+			room_id: room.id,
+		})
+	}
+
+	@SubscribeMessage("INVITE_USER")
+	async joinRoom(client: Socket, data: {
+		user_id: number
+	})
+	{
+		this.pongService.joinMatch(data.user_id);
+	}*/
 
 	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)

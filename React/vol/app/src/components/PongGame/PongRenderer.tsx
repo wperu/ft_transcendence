@@ -79,7 +79,7 @@ function updatePlayer(room: IPongRoom, user: IUser, deltaTime: number)
 /*** RENDER ***/
 
 
-interface PongRenderingContext
+export interface PongRenderingContext
 {
     terrain_x: number,
     terrain_y: number,
@@ -89,10 +89,11 @@ interface PongRenderingContext
     height: number,
     deltaTime: number,
     frameTime: number,
+    frameCount: number;
 }
 
 
-function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, last_time: number = performance.now()) : PongRenderingContext
+function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, last_frame: number, last_time: number = performance.now()) : PongRenderingContext
 {
     let render_ctx: PongRenderingContext = {
         terrain_x: 0,
@@ -102,7 +103,8 @@ function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTML
         width: canvas.width,
         height: canvas.height,
         deltaTime: 0,
-        frameTime: performance.now()
+        frameTime: performance.now(),
+        frameCount: ++last_frame,
     };
     /* timed update  */
     render_ctx.deltaTime = (render_ctx.frameTime - last_time) / 1000.0;
@@ -129,7 +131,7 @@ function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTML
 }
 
 
-async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_time: number = performance.now())
+async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_frame: number = 0, last_time: number = performance.now())
 { 
     /* Background */
     ctx = canvas.getContext('2d');
@@ -141,7 +143,7 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
         return ;
     }
 
-    let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_time);
+    let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_frame, last_time);
     update(pong_ctx, render_ctx.deltaTime, user);
 
     renderBackground(ctx, render_ctx, canvas);
@@ -152,14 +154,18 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
 
     /* DEV - FPS counter */
     ctx.fillStyle = '#FFFFFF'
-    ctx.fillText("~" + (1 / render_ctx.deltaTime) + " FPS", render_ctx.terrain_x, render_ctx.terrain_y - 50);
+    ctx.fillText("FPS: " + (1 / render_ctx.deltaTime), render_ctx.terrain_x, render_ctx.terrain_y - 50);
     ctx.stroke();
 
-    ctx.fillText(render_ctx.deltaTime + " delta", render_ctx.terrain_x, render_ctx.terrain_y - 40);
+    ctx.fillText("delta: "  + render_ctx.deltaTime, render_ctx.terrain_x, render_ctx.terrain_y - 40);
+    ctx.stroke();
+
+    ctx.fillText("frameCount: " + render_ctx.frameCount, render_ctx.terrain_x, render_ctx.terrain_y - 30);
     ctx.stroke();
     /* **** */
     
-    requestAnimationFrame(() => render(pong_ctx, ctx, canvas, user, render_ctx.frameTime));
+    render_ctx.frameCount++;
+    requestAnimationFrame(() => render(pong_ctx, ctx, canvas, user, render_ctx.frameCount, render_ctx.frameTime));
 }
 
 
@@ -257,9 +263,9 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
         ball_y = render_ctx.terrain_y +  (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
     }
 
-    plot_trail(pong_ctx, ctx, ball_x, ball_y);
+    plot_trail(pong_ctx, ctx, ball_x, ball_y, render_ctx);
     /* Ball */
-    let ball_size = render_ctx.terrain_h * 0.03;
+    let ball_size = render_ctx.terrain_h * 0.015;
     ctx.fillStyle = '#FFFFFF'
     ctx.beginPath();
     ctx.ellipse(ball_x,

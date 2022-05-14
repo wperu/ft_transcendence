@@ -7,15 +7,13 @@ import { useAuth } from "../../auth/useAuth";
 import IUser from "../../interface/User";
 import { render } from "./PongRenderer";
 
-// TODO Review matchmaking back end                    
 // TODO Make matchmaking page with options             
-// TODO implement game modes                           
 // TODO Double ball mode                               
 // TODO dash mode                                                 
 // TODO Refractor back end                            
 // TODO socket reconnection                     
-// TODO use socketio.room instead of pong rooms 
-
+// TODO set room_id (0 = not in game) in users database
+// TODO 2FA auth 
 
 interface CanvasProps
 {
@@ -31,7 +29,7 @@ function getPongPlayer(pong_ctx: IPongContext, user: IUser) : number | undefined
     }
     else if (pong_ctx.room && user.username === pong_ctx.room.player_2.username)
     {
-        return (2)
+        return (2);
     }
     return (undefined);
 }

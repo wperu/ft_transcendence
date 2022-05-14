@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../../../auth/useAuth";
 import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
+import { defaultParticleEmitter, ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
 
 export interface IPongUser
@@ -31,7 +32,7 @@ export enum RoomState {
 
 export interface IPongRoom
 {
-    room_id: number,
+    room_id: string,
     player_1: IPongUser,
     player_2: IPongUser,
     ball: IPongBall,
@@ -124,7 +125,11 @@ function usePongProvider() : IPongContext
     useEffect(() => {
         socket.connect();
         console.log(socket);
-    }, []);
+
+        return (() => {
+            socket.disconnect();
+        })
+    }, [socket]);
 
 
     useEffect(() => {
@@ -132,6 +137,7 @@ function usePongProvider() : IPongContext
             socket.emit("SEARCH_ROOM");
         })
     })
+
 
     return ({
         room: room,
@@ -143,7 +149,38 @@ function initFx() : FX
 {
     return ({
         trail: {
-            points: []
+            system: {
+                emitters: [
+                    {
+                        particles: [],
+                        speed: 0,
+                        start_size: 10,
+                        spread_amount: 0,
+                        end_size: 9,
+                        start_color: { r: 27, g: 147, b: 198, a: 50 },
+                        end_color:  { r: 27, g: 198, b: 160, a: 0 },
+                        lifetime: 0.6,
+                        center_x: 0,
+                        center_y: 0,
+                        max_particles: 50,
+                        emission_amount: 1
+                    } as ParticleEmitter,
+                    {
+                        particles: [],
+                        speed: 0.2,
+                        start_size: 3,
+                        spread_amount: 5,
+                        end_size: 0,
+                        start_color: { r: 187, g: 224, b: 237, a: 255 },
+                        end_color:  { r: 187, g: 237, b: 228, a: 0 },
+                        lifetime: 1,
+                        center_x: 0,
+                        center_y: 0,
+                        max_particles: 50,
+                        emission_amount: 5
+                    } as ParticleEmitter,
+                ]
+            }
         } as TrailFX
     } as FX)
 }

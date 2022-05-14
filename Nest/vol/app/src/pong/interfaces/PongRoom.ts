@@ -11,7 +11,7 @@ export enum RoomState
 
 export interface PongRoom
 {
-    id: number,
+    id: string,
     player_1: PongUser,
     player_2: PongUser,
     ball: PongBall,
@@ -19,6 +19,3 @@ export interface PongRoom
     state: RoomState,
     interval?: NodeJS.Timer,
 }
-
-Socket
-
