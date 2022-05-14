@@ -318,7 +318,15 @@ export class RoomService
 		})
 
 		if (rels.length === 0)
+		{
+			await this.roomRelRepo.createQueryBuilder()
+				.relation("room")
+				.of({id: chanId})
+				.delete()
+				.execute();
+
 			await this.roomRepo.remove(room);
+		}
 		else if (refId === room.owner)
 		{
 			let newOwner : number;
