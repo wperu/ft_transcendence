@@ -10,6 +10,7 @@ import CloseLogo from "../../ressources/images/close.png";
 import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
+import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 interface Prop
 {
@@ -73,9 +74,10 @@ export function InviteUserButton(prop: gameInvitationProp)
 	function onClick()
 	{
 		console.log("user invited");
-		let dto = {
-			roomId: 0, //todo create room and send
+		let dto : GameInviteDTO = {
+			gameRoomId: 0, //todo create room and send
 			refId: prop.refId,
+			chatRoomId: undefined,
 		}
 		socket.emit('GAME_INVITE', dto);
 		

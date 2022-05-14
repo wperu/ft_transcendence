@@ -384,7 +384,7 @@ function useChatProvider() : IChatContext
 						req_id: req.reference_id,
 						username: req.username,
 						refId: req.reference_id,
-						date: new Date(),
+						date: req.date || new Date(),
 					});
 				}	
 			})

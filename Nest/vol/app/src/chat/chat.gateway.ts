@@ -505,34 +505,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('GAME_INVITE')
 	async game_invite(client: Socket, data: GameInviteDTO)
 	{
-		const user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
-		if (user !== undefined)
-		{
-			let dto: NotifDTO[];
-			
-			const dest = this.chatService.getUserFromID(data.refId);
-			if (dest === undefined)
-			{
-				//todo user is not connected;
-			}
-			else
-			{
-				dto =[
-				{
-					type: ENotification.GAME_REQUEST,
-					req_id: data.roomId,
-					content: undefined,
-					username: await this.chatService.getUsernameFromID(user.reference_id),
-					date: new Date(),
-					refId: user.reference_id,
-				}]
-
-				for (const s of dest.socket)
-				{
-					s.emit('RECEIVE_NOTIF', dto);
-				}
-			}
-		}
+		await this.chatService.gameInvite(client, data);
 	}
-  
 }

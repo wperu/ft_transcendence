@@ -1,5 +1,7 @@
 export interface GameInviteDTO
 {
-	roomId:	number;
-	refId:	number;
+	gameRoomId:		number;
+	refId?:			number;
+	chatRoomId?:	number;
+
 }
