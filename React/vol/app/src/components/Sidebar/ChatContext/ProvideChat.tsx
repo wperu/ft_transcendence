@@ -258,6 +258,7 @@ function useChatProvider() : IChatContext
 				if (data.isPrivate !== undefined) refR.private = data.isPrivate;
 				if (data.name !== undefined) refR.room_name = data.name;
 				if (data.level !== undefined) refR.user_level = data.level;
+				if (data.owner !== undefined) refR.owner = data.owner;
 			}
 
 		});

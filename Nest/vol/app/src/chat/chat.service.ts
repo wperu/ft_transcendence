@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { RouterModule } from '@nestjs/core';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
-
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
-import { CreateRoomDTO, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { CreateRoomDTO, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomUpdatedDTO, UserDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
@@ -227,7 +225,7 @@ export class ChatService {
 		return;
 	}
 
-	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string)
+	async leaveRoom(server: Server, client: Socket, user: ChatUser, id: number, roomName: string)
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
 		const resp = await this.roomService.leaveRoomById(id, user.reference_id)
@@ -238,15 +236,31 @@ export class ChatService {
 			client.emit("NOTIFICATION", data);
 			return ;
 		}
+		else if (typeof resp === 'number')
+		{
+			let dto : RoomUpdatedDTO;
 
-		//return;
+			dto = {id: id, owner: resp};
+			server.to(id.toString()).emit('UPDATE_ROOM', dto);
+
+			const dest = this.getUserFromID(resp);
+			if (dest !== undefined)
+			{
+				dto = {id: id, level: ELevelInRoom.owner};
+				
+				for (const s of dest.socket)
+				{
+					s.emit('UPDATE_ROOM', dto);
+				}
+			
+			}
+		}
 
 		let dto: RoomLeftDto;
 		
 		dto = {
 			id: id,
 			room_name: roomName,
-			//room_name: roomName,
 		}
 		user.socket.forEach((s) => {
 			s.leave(id.toString());

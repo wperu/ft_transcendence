@@ -118,7 +118,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 		
-		await this.chatService.leaveRoom(client, user, payload.id, payload.name);
+		await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name);
 	}
 
 
@@ -139,26 +139,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('PROTECT_ROOM')
 	protectRoom(client: Socket, payload: RoomProtect)
 	{
-		/*let local_room = this.chatService.getRoom(payload.room_name)
-		if (local_room === undefined)
-		{
-			console.error(`Cannot set protection to unknown room: ${payload.room_name}`);
-			throw new BadRequestException(`Unknown room ${payload.room_name}`);
-		}
-
-		if (!this.chatService.isOwner(this.chatService.getUserFromSocket(client), local_room))
-		{
-			if(payload.private_room)
-			{
-				local_room.private_room = true;
-				local_room.password = payload.opt;
-			}
-			else
-			{
-				local_room.private_room = false;
-				local_room.password = payload.opt;
-			}
-		}*/
 	}
 
 

@@ -284,13 +284,12 @@ export class RoomService
 
 	/**
 	 * //todo destroy chan when user last user leave
-	 * //todo cn't leave dm room
 	 * Join room using room's Id
 	 * @param chanName 
 	 * @param userId 
 	 * @returns 
 	 */
-	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string>
+	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string | number>
 	 {
 		const room = await this.findRoomById(chanId);
  
@@ -313,14 +312,46 @@ export class RoomService
 		const rels = await this.roomRelRepo.find({
 			relations : ["room"],
 			where : {
-				room : { id : room.id }
+				room : { id : room.id },
+				ban_expire: null,
 			}
 		})
 
-		console.log(rels);
-
 		if (rels.length === 0)
 			await this.roomRepo.remove(room);
+		else if (refId === room.owner)
+		{
+			let newOwner : number;
+			const rel = await this.roomRelRepo.findOne({
+				relations : ["room", "user"],
+				where : {
+					room : { id : room.id },
+					isAdmin: true,
+				}
+			})
+			if (rel !== undefined)
+			{
+				newOwner = rel.user.reference_id;
+			}
+			else
+			{
+				const rel = await this.roomRelRepo.findOne({
+					relations : ["room", "user"],
+					where : {
+						room : { id : room.id },
+						ban_expire: null
+					}
+				})
+				rel.mute_expire = null;
+				rel.isAdmin = true;
+				newOwner = rel.user.reference_id;
+
+				await this.roomRelRepo.save(rel);
+			}
+			room.owner = newOwner;
+			this.roomRepo.save(room);
+			return (room.owner);
+		}
 		return (undefined);
 	 }
 

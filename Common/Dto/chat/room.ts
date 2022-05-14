@@ -101,7 +101,8 @@ export interface RoomUpdatedDTO
 	level?:		ELevelInRoom,
 	name?:		string,
 	isPrivate?: boolean,
-	isAdmin:	boolean,
+	isAdmin?:	boolean,
+	owner?:		number;
 }
 
 export interface JoinRoomDto
