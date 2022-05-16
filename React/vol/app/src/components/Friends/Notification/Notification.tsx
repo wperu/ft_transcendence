@@ -4,21 +4,24 @@ import "./Notification.css";
 
 interface infos
 {
-	content: string;
-	date: string;
+	id:			string;
+	content:	string;
+	date:		Date;
 }
 
 interface invite
 {
+	id:			string;
 	name: string;
-	date: string;
+	date: Date;
 	refId: number;
 }
 
 interface fren
 {
+	id:			string;
 	name: string;
-	date: string;
+	date: Date;
 	refId: number;
 }
 
@@ -26,8 +29,8 @@ export function InfoNotification(props: infos)
 {
 	return (
 		<div className="friends_info_notification">
-			<DeleteNotification refId={0} />
-			<div className="friends_notification_date">{props.date}</div>
+			<DeleteNotification refId={0} id={props.id} isRequestFriend={false}/>
+			<div className="friends_notification_date">{props.date.toString()}</div>
 			<div className="friends_info_notification_content">{props.content}</div>
 		</div>
 	);
@@ -38,9 +41,9 @@ export function InviteNotification(props: invite)
 {
 	return (
 		<div className="friends_interactive_notification">
-			<DeleteNotification refId={props.refId} />
-			<div className="friends_notification_date">{props.date}</div>
-			<div className="friends_notif_name"><Link to={"/profile/" + props.refId}>{props.name}</Link></div>
+			<DeleteNotification refId={props.refId} id={props.id} isRequestFriend={false}/>
+			<div className="friends_notification_date">{props.date.toString()}</div>
+      <div className="friends_notif_name"><Link to={"/profile/" + props.refId}>{props.name}</Link></div>
 			<div className="friends_interactive_notif_content">t'as invité à jouer</div>
 			<div className="notif_button_div">
 				<AcceptGameInvitation src_name={props.name} refId={props.refId}/>
@@ -56,8 +59,8 @@ export function NewFriendNotification(props: fren)
 {
 	return (
 		<div className="friends_interactive_notification">
-			<DeleteNotification refId={props.refId} />
-			<div className="friends_notification_date">{props.date}</div>
+			<DeleteNotification refId={props.refId} id={props.id} isRequestFriend={true} />
+			<div className="friends_notification_date">{props.date.toString()}</div>
 			<div className="friends_notif_name"><Link to={"/profile/" + props.refId}>{props.name}</Link></div>
 			<div className="friends_interactive_notif_content"> t'as ajouté à ses amis</div>
 			<div className="notif_button_div">

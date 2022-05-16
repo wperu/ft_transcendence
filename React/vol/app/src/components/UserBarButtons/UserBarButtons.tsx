@@ -13,6 +13,7 @@ import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Co
 import Popup from "reactjs-popup";
 import { isPropertySignature } from "typescript";
 import React, { useState } from "react";
+import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 interface Prop
 {
@@ -70,7 +71,9 @@ interface gameInvitationProp
 
 interface refuseProp
 {
-	refId: number;
+	isRequestFriend:	boolean;
+	refId:				number;
+	id:					string;
 }
 
 export function InviteUserButton(prop: gameInvitationProp)
@@ -79,9 +82,10 @@ export function InviteUserButton(prop: gameInvitationProp)
 	function onClick()
 	{
 		console.log("user invited");
-		let dto = {
-			roomId: 0, //todo create room and send
+		let dto : GameInviteDTO = {
+			gameRoomId: 0, //todo create room and send
 			refId: prop.refId,
+			chatRoomId: undefined,
 		}
 		socket.emit('GAME_INVITE', dto);
 		
@@ -417,9 +421,17 @@ export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 
 export function DeleteNotification(prop: refuseProp)
 {
+	const {rmNotif, socket} = useChatContext();
 	function close()
 	{
+		rmNotif(prop.id);
+		
 		console.log("refuse invitation");
+
+		if (prop.isRequestFriend === true)
+		{
+			socket.emit("RM_REQUEST_FRIEND", prop.refId);
+		}
 	}
 	return (<button className="close_notification_button" onClick={close}><img alt="" src={CloseLogo}/></button>)
 }

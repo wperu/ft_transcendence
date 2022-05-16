@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { RouterModule } from '@nestjs/core';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
-
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
-import { CreateRoomDTO, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, UserDataDto } from 'src/Common/Dto/chat/room';
+import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
+import { CreateRoomDTO, JoinRoomDto, RoomBanDto, RoomLeftDto, RoomMuteDto, RoomPromoteDto, RoomUpdatedDTO, UserDataDto } from 'src/Common/Dto/chat/room';
 import { ELevelInRoom, RoomJoinedDTO } from 'src/Common/Dto/chat/RoomJoined';
 import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
@@ -225,7 +225,7 @@ export class ChatService {
 		return;
 	}
 
-	async leaveRoom(client: Socket, user: ChatUser, id: number, roomName: string)
+	async leaveRoom(server: Server, client: Socket, user: ChatUser, id: number, roomName: string)
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
 		const resp = await this.roomService.leaveRoomById(id, user.reference_id)
@@ -236,15 +236,31 @@ export class ChatService {
 			client.emit("NOTIFICATION", data);
 			return ;
 		}
+		else if (typeof resp === 'number')
+		{
+			let dto : RoomUpdatedDTO;
 
-		//return;
+			dto = {id: id, owner: resp};
+			server.to(id.toString()).emit('UPDATE_ROOM', dto);
+
+			const dest = this.getUserFromID(resp);
+			if (dest !== undefined)
+			{
+				dto = {id: id, level: ELevelInRoom.owner};
+				
+				for (const s of dest.socket)
+				{
+					s.emit('UPDATE_ROOM', dto);
+				}
+			
+			}
+		}
 
 		let dto: RoomLeftDto;
 		
 		dto = {
 			id: id,
 			room_name: roomName,
-			//room_name: roomName,
 		}
 		user.socket.forEach((s) => {
 			s.leave(id.toString());
@@ -265,6 +281,10 @@ export class ChatService {
 		
 		if (typeof resp !== 'string')
 		{
+			for (let u of resp)
+			{
+				u.is_connected = this.getUserFromID(u.reference_id) !== undefined;
+			}
 			client.emit("USER_LIST", resp);
 		}
 	}
@@ -412,6 +432,10 @@ export class ChatService {
 		if (newAdmin !== undefined)
 		{
 			//todo send update
+			for (const s of newAdmin.socket)
+			{
+				s.emit("UPDATE_ROOM", {id: data.room_id, level: ((data.isPromote) ? ELevelInRoom.admin : ELevelInRoom.casual)});
+			}
 		}
 	}
 
@@ -497,10 +521,16 @@ export class ChatService {
 			ret.push({
 				username: username || "default", //todo
 				reference_id: rel.id_one,
+				date: rel.date,
 			});
 		};
 
 		return ret;
+	}
+
+	async denyRequestFriend(user: ChatUser, refId: number)
+	{
+		this.friendService.rmRequestFriend(user.reference_id, refId);
 	}
 
 
@@ -561,6 +591,69 @@ export class ChatService {
 		await this.friendService.unBlockUser(user.reference_id, ref_id);
 
 		return;
+	}
+
+
+	async gameInvite(client: Socket, data: GameInviteDTO)
+	{
+		const user : ChatUser | undefined = this.getUserFromSocket(client);
+		if (user !== undefined)
+		{
+			let dto: NotifDTO[];
+
+			dto =[
+				{
+					type: ENotification.GAME_REQUEST,
+					req_id: data.gameRoomId,
+					content: undefined,
+					username: await this.getUsernameFromID(user.reference_id),
+					date: new Date(),
+					refId: user.reference_id,
+				}]
+			
+			//player
+			if (data.refId !== undefined)
+			{
+				const dest = this.getUserFromID(data.refId);
+				if (dest === undefined)
+				{
+					//todo user is not connected;
+				}
+				else
+				{
+
+
+					for (const s of dest.socket)
+					{
+						s.emit('RECEIVE_NOTIF', dto);
+					}
+				}
+			}
+			else if (data.chatRoomId !== undefined) //room case 
+			{
+				const resp = await this.roomService.userListOfRoom(data.chatRoomId, user.reference_id);
+
+				if (typeof resp === "string")
+				{
+
+				}
+				else
+				{
+					for (const r of resp)
+					{
+						const dest = this.getUserFromID(r.reference_id);
+						if (dest !== undefined && dest.reference_id !== user.reference_id)
+						{
+							for (const s of dest.socket)
+							{
+								s.emit('RECEIVE_NOTIF', dto);
+							}
+						}
+					}
+				}
+
+			}
+		}
 	}
 
 }

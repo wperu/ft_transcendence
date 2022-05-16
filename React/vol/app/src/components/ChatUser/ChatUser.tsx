@@ -69,9 +69,22 @@ function ChatUser(data: props)
 		}
 	}
 
+	function getSym(e: ELevelInRoom)
+	{
+		if (e === ELevelInRoom.owner)
+			return ' 👑';
+		else if (e === ELevelInRoom.admin)
+			return ' ⚔️';
+		else
+			return '';
+
+	}
+
 	return (
 		<div className="chat_user" >
-			<div className="chat_user_username"><Link to={"/profile/" + data.refId}>{data.targetUsername + data.targetUserLvl}</Link></div>
+			<div className="chat_user_username">
+        <Link to={"/profile/" + data.refId}>{data.targetUsername + getSym(data.targetUserLvl) }</Link>
+      </div>
 			<Buttons />
 		</div>
 	);

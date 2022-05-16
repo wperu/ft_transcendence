@@ -118,7 +118,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 		
-		await this.chatService.leaveRoom(client, user, payload.id, payload.name);
+		await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name);
 	}
 
 
@@ -139,26 +139,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('PROTECT_ROOM')
 	protectRoom(client: Socket, payload: RoomProtect)
 	{
-		/*let local_room = this.chatService.getRoom(payload.room_name)
-		if (local_room === undefined)
-		{
-			console.error(`Cannot set protection to unknown room: ${payload.room_name}`);
-			throw new BadRequestException(`Unknown room ${payload.room_name}`);
-		}
-
-		if (!this.chatService.isOwner(this.chatService.getUserFromSocket(client), local_room))
-		{
-			if(payload.private_room)
-			{
-				local_room.private_room = true;
-				local_room.password = payload.opt;
-			}
-			else
-			{
-				local_room.private_room = false;
-				local_room.password = payload.opt;
-			}
-		}*/
 	}
 
 
@@ -400,6 +380,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	  }
 	}
 
+	@SubscribeMessage('RM_REQUEST_FRIEND')
+	async rm_request_friend(client: Socket, payload: number) : Promise<void>
+	{
+		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+
+		if (user !== undefined)
+		{
+			await this.chatService.denyRequestFriend(user, payload);
+		}
+	}
+
 	@SubscribeMessage('RM_FRIEND')
 	async rm_friend(client: Socket, payload: number) : Promise<void>
 	{
@@ -494,33 +485,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('GAME_INVITE')
 	async game_invite(client: Socket, data: GameInviteDTO)
 	{
-		const user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
-		if (user !== undefined)
-		{
-			let dto: NotifDTO[];
-			
-			const dest = this.chatService.getUserFromID(data.refId);
-			if (dest === undefined)
-			{
-				//todo user is not connected;
-			}
-			else
-			{
-				dto =[
-				{
-					type: ENotification.GAME_REQUEST,
-					req_id: data.roomId,
-					content: undefined,
-					username: await this.chatService.getUsernameFromID(user.reference_id),
-					date: new Date(),
-				}]
-
-				for (const s of dest.socket)
-				{
-					s.emit('RECEIVE_NOTIF', dto);
-				}
-			}
-		}
+		await this.chatService.gameInvite(client, data);
 	}
-  
 }

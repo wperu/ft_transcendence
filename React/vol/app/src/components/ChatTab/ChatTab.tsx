@@ -4,6 +4,7 @@ import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat"
 import useInterval from '../../hooks/useInterval';
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
 import "./ChatTab.css";
+import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 function ChatTab ()
 {
@@ -40,6 +41,19 @@ function ChatTab ()
 			chatCtx.socket.emit("LEAVE_ROOM", dto);
 			setMessages([]);
 			chatCtx.setCurrentTab(ECurrentTab.channels);
+		}
+	}
+
+	function sendInvite()
+	{
+		if (chatCtx.currentRoom !== undefined)
+		{
+			let dto : GameInviteDTO = {
+				gameRoomId: 0, //todo create room and send
+				refId: undefined,
+				chatRoomId: chatCtx.currentRoom.id,
+			}
+			chatCtx.socket.emit('GAME_INVITE', dto);
 		}
 	}
 
@@ -83,7 +97,7 @@ function ChatTab ()
 					value="Quitter" onClick={pressedQuit} />
 				<input type="button"
 					name="chat_quick_invite" id="chat_quick_invite"
-					value="Inviter à jouer" />
+					value="Inviter à jouer" onClick={sendInvite} />
 			</header>
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
