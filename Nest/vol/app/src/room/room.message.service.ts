@@ -21,9 +21,13 @@ export class ChatMessageService
 	/** //todo
 	 * rm all message of one room
 	 */
-	async rmMessageOfRoom() : Promise<void>
+	async rmMessageOfRoom(id: number) : Promise<void | string>
 	{
-		this.msgRepo.clear();
+		const ret = await this.msgRepo.findOne(id);
+		if(ret === undefined)
+			return("room nonexistent");
+		else
+			this.msgRepo.clear();
 	}
 
 	/** //todo	Bonus
@@ -79,9 +83,13 @@ export class ChatMessageService
 	/** //todo
 	 * fetch all message of one room
 	 */
-	async getAllMessageOf(room: ChatRoomEntity): Promise<ChatMessageEntity[]>
+	async getAllMessageOf(room_id: number): Promise<ChatMessageEntity[] | string>
 	{
-		return await this.msgRepo.find();
+		const ret = await this.msgRepo.findOne(room_id);
+		if(ret === undefined)
+			return("room nonexistent");
+		else
+			return await this.msgRepo.find();
 	}
 
 	
