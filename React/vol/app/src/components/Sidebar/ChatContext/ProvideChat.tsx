@@ -2,7 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
-import { RcvMessageDto, RoomLeftDto, UserDataDto } from "../../../Common/Dto/chat/room";
+import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
 import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
 
@@ -48,7 +48,8 @@ export interface INotif
 	req_id?: number;
 	username?: string;
 	content? : string;
-
+	refId?: number;
+	date: Date;
 }
 
 export interface IRoom
@@ -88,6 +89,10 @@ interface IChatContext
 	friendsList:			Array<UserDataDto>;
 	blockList:				Array<UserDataDto>;
 	//RequestList:		Array<UserDataDto>;
+}
+
+const generateKey = (id : number) => {
+    return `${ id }_${ new Date().getTime()}_${Math.random() * 25}`;
 }
 
 function useChatProvider() : IChatContext
@@ -245,8 +250,17 @@ function useChatProvider() : IChatContext
 	}, [socket, addRoom]);
 
 	useEffect(() => {
-		socket.on("UPDATE_ROOM", (data: RoomJoinedDTO) => {
+		socket.on("UPDATE_ROOM", (data: RoomUpdatedDTO) => {
 			//todo for each modification
+			let refR = findRoomById(data.id);
+			if (refR !== undefined)
+			{
+				if (data.isPrivate !== undefined) refR.private = data.isPrivate;
+				if (data.name !== undefined) refR.room_name = data.name;
+				if (data.level !== undefined) refR.user_level = data.level;
+				if (data.owner !== undefined) refR.owner = data.owner;
+			}
+
 		});
 
 		return function cleanup() {
@@ -286,14 +300,13 @@ function useChatProvider() : IChatContext
 		});
 	}, []);
 
-	function rmNotif(id: string)
-	{
+	const rmNotif = useCallback((id: string) => {
 		setNotification(prev => {
 			return prev.filter((o) => {
 				return (o.id !== id);
 			})
 		});
-	};
+	}, []);
 
 	function rmFriendNotif(id: number)
 	{
@@ -306,6 +319,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
+			data.forEach(d => {d.id = generateKey(d.req_id || d.type)})
 			addNotif(data);
 		});
 		
@@ -366,10 +380,12 @@ function useChatProvider() : IChatContext
 				if (!isNotified(req.reference_id))
 				{
 					not.push({
-						id: "",
+						id: generateKey(req.reference_id),
 						type: ENotification.FRIEND_REQUEST,
 						req_id: req.reference_id,
-						username: req.username
+						username: req.username,
+						refId: req.reference_id,
+						date: req.date || new Date(),
 					});
 				}	
 			})

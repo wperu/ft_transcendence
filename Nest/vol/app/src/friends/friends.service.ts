@@ -147,21 +147,26 @@ export class FriendsService
 		}
 	}
 
+
+
 	/**
 	 * 
 	 * @param id : request_id 
 	 * @returns void
 	 */
-	async rmRequestFriend(id: number) : Promise<void>
+	async rmRequestFriend(id_two: number, id_one: number) : Promise<undefined | string>
 	{
-		
-		await this.friendRepository
-		    .createQueryBuilder()
-		    .delete()
-		    .from(FriendShip)
-		    .where("id = :id", { id: id })
-		    .execute()
-		return ;
+		const rel = await this.findFriendRelationOf(id_one, id_two);
+
+		if (rel !== undefined)
+		{
+			if (rel.status === 0)
+			{
+				await this.friendRepository.remove(rel);
+				return undefined;
+			}
+		}
+		return "No Request Send !";
 	}
 
 	/**

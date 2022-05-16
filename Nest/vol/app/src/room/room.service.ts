@@ -284,13 +284,12 @@ export class RoomService
 
 	/**
 	 * //todo destroy chan when user last user leave
-	 * //todo cn't leave dm room
 	 * Join room using room's Id
 	 * @param chanName 
 	 * @param userId 
 	 * @returns 
 	 */
-	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string>
+	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string | number>
 	 {
 		const room = await this.findRoomById(chanId);
  
@@ -313,14 +312,54 @@ export class RoomService
 		const rels = await this.roomRelRepo.find({
 			relations : ["room"],
 			where : {
-				room : { id : room.id }
+				room : { id : room.id },
+				ban_expire: null,
 			}
 		})
 
-		console.log(rels);
-
 		if (rels.length === 0)
+		{
+			await this.roomRelRepo.createQueryBuilder()
+				.relation("room")
+				.of({id: chanId})
+				.delete()
+				.execute();
+
 			await this.roomRepo.remove(room);
+		}
+		else if (refId === room.owner)
+		{
+			let newOwner : number;
+			const rel = await this.roomRelRepo.findOne({
+				relations : ["room", "user"],
+				where : {
+					room : { id : room.id },
+					isAdmin: true,
+				}
+			})
+			if (rel !== undefined)
+			{
+				newOwner = rel.user.reference_id;
+			}
+			else
+			{
+				const rel = await this.roomRelRepo.findOne({
+					relations : ["room", "user"],
+					where : {
+						room : { id : room.id },
+						ban_expire: null
+					}
+				})
+				rel.mute_expire = null;
+				rel.isAdmin = true;
+				newOwner = rel.user.reference_id;
+
+				await this.roomRelRepo.save(rel);
+			}
+			room.owner = newOwner;
+			this.roomRepo.save(room);
+			return (room.owner);
+		}
 		return (undefined);
 	 }
 
@@ -344,7 +383,6 @@ export class RoomService
 			relations: ["user", "room"],
 			where: {
 				room: { id : room.id },
-				ban_expire: null,
 			}
 		})
 		let ret : UserRoomDataDto[];
@@ -360,6 +398,7 @@ export class RoomService
 					level:			await this.getUserLevel(room.id, room.owner, r.user.reference_id),
 					isMuted:		await this.isMute(room.id, r.user.reference_id),
 					isBan:			!(r.ban_expire === null),
+					is_connected:	false, // default value change in chat service
 				})
 			}
 		}
@@ -458,7 +497,7 @@ export class RoomService
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
-		if (await this.isAdmin(room.id, senderRefId) === false)
+		if (room.owner !== senderRefId && await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
 			return "You can't mute room operator !";
@@ -481,7 +520,7 @@ export class RoomService
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
-		if (await this.isAdmin(room.id, senderRefId) === false)
+		if (room.owner !== senderRefId && await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
 			return "You can't mute room operator !";
@@ -496,6 +535,7 @@ export class RoomService
 	}
 
 	/**
+	 * //fix only owner or admin too
 	 * @param id 
 	 * @param refId 
 	 * @param password 
@@ -510,7 +550,7 @@ export class RoomService
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
 
-		if (await this.isAdmin(room.id, refId) === false)
+		if (room.owner !== refId && await this.isAdmin(room.id, refId) === false)
 			return "Only the room owner can change the password !";
 		
 		room.password_key = await this.passwordService.genHash(password);
@@ -549,7 +589,7 @@ export class RoomService
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
-		if (await this.isAdmin(room.id, senderRefId) === false)
+		if (room.owner !== senderRefId && await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
 			return "You can't mute room operator !";
@@ -571,7 +611,7 @@ export class RoomService
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
-		if (await this.isAdmin(room.id, senderRefId) === false)
+		if (room.owner !== senderRefId && await this.isAdmin(room.id, senderRefId) === false)
 			return "No Right !";
 		if (await this.isAdmin(room.id, refId) === true && room.owner !== senderRefId)
 			return "You can't unmute room operator !";

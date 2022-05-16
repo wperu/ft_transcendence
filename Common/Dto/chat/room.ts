@@ -53,9 +53,10 @@ export interface RoomLeftDto
 
 export interface UserDataDto
 {
-	username: string,
-    reference_id: number,
-	is_connected?: boolean,
+	username:		string,
+    reference_id:	number,
+	is_connected?:	boolean,
+	date?:			Date,
 }
 
 
@@ -63,7 +64,7 @@ export interface UserRoomDataDto
 {
 	username:		string,
     reference_id:	number,
-	is_connected?:	boolean,
+	is_connected:	boolean,
 	isMuted:		boolean,
 	isBan:			boolean,
 	level:			ELevelInRoom,
@@ -94,13 +95,14 @@ export interface RoomListDTO
 	isDm:			boolean;
 }
 
-export interface RoomUpdataDTO
+export interface RoomUpdatedDTO
 {
 	id:			number,
 	level?:		ELevelInRoom,
 	name?:		string,
 	isPrivate?: boolean,
-	isAdmin:	boolean,
+	isAdmin?:	boolean,
+	owner?:		number;
 }
 
 export interface JoinRoomDto
