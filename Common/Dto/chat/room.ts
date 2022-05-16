@@ -64,7 +64,7 @@ export interface UserRoomDataDto
 {
 	username:		string,
     reference_id:	number,
-	is_connected?:	boolean,
+	is_connected:	boolean,
 	isMuted:		boolean,
 	isBan:			boolean,
 	level:			ELevelInRoom,

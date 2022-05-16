@@ -398,6 +398,7 @@ export class RoomService
 					level:			await this.getUserLevel(room.id, room.owner, r.user.reference_id),
 					isMuted:		await this.isMute(room.id, r.user.reference_id),
 					isBan:			!(r.ban_expire === null),
+					is_connected:	false, // default value change in chat service
 				})
 			}
 		}

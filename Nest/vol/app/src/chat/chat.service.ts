@@ -281,6 +281,10 @@ export class ChatService {
 		
 		if (typeof resp !== 'string')
 		{
+			for (let u of resp)
+			{
+				u.is_connected = this.getUserFromID(u.reference_id) !== undefined;
+			}
 			client.emit("USER_LIST", resp);
 		}
 	}
