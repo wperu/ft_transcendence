@@ -99,7 +99,7 @@ export function BanUserButton(prop: banProp)
 {
 	const chtCtx = useChatContext();
 	const [isOpen, setIsOpen] = useState<boolean>(false);
-	const [duration, setDuration] = useState<number>();
+	const [duration, setDuration] = useState<number>(0);
 
 	function close()
 	{
@@ -128,7 +128,7 @@ export function BanUserButton(prop: banProp)
 			{
 				id: chtCtx.currentRoom.id,
 				refId: prop.refId,
-				expires_in: 50000,
+				expires_in: duration,
 				isBan: true,
 			} 
 			chtCtx.socket.emit('ROOM_BAN', dto);
