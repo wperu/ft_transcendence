@@ -13,6 +13,7 @@ interface	props
 	isBlockedByCurrentUser: boolean;
 	isMuted: boolean;
 	isDm: boolean;
+	isBanned: boolean;
 }
 
 function ChatUser(data: props)
@@ -45,7 +46,7 @@ function ChatUser(data: props)
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
-						<BanUserButton user_name={data.targetUsername} refId={data.refId} isBanned={false}/>
+						<BanUserButton user_name={data.targetUsername} refId={data.refId} isBanned={data.isBanned}/>
 					</div>
 				);
 			}
@@ -62,7 +63,7 @@ function ChatUser(data: props)
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted}/>
-						<BanUserButton user_name={data.targetUsername} refId={data.refId} isBanned={false}/>
+						<BanUserButton user_name={data.targetUsername} refId={data.refId} isBanned={data.isBanned}/>
 					</div>
 				);
 			}

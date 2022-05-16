@@ -12,7 +12,7 @@ import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
 import Popup from "reactjs-popup";
 import { isPropertySignature } from "typescript";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 interface Prop
@@ -120,8 +120,7 @@ export function BanUserButton(prop: banProp)
 			unban();
 	}
 
-	function ban()
-	{
+	const ban = useCallback(() => {
 		if (chtCtx.currentRoom !== undefined)
 		{
 			const dto : RoomBanDto =
@@ -133,8 +132,8 @@ export function BanUserButton(prop: banProp)
 			} 
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
-		console.log("user banned");
-	}
+		console.log("duration " + duration);
+	}, [duration])
 
 	function unban()
 	{
@@ -175,7 +174,7 @@ export function BanUserButton(prop: banProp)
 						<input type="button" value="cancel" 
 							onClick={close}/>
 						<input type="button" value={"ban " + prop.user_name} 
-							onClick={handleSubmit}/>
+							onClick={ban}/>
 					</div>
 				</div>}
 			</Popup>
@@ -195,7 +194,7 @@ export function BanUserButton(prop: banProp)
 						<input type="button" value="cancel" 
 							onClick={close}/>
 						<input type="button" value={"unban " + prop.user_name}
-						onClick={handleSubmit}/>
+						onClick={unban}/>
 					</div>
 				</div>}
 			</Popup>

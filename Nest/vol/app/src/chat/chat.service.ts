@@ -295,12 +295,16 @@ export class ChatService {
 
 		if (data.isBan)
 		{
-			const ban_expire = new Date(Date.now() + data.expires_in);
+			const hours = new Date(0);
+			hours.setHours(data.expires_in);
+			const ban_expire = new Date(Date.now() + hours.getTime());
 			resp = await this.roomService.banUser(data.id, user.reference_id, data.refId, ban_expire);
 		}
 		else
 			resp = await this.roomService.unbanUser(data.id, user.reference_id, data.refId);
 		
+
+		console.log(resp);
 		let dto : NoticeDTO;
 		if (resp instanceof ChatRoomEntity)
 		{

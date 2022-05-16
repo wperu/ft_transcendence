@@ -70,7 +70,8 @@ function ChannelUserList ()
 								refId={user.reference_id}
 								currentUserLvl={user_lvl}
 								isMuted={user.isMuted}
-								isDm={currentRoom !== undefined? currentRoom.isDm : false}/>
+								isDm={currentRoom !== undefined? currentRoom.isDm : false}
+								isBanned={false}/>
 							);
 					}
 					else
@@ -90,7 +91,9 @@ function ChannelUserList ()
 								refId={user.reference_id}
 								currentUserLvl={user_lvl}
 								isMuted={user.isMuted}
-								isDm={currentRoom !== undefined? currentRoom.isDm : false}/>
+								isDm={currentRoom !== undefined? currentRoom.isDm : false}
+								isBanned={true}
+								/>
 							);
 					}
 					else

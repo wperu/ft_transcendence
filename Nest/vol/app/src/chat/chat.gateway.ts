@@ -188,7 +188,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user === undefined)
 			return; //todo disconect ?
-		
+		console.log(payload);
 		await this.chatService.roomBanUser(client, user, payload);
 	}
 

@@ -390,17 +390,15 @@ export class RoomService
 
 		for(const r of rel)
 		{
-			if (r.ban_expire === null || (this.checkBan(room.id, refId)))
-			{
+			await this.checkBan(room.id, r.user.reference_id);
 				ret.push({
 					reference_id :	r.user.reference_id,
 					username:		r.user.username,
 					level:			await this.getUserLevel(room.id, room.owner, r.user.reference_id),
 					isMuted:		await this.isMute(room.id, r.user.reference_id),
-					isBan:			!(r.ban_expire === null),
+					isBan:			r.ban_expire !== null,
 					is_connected:	false, // default value change in chat service
 				})
-			}
 		}
 
 		return (ret);
@@ -507,6 +505,8 @@ export class RoomService
 			return "User not in room !";
 
 		rel.ban_expire = expires_in;
+
+		console.log(expires_in);
 		await this.roomRelRepo.save(rel);
 		
 		return room;
@@ -528,9 +528,10 @@ export class RoomService
 		const rel = await this.findRelOf(id, refId);
 		if (rel === undefined)
 			return "User not in room !";
+		if (rel.ban_expire === null)
+			return "User is not Banned !";
 
 		await this.roomRelRepo.remove(rel);
-		
 		return undefined;
 	}
 

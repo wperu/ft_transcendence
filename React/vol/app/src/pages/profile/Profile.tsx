@@ -84,6 +84,20 @@ function CurrentUserProfileHeader(props : headerInfo)
 		return (props.user.username);
 	}
 
+	function updateUsername() : void
+	{
+	
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/' + 'username';
+		const headers = {
+			//'authorization'	: user.access_token_42,
+			//'grant-type': 'authorization-code',
+			//'authorization-code': accessCode
+			'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
+		}
+
+		axios.put(url, )
+	}
+
 	function changePP(e: React.ChangeEvent<HTMLInputElement>)
 	{
 		if (!e.target.files || e.target.files.length === 0) {
