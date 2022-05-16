@@ -360,9 +360,6 @@ function useChatProvider() : IChatContext
 
 			not = [];
 			data.forEach((req) => {
-				
-
-				
 				if (!isNotified(req.reference_id))
 				{
 					not.push({

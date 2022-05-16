@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {ELevelInRoom} from "../Sidebar/ChatContext/ProvideChat"
 import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
 	PromoteUserButton, AddFriendButton, DirectMessage} from "../UserBarButtons/UserBarButtons"
@@ -44,7 +45,7 @@ function ChatUser(data: props)
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
-						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
+						<BanUserButton user_name={data.targetUsername} refId={data.refId} isBanned={false}/>
 					</div>
 				);
 			}
@@ -61,7 +62,7 @@ function ChatUser(data: props)
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted}/>
-						<BanUserButton user_name={data.targetUsername} refId={data.refId}/>
+						<BanUserButton user_name={data.targetUsername} refId={data.refId} isBanned={false}/>
 					</div>
 				);
 			}
@@ -70,7 +71,7 @@ function ChatUser(data: props)
 
 	return (
 		<div className="chat_user" >
-			<div className="chat_user_username">{data.targetUsername + data.targetUserLvl}</div>
+			<div className="chat_user_username"><Link to={"/profile/" + data.refId}>{data.targetUsername + data.targetUserLvl}</Link></div>
 			<Buttons />
 		</div>
 	);

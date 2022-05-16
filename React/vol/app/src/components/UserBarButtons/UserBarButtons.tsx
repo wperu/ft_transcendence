@@ -1,3 +1,4 @@
+import "./UserBarButtons.css";
 import BlockLogo from "../../ressources/images/forbidden.png";
 import MuteLogo from "../../ressources/images/mute.png";
 import BanLogo from "../../ressources/images/hammer.png";
@@ -7,9 +8,11 @@ import AddFriendLogo from "../../ressources/images/add-friend.png";
 import AcceptInvitationLogo from "../../ressources/images/accept.png";
 import ChatLogo from "../../ressources/images/chatting.png";
 import CloseLogo from "../../ressources/images/close.png";
-import "./UserBarButtons.css";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
+import Popup from "reactjs-popup";
+import { isPropertySignature } from "typescript";
+import React, { useState } from "react";
 
 interface Prop
 {
@@ -20,6 +23,11 @@ interface Prop
 interface muteProp extends Prop
 {
 	isMuted: boolean;
+}
+
+interface banProp extends Prop
+{
+	isBanned: boolean;
 }
 
 interface promoteProp
@@ -83,11 +91,32 @@ export function InviteUserButton(prop: gameInvitationProp)
 	);
 }
 
-export function BanUserButton(prop: Prop)
+export function BanUserButton(prop: banProp)
 {
 	const chtCtx = useChatContext();
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [duration, setDuration] = useState<number>();
 
-	function onClick()
+	function close()
+	{
+		setIsOpen(false);
+	}
+
+	function open()
+	{
+		setIsOpen(true);
+	}
+
+	function handleSubmit()
+	{
+		close()
+		if (prop.isBanned)
+			ban();
+		else
+			unban();
+	}
+
+	function ban()
 	{
 		if (chtCtx.currentRoom !== undefined)
 		{
@@ -102,14 +131,98 @@ export function BanUserButton(prop: Prop)
 		}
 		console.log("user banned");
 	}
+
+	function unban()
+	{
+		if (chtCtx.currentRoom !== undefined)
+		{
+			const dto : RoomBanDto =
+			{
+				id: chtCtx.currentRoom.id,
+				refId: prop.refId,
+				expires_in: -1,
+				isBan: false,
+			} 
+			chtCtx.socket.emit('ROOM_BAN', dto);
+		}
+		console.log("user unbanned");
+	}
+
+	if (!prop.isBanned)
+	{
+		return (
+		<React.Fragment>
+			<button className="user_bar_button negative_user_button" onClick={open}>
+				<img alt="" src={BanLogo}/>
+				ban
+			</button>
+			<Popup onClose={close} open={isOpen} modal>
+				{<div className="mute_ban_popup">
+					<div className="header"> Ban duration </div>
+					<div className="content">
+						<input type="number" min="1" placeholder="duration"
+							value={duration} onChange={(e) => {
+								setDuration(parseInt(e.target.value))
+								}}
+							/>
+						hours
+					</div>
+					<div className="actions">
+						<input type="button" value="cancel" 
+							onClick={close}/>
+						<input type="button" value={"ban " + prop.user_name} 
+							onClick={handleSubmit}/>
+					</div>
+				</div>}
+			</Popup>
+		</React.Fragment>
+		);
+	}
 	return (
-		<button className="user_bar_button negative_user_button" onClick={onClick}><img alt="" src={BanLogo}/>ban</button>
+		<React.Fragment>
+			<button className="user_bar_button positive_user_button" onClick={open}>
+				<img alt="" src={BanLogo}/>
+				ban
+			</button>
+			<Popup open={isOpen} onClose={close} modal>
+				{<div className="mute_ban_popup">
+					<div className="header"> Are you sure ? </div>
+					<div className="actions">
+						<input type="button" value="cancel" 
+							onClick={close}/>
+						<input type="button" value={"unban " + prop.user_name}
+						onClick={handleSubmit}/>
+					</div>
+				</div>}
+			</Popup>
+		</React.Fragment>
 	);
 }
 
 export function MuteUserButton(prop: muteProp)
 {
 	const chtCtx = useChatContext();
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [duration, setDuration] = useState<number>(0);
+
+	function close()
+	{
+		setIsOpen(false);
+	}
+
+	function open()
+	{
+		setIsOpen(true);
+	}
+
+	function handleSubmit()
+	{
+		close()
+		if (prop.isMuted)
+			unmute();
+		else
+			mute();
+	}
 
 	function mute()
 	{
@@ -120,7 +233,7 @@ export function MuteUserButton(prop: muteProp)
 				roomId: chtCtx.currentRoom.id,
 				refId: prop.refId,
 				isMute: true,
-				expires_in: 10000,
+				expires_in: duration,
 			} 
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}
@@ -141,9 +254,55 @@ export function MuteUserButton(prop: muteProp)
 		}
 	}
 
-	if (prop.isMuted)
-		return (<button className="user_bar_button positive_user_button" onClick={unmute}><img alt="" src={MuteLogo}/>unmute</button>);
-	return (<button className="user_bar_button negative_user_button" onClick={mute}><img alt="" src={MuteLogo}/>mute</button>);
+	if (!prop.isMuted)
+	{
+		return (
+		<React.Fragment>
+			<button className="user_bar_button negative_user_button" onClick={open} >
+				<img alt="" src={MuteLogo}/>
+				mute
+			</button>
+			<Popup onClose={close} open={isOpen} modal>
+				{<div className="mute_ban_popup">
+					<div className="header"> Mute duration </div>
+					<div className="content">
+						<input type="number" min="1" placeholder="duration"
+							value={duration} onChange={(e) => {
+								setDuration(parseInt(e.target.value))
+								}}
+							/>
+						hours
+					</div>
+					<div className="actions">
+						<input type="button" value="cancel" 
+							onClick={close}/>
+						<input type="button" value={"mute " + prop.user_name} 
+							onClick={handleSubmit}/>
+					</div>
+				</div>}
+			</Popup>
+		</React.Fragment>
+		);
+	}
+	return (
+		<React.Fragment>
+			<button className="user_bar_button positive_user_button" onClick={open} >
+				<img alt="" src={MuteLogo}/>
+				unmute
+			</button>
+			<Popup open={isOpen} onClose={close} modal>
+				{<div className="mute_ban_popup">
+					<div className="header"> Are you sure ? </div>
+					<div className="actions">
+						<input type="button" value="cancel" 
+							onClick={close}/>
+						<input type="button" value={"unmute " + prop.user_name}
+						onClick={handleSubmit}/>
+					</div>
+				</div>}
+			</Popup>
+		</React.Fragment>
+	);
 }
 
 //todo Friend part
@@ -215,9 +374,6 @@ export function PromoteUserButton(prop: promoteProp)
 	else
 		return (<button className="user_bar_button positive_user_button" onClick={promote}><img alt="" src={PromoteLogo}/>promote</button>);
 }
-
-
-
 
 export function AddFriendButton(prop: friendProp)
 {

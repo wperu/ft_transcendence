@@ -5,5 +5,17 @@
 	scroll-behavior: auto;
 	overflow-x: hidden;
 	overflow-y: auto;
+	width: 100%;
 	height: calc(100vh - (var(--tab_button_height) * 2) - var(--additional_settings_space));
+}
+
+.chat_user_status_tab
+{
+	display: inline-block;
+	width: 100%;
+	text-transform: lowercase;
+	font-style: italic;
+	font-size: 0.7em;
+	padding-left: 0.3vmin;
+	text-align: start;
 }
