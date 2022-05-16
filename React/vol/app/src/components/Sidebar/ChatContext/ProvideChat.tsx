@@ -133,26 +133,6 @@ function useChatProvider() : IChatContext
 		}));
 	}, [rooms]);
 	
-    const addRoom = useCallback((room: RoomJoinedDTO) => {
-		const newRoom : IRoom = {
-			id: room.id,
-			user_level: room.level,
-			room_name: room.room_name,
-			room_message: [],
-			private: false, //fix me ?!
-			protected: room.protected,
-			isDm: room.isDm,
-			owner: room.owner,
-			nb_notifs: 0,
-		};
-		
-		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
-		if (currentRoom !== undefined)
-			setCurrentRoomById(currentRoom.id);
-
-    }, [currentRoom, setCurrentRoomById]);
-
-
 	const rmRoom = useCallback((id: number) => {
 		setRooms(prev => {
 			return prev.filter((o) => {
@@ -167,6 +147,29 @@ function useChatProvider() : IChatContext
 			return (o.id === id);
 		}));
 	}, [rooms]);
+
+	const addRoom = useCallback((room: RoomJoinedDTO) => {
+		if (findRoomById(room.id) !== undefined)
+			return;
+
+		const newRoom : IRoom = {
+			id: room.id,
+			user_level: room.level,
+			room_name: room.room_name,
+			room_message: [],
+			private: false, //fix me ?!
+			protected: room.protected,
+			isDm: room.isDm,
+			owner: room.owner,
+			nb_notifs: 0,
+		};
+		
+
+		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
+		if (currentRoom !== undefined)
+			setCurrentRoomById(currentRoom.id);
+
+    }, [currentRoom, setCurrentRoomById, findRoomById]);
 
 	useEffect(() => {
 		if (jumpDm !== undefined)

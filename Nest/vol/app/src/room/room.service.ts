@@ -7,6 +7,7 @@ import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ChatMessageService } from './room.message.service';
+import { urlencoded } from 'express';
 
 @Injectable()
 export class RoomService
@@ -159,8 +160,6 @@ export class RoomService
 
 	/**
 	 * //todo : name already exist /!\
-	 * //todo : encrypt password
-	 * //todo : dm already exist
 	 *
 	 * @param name 			-> name
 	 * @param user			-> owner
@@ -179,6 +178,8 @@ export class RoomService
 			return "User doesn't exist !";
 		if (isDm && await this.findDm(user, user2)) //fix
 			return "dm room already exist";
+	/*	if (user.reference_id === user.reference_id)
+			return "can't dm with "*/ 
 
 		room.name			= name;
 		room.owner			= user.reference_id;
@@ -193,7 +194,7 @@ export class RoomService
 		roomRel.user	= user;
 		roomRel.isAdmin = false;
 
-		if (isDm)
+		if (isDm && user.id !== user2.id)
 		{
 			let roomRel2	: ChatRoomRelationEntity	= new ChatRoomRelationEntity();
 

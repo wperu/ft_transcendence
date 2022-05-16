@@ -304,7 +304,6 @@ export class ChatService {
 			resp = await this.roomService.unbanUser(data.id, user.reference_id, data.refId);
 		
 
-		console.log(resp);
 		let dto : NoticeDTO;
 		if (typeof resp !== "string")
 		{
