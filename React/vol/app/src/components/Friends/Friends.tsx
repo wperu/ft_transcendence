@@ -4,6 +4,7 @@ import { InfoNotification, InviteNotification, NewFriendNotification } from "./N
 import "./Friends.css";
 import { INotif, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from "../../hooks/useInterval";
+import { Link } from "react-router-dom";
 
 
 enum ENotification
@@ -64,7 +65,7 @@ function Friends()
 			<form id="add_friend_by_name_form" onSubmit={addFriend}>
 				<div id="add_friend_title">Ajouter un ami</div>
 				<input id="add_friend_input" type="text"
-					name="name" placeholder="Nom du fdp"/>
+					name="name" placeholder="Nom de l'utilisateur"/>
 				<input id="add_friend_button" type="submit" value="Ajouter"/>
 			</form>
 
@@ -80,17 +81,16 @@ function Friends()
 				<div className="user_status_tab">Online</div>
 				{chtCtx.friendsList.map((u, index) => (
 					(u.is_connected !== undefined && u.is_connected !== false)
-					? <Friend
-						key={u.reference_id}
-						ref_id={u.reference_id}
-						name={u.username}
-						online={u.is_connected}/>
+					?	<Friend
+							key={u.reference_id}
+							ref_id={u.reference_id}
+							name={u.username}
+							online={u.is_connected}/>
 					: null ))}
 				<div className="user_status_tab">Offline</div>
 				{chtCtx.friendsList.map((u, index) => (
 					(u.is_connected !== undefined && u.is_connected === false)
-					? <Friend
-						key={u.reference_id}
+					?	<Friend key={u.reference_id}
 						ref_id={u.reference_id}
 						name={u.username}
 						online={u.is_connected}/>
@@ -99,7 +99,11 @@ function Friends()
 
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
-				{chtCtx.blockList.map((u) => (<BlockedUser key={u.reference_id} ref_id={u.reference_id} name={u.username} /> ))}
+				{chtCtx.blockList.map((u) => (
+					<BlockedUser key={u.reference_id}
+						ref_id={u.reference_id}
+						name={u.username} />
+				))}
 			</div>
 		</div>
 	);
