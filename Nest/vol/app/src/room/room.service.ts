@@ -33,17 +33,18 @@ export class RoomService
 
 	async findRoomByName(name: string) : Promise<ChatRoomEntity | undefined>
 	{
-		const ret = await this.roomRepo.find(
+		const ret = await this.roomRepo.findOne(
 			{
 			where: {
 				name: name,
+				isDm: false, 
 			}
 		})
 
-		if (ret.length === 0)
-			return undefined
+		if (ret === undefined)
+			return undefined;
 
-		return ret[0];
+		return ret;
 	}
 
 	async findRoomById(id: number) : Promise<ChatRoomEntity | undefined>
@@ -210,10 +211,10 @@ export class RoomService
 
 	async joinRoom(room: ChatRoomEntity, user: User, password_key: string) : Promise<ChatRoomEntity | string>
 	{
-		if(room.isDm === true)
-			return ("You can't join dm room");
 		if (room === undefined)
 			return ("no room exist !");
+		if(room.isDm === true)
+			return ("You can't join dm room");
 		if (await this.checkBan(room.id, user.reference_id) === true)
 			return ("banned !");
 		if (await this.isInRoom(room, user.reference_id) === true)

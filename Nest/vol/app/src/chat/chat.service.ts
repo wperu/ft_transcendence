@@ -306,7 +306,7 @@ export class ChatService {
 
 		console.log(resp);
 		let dto : NoticeDTO;
-		if (resp instanceof ChatRoomEntity)
+		if (typeof resp !== "string")
 		{
 			let left_dto : RoomLeftDto;
 
