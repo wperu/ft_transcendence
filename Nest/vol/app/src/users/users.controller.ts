@@ -1,15 +1,14 @@
-import { Body, Controller, Get, NotFoundException, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
-import { Request } from 'express';
-import { brotliDecompress } from 'zlib';
+import { Request, Response } from 'express';
 
 @Controller('users')
 export class UsersController
 {
 	constructor(
-		private readonly userService: UsersService
+		private readonly userService: UsersService,
 	) {}
 	
 
@@ -20,8 +19,7 @@ export class UsersController
 		return await this.userService.findAll();
 	}
 
-
-	@Get("/:id")
+	@Get("/profile/:id")
 	//@UseGuards(AuthGuard)
 	async findOne(@Param('id') param): Promise<User>
 	{
@@ -36,38 +34,61 @@ export class UsersController
 	}
 
 
-	@Post("/:id/update/username")
+	@Put("/:id/username")
 	//@UseGuards(AuthGuard)
-	async updateUserName(@Req() request: Request, @Body() body, @Param('id') param): Promise<void> | undefined
+	async updateUserName(@Res() response : Response, @Req() request: Request, @Body() body, @Param('id') param)
 	{
 		// TODO update user in service
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
-			throw new NotFoundException();
+		{
+			return response.status(HttpStatus.NOT_FOUND).json();
+		}
+		
+		if (await this.userService.checkAccesWithRefId(request.header['authorization'],id) === false)
+			return response.status(HttpStatus.FORBIDDEN).json({error: "Invalid access token"});
 
-			console.log(body);
-			if (body.username !== undefined )
+		if (body.username === undefined || body.username === "") //todo add username Rules
+		{
+			return response.status(HttpStatus.CONFLICT).json({error: 'no username passed'});
+		}
+		else
+		{
+			if (await this.userService.updateUserName(id, body.username) === false) //add alreay user responses
 			{
-				let username = body.username;
-				if (username !== undefined)
-					this.userService.updateUserName(id, username);
+				return response.status(HttpStatus.CONFLICT).json({error: 'username already use'});
 			}
-
-		return (undefined);
+			else
+				return response.status(HttpStatus.OK).json();
+		}
 	}
 
-	@Post("/:id/update/useTwoFactor")
+	@Put("/:id/useTwoFactor")
 	//@UseGuards(AuthGuard)
-	async updateTwoFactor(@Param('id') param): Promise<User> | undefined
+	async updateTwoFactor(@Res() response : Response, @Param('id') param)
 	{
 		// TODO update user in service
+
+		let id: number = parseInt(param);
+		if(isNaN(id) || !/^\d*$/.test(param))
+		{
+			return response.status(HttpStatus.NOT_FOUND).json();
+		}
+
+
 		return (undefined);
 	}
 
-	@Post("/:id/update/avatar")
+	@Put("/:id/avatar")
 	//@UseGuards(AuthGuard)
-	async updateOne(@Param('id') param): Promise<User> | undefined
+	async updateOne(@Res() response : Response, @Param('id') param)
 	{
+		let id: number = parseInt(param);
+		if(isNaN(id) || !/^\d*$/.test(param))
+		{
+			return response.status(HttpStatus.NOT_FOUND).json();
+		}
+
 		// TODO update user in service
 		return (undefined);
 	}

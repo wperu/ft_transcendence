@@ -165,13 +165,29 @@ export class UsersService
 
 
 
-	async updateUserName(id: Number, newUserName : string)
+	async updateUserName(id: Number, newUserName : string) : Promise<boolean>
 	{
-		await this.usersRepository
-				.createQueryBuilder()
-				.update(User)
-				.set({username: newUserName})
-				.where("id = :id", {id})
-				.execute();
+		try {
+			await this.usersRepository
+					.createQueryBuilder()
+					.update(User)
+					.set({username: newUserName})
+					.where("id = :id", {id})
+					.execute();
+		}
+		catch(e)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	async checkAccesWithRefId(access: string, refId : number)
+	{
+		const ret = await this.findUserByAccessToken(access);
+		if (ret === undefined)
+			return false;
+
+		return (ret.reference_id === refId);
 	}
 }

@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, JoinColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, JoinColumn, OneToOne, Unique } from 'typeorm';
 import DatabaseFile from './databaseFile.entity';
 
 @Entity()
+@Unique('username', ['username'])
 export class User
 {
   @PrimaryGeneratedColumn()
@@ -10,11 +11,13 @@ export class User
   @Column()
   reference_id: number;
 
-  @Column()
+
+  @Column({nullable: true, default: null})
+  login: string;
+
+  @Column({nullable: false})
   username: string;
   
-
-
   // all tokens are nullable because we dont want to keep an expired token
   @Column({nullable: true})
   access_token_42?: string;
