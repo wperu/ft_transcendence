@@ -98,7 +98,7 @@ function usePongProvider() : IPongContext
                 } as IPongBall,
 
                 spectators: [],
-                state: RoomState.LOADING,
+                state: RoomState.ENDED,
                 socket: socket,
             } as IPongRoom);
 

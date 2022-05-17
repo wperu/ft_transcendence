@@ -200,6 +200,7 @@ export class PongService {
         this.server.to(room.id).emit("END_GAME");
         console.log("ending");
         clearInterval(room.interval);
+        room.interval = null;
 
         new Promise(async () => setTimeout(() => {
             this.server.to(room.id).emit("LOAD_GAME");
@@ -286,19 +287,18 @@ export class PongService {
 
         console.log("sent start request");
 
-       /* new Promise(() => setTimeout(() => {
-            this.server.to(room.id).emit("START_GAME");
-            room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
-        }, GameConfig.RELOAD_TIME));*/
-
-        //new Promise(async () => setTimeout(() => {
-            new Promise(async () => setTimeout(() => {
+        new Promise(async () => setTimeout(async () => {
+            console.log("loading");
+            this.server.to(room.id).emit("LOAD_GAME");
+            await new Promise(async () => setTimeout(() => {
                 console.log("starting");
+                this.sendBallUpdate(room);
+                this.sendPlayerUpdate(room);
                 this.server.to(room.id).emit("START_GAME");
                 this.last_time = 0;
                 room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
             }, GameConfig.RELOAD_TIME));
-        //}, GameConfig.RELOAD_TIME));
+        }, GameConfig.RELOAD_TIME));
     }
 
 
@@ -381,6 +381,9 @@ export class PongService {
         let room = this.rooms.find ((r) => r.id === data.room_id);
         let user = await this.getUserFromSocket(client);
 
+        if (room.interval === null)
+            return ;
+
         if (room === undefined)
         {
             console.log(`cannot update undefined room with id: ${data.room_id}`);
@@ -428,7 +431,7 @@ export class PongService {
             too much ressources for calculating visual effects on the back-end 
         */
         let terrain_sx = 2, terrain_sy = 1;
-
+       // console.log("updating");
 
         /* Calculating next frame velocities */
         // ball

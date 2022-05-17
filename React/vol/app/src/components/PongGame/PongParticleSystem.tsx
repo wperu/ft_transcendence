@@ -89,24 +89,6 @@ function lerp_color(color1: color, color2: color, t: number) : color
 
 async function update_emitter(emitter: ParticleEmitter, render_ctx: PongRenderingContext)
 {
-    if (emitter.particles.length < emitter.max_particles)
-    {
-        if (render_ctx.frameCount % emitter.emission_amount <= 2)
-        {
-            emitter.particles.push({
-                x: emitter.center_x + Math.random() * emitter.spread_amount - emitter.spread_amount * 0.5,
-                y: emitter.center_y + Math.random() * emitter.spread_amount - emitter.spread_amount * 0.5,
-                vel_x: (Math.random() * emitter.speed) - (emitter.speed * 0.5),
-                vel_y: (Math.random() * emitter.speed) - (emitter.speed * 0.5),
-                age: 0,
-            } as Particle)
-        }
-    }
-    else
-    {
-        console.log("max particles");
-    }
-
     emitter.particles.forEach((particle) => {
         particle.age += render_ctx.deltaTime;
         particle.x += particle.vel_x;
@@ -142,8 +124,28 @@ export function clear_particles(system: ParticleSystem)
     })
 }
 
+export async function summon_particles(system: ParticleSystem, render_ctx: PongRenderingContext)
+{
+    system.emitters.forEach((emitter) => {
+        if (emitter.particles.length < emitter.max_particles)
+        {
+            if (render_ctx.frameCount % emitter.emission_amount <= 2)
+            {
+                emitter.particles.push({
+                    x: emitter.center_x + Math.random() * emitter.spread_amount - emitter.spread_amount * 0.5,
+                    y: emitter.center_y + Math.random() * emitter.spread_amount - emitter.spread_amount * 0.5,
+                    vel_x: (Math.random() * emitter.speed) - (emitter.speed * 0.5),
+                    vel_y: (Math.random() * emitter.speed) - (emitter.speed * 0.5),
+                    age: 0,
+                } as Particle)
+            }
+        }
+    })
+}
+
 export async function draw_particles(ctx: CanvasRenderingContext2D, render_ctx: PongRenderingContext, system: ParticleSystem)
 {
+    ctx.save();
     system.emitters.forEach((emitter) => {
         update_emitter(emitter, render_ctx);
         emitter.particles.forEach((particle) => {
@@ -168,6 +170,7 @@ export async function draw_particles(ctx: CanvasRenderingContext2D, render_ctx: 
             //    emitter.particles.splice(emitter.particles.indexOf(particle), 1);
         });
     });
+    ctx.restore();
 }
 
 

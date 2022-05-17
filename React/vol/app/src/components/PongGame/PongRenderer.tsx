@@ -1,8 +1,9 @@
 import { GameConfig } from "../../Common/Game/GameConfig";
 import IUser from "../../interface/User";
 import { IPongContext, IPongRoom, RoomState } from "./PongContext/ProvidePong";
+import { getPongOpponent, getPongPlayer } from "./PongGame";
 import { clear_particles } from "./PongParticleSystem";
-import { clear_trail, plot_trail } from "./PongTrail";
+import { add_particles, clear_trail, plot_trail } from "./PongTrail";
 
 /*** UPDATE ***/
 
@@ -150,7 +151,7 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
     let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_frame, last_time);
     update(pong_ctx, render_ctx.deltaTime, user);
 
-    renderBackground(ctx, render_ctx, pong_ctx, canvas);
+    renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
 
     renderBall(ctx, render_ctx, pong_ctx, user);
 
@@ -174,7 +175,7 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
 
 
 
-function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, canvas: HTMLCanvasElement)
+function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, canvas: HTMLCanvasElement, user: IUser)
 {
     // TODO review clearing pattern     
     ctx.beginPath();    // clear existing drawing paths
@@ -188,14 +189,14 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     /* Center line */
-    ctx.strokeStyle = '#353540'
     ctx.save();
+    ctx.strokeStyle = '#353540'
     ctx.beginPath();
     ctx.lineWidth = 5;
     ctx.moveTo(render_ctx.terrain_x + render_ctx.terrain_w * 0.5, render_ctx.terrain_y);
     ctx.lineTo(render_ctx.terrain_x + render_ctx.terrain_w * 0.5, render_ctx.terrain_y + render_ctx.terrain_h);
     ctx.stroke();
-    
+    ctx.restore();
 
     /* Terrain */
     ctx.strokeStyle = '#FFFFFF'
@@ -205,21 +206,30 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
     /* Player names */
     if (pong_ctx.room)
     {
-        ctx.save();
-        ctx.translate(render_ctx.terrain_x - 10, render_ctx.terrain_y + render_ctx.terrain_h);
-        ctx.rotate(Math.PI + Math.PI * 0.5);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font = "20px NonFiction"
-        ctx.fillText(pong_ctx.room.player_1.username.toUpperCase(), 0, 0);
-        ctx.restore();
+        let player = getPongPlayer(pong_ctx, user);
+        let opponent = getPongOpponent(pong_ctx, user);
 
-        ctx.save();
-        ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + 10, render_ctx.terrain_y);
-        ctx.rotate(Math.PI * 0.5);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font = "20px NonFiction"
-        ctx.fillText(pong_ctx.room.player_2.username.toUpperCase(), 0, 0);
-        ctx.restore();
+        if (player !== undefined)
+        {        
+            ctx.save();
+            ctx.translate(render_ctx.terrain_x - 10, render_ctx.terrain_y + render_ctx.terrain_h);
+            ctx.rotate(Math.PI + Math.PI * 0.5);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "20px NonFiction"
+            ctx.fillText(player.username.toUpperCase(), 0, 0);
+            ctx.restore();
+        }
+
+        if (opponent !== undefined)
+        { 
+            ctx.save();
+            ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + 10, render_ctx.terrain_y);
+            ctx.rotate(Math.PI * 0.5);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.font = "20px NonFiction"
+            ctx.fillText(opponent.username.toUpperCase(), 0, 0);
+            ctx.restore();
+        }
     }
 }
 
@@ -287,29 +297,32 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
         ball_y = render_ctx.terrain_y +  (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
     }
 
-    if (pong_ctx.room.ball.size < GameConfig.BALL_SIZE)
+    if (pong_ctx.room.state === RoomState.LOADING && pong_ctx.room.ball.size < GameConfig.BALL_SIZE)
     {
         clear_trail(pong_ctx);
         pong_ctx.room.ball.size += render_ctx.deltaTime * 0.4;
     }
     else
     {
-        plot_trail(pong_ctx, ctx, ball_x, ball_y, render_ctx);
+        if (pong_ctx.room.state !== RoomState.ENDED)
+            add_particles(pong_ctx, ball_x, ball_y, render_ctx);
+        plot_trail(pong_ctx, ctx, render_ctx);
     }
 
-    //if (pong_ctx.room.state !== RoomState.ENDED)
-    //{
-        /* Ball */
-        let ball_size = render_ctx.terrain_h * (pong_ctx.room.ball.size * 0.1);
-        ctx.fillStyle = '#FFFFFF'
-        ctx.beginPath();
-        ctx.ellipse(ball_x,
-                    ball_y, 
-                    ball_size,
-                    ball_size,
-                    Math.PI / 4, 0, 2 * Math.PI);
-        ctx.fill();
-    //} 
+    /* Ball */
+    let ball_size = render_ctx.terrain_h * (pong_ctx.room.ball.size * 0.1);
+    if (pong_ctx.room.state === RoomState.ENDED)
+        ball_size = 0;
+    ctx.fillStyle = '#FFFFFF'
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(ball_x,
+                ball_y, 
+                ball_size,
+                ball_size,
+                Math.PI / 4, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.restore();
 }
 
 

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { UpdatePongBallDTO } from "../../Common/Dto/pong/UpdatePongBallDTO";
 import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
-import { IPongContext, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
+import { IPongContext, IPongUser, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../interface/User";
 import { render } from "./PongRenderer";
@@ -21,18 +21,32 @@ interface CanvasProps
     height: number;
 }
 
-function getPongPlayer(pong_ctx: IPongContext, user: IUser) : number | undefined // 1 - 2
+export function getPongPlayer(pong_ctx: IPongContext, user: IUser) : IPongUser | undefined // 1 - 2
 {
     if (pong_ctx.room && user.username === pong_ctx.room.player_1.username)
     {
-        return (1);
+        return (pong_ctx.room.player_1);
     }
     else if (pong_ctx.room && user.username === pong_ctx.room.player_2.username)
     {
-        return (2);
+        return (pong_ctx.room.player_2);
     }
     return (undefined);
 }
+
+export function getPongOpponent(pong_ctx: IPongContext, user: IUser) : IPongUser | undefined // 1 - 2
+{
+    if (pong_ctx.room && user.username !== pong_ctx.room.player_1.username)
+    {
+        return (pong_ctx.room.player_1);
+    }
+    else if (pong_ctx.room && user.username !== pong_ctx.room.player_2.username)
+    {
+        return (pong_ctx.room.player_2);
+    }
+    return (undefined);
+}
+
 
 
 const PongGame = (props: CanvasProps) => {
@@ -67,36 +81,19 @@ const PongGame = (props: CanvasProps) => {
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
-            let player_id = getPongPlayer(pongCtx, user);
-               if (player_id !== undefined)
-               {
-                    if (player_id === 1)
+                let player = getPongPlayer(pongCtx, user);
+                if (player !== undefined)
+                {
+                    if ((event.key === "z" || event.key === "Z") && player.key == -1
+                    || (event.key === "s" || event.key === "S") && player.key == 1)
                     {
-                        if ((event.key === "z" || event.key === "Z") && pongCtx.room.player_1.key == -1
-                        || (event.key === "s" || event.key === "S") && pongCtx.room.player_1.key == 1)
-                        {
-                            pongCtx.room.player_1.key = 0;
-                        
-                            pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
-                                room_id: pongCtx.room.room_id,
-                                key: 0,
-                                state: 0,
-                            } as SendPlayerKeystrokeDTO)
-                        }
-                    }
-                    else 
-                    {
-                        if ((event.key === "z" || event.key === "Z") && pongCtx.room.player_2.key == -1
-                        || (event.key === "s" || event.key === "S") && pongCtx.room.player_2.key == 1)
-                        {
-                            pongCtx.room.player_2.key = 0;
-
-                            pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
-                                room_id: pongCtx.room.room_id,
-                                key: 0,
-                                state: 0,
-                            } as SendPlayerKeystrokeDTO)
-                        }
+                        player.key = 0;
+                    
+                        pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
+                            room_id: pongCtx.room.room_id,
+                            key: 0,
+                            state: 0,
+                        } as SendPlayerKeystrokeDTO)
                     }
                 }
             }
