@@ -7,6 +7,7 @@ export enum RoomState
     WAITING, 
     PLAYING,
     FINISHED,
+    PAUSED,
 }
 
 export interface PongRoom

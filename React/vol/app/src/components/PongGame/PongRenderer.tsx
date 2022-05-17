@@ -1,3 +1,4 @@
+import { getGeneratedNameForNode } from "typescript";
 import { GameConfig } from "../../Common/Game/GameConfig";
 import IUser from "../../interface/User";
 import { IPongContext, IPongRoom, RoomState } from "./PongContext/ProvidePong";
@@ -149,15 +150,20 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
     }
 
     let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_frame, last_time);
-    update(pong_ctx, render_ctx.deltaTime, user);
+    
+    if (pong_ctx.room.state !== RoomState.PAUSED)
+        update(pong_ctx, render_ctx.deltaTime, user);
 
     renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
-
     renderBall(ctx, render_ctx, pong_ctx, user);
-
     renderPlayers(ctx, render_ctx, pong_ctx.room, user);
 
+    if (pong_ctx.room.state === RoomState.PAUSED)
+        renderPauseScreen(ctx, render_ctx);
+    
+
     /* DEV - FPS counter */
+    ctx.font = "10px Mono"
     ctx.fillStyle = '#FFFFFF'
     ctx.fillText("FPS: " + (1 / render_ctx.deltaTime), render_ctx.terrain_x, render_ctx.terrain_y - 50);
     ctx.stroke();
@@ -327,4 +333,20 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
 
 
 
+
+function renderPauseScreen(ctx: CanvasRenderingContext2D, render_ctx: PongRenderingContext)
+{
+    ctx.fillStyle = '#1010169D'
+    ctx.fillRect(0, 0, render_ctx.width, render_ctx.height);
+    ctx.fillStyle = '#FFFFFF'
+    ctx.textAlign = 'center'
+    ctx.font = "30px Nonfiction";
+    ctx.fillText("Player disconnected", render_ctx.width * 0.5, render_ctx.height * 0.5 - 100);
+    ctx.fillText("Waiting for reconnection...", render_ctx.width * 0.5, render_ctx.height * 0.5 - 50);
+    ctx.textAlign = 'start'
+}
+
+// TODO text align disconnect
+// TODO actual disconnect 
+// FIX multi rooms 
 export { render }

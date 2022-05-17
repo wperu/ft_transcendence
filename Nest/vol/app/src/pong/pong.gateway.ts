@@ -42,7 +42,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		
 		if (user === undefined)
 		{
-			user = await this.pongService.connectUserFromSocket(client);
+			user = await this.pongService.registerUserFromSocket(client);
 			
 			if(user === undefined)
 			{
@@ -51,21 +51,30 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				return ;
 			}
 		}
-		else if (user.socket.id !== client.id)
+		
+		if (user.in_game)
 		{
-			user.socket.emit("CHANGING_SOCKET");
-			user.socket = client;
+			console.log("reconnected user");
+			this.pongService.reconnectUser(user, client);
 		}
-
-		// let the client know that we have authentificated him as a PongUser
-		client.emit("AUTHENTIFICATED");
-		this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
+		else
+		{
+			// let the client know that we have authentificated him as a PongUser
+			client.emit("AUTHENTIFICATED");
+			this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
+		}
+		
 	}
 
-	handleDisconnect(client: Socket)
+	async handleDisconnect(client: Socket)
 	{
-		// TODO handle is user in game ;
-		this.pongService.removeFromWaitingList(client);
+		let usr = await this.pongService.getUserFromSocket(client);
+		if (!usr || !usr.in_game)
+			this.pongService.removeFromWaitingList(client);
+		else
+		{
+			this.pongService.disconnectUser(usr);
+		}
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
 

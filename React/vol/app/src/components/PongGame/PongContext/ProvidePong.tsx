@@ -2,8 +2,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../../../auth/useAuth";
+import { ReconnectPlayerDTO } from "../../../Common/Dto/pong/ReconnectPlayerDTO";
 import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
 import { GameConfig } from "../../../Common/Game/GameConfig";
+import { getPongPlayer } from "../PongGame";
 import { defaultParticleEmitter, ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
 
@@ -30,6 +32,7 @@ export enum RoomState {
     PLAYING,
     FINISHED,
     ENDED,
+    PAUSED,
 }
 
 export interface IPongRoom
@@ -58,10 +61,11 @@ export interface IPongContext
 
 function usePongProvider() : IPongContext
 {
+    const user = useAuth().user;
     const [inGame, setInGame] = useState<boolean>(false);
     const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
         auth: {
-			token: useAuth().user?.access_token_42,
+			token: user?.access_token_42,
         }
     }));
     const [room, setRoom] = useState<IPongRoom | null>(null);
@@ -139,6 +143,44 @@ function usePongProvider() : IPongContext
             socket.emit("SEARCH_ROOM");
         })
     }, [])
+
+
+    useEffect(() => {
+        socket.on("RECONNECT_YOU", (data: ReconnectPlayerDTO) => {
+            console.log("getting reconnected");
+            setRoom({
+                room_id: data.room_id,
+                player_1: {
+                    username: data.player_1.username,
+                    points: data.player_1.points,
+                    position: data.player_1.position,
+                    velocity: 0,
+                    key: 0,
+                } as IPongUser,
+
+                player_2: {
+                    username: data.player_2.username,
+                    points: data.player_1.points,
+                    position: data.player_1.position,
+                    velocity: 0,
+                    key: 0,
+                } as IPongUser,
+
+                ball: {
+                    pos_x: data.ball.x,
+                    pos_y: data.ball.y,
+                    size: GameConfig.BALL_SIZE,
+                    vel_x: data.ball.vel_x,
+                    vel_y: data.ball.vel_y
+                } as IPongBall,
+
+                spectators: [],
+                state: RoomState.LOADING,
+                socket: socket,
+            });
+            setInGame(true);
+        });
+    }, [room])
 
 
     return ({

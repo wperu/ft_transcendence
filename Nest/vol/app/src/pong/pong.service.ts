@@ -13,9 +13,11 @@ import { GameConfig } from 'src/Common/Game/GameConfig';
 import { randomInt } from 'crypto';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
 import { UpdatePongPlayerDTO } from 'src/Common/Dto/pong/UpdatePongPlayerDTO';
+import { ReconnectPlayerDTO } from 'src/Common/Dto/pong/ReconnectPlayerDTO';
 import { PongModes, PongPool } from './interfaces/PongPool';
 import { SocketAddressInitOptions } from 'net';
 import { timeout } from 'rxjs';
+import { ro } from 'date-fns/locale';
 
 
 // REVIEW do we want multiple socket for pong user ? 
@@ -56,7 +58,7 @@ export class PongService {
     }
 
 
-    async connectUserFromSocket(socket: Socket): Promise<PongUser | undefined>
+    async registerUserFromSocket(socket: Socket): Promise<PongUser | undefined>
 	{
         const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
 
@@ -78,10 +80,12 @@ export class PongService {
 		let idx = this.users.push({
 			socket: socket, 
 			username: user_info.username,
+            reference_id: data.reference_id,
             points: 0,
             position: 0.5,
             velocity: 0,
             key: 0,
+            in_game: false,
         } as PongUser)
 
 		return this.users[idx - 1];
@@ -98,7 +102,6 @@ export class PongService {
 		if (data as UserToken)
 		{
 			const us = data as UserToken;
-
 
 			let user_info = await this.usersService.findUserByReferenceID(data.reference_id);
 
@@ -281,6 +284,8 @@ export class PongService {
                 username: room.player_2.username,
             }
         }
+        room.player_1.in_game = true;
+        room.player_2.in_game = true;
 
         room.state = RoomState.PLAYING;
         this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
@@ -305,8 +310,8 @@ export class PongService {
 
     async runRoom(room: PongRoom) : Promise<PongRoom>
     {
-        if (room.player_1.socket.connected === false
-         || room.player_2.socket.connected === false)
+        if (room.player_1.in_game === false
+         || room.player_2.in_game === false)
         {
             room.state = RoomState.FINISHED;
             if (room.interval !== undefined)
@@ -316,7 +321,8 @@ export class PongService {
             return room;
         }
 
-        await this.updateRoom(room);
+        if (room.state !== RoomState.PAUSED)
+            await this.updateRoom(room);
     }
 
 
@@ -381,9 +387,6 @@ export class PongService {
         let room = this.rooms.find ((r) => r.id === data.room_id);
         let user = await this.getUserFromSocket(client);
 
-        if (room.interval === null)
-            return ;
-
         if (room === undefined)
         {
             console.log(`cannot update undefined room with id: ${data.room_id}`);
@@ -431,7 +434,7 @@ export class PongService {
             too much ressources for calculating visual effects on the back-end 
         */
         let terrain_sx = 2, terrain_sy = 1;
-       // console.log("updating");
+        //console.log("updating");
 
         /* Calculating next frame velocities */
         // ball
@@ -523,6 +526,80 @@ export class PongService {
         {
             room.player_2.velocity = 0;
             room.player_2.position = 1 - GameConfig.TERRAIN_PADDING_Y;
+        }
+    }
+
+
+    async disconnectUser(user: PongUser)
+    {
+        let room: PongRoom = this.rooms.find((r) => {
+            return r.player_1.reference_id === user.reference_id || r.player_2.reference_id === user.reference_id
+        });
+
+        if (room !== undefined && room.state === RoomState.PAUSED)
+        {
+            room.player_1.in_game = false;
+            room.player_2.in_game = false;
+            room.state = RoomState.FINISHED;
+            // TODO push room in history
+        }
+        else if (room !== undefined && room.state !== RoomState.PAUSED)
+        {
+            room.state = RoomState.PAUSED;
+            this.server.to(room.id).emit("PLAYER_DISCONNECT");
+            clearInterval(room.interval)
+            console.log("player disconnected")
+        }
+    }
+
+    async reconnectUser(user: PongUser, client: Socket)
+    {
+        let room: PongRoom = this.rooms.find((r) => {
+            return r.player_1.reference_id === user.reference_id || r.player_2.reference_id === user.reference_id
+        });
+
+        if (room !== undefined && room.state === RoomState.PAUSED)
+        {
+            let player = undefined;
+            if (room.player_1.reference_id === user.reference_id)
+                player = room.player_1;
+            else 
+                player = room.player_2;
+            user.socket = client;
+            player.socket = user.socket;
+            this.server.to(room.id).emit("PLAYER_RECONNECT");
+            user.socket.join(room.id);
+            user.socket.emit("RECONNECT_YOU", {
+                room_id: room.id,
+                player_1: {
+                    position: room.player_1.position,
+                    username: room.player_1.username,
+                    points: room.player_1.points,
+                },
+                player_2: {
+                    position: room.player_2.position,
+                    username: room.player_2.username,
+                    points: room.player_2.points,
+                },
+                ball: {
+                    x: room.ball.pos_x,
+                    y: room.ball.pos_y,
+                    vel_x: room.ball.vel_x,
+                    vel_y: room.ball.vel_y,
+                },
+            } as ReconnectPlayerDTO);
+
+            console.log("player reconnected")
+
+            new Promise(async () => setTimeout(async () => {
+                console.log("starting");
+                room.state = RoomState.PLAYING;
+                this.sendBallUpdate(room);
+                this.sendPlayerUpdate(room);
+                this.server.to(room.id).emit("START_GAME");
+                this.last_time = 0;
+                room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
+            }, GameConfig.RELOAD_TIME));
         }
     }
 }

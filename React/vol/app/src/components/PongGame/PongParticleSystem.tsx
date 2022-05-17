@@ -158,7 +158,7 @@ export async function draw_particles(ctx: CanvasRenderingContext2D, render_ctx: 
 
             if (particle_size > 0)
             {
-                ctx.fillStyle = to_hex_color(particle_color)
+                ctx.fillStyle = to_hex_color(particle_color);
                 ctx.beginPath();
                 ctx.ellipse(particle.x,
                             particle.y, 
@@ -166,8 +166,6 @@ export async function draw_particles(ctx: CanvasRenderingContext2D, render_ctx: 
                             Math.PI / 4, 0, 2 * Math.PI);
                 ctx.fill();
             }
-            //else
-            //    emitter.particles.splice(emitter.particles.indexOf(particle), 1);
         });
     });
     ctx.restore();
