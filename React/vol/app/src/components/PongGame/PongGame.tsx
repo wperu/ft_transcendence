@@ -2,14 +2,14 @@ import { useEffect, useRef } from "react";
 import { UpdatePongBallDTO } from "../../Common/Dto/pong/UpdatePongBallDTO";
 import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
-import { IPongContext, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
+import { IPongContext, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../interface/User";
 import { render } from "./PongRenderer";
 
 // TODO Make matchmaking page with options             
-// TODO Double ball mode                               
-// TODO dash mode                                                 
+// TODO - Double ball mode                               
+// TODO - dash mode                                                 
 // TODO Refractor back end                            
 // TODO socket reconnection                     
 // TODO set room_id (0 = not in game) in users database
@@ -46,7 +46,7 @@ const PongGame = (props: CanvasProps) => {
 
     /* Keypress */
     window.addEventListener('keypress', async (event: KeyboardEvent) => {
-        if (pongCtx.room !== null && user !== null)
+        if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
@@ -63,7 +63,7 @@ const PongGame = (props: CanvasProps) => {
 
     /* Keyrelease */
     window.addEventListener('keyup', async (event: KeyboardEvent) => {
-        if (pongCtx.room !== null && user !== null)
+        if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
         {
             if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
             {
@@ -137,6 +137,42 @@ const PongGame = (props: CanvasProps) => {
                         if (pongCtx.room.player_2.username !== user.username)
                             pongCtx.room.player_2.key = data.key;
                     }
+                }
+            });
+        }
+    })
+
+    useEffect(() => {
+        if (pongCtx.room)
+        {
+            pongCtx.room.socket.on("START_GAME", () => {
+                console.log("start");
+                if (pongCtx.room)
+                {
+                    pongCtx.room.state = RoomState.PLAYING;
+                    pongCtx.room.player_1.key = 0;
+                    pongCtx.room.player_2.key = 0;
+                    pongCtx.room.player_1.velocity = 0;
+                    pongCtx.room.player_2.velocity = 0;
+                }
+            });
+
+            pongCtx.room.socket.on("LOAD_GAME", () => {
+                console.log("load");
+
+                if (pongCtx.room)
+                {
+                    pongCtx.room.state = RoomState.LOADING;
+                    pongCtx.room.ball.size = 0;
+                }
+            });
+
+            pongCtx.room.socket.on("END_GAME", () => {
+                console.log("end");
+
+                if (pongCtx.room)
+                {
+                    pongCtx.room.state = RoomState.ENDED;
                 }
             });
         }

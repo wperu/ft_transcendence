@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../../../auth/useAuth";
 import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
+import { GameConfig } from "../../../Common/Game/GameConfig";
 import { defaultParticleEmitter, ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
 
@@ -25,9 +26,10 @@ export interface IPongBall
 }
 
 export enum RoomState {
-    WAITING, 
+    LOADING, 
     PLAYING,
     FINISHED,
+    ENDED,
 }
 
 export interface IPongRoom
@@ -90,13 +92,13 @@ function usePongProvider() : IPongContext
                 ball: {
                     pos_x: 1,
                     pos_y: 0.5,
-                    size: 16,
+                    size: 0,
                     vel_x: 0,
                     vel_y: 0
                 } as IPongBall,
 
                 spectators: [],
-                state: RoomState.PLAYING,
+                state: RoomState.LOADING,
                 socket: socket,
             } as IPongRoom);
 
@@ -136,7 +138,7 @@ function usePongProvider() : IPongContext
         socket.on("AUTHENTIFICATED", () => {
             socket.emit("SEARCH_ROOM");
         })
-    })
+    }, [])
 
 
     return ({

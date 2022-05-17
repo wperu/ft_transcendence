@@ -1,7 +1,8 @@
 import { GameConfig } from "../../Common/Game/GameConfig";
 import IUser from "../../interface/User";
-import { IPongContext, IPongRoom } from "./PongContext/ProvidePong";
-import { plot_trail } from "./PongTrail";
+import { IPongContext, IPongRoom, RoomState } from "./PongContext/ProvidePong";
+import { clear_particles } from "./PongParticleSystem";
+import { clear_trail, plot_trail } from "./PongTrail";
 
 /*** UPDATE ***/
 
@@ -11,11 +12,14 @@ function update(pong_ctx: IPongContext, deltaTime: number, user: IUser)
     if (!room)
         return ;
 
-    updatePlayer(room, user, deltaTime);
+    if (room.state === RoomState.PLAYING)
+    {
+        updatePlayer(room, user, deltaTime);
 
-    /* update ball position */
-    room.ball.pos_x += room.ball.vel_x * deltaTime;
-    room.ball.pos_y += room.ball.vel_y * deltaTime;
+        /* update ball position */
+        room.ball.pos_x += room.ball.vel_x * deltaTime;
+        room.ball.pos_y += room.ball.vel_y * deltaTime;
+    }    
 }
 
 
@@ -146,7 +150,7 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
     let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_frame, last_time);
     update(pong_ctx, render_ctx.deltaTime, user);
 
-    renderBackground(ctx, render_ctx, canvas);
+    renderBackground(ctx, render_ctx, pong_ctx, canvas);
 
     renderBall(ctx, render_ctx, pong_ctx, user);
 
@@ -170,7 +174,7 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
 
 
 
-function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, canvas: HTMLCanvasElement)
+function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, canvas: HTMLCanvasElement)
 {
     // TODO review clearing pattern     
     ctx.beginPath();    // clear existing drawing paths
@@ -197,6 +201,26 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
     ctx.strokeStyle = '#FFFFFF'
     ctx.lineWidth = 10;
     ctx.strokeRect(render_ctx.terrain_x, render_ctx.terrain_y, render_ctx.terrain_w, render_ctx.terrain_h);
+
+    /* Player names */
+    if (pong_ctx.room)
+    {
+        ctx.save();
+        ctx.translate(render_ctx.terrain_x - 10, render_ctx.terrain_y + render_ctx.terrain_h);
+        ctx.rotate(Math.PI + Math.PI * 0.5);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "20px NonFiction"
+        ctx.fillText(pong_ctx.room.player_1.username.toUpperCase(), 0, 0);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + 10, render_ctx.terrain_y);
+        ctx.rotate(Math.PI * 0.5);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "20px NonFiction"
+        ctx.fillText(pong_ctx.room.player_2.username.toUpperCase(), 0, 0);
+        ctx.restore();
+    }
 }
 
 
@@ -263,17 +287,29 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
         ball_y = render_ctx.terrain_y +  (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
     }
 
-    plot_trail(pong_ctx, ctx, ball_x, ball_y, render_ctx);
-    /* Ball */
-    let ball_size = render_ctx.terrain_h * 0.015;
-    ctx.fillStyle = '#FFFFFF'
-    ctx.beginPath();
-    ctx.ellipse(ball_x,
-                ball_y, 
-                ball_size,
-                ball_size,
-                Math.PI / 4, 0, 2 * Math.PI);
-    ctx.fill();
+    if (pong_ctx.room.ball.size < GameConfig.BALL_SIZE)
+    {
+        clear_trail(pong_ctx);
+        pong_ctx.room.ball.size += render_ctx.deltaTime * 0.4;
+    }
+    else
+    {
+        plot_trail(pong_ctx, ctx, ball_x, ball_y, render_ctx);
+    }
+
+    //if (pong_ctx.room.state !== RoomState.ENDED)
+    //{
+        /* Ball */
+        let ball_size = render_ctx.terrain_h * (pong_ctx.room.ball.size * 0.1);
+        ctx.fillStyle = '#FFFFFF'
+        ctx.beginPath();
+        ctx.ellipse(ball_x,
+                    ball_y, 
+                    ball_size,
+                    ball_size,
+                    Math.PI / 4, 0, 2 * Math.PI);
+        ctx.fill();
+    //} 
 }
 
 

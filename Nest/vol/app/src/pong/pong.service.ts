@@ -15,6 +15,7 @@ import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeD
 import { UpdatePongPlayerDTO } from 'src/Common/Dto/pong/UpdatePongPlayerDTO';
 import { PongModes, PongPool } from './interfaces/PongPool';
 import { SocketAddressInitOptions } from 'net';
+import { timeout } from 'rxjs';
 
 
 // REVIEW do we want multiple socket for pong user ? 
@@ -183,16 +184,36 @@ export class PongService {
 
 
 
-    reloadRoom(room: PongRoom)
+    async reloadRoom(room: PongRoom)
     {
         room.ball.pos_x = 1;
         room.ball.pos_y = 0.5;
         room.ball.vel_x = randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
         room.ball.vel_y = randomInt(-100, 100) / 1000
+        room.player_1.position = 0.5;
+        room.player_2.position = 0.5;
+        room.player_1.key = 0;
+        room.player_2.key = 0;
 
-        this.sendBallUpdate(room);
-        this.sendPlayerUpdate(room, 1);
-        this.sendPlayerUpdate(room, 2);
+
+
+        this.server.to(room.id).emit("END_GAME");
+        console.log("ending");
+        clearInterval(room.interval);
+
+        new Promise(async () => setTimeout(() => {
+            this.server.to(room.id).emit("LOAD_GAME");
+            console.log("loading");
+            this.sendBallUpdate(room);
+            this.sendPlayerUpdate(room);
+
+            new Promise(async () => setTimeout(() => {
+                console.log("starting");
+                this.server.to(room.id).emit("START_GAME");
+                this.last_time = Date.now();
+                room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
+            }, GameConfig.RELOAD_TIME));
+        }, GameConfig.RELOAD_TIME));
     }
 
 
@@ -223,7 +244,6 @@ export class PongService {
             this.logger.log("undefined user tried to sneak into waiting list")
             return ;
         }
-        console.log(other);
 
         if (other === undefined || this.waitingPool.length === 0)
         {
@@ -263,18 +283,22 @@ export class PongService {
 
         room.state = RoomState.PLAYING;
         this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
-        //room.player_2.socket.to(room.id).emit('STARTING_ROOM', starting_obj);
-    
-
-       // console.log("sent start request to players");
-
-      /*  room.spectators.forEach((usr) => {
-            usr.socket.emit('STARTING_ROOM', starting_obj);
-        })*/
 
         console.log("sent start request");
 
-        room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
+       /* new Promise(() => setTimeout(() => {
+            this.server.to(room.id).emit("START_GAME");
+            room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
+        }, GameConfig.RELOAD_TIME));*/
+
+        //new Promise(async () => setTimeout(() => {
+            new Promise(async () => setTimeout(() => {
+                console.log("starting");
+                this.server.to(room.id).emit("START_GAME");
+                this.last_time = 0;
+                room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
+            }, GameConfig.RELOAD_TIME));
+        //}, GameConfig.RELOAD_TIME));
     }
 
 
@@ -292,14 +316,14 @@ export class PongService {
             return room;
         }
 
-        this.updateRoom(room);
+        await this.updateRoom(room);
     }
 
 
 
 
 
-    updateRoom(room: PongRoom)
+    async updateRoom(room: PongRoom)
     {
         /* calulating delta time between frames */
         this.current_time = Date.now();
@@ -309,7 +333,7 @@ export class PongService {
         this.last_time = this.current_time;
 
         /* Logic update */
-        this.gameUpdate(room);
+        await this.gameUpdate(room);
 
         if (this.frameCount === 0)
             this.sendBallUpdate(room);
@@ -332,40 +356,21 @@ export class PongService {
     }
 
 
-    sendPlayerUpdate(room: PongRoom, player_id: number)
+    sendPlayerUpdate(room: PongRoom)
     {
-       // if (player_id === 1)
-       // {
-            this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
-                player_id: 2,
-                position: room.player_2.position,
-                velocity: room.player_2.velocity,
-                key: room.player_2.key,
-            } as UpdatePongPlayerDTO);    
+        this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
+            player_id: 2,
+            position: room.player_2.position,
+            velocity: room.player_2.velocity,
+            key: room.player_2.key,
+        } as UpdatePongPlayerDTO);    
 
-            this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
-                player_id: 1,
-                position: room.player_1.position,
-                velocity: room.player_1.velocity,
-                key: room.player_1.key,
-            } as UpdatePongPlayerDTO);
-     /*   }
-        else
-        {
-            room.player_2.socket.emit('UPDATE_PONG_PLAYER', {
-                player_id: 2,
-                position: room.player_2.position,
-                velocity: room.player_2.velocity,
-                key: room.player_2.key,
-            } as UpdatePongPlayerDTO);    
-
-            room.player_2.socket.emit('UPDATE_PONG_PLAYER', {
-                player_id: 1,
-                position: room.player_1.position,
-                velocity: room.player_1.velocity,
-                key: room.player_1.key,
-            } as UpdatePongPlayerDTO);        
-        }*/
+        this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
+            player_id: 1,
+            position: room.player_1.position,
+            velocity: room.player_1.velocity,
+            key: room.player_1.key,
+        } as UpdatePongPlayerDTO);
     }
 
 
@@ -405,13 +410,12 @@ export class PongService {
         }
 
         this.updateRoom(room);
-        this.sendPlayerUpdate(room, 1);
-        //this.sendPlayerUpdate(room, 2);
+        this.sendPlayerUpdate(room);
     }
 
 
     /* REVIEW Game logic here, maybe rewrap this into another service */
-    gameUpdate(room: PongRoom)
+    async gameUpdate(room: PongRoom)
     {
         /*
             TERRAIN BOUNDS AND OVERALL DIMENSIONS
@@ -437,7 +441,8 @@ export class PongService {
 
         if (room.ball.pos_x > terrain_sx || room.ball.pos_x < 0)
         {
-            this.reloadRoom(room);
+            console.log("reloading room");
+            await this.reloadRoom(room);
             return ;
         }
 

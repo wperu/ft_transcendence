@@ -91,10 +91,8 @@ async function update_emitter(emitter: ParticleEmitter, render_ctx: PongRenderin
 {
     if (emitter.particles.length < emitter.max_particles)
     {
-        //console.log(render_ctx.frameCount % 20 < emitter.emission_amount);
         if (render_ctx.frameCount % emitter.emission_amount <= 2)
         {
-        console.log("emitting");
             emitter.particles.push({
                 x: emitter.center_x + Math.random() * emitter.spread_amount - emitter.spread_amount * 0.5,
                 y: emitter.center_y + Math.random() * emitter.spread_amount - emitter.spread_amount * 0.5,
@@ -134,6 +132,13 @@ export function center_emitter(system: ParticleSystem, x: number, y: number)
     system.emitters.forEach((emitter) => {
         emitter.center_x = x;
         emitter.center_y = y;
+    })
+}
+
+export function clear_particles(system: ParticleSystem)
+{
+    system.emitters.forEach((emitter) => {
+        emitter.particles = [];
     })
 }
 
