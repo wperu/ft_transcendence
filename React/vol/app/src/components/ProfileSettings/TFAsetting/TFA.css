@@ -1,0 +1,65 @@
+#tfa_setting
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 14%;
+	text-align: center;
+}
+
+#tfa_checkbox
+{
+	display: none;
+}
+
+#tfa_switch
+{
+	z-index: 1;
+	position: relative;
+	width: 10vmin;
+	height: 5vh;
+	background-color: rgb(221, 26, 26);
+	border-radius: 100px;
+	padding: 2px;
+}
+
+#tfa_slider
+{
+	display: block;
+	position: absolute;
+	left: 2%;
+	border-radius: 100px;
+	height: 5vh;
+	width: 5vh;
+	background-color: whitesmoke;
+}
+
+#tfa_checkbox:checked + #tfa_switch
+{
+	background-color: yellowgreen;
+}
+
+#tfa_checkbox:checked + #tfa_switch #tfa_slider
+{
+	right: 2%;
+	left: auto;
+}
+
+#tfa_key_input
+{
+	margin-top: 0.3em;
+	text-align: center;
+	padding: 0.05em 0.2em;
+	font-size: 1em;
+	color: whitesmoke;
+	font-size: 0.6em;
+	background-color: #282c3450;
+	border: none;
+	border-radius: 4px;
+	width: 100%;
+}
+
+#tfa_setting
+{
+	margin: 0 auto;
+}
