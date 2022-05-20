@@ -1,5 +1,4 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, JoinColumn, OneToOne, Unique } from 'typeorm';
-import DatabaseFile from './databaseFile.entity';
 
 @Entity()
 @Unique('username', ['username'])
@@ -38,23 +37,8 @@ export class User
   @CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
   creation_date: Date;
 
-
-
-  /*@Column()
-  avatar_id: 
-  // TODO : create entity databasefile for avatar_id 
-  */
-//   @JoinColumn({ name: 'avatarId' })
-//   @OneToOne(
-//     () => DatabaseFile,
-//     {
-//       nullable: true
-//     }
-//   )
-//   public avatar?: DatabaseFile;
- 
-//   @Column({ nullable: true })
-//   public avatarId?: number;
+  @Column({nullable: true})
+  avatar_file?: string;
 
   //TODO : create nb_won, nb_lose,block_list,friend_list
 }

@@ -1,10 +1,12 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable, UploadedFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
 import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
+import { Express } from 'express';
+import { diskStorage } from 'multer';
 
 @Injectable()
 export class UsersService 
@@ -163,9 +165,40 @@ export class UsersService
 		return (await this.usersRepository.save(user));
 	}
 
+	async updateAvatar(id : number, new_avatar_file: string) : Promise<string | undefined>
+	{
+		let	user : User;
+		let	old_avatar_path: string | undefined;
+		try {
 
+			user = await this.usersRepository.findOne({
+				where: [
+					{id: id}
+				],
+			});
+			if (user === null)
+				console.warn("User with ID: " + id + " doesn't exist");
+			else
+			{
+				old_avatar_path = user.avatar_file;
+				await this.usersRepository
+						.createQueryBuilder()
+						.update(User)
+						.set({avatar_file: new_avatar_file})
+						.where("id = :id", {id})
+						.execute();
+				console.log("Avatar of " + user.username + "updated");
+			}
+		}
+		catch(e)
+		{
+			console.error(e);
+			return (undefined);
+		}
+		return (old_avatar_path);
+	}
 
-	async updateUserName(id: Number, newUserName : string) : Promise<boolean>
+	async updateUserName(id: number, newUserName : string) : Promise<boolean>
 	{
 		try {
 			await this.usersRepository

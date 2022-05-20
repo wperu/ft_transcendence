@@ -1,8 +1,26 @@
-import { BadRequestException, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
+import {
+	BadRequestException,
+	Body,
+	Controller,
+	Get,
+	HttpStatus,
+	NotFoundException,
+	Param,
+	Post,
+	Put,
+	Req,
+	Res,
+	UploadedFile,
+	UseGuards,
+	UseInterceptors,
+} from '@nestjs/common';
+import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
 import { Request, Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { unlink } from 'fs';
 
 @Controller('users')
 export class UsersController
@@ -81,15 +99,36 @@ export class UsersController
 
 	@Put("/:id/avatar")
 	//@UseGuards(AuthGuard)
-	async updateOne(@Res() response : Response, @Param('id') param)
+	@UseInterceptors(FileInterceptor('file', {
+		storage: diskStorage({
+			destination: './avatars'
+		})
+	}))
+	async updateAvatar(
+		@UploadedFile() file: Express.Multer.File,
+		@Res() response : Response,
+		@Param('id') param
+	)
 	{
+		let	old_avatar : string | undefined;
 		let id: number = parseInt(param);
-		if(isNaN(id) || !/^\d*$/.test(param))
-		{
-			return response.status(HttpStatus.NOT_FOUND).json();
-		}
 
-		// TODO update user in service
+		if(isNaN(id) || !/^\d*$/.test(param))
+			return response.status(HttpStatus.NOT_FOUND).json();
+		else
+		{
+			old_avatar = await this.userService.updateAvatar(param, file.path);
+			if (old_avatar !== undefined)
+			{
+				unlink(old_avatar, (err) => {
+					if (err)
+					{
+						console.error("Old avatar didn't exist");
+					}
+					console.log('Old avatar deleted');
+				});
+			}
+		}
 		return (undefined);
 	}
 }
