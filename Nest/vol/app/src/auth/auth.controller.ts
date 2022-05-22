@@ -70,6 +70,8 @@ export class AuthController
         let user = await this.usersService.findUserByAccessToken(token);
 		if (user === undefined)
 			throw new ForbiddenException("wrong access code");
+		if (user.username !== null)
+			throw new ForbiddenException("Already register !");
 
 		let username = req.body['username'];
 		if (username === undefined)
