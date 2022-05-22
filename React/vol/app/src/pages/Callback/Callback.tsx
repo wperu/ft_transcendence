@@ -1,11 +1,13 @@
 import React, { useEffect, useState, KeyboardEvent } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { ELevel, useNotifyContext } from "../../components/NotifyContext/NotifyContext";
 
 function Callback() : JSX.Element
 {
 	const { search  } = useLocation();
 	const [needForm, setNeedForm] = useState<boolean>(true);
+	const notif = useNotifyContext();
 
 	function authUser()
 	{
@@ -38,7 +40,7 @@ function Callback() : JSX.Element
 			})
 			.catch(e =>
 			{
-				console.log(e);
+				//console.log(e);
 			})
 				
 		}
@@ -78,7 +80,7 @@ function Callback() : JSX.Element
 				url: url,
 				headers: {
 					'grant-type': 'authorization-code',
-					'authorization-code': accessCode || ""
+					'authorization-code': accessCode + "x" || ""
 				},
 				data: {
 					username: event.currentTarget.value,
@@ -88,10 +90,22 @@ function Callback() : JSX.Element
 			.then((resp) => {
 				setNeedForm(false);
 			})
-			.catch(resp => {
-				console.log('bad querry');
-				console.log(resp.body.message);
-			})
+			.catch(function (error) {
+				if (error.response) {
+				  // The request was made and the server responded with a status code
+				  // that falls out of the range of 2xx
+				  // console.log(error.response.data);
+				  notif.addNotice(ELevel.error, error.response.data.message, 3000);
+				} else if (error.request) {
+				  // The request was made but no response was received
+				  // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+				  // http.ClientRequest in node.js
+				  // console.log(error.request);
+				} else {
+				  // Something happened in setting up the request that triggered an Error
+				  // console.log('Error', error.message);
+				}
+			  });
 
 			event.currentTarget.value = '';
 		}

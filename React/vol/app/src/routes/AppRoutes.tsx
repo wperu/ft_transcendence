@@ -25,8 +25,8 @@ function ProtectedRoute({element, path, children}:Props)
 function AppRoute() : JSX.Element
 {
 	const element =
-	<ProvideAuth>
-		<ProvideNotify>
+	<ProvideNotify>
+		<ProvideAuth>
 			<BrowserRouter>
 				<Routes>
 				<Route path="/login" element={<HomeLoggedOut />}/>
@@ -45,8 +45,8 @@ function AppRoute() : JSX.Element
 				</Route>
 				</Routes>
 			</BrowserRouter>
-		</ProvideNotify>
-	</ProvideAuth>;
+		</ProvideAuth>
+	</ProvideNotify>;
 
 	return element;
 }
