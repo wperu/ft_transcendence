@@ -86,7 +86,7 @@ export class AuthService {
         if (user === undefined)
         {
             console.log("Unknown user, creating it...");
-            user = await this.usersService.createUser(info.data.id, info.data.login, token);
+            user = await this.usersService.createUser(info.data.id, null, token);
         }
         else
         {

@@ -447,7 +447,7 @@ export function ProvideChat( {children}: {children: JSX.Element} ): JSX.Element
 {
 	const chatCtx = useChatProvider();
 
-	return(
+	return (
 		<chatContext.Provider value={chatCtx}>
 			{children}
 		</chatContext.Provider>

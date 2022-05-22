@@ -11,11 +11,10 @@ export class User
   @Column()
   reference_id: number;
 
-
   @Column({nullable: true, default: null})
   login: string;
 
-  @Column({nullable: false})
+  @Column({nullable: true, default: null})
   username: string;
   
   // all tokens are nullable because we dont want to keep an expired token
