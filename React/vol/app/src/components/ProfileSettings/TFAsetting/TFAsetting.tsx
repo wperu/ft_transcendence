@@ -1,5 +1,5 @@
 import { useState } from "react";
-import IUser from "../../../interface/User";
+import IUser from "../../../Common/Dto/User/User";
 import "./TFA.css";
 
 interface twoFAProps

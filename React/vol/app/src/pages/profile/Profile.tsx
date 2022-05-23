@@ -2,7 +2,7 @@ import "./Profile.css";
 import {  useState } from "react";
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
-import IUser from "../../interface/User";
+import IUser from "../../Common/Dto/User/User";
 import DefaultPP from "../../ressources/images/user-icon-0.png";
 import MatchHistory from "./MatchHistory";
 import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuButton";

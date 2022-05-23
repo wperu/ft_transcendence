@@ -8,6 +8,7 @@ import { UsersService } from 'src/users/users.service';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
+import IUser from 'src/Common/Dto/User/User';
 
 @Controller('auth')
 export class AuthController
@@ -44,7 +45,7 @@ export class AuthController
 
 
     @Post('/token')
-    async   getAccessToken(@Req() req, @Body() body) : Promise<User | undefined>
+    async   getAccessToken(@Req() req, @Body() body) : Promise<IUser | undefined>
     {
         if (req.headers['authorization-code'] === undefined)
             throw new BadRequestException("no authorization_code in request header");
@@ -53,7 +54,7 @@ export class AuthController
         if (token === undefined)
             throw new ForbiddenException("wrong access code");
         /* validates user, deletes code */
-        return (this.usersService.findUserByAccessToken(token));
+        return this.usersService.getIUserFromUser(await this.usersService.findUserByAccessToken(token));
     }
 
 	@Post('/register')
@@ -85,7 +86,7 @@ export class AuthController
     }
 
     @Post('/dev-user')
-    async   createDevUser(@Req() req) : Promise<User | undefined>
+    async   createDevUser(@Req() req) : Promise<IUser | undefined>
     {
         let fake_token = {
             access_token: "F4KE",
@@ -102,10 +103,10 @@ export class AuthController
         if (user !== undefined)
         {
             console.log (`Logged back new DEV user \"${req.headers["username"]}\"`);
-            return (user);
+            return this.usersService.getIUserFromUser(user);
         }
 
         console.log (`Created new DEV user with Username \"${req.headers["username"]}\"`);
-        return (await this.usersService.createUser(randomInt(10000), req.headers['username'], fake_token));
+        return this.usersService.getIUserFromUser(await this.usersService.createUser(randomInt(10000), req.headers['username'], fake_token));
     }
 }

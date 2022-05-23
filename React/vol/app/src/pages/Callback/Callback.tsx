@@ -19,12 +19,8 @@ function Callback() : JSX.Element
 		if (window.opener === null)
 			return ;
 
-		
-
-		if ( accessCode !== null)
+		if (accessCode !== null)
 		{
-			console.log(accessCode);
-
 			const url = process.env.REACT_APP_API_URL + '/auth/token';
 			const response = axios({
 				method: 'post',
@@ -34,7 +30,7 @@ function Callback() : JSX.Element
 					'authorization-code': accessCode
 				},
 			})
-			.then(res => {				
+			.then(res => {
 				window.opener.postMessage(res.data, process.env.REACT_APP_ORIGIN_URL);
 				window.close();
 			})
@@ -80,7 +76,7 @@ function Callback() : JSX.Element
 				url: url,
 				headers: {
 					'grant-type': 'authorization-code',
-					'authorization-code': accessCode + "x" || ""
+					'authorization-code': accessCode || ""
 				},
 				data: {
 					username: event.currentTarget.value,

@@ -1,4 +1,4 @@
-import IUser from "../interface/User";
+import IUser from "../Common/Dto/User/User";
 
 /**
  * 	Open login popup
@@ -29,7 +29,10 @@ function openLoginPopup(cb: () => void)
 		
 		console.log("Get IUser");
 		//if (event.data !== undefined)
-		const user : IUser	= event.data;
+		
+		const user : IUser = event.data;
+
+		console.log(user);
 
 		//todo
 		//do stuff with user

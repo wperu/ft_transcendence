@@ -1,5 +1,5 @@
 import axios from "axios";
-import IUser from "../../../interface/User";
+import IUser from "../../../Common/Dto/User/User";
 import React, { useEffect, useState } from "react";
 import DefaultPP from "../../../ressources/images/user-icon-0.png";
 import EditLogo from "../../../ressources/images/draw.png";

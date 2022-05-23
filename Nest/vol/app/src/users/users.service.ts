@@ -5,6 +5,7 @@ import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
+import IUser from 'src/Common/Dto/User/User';
 
 @Injectable()
 export class UsersService 
@@ -40,6 +41,21 @@ export class UsersService
 	}
 
 
+	getIUserFromUser(user : User)
+	{
+		let ret : IUser;
+
+		ret = {
+			id: user.id,
+			reference_id: user.reference_id,
+			username: user.username,
+			accessCode: user.access_token_42,
+			creation_date: user.creation_date,
+			avatar_id : 0,
+		}
+
+		return ret;
+	}
 
 	async findUserByReferenceID(reference_id: number): Promise<User | undefined>
 	{
@@ -93,7 +109,7 @@ export class UsersService
 		});
 
 		if (user !== undefined)
-			return user
+			return user;
 		return (undefined)
 	}
 
