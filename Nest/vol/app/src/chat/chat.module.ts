@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from 'src/auth/auth.module';
 import { TokenService } from 'src/auth/token.service';
+import { UsersService } from 'src/users/users.service';
 import { FriendsModule } from 'src/friends/friends.module';
 import { FriendsService } from 'src/friends/friends.service';
 import { RoomModule } from 'src/room/room.module';
@@ -15,6 +16,6 @@ import { ChatService } from './chat.service';
 		UsersModule,
 		RoomModule
 	],
-	providers: [Array, ChatService, ChatGateway, TokenService]
+	providers: [Array, ChatService, ChatGateway, TokenService, UsersService]
 })
 export class ChatModule {}

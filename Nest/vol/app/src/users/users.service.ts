@@ -5,6 +5,7 @@ import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
+import { UserToken } from '../Common/Dto/User/UserToken'
 import IUser from 'src/Common/Dto/User/User';
 import { TwoFactorService } from 'src/auth/auth.twoFactor.service';
 
@@ -103,6 +104,23 @@ export class UsersService
 
 
 
+
+	async findUserByName(name: string): Promise<User | undefined>
+	{
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				username: In([name])
+			},
+		});
+
+		if (user !== undefined)
+			return user
+		return (undefined)
+	}
+
+
+
+
 	async findUserByAccessToken(access_token: string): Promise<User | undefined>
 	{
 		const user = await this.usersRepository.findOne({ 
@@ -137,8 +155,7 @@ export class UsersService
 		user.SecretCode = this.twoFactorService.generateSecret();
 
 		/* sign the token with jwt */
-		const user_data = {
-			username: username,
+		const user_data : UserToken = {
 			reference_id: reference_id,
 		};
 

@@ -7,6 +7,10 @@ import { User } from './entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { TokenValidatorEntity } from './entities/token_validator.entity';
 import { ChatModule } from './chat/chat.module';
+import { PongModule } from './pong/pong.module';
+import { PongGateway } from './pong/pong.gateway';
+import { PongService } from './pong/pong.service';
+import { TokenService } from './auth/token.service';
 import { FriendShip } from './entities/friend_ship.entity';
 import { FriendsModule } from './friends/friends.module';
 import { RoomModule } from './room/room.module';
@@ -40,8 +44,8 @@ import { FinishedGame } from './entities/finishedGame.entity';
 			],
 			synchronize: true,
 		}
-	), UsersModule, AuthModule, ChatModule, FriendsModule, RoomModule, GameHistoryModule],
+	), UsersModule, AuthModule, ...AuthModule.getDependencies(), ChatModule, PongModule, FriendsModule, RoomModule, GameHistoryModule],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, PongService, PongGateway, Array, TokenService],
 })
 export class AppModule {}

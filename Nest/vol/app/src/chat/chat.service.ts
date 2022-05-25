@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
+import { UserToken } from 'src/Common/Dto/User/UserToken';
+import { UsersService } from 'src/users/users.service';
+import { ChatModule } from './chat.module';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
@@ -23,18 +26,33 @@ import { Room } from './interface/room';
 @Injectable()
 export class ChatService {
     constructor (
-        private tokenService: TokenService,
+		private usersService: UsersService,
+    private tokenService: TokenService,
 		private friendService: FriendsService,
 		private users: ChatUser[],
-		private userService: UsersService,
-		private roomService: RoomService
+    private roomService: RoomService,
     )
-    {}
+    { this.rooms = []; }
 
 
-	connectUserFromSocket(socket: Socket): ChatUser | undefined
+	async connectUserFromSocket(socket: Socket): Promise<ChatUser | undefined>
 	{
-        const data: ChatUser = this.tokenService.decodeToken(socket.handshake.auth.token) as ChatUser;
+        const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
+
+		if (data === null)
+		{
+			console.log("[PONG] unable to decode user token data");
+			return (undefined);
+		}
+		
+		const user_info = await this.usersService.findUserByReferenceID(data.reference_id);
+
+		if (user_info === undefined)
+		{
+			console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
+			socket.disconnect();
+			return (undefined);
+		}
 
 		if (data === undefined || data === null)
 			return undefined;
@@ -45,24 +63,30 @@ export class ChatService {
 			reference_id: data.reference_id,
 		})
 
-
 		return this.users[idx - 1];
 	}
 
 
-    getUserFromSocket(socket: Socket): ChatUser | undefined
+   async getUserFromSocket(socket: Socket): Promise<ChatUser | undefined>
     {
-        const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
-        /* todo   maybe check if data contains the keys that we have in ChatUser */
-        /* todo   and only that so we cant pass data through here                */
+        const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
+       
 		if (data === null)
 			return (undefined);
 
-		if (data as UserData)
+		if (data as UserToken)
 		{
-			const us = data as UserData;
+			const us = data as UserToken;
 
-			let ret = this.users.find((u) => { return u.username === us.username})
+			let user_info = await this.usersService.findUserByReferenceID(data.reference_id);
+
+			if (user_info === undefined)
+			{
+				console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
+				socket.disconnect();
+				return (undefined);
+			}
+			let ret = this.users.find((u) => { return u.username === user_info.username})
 			return (ret);
 		}
 

@@ -1,3 +1,4 @@
+import { BadRequestException, Logger, OnModuleInit, UnauthorizedException, UseFilters } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
@@ -14,22 +15,26 @@ import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
 // Todo add namespace
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
-	/*namespace: "/chat/", */
+	namespace: "/chat",
 	cors: {
 		origin: '*',
 	},
 	transports: ['websocket'] 
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, OnModuleInit
 {	
 	@WebSocketServer() server: Server;
-	private logger: Logger = new Logger('AppGateway');
+	private logger: Logger = new Logger('ChatGateway');
 
 
 	constructor(
 		private chatService: ChatService,
 	) { }
 
+	onModuleInit()
+	{
+		this.logger.log("Module initialized");
+	}
 
 
 	afterInit(server: Server) 
@@ -45,9 +50,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field room: The room name to send the message to
 	 */
 	@SubscribeMessage('SEND_MESSAGE')
-	handleMessage(client: Socket, payload: SendMessageDTO) : void
+	async	handleMessage(client: Socket, payload: SendMessageDTO) : Promise<void>
 	{
-		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		let msg_obj : RcvMessageDto;
 
@@ -72,7 +77,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('CREATE_ROOM')
 	async createRoom(client: Socket, payload: CreateRoomDTO): Promise<void>
 	{
-		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 		return ;//todo trown error and disconnect
 		
@@ -95,7 +100,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('JOIN_ROOM')
 	async joinRoom(client: Socket, payload: JoinRoomDto): Promise<void>
 	{
-		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
@@ -114,7 +119,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('LEAVE_ROOM')
 	async leaveRoom(client: Socket, payload: any): Promise<void>
 	{
-		let user: ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 		
@@ -137,8 +142,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field opt: optional field, used to store the password when protection_mode is PRIVATE
 	 */
 	@SubscribeMessage('PROTECT_ROOM')
-	protectRoom(client: Socket, payload: RoomProtect)
+	async protectRoom(client: Socket, payload: RoomProtect)
 	{
+
 	}
 
 
@@ -149,8 +155,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field new_name: the new name for the room
 	 */
 	@SubscribeMessage('RENAME_ROOM')
-	renameRoom(client: Socket, payload: RoomRename)
+	async renameRoom(client: Socket, payload: RoomRename)
 	{
+    
 	}
 
 
@@ -160,6 +167,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	 * @field name_room: the name of room
 	 * @field new_pass: the new password for the room
 	 */
+
 	@SubscribeMessage('ROOM_CHANGE_PASS')
 	async roomChangePass(client: Socket, payload: RoomChangePassDTO)
 	{
@@ -216,13 +224,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		await this.chatService.sendRoomList(client);
 	}
 
+
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		
 		if (user === undefined)
 		{
-			user = this.chatService.connectUserFromSocket(client);
+			user = await this.chatService.connectUserFromSocket(client);
 			if(user === undefined)
 			{
 				console.log("Unknown user tried to join the chat");

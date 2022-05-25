@@ -14,10 +14,7 @@ function FakeUser()
 
 	function submitFakeUser(event: React.KeyboardEvent<HTMLInputElement>)
 	{
-		
-
-	    //console.log(event);
-	    if (event.key === "Enter" && event.currentTarget.value.length > 0)
+		if (event.key === "Enter" && event.currentTarget.value.length > 0)
 	    {
 	        const url : string	= process.env.REACT_APP_API_AUTH + "/dev-user" || "/";
 	        const username = event.currentTarget.value;

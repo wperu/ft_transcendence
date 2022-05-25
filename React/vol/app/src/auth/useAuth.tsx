@@ -29,7 +29,6 @@ function useAuth() : IContext
 */
 function useProvideAuth(): IContext
 {
-	
 	const [user, setUser] = useState<IUser | null>(getUser());
 	const [isAuth, setIsAuth] = useState<boolean>( user !== null );
 

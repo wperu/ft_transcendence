@@ -10,6 +10,8 @@ services:
     restart: always
     ports:
       - 8080:8080
+    depends_on:
+     - "db"
 
   react:
     build: ./React
@@ -17,6 +19,8 @@ services:
     volumes:
       - ./React/vol/app:/vol/app
       - ./Common:/vol/Common
+    depends_on:
+      - "nest"
     
   nest:
     build: ./Nest
@@ -28,6 +32,8 @@ services:
       - 4000:4000
     expose:
       - 4000:4000
+    depends_on:
+      - "db"
 
   proxy:
     build: ./Proxy
@@ -35,4 +41,8 @@ services:
     ports:
       - 80:80
       - 443:443
+    depends_on:
+      - "nest"
+      - "react"
+      - "db"
 
