@@ -112,8 +112,12 @@ export class AuthService {
     async getAccessToken(code: string) : Promise<string | undefined>
     {
         let access_token = await this.tokenService.getAccessToken(code);
-        this.tokenService.deleteAccessCode(code);
         return (access_token);
+    }
+
+	async destroyAccessToken(code: string) : Promise<void>
+    {
+        this.tokenService.deleteAccessCode(code);
     }
 }
 

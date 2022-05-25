@@ -1,4 +1,4 @@
-import { Request, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
@@ -42,24 +42,24 @@ export class UsersController
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
-			return response.status(HttpStatus.NOT_FOUND).json();
+			throw new NotFoundException();
 		}
 		
 		if (await this.userService.checkAccesWithRefId(request.headers['authorization'],id) === false)
-			return response.status(HttpStatus.FORBIDDEN).json({error: "Invalid access token"});
+			throw new ForbiddenException("wrong access code");
 
 		if (body.username === undefined || body.username === "") //todo add username Rules
 		{
-			return response.status(HttpStatus.CONFLICT).json({error: 'no username passed'});
+			throw new BadRequestException('no username passed')
 		}
 		else
 		{
 			if (await this.userService.updateUserName(id, body.username) === false) //add alreay user responses
 			{
-				return response.status(HttpStatus.CONFLICT).json({error: 'username already use'});
+				throw new BadRequestException('username already use');
 			}
 			else
-				return response.status(HttpStatus.OK).json();
+				return ;
 		}
 	}
 
@@ -75,7 +75,7 @@ export class UsersController
 	 */
 	@Put("/:id/useTwoFactor")
 	//@UseGuards(AuthGuard)
-	async updateTwoFactor(@Res() response : Response, @Param('id') param, @Req() request: Request, @Body() body,)
+	async updateTwoFactor(@Param('id') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
 		// TODO update user in service
 		console.log('Set two factor');
@@ -95,10 +95,10 @@ export class UsersController
 			user.setTwoFA = !user.setTwoFA;
 
 			await this.userService.saveUser(user);
-			return response.status(HttpStatus.OK); // OK
+			return ; // OK
 		}
 
-		return response.status(HttpStatus.BAD_REQUEST).send('bad token'); // KO bad token
+		throw new BadRequestException("wrong access code"); // KO bad token
 	}
 
 	@Get("/:id/twFactorQR")
@@ -110,7 +110,7 @@ export class UsersController
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
-			return response.status(HttpStatus.NOT_FOUND).json();
+			throw new NotFoundException();
 		}
 
 		const user = await this.userService.findUserByReferenceID(id);
@@ -126,7 +126,7 @@ export class UsersController
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
-			return response.status(HttpStatus.NOT_FOUND).json();
+			throw new NotFoundException();
 		}
 
 		// TODO update user in service

@@ -42,12 +42,11 @@ export class AuthController
 
         let react_code: string = await this.authService.generateAuthorizationCode(user.access_token_42);
 
-        await res.redirect(301, `${this.configService.get<string>("REACT_REDIRECT_URL")}?code=${react_code}&register=${user.username === null}`);
+        await res.redirect(301, `${this.configService.get<string>("REACT_REDIRECT_URL")}?code=${react_code}&register=${user.username === null}&useTwoFactor=${user.setTwoFA}`);
     }
 
-
     @Post('/token')
-    async   getAccessToken(@Req() req, @Body() body) : Promise<IUser | undefined>
+    async   getAccessToken(@Req() req, @Body() body : Body) : Promise<IUser | undefined>
     {
         if (req.headers['authorization-code'] === undefined)
             throw new BadRequestException("no authorization_code in request header");
@@ -55,8 +54,21 @@ export class AuthController
         let token = await this.authService.getAccessToken(req.headers['authorization-code']);
         if (token === undefined)
             throw new ForbiddenException("wrong access code");
-        /* validates user, deletes code */
-        return this.usersService.getIUserFromUser(await this.usersService.findUserByAccessToken(token));
+
+		const user = await this.usersService.findUserByAccessToken(token);
+		if (user === undefined)
+			return;	//todo error
+		
+		if (user.setTwoFA === true)
+		{
+			if (body['token'] === undefined)
+				throw new ForbiddenException("2FA: no token send");
+			if (this.twoFactorService.isValide(body['token'], user.SecretCode) === false)
+				throw new ForbiddenException("2FA: bad token send");
+		}
+		/* validates user, deletes code */
+		this.authService.destroyAccessToken(req.headers['authorization-code']);
+        return this.usersService.getIUserFromUser(user);
     }
 
 	@Post('/register')

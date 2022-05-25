@@ -7,9 +7,10 @@ function Callback() : JSX.Element
 {
 	const { search  } = useLocation();
 	const [needForm, setNeedForm] = useState<boolean>(true);
+	const [useTwoFactor, setUseTwoFactor] = useState<boolean>(true);
 	const notif = useNotifyContext();
 
-	function authUser()
+	function authUser(data: any = undefined)
 	{
 		const searchParams	= new URLSearchParams(search);
 		const accessCode	= searchParams.get("code");
@@ -27,6 +28,7 @@ function Callback() : JSX.Element
 					'grant-type': 'authorization-code',
 					'authorization-code': accessCode
 				},
+				data: data
 			})
 			.then(res => {
 				window.opener.postMessage(res.data, process.env.REACT_APP_ORIGIN_URL);
@@ -47,16 +49,20 @@ function Callback() : JSX.Element
 	useEffect(() => {
 		const searchParams	= new URLSearchParams(search);
 		const register		= searchParams.get("register");
+		const twoFactor		= searchParams.get("useTwoFactor");
 
+		if(twoFactor === "false")
+		{
+			setUseTwoFactor(false);
+		}
 		if(register === "false")
 		{
 			setNeedForm(false);
-			return ;
 		}
 	}, [])
 
 	useEffect(() => {		
-		if (needForm === false)
+		if (needForm === false && useTwoFactor === false)
 			authUser();
 	}, [needForm])
 
@@ -105,11 +111,25 @@ function Callback() : JSX.Element
 		}
 	};
 
+
+	function sendToken(event: KeyboardEvent<HTMLInputElement>)
+	{
+		if (event.key === "Enter" && event.currentTarget.value.length > 0)
+		{
+			authUser({token: event.currentTarget.value});
+			event.currentTarget.value = '';
+		}
+	}
+
 	//todo form
 	if (needForm)
 		return(	<div>
 				<input type="text" maxLength={20} placeholder={'username'} onKeyPress={pressedSend}  />
 			</div>);
+	else if (useTwoFactor)
+		return (	<div>
+						<input type="text" maxLength={6} placeholder={'token'} onKeyPress={sendToken}  />
+					</div>)
 	else
 		return <div></div>;
 }
