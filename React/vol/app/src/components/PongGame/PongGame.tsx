@@ -12,7 +12,7 @@ import { render } from "./PongRenderer";
 // TODO - Double ball mode                               
 // TODO - dash mode                                                 
 // TODO Refractor back end                            
-// TODO socket reconnection                     
+// REVIEW socket reconnection                     
 // TODO set room_id (0 = not in game) in users database
 // TODO 2FA auth 
 // TODO actual multiplayer 

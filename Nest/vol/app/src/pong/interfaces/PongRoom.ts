@@ -18,5 +18,9 @@ export interface PongRoom
     ball: PongBall,
     spectators: Array<PongUser>,
     state: RoomState,
-    interval?: NodeJS.Timer,
+
+    frameCount: number,
+    deltaTime: number,
+    lastTime: number,
+    currentTime: number,
 }
