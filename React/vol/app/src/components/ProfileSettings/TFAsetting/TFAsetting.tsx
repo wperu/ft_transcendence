@@ -1,4 +1,7 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState, KeyboardEvent } from "react";
+import Popup from "reactjs-popup";
+import { useAuth } from "../../../auth/useAuth";
 import IUser from "../../../Common/Dto/User/User";
 import "./TFA.css";
 
@@ -10,33 +13,55 @@ interface twoFAProps
 
 function TwoFactorAuthSetting(props: twoFAProps)
 {
-	const [isTwoFactor, setIsTwoFactor] = useState<boolean>(props.is_active);
+	const [isTwoFactor, setIsTwoFactor]	= useState<boolean>(props.is_active);
+	const [isOpen, setIsOpen]			= useState<boolean>(false);
+	const { user } = useAuth();
 
 	function changeTwoFactor()
 	{
-		setIsTwoFactor(!isTwoFactor);
-		if (props.user)
-		{
-			const url = process.env.REACT_APP_API_USER + '/' + props.user.id +  '/'; //fixme
-			const headers = {
-				//'authorization'	: user.access_token_42,
-				//'grant-type': 'authorization-code',
-				//'authorization-code': accessCode
-				'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
-			}
-			// axios.post(url, file, {headers})
-			// .then(res => {
-			// 	if (process.env.NODE_ENV === "development")
-			// 	{
-			// 		console.log('Avatar Post succes');
-			// 	}
-			// })
-			// .catch(res => {
-			// 	console.log(res);
-			// 	setIsTwoFactor(isTwoFactor);
-			// });
-		}
+		setIsOpen(true);
 	}
+
+	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
+	{
+		if ( event.key === "Enter" && event.currentTarget.value.length > 0)
+		{
+			setIsTwoFactor(!isTwoFactor);
+			if (props.user)
+			{
+				console.log(user?.accessCode);
+				const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/useTwoFactor'; //fixme
+				const headers = {
+					'authorization'	: user ? (user.accessCode) : '',
+					'grant-type': 'authorization-code',
+				}
+				const body = {
+					token: event.currentTarget.value,
+				}
+				console.log(url);
+				const respo = axios({
+					method: 'put',
+					url: url,
+					headers: headers,
+					data: body,
+				})
+				.then(res => {
+					console.log(res);
+				})
+				.catch(res => {
+					console.log(res); //fix parseme pls /!\
+					setIsTwoFactor(isTwoFactor);
+				});
+			}
+
+			event.currentTarget.value = '';
+		}
+	};
+
+	useEffect(() => {
+		if (user)
+			user.useTwoFa = isTwoFactor;
+	},[user, isTwoFactor])
 
 	function getKeyInputVisibility()
 	{
@@ -53,7 +78,12 @@ function TwoFactorAuthSetting(props: twoFAProps)
 			<label id="tfa_switch" htmlFor="tfa_checkbox">
 				<span id="tfa_slider"></span>
 			</label>
-			<input id="tfa_key_input" className={getKeyInputVisibility()} type="text" placeholder="Clé de 2FA Google" />
+			{user?.secret}
+			<input id="tfa_key_input" className={getKeyInputVisibility()} type="text" placeholder={user?.secret} />
+
+			<Popup open={isOpen} onClose={() => setIsOpen(false)}>
+				<input id="tfa_key_input" type="text" onKeyPress={pressedSend} maxLength={6}/>
+			</Popup>
 		</div>
 	);
 }

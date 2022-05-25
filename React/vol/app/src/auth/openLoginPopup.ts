@@ -36,7 +36,7 @@ function openLoginPopup(cb: () => void)
 
 		//todo
 		//do stuff with user
-		localStorage.setItem("user", JSON.stringify(user));
+		sessionStorage.setItem("user", JSON.stringify(user));
 		cb();
 	}
 

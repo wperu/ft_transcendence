@@ -33,7 +33,7 @@ function CurrentUserProfileHeader(props : headerInfo)
 					<span id="ratio_losses">667</span>
 				</div>
 			</div>
-			<TwoFactorAuthSetting user={props.user} is_active={true} />
+			<TwoFactorAuthSetting user={props.user} is_active={props.user.useTwoFa} />
 		</header>
 	);
 }

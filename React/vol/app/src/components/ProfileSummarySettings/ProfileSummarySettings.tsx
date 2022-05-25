@@ -92,18 +92,20 @@ function ProfileSummarySettings() {
 		setIsTwoFactor(!isTwoFactor);
 		if (user)
 		{
-			const url = process.env.REACT_APP_API_USER + '/' + user.id +  '/'; //fixme
+			const url = process.env.REACT_APP_API_USER + '/' + user.id +  '/useTwoFactor'; //fixme
 			const headers = {
-				//'authorization'	: user.access_token_42,
-				//'grant-type': 'authorization-code',
+				'authorization'	: user.accessCode,
+				'grant-type': 'authorization-code',
 				//'authorization-code': accessCode
-				'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
+				//'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
+			}
+			const body = {
+				setTwoFactor: !isTwoFactor,
 			}
 			axios.post(url, file, {headers})
 			.then(res => {
 				if (process.env.NODE_ENV === "development")
 				{
-					console.log('Avatar Post succes');
 				}
 			})
 			.catch(res => {

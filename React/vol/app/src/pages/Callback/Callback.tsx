@@ -14,8 +14,6 @@ function Callback() : JSX.Element
 		const searchParams	= new URLSearchParams(search);
 		const accessCode	= searchParams.get("code");
 		
-		
-
 		if (window.opener === null)
 			return ;
 

@@ -42,7 +42,7 @@ export class AuthGuard implements CanActivate {
 				target_user.access_token_42 = new_token.access_token;
 				target_user.refresh_token_42 = new_token.refresh_token;
 				target_user.token_expiration_date_42 = new Date(Date.now() + new_token.expires_in * 1000);
-				this.usersService.saveUser(target_user);
+				await this.usersService.saveUser(target_user);
 				console.log("retrieved new access_token");
 			}
 			catch(e)

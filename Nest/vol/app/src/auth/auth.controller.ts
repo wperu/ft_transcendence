@@ -9,6 +9,7 @@ import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import IUser from 'src/Common/Dto/User/User';
+import { TwoFactorService } from './auth.twoFactor.service';
 
 @Controller('auth')
 export class AuthController
@@ -17,6 +18,7 @@ export class AuthController
         private readonly authService: AuthService,
         private readonly configService: ConfigService,
         private readonly usersService: UsersService,
+		private readonly twoFactorService: TwoFactorService,
     )
     {}
 

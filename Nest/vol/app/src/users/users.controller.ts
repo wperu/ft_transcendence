@@ -1,8 +1,8 @@
-import { BadRequestException, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
+import { Request, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 @Controller('users')
 export class UsersController
@@ -45,7 +45,7 @@ export class UsersController
 			return response.status(HttpStatus.NOT_FOUND).json();
 		}
 		
-		if (await this.userService.checkAccesWithRefId(request.header['authorization'],id) === false)
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'],id) === false)
 			return response.status(HttpStatus.FORBIDDEN).json({error: "Invalid access token"});
 
 		if (body.username === undefined || body.username === "") //todo add username Rules
@@ -63,9 +63,47 @@ export class UsersController
 		}
 	}
 
+	/**
+	 * Turn ON/OFF
+	 * 
+	 * you need valide google authentificator to change settings
+	 * @param response 
+	 * @param param 
+	 * @param request 
+	 * @param body 
+	 * @returns 
+	 */
 	@Put("/:id/useTwoFactor")
 	//@UseGuards(AuthGuard)
-	async updateTwoFactor(@Res() response : Response, @Param('id') param)
+	async updateTwoFactor(@Res() response : Response, @Param('id') param, @Req() request: Request, @Body() body,)
+	{
+		// TODO update user in service
+		console.log('Set two factor');
+		let id: number = parseInt(param);
+		if(isNaN(id) || !/^\d*$/.test(param))
+		{
+		//	return response.status(HttpStatus.NOT_FOUND).json();
+		}
+		console.log(body['token']);
+
+
+		let user = await this.userService.findUserByReferenceID(id);
+		
+		
+		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
+		{
+			user.setTwoFA = !user.setTwoFA;
+
+			await this.userService.saveUser(user);
+			return response.status(HttpStatus.OK); // OK
+		}
+
+		return response.status(HttpStatus.BAD_REQUEST).send('bad token'); // KO bad token
+	}
+
+	@Get("/:id/twFactorQR")
+	//@UseGuards(AuthGuard)
+	async getTwoFaQr(@Res() response : Response, @Param('id') param, @Body() body,)
 	{
 		// TODO update user in service
 
@@ -75,8 +113,10 @@ export class UsersController
 			return response.status(HttpStatus.NOT_FOUND).json();
 		}
 
+		const user = await this.userService.findUserByReferenceID(id);
 
-		return (undefined);
+		
+		return (this.userService.getQR(user.SecretCode));
 	}
 
 	@Put("/:id/avatar")

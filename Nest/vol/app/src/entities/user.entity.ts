@@ -5,37 +5,41 @@ import DatabaseFile from './databaseFile.entity';
 @Unique('username', ['username'])
 export class User
 {
-  @PrimaryGeneratedColumn()
-  id: number;
+	@PrimaryGeneratedColumn()
+	id: number;
 
-  @Column()
-  reference_id: number;
+	@Column()
+	reference_id: number;
 
-  @Column({nullable: true, default: null})
-  login: string;
+	@Column({nullable: true, default: null})
+	login: string;
 
-  @Column({nullable: true, default: null})
-  username: string;
-  
-  // all tokens are nullable because we dont want to keep an expired token
-  @Column({nullable: true})
-  access_token_42?: string;
+	@Column({nullable: true, default: null})
+	username: string;
 
-  @Column({nullable: true})
-  refresh_token_42?: string;
+	// all tokens are nullable because we dont want to keep an expired token
+	@Column({nullable: true})
+	access_token_42?: string;
 
-  // created at actual date then adds the expiration time
-  @CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
-  token_expiration_date_42?: Date;
+	@Column({nullable: true})
+	refresh_token_42?: string;
 
-  @Column({nullable: true})
-  access_token_google?: string;
+	// created at actual date then adds the expiration time
+	@CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
+	token_expiration_date_42?: Date;
 
-  @Column({default: true})
-  is_connected: boolean;
+	@Column({nullable: true})
+	access_token_google?: string;
 
-  @CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
-  creation_date: Date;
+	@Column({nullable: false, default: false})
+	setTwoFA: boolean;
+
+	@Column()
+	SecretCode: string;
+
+
+	@CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
+	creation_date: Date;
 
 
 

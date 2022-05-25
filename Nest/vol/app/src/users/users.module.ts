@@ -4,6 +4,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { TokenService } from 'src/auth/token.service';
 import { AuthModule } from 'src/auth/auth.module';
+import { TwoFactorService } from 'src/auth/auth.twoFactor.service';
 
 @Global()
 @Module({
@@ -11,7 +12,7 @@ import { AuthModule } from 'src/auth/auth.module';
 		...AuthModule.getDependencies()
 	],
 	controllers: [UsersController],
-	providers: [UsersService, AuthService, TokenService],
+	providers: [UsersService, AuthService, TokenService, TwoFactorService],
 	exports: [UsersService],
 })
 export class UsersModule {}

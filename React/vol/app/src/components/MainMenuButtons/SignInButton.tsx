@@ -27,17 +27,16 @@ function SignInButton ()
 							&&	typeof location.state.from.pathname === 'string'
 					   		?	location.state.from.pathname
 					   		:	"/";
+		console.log(redirectTo);
 
-		console.log("Redirect");
-
-		let rawUser : string | null = localStorage.getItem('user');
+		let rawUser : string | null = sessionStorage.getItem('user');
 
 		if (rawUser !== null)
 		{
 			auth.setUser(JSON.parse(rawUser));
 			auth.setIsAuth(true);
 		}
-		navigate(redirectTo, { replace: true});
+		navigate(redirectTo, { replace: true });
 	};
 
 	function signInClick ()

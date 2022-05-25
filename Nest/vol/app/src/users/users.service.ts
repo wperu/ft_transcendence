@@ -6,6 +6,7 @@ import { User } from '../entities/user.entity';
 import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
 import IUser from 'src/Common/Dto/User/User';
+import { TwoFactorService } from 'src/auth/auth.twoFactor.service';
 
 @Injectable()
 export class UsersService 
@@ -16,6 +17,7 @@ export class UsersService
 		private usersRepository: Repository<User>,
 
 		private readonly tokenService: TokenService,
+		private readonly twoFactorService: TwoFactorService,
 	) {}
 
 
@@ -52,6 +54,8 @@ export class UsersService
 			accessCode: user.access_token_42,
 			creation_date: user.creation_date,
 			avatar_id : 0,
+			useTwoFa: user.setTwoFA,
+			secret: user.SecretCode,
 		}
 
 		return ret;
@@ -131,6 +135,7 @@ export class UsersService
 		user.username = username;
 		user.refresh_token_42 = token.refresh_token;
 		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
+		user.SecretCode = this.twoFactorService.generateSecret();
 
 		/* sign the token with jwt */
 		const user_data = {
@@ -205,5 +210,51 @@ export class UsersService
 			return false;
 
 		return (ret.reference_id === refId);
+	}
+
+	async setTwoFa(access: string, set: boolean)
+	{
+		const user = await this.findUserByAccessToken(access);
+
+		console.log(user + ' ' + set);
+		if (user === undefined)
+			return ;
+	
+		if (user.setTwoFA === set)
+			return ; // nothing to do ...
+		if (set === true)
+		{
+			if (user.SecretCode === null)
+			{
+				console.log("Generating SecretCode...");
+				user.SecretCode = this.twoFactorService.generateSecret();
+			}
+			console.log("turn ON 2FA");
+			user.setTwoFA = set;
+		}
+		else
+		{
+			console.log("turn OFF 2FA");
+			user.setTwoFA = set;
+		}
+		await this.saveUser(user);
+	}
+
+	checkToken(token: string, secret: string): boolean
+	{
+		let ret = this.twoFactorService.isValide(token, secret);
+
+		if (typeof ret === 'boolean')
+		{
+			return ret;
+		}
+		return false;
+	}
+
+	getQR(secret: string)
+	{
+		const optAuth = this.twoFactorService.getOtpAuth('ft', secret);
+
+		return this.twoFactorService.getQrUrl(optAuth);
 	}
 }

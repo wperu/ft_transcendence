@@ -13,8 +13,9 @@ interface IUser
 	token_expiration_date_42?: Date; // to erase
 	access_token_google?: string;
 	creation_date: Date;
-	// avatar?: DatabaseFile;
+	useTwoFa: boolean;
 	avatar_id: number;
+	secret: string;
 	
 }
 

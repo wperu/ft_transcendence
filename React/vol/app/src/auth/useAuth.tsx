@@ -29,8 +29,9 @@ function useAuth() : IContext
 */
 function useProvideAuth(): IContext
 {
-	const [isAuth, setIsAuth] = useState<boolean>(false);
-	const [user, setUser] = useState<IUser | null>(null);
+	
+	const [user, setUser] = useState<IUser | null>(getUser());
+	const [isAuth, setIsAuth] = useState<boolean>( user !== null );
 
 	const signin = (cb: () => void) =>
 	{
@@ -44,10 +45,30 @@ function useProvideAuth(): IContext
 	}
 
 	useEffect(() => {
+		if (user !== null)
+			setIsAuth(true);
+	}, [user])
+
+	function getUser() : IUser | null
+	{
+		let rawUser : string | null = sessionStorage.getItem('user');
+
+		if (rawUser !== null)
+		{
+			//setIsAuth(true);
+			return (JSON.parse(rawUser));
+		}
+		else
+		{
+			return null
+		}
+	}
+
+	/*useEffect(() => {
 		if (user === null || user === undefined || user.accessCode === undefined )
 			setIsAuth(false);
-		console.log('user' + user);
-	}, [user])
+		console.log(user);
+	}, [user])*/
 
 
 	return {
