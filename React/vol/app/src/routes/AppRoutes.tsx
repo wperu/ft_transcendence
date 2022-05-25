@@ -10,7 +10,6 @@ import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
 import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
-import { ProvideChat } from '../components/Sidebar/ChatContext/ProvideChat';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 
 function AppRoute() : JSX.Element

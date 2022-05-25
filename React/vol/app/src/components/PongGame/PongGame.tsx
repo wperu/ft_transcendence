@@ -5,7 +5,7 @@ import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrok
 import { ReconnectPlayerDTO } from "../../Common/Dto/pong/ReconnectPlayerDTO"
 import { IPongContext, IPongUser, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
-import IUser from "../../interface/User";
+import IUser from "../../Common/Dto/User/User";
 import { render } from "./PongRenderer";
 
 // TODO Make matchmaking page with options             

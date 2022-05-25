@@ -1,5 +1,4 @@
-import { BadRequestException, Logger, OnModuleInit, UnauthorizedException, UseFilters } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleInit } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
@@ -171,7 +170,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_CHANGE_PASS')
 	async roomChangePass(client: Socket, payload: RoomChangePassDTO)
 	{
-		let user: ChatUser = this.chatService.getUserFromSocket(client);
+		let user: ChatUser = await this.chatService.getUserFromSocket(client);
 		
 		if (user === undefined)
 			return ;
@@ -182,7 +181,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('USER_LIST')
 	async user_list(client: Socket , payload: number) : Promise<void>
 	{
-		let user :ChatUser = this.chatService.getUserFromSocket(client);
+		let user :ChatUser = await this.chatService.getUserFromSocket(client);
 		
 		if (user !== undefined)
 			await this.chatService.roomUserList(client, user, payload);
@@ -192,7 +191,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_BAN')
 	async room_block(client:Socket, payload: RoomBanDto): Promise<void>
 	{
-		const user: ChatUser = this.chatService.getUserFromSocket(client);
+		const user: ChatUser = await this.chatService.getUserFromSocket(client);
 
 		if (user === undefined)
 			return; //todo disconect ?
@@ -203,7 +202,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ROOM_MUTE')
 	async room_mute(client:Socket, payload: RoomMuteDto): Promise<void>
 	{
-		let user :ChatUser = this.chatService.getUserFromSocket(client);
+		let user :ChatUser = await this.chatService.getUserFromSocket(client);
 		
 		if (user === undefined)
 				return ;//fix
@@ -298,7 +297,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ADD_FRIEND')
 	async add_friend(client: Socket, payload: number) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -345,7 +344,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('ADD_FRIEND_USERNAME')
 	async add_friend_by_username(client: Socket, payload: string) : Promise<void>
 	{
-	  let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+	  let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 	  if (user !== undefined)
 	  {
@@ -391,7 +390,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('RM_REQUEST_FRIEND')
 	async rm_request_friend(client: Socket, payload: number) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -402,7 +401,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('RM_FRIEND')
 	async rm_friend(client: Socket, payload: number) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -418,7 +417,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('BLOCK_USER')
 	async block_user(client: Socket, payload: number) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -436,7 +435,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('UNBLOCK_USER')
 	async unblock_user(client: Socket, payload: number) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -452,7 +451,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('FRIEND_LIST')
 	async friend_list(client: Socket) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -467,7 +466,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('FRIEND_REQUEST_LIST')
 	async request_list(client: Socket) : Promise<void>
 	{
-		let user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
 		if (user !== undefined)
 		{
@@ -481,7 +480,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('BLOCK_LIST')
 	async block_list(client: Socket) : Promise<void>
 	{
-		const user : ChatUser | undefined = this.chatService.getUserFromSocket(client);
+		const user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user !== undefined)
 		{
 			const ret = await this.chatService.getBlockList(user) as UserDataDto[];

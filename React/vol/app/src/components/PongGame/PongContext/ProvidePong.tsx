@@ -5,8 +5,7 @@ import { useAuth } from "../../../auth/useAuth";
 import { ReconnectPlayerDTO } from "../../../Common/Dto/pong/ReconnectPlayerDTO";
 import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
 import { GameConfig } from "../../../Common/Game/GameConfig";
-import { getPongPlayer } from "../PongGame";
-import { defaultParticleEmitter, ParticleEmitter } from "../PongParticleSystem";
+import { ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
 
 export interface IPongUser
@@ -65,7 +64,7 @@ function usePongProvider() : IPongContext
     const [inGame, setInGame] = useState<boolean>(false);
     const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
         auth: {
-			token: user?.access_token_42,
+			token: user?.accessCode,
         }
     }));
     const [room, setRoom] = useState<IPongRoom | null>(null);

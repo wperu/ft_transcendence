@@ -1,6 +1,6 @@
 import { getGeneratedNameForNode } from "typescript";
 import { GameConfig } from "../../Common/Game/GameConfig";
-import IUser from "../../interface/User";
+import IUser from "../../Common/Dto/User/User";
 import { IPongContext, IPongRoom, RoomState } from "./PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "./PongGame";
 import { clear_particles } from "./PongParticleSystem";

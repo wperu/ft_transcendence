@@ -11,11 +11,11 @@ import { ChatService } from './chat.service';
 
 @Module({
 	imports: [
-		...AuthModule.getDependencies(),
 		FriendsModule,
 		UsersModule,
-		RoomModule
+		RoomModule,
+		AuthModule
 	],
-	providers: [Array, ChatService, ChatGateway, TokenService, UsersService]
+	providers: [Array, ChatService, ChatGateway]
 })
 export class ChatModule {}

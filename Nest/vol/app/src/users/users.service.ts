@@ -1,9 +1,8 @@
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
 import { In, MoreThan, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
 import { UserToken } from '../Common/Dto/User/UserToken'
 import IUser from 'src/Common/Dto/User/User';
@@ -74,20 +73,6 @@ export class UsersService
 		return (undefined)
 	}
 
-	async findUserByName(name: string): Promise<User | undefined>
-	{
-		const user = await this.usersRepository.findOne({ 
-			where: {
-				username: In([name])
-			},
-		});
-
-		if (user !== undefined)
-			return user
-		return (undefined)
-	}
-
-
 	async findUserByUsername(username: string): Promise<User | undefined>
 	{
 		const user = await this.usersRepository.findOne({ 
@@ -100,10 +85,6 @@ export class UsersService
 			return user
 		return (undefined)
 	}
-
-
-
-
 
 	async findUserByName(name: string): Promise<User | undefined>
 	{

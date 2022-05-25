@@ -14,7 +14,6 @@ import { ChatRoomEntity } from 'src/entities/room.entity';
 import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
 import { RoomService } from 'src/room/room.service';
-import { UsersService } from 'src/users/users.service';
 import { Room } from './interface/room';
 
 
@@ -27,12 +26,12 @@ import { Room } from './interface/room';
 export class ChatService {
     constructor (
 		private usersService: UsersService,
-    private tokenService: TokenService,
+    	private tokenService: TokenService,
 		private friendService: FriendsService,
 		private users: ChatUser[],
-    private roomService: RoomService,
+    	private roomService: RoomService,
     )
-    { this.rooms = []; }
+    {}
 
 
 	async connectUserFromSocket(socket: Socket): Promise<ChatUser | undefined>
@@ -58,8 +57,8 @@ export class ChatService {
 			return undefined;
 
 		let idx = this.users.push({
-			socket: [socket], 
-			username: data.username,
+			socket: [socket],
+			username: await this.getUsernameFromID(data.reference_id),
 			reference_id: data.reference_id,
 		})
 
@@ -93,9 +92,9 @@ export class ChatService {
         return (undefined);
     }
 
-	getUsernameFromID(refId : number)
+	async getUsernameFromID(refId : number)
 	{
-		let ret = this.users.find((u) => { return u.reference_id === refId});
+		let ret = await this.usersService.findUserByReferenceID(refId)//this.users.find((u) => { return u.reference_id === refId});
 
 		if (ret === undefined)
 			return "undefined";
@@ -130,11 +129,11 @@ export class ChatService {
 
 		const us = data as UserData;
 
-		const chatUser = this.users.find((u) => { return u.username === us.username})
+		const chatUser = await this.getUserFromSocket(socket);
 		if (chatUser === undefined)
 			return undefined;//throw error
 		
-		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id}), 1);
+		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id }), 1);
 		return (chatUser);
 	}
 
@@ -149,8 +148,8 @@ export class ChatService {
 
 	async createRoom(client: Socket, user: ChatUser, data : CreateRoomDTO) : Promise<void>
 	{
-		const user1 = await this.userService.findUserByReferenceID(user.reference_id);
-		const user2 = await this.userService.findUserByReferenceID(data.with);
+		const user1 = await this.usersService.findUserByReferenceID(user.reference_id);
+		const user2 = await this.usersService.findUserByReferenceID(data.with);
 
 		const resp = await this.roomService.createRoom(data.room_name, user1, data.private_room, data.password, data.isDm, user2);
 
@@ -206,7 +205,7 @@ export class ChatService {
 
 	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto)
 	{
-		let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
+		let userRoom = await this.usersService.findUserByReferenceID(user.reference_id);
 		let resp;
 
 		if (data.id !== undefined)
@@ -441,12 +440,12 @@ export class ChatService {
 	//todo send to user ?
 	async setIsAdmin(client:Socket, data: RoomPromoteDto)
 	{
-		const user = this.getUserFromSocket(client);
+		const user = await this.getUserFromSocket(client);
 
 		if (user === undefined)
 			return ;//todo disconnect;
 
-		const resp = await this.roomService.setIsAdmin(data.room_id, data.refId,user.reference_id, data.isPromote);
+		const resp = await this.roomService.setIsAdmin(data.room_id, data.refId, user.reference_id, data.isPromote);
 
 		let dto : NoticeDTO;
 		if (resp !== undefined)
@@ -492,7 +491,7 @@ export class ChatService {
 		ret = [];
 		for (const rel of relation)
 		{
-			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
+			let user2 = await this.usersService.findUserByReferenceID(rel.id_two);
 
 			let username = user2?.username || "default";
 			let status = this.isConnected(rel.id_two);
@@ -518,7 +517,7 @@ export class ChatService {
 		ret = [];
 		for (const rel of relation)
 		{
-			let user2 = await this.userService.findUserByReferenceID(rel.id_two);
+			let user2 = await this.usersService.findUserByReferenceID(rel.id_two);
 			let username = user2?.username || "default";
 			
 			ret.push({
@@ -542,7 +541,7 @@ export class ChatService {
 
 		for (const rel of relation)
 		{
-			let user2 = await this.userService.findUserByReferenceID(rel.id_one);
+			let user2 = await this.usersService.findUserByReferenceID(rel.id_one);
 
 			let username = user2?.username || "default";
 			ret.push({
@@ -594,7 +593,7 @@ export class ChatService {
 
 	async getUserByUsername(username : string) : Promise<User>
 	{
-		let toSend = await this.userService.findUserByUsername(username);
+		let toSend = await this.usersService.findUserByUsername(username);
 		return toSend;
 	}
 
@@ -623,7 +622,7 @@ export class ChatService {
 
 	async gameInvite(client: Socket, data: GameInviteDTO)
 	{
-		const user : ChatUser | undefined = this.getUserFromSocket(client);
+		const user : ChatUser | undefined = await this.getUserFromSocket(client);
 		if (user !== undefined)
 		{
 			let dto: NotifDTO[];
