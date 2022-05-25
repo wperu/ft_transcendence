@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState, KeyboardEvent } from "react";
+import QRCode from "react-qr-code";
 import Popup from "reactjs-popup";
 import { useAuth } from "../../../auth/useAuth";
 import IUser from "../../../Common/Dto/User/User";
@@ -15,6 +16,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 {
 	const [isTwoFactor, setIsTwoFactor]	= useState<boolean>(props.is_active);
 	const [isOpen, setIsOpen]			= useState<boolean>(false);
+	const [qrUri, setQrUri]				= useState<string>("other world !");
 	const { user } = useAuth();
 
 	function changeTwoFactor()
@@ -58,9 +60,38 @@ function TwoFactorAuthSetting(props: twoFAProps)
 		}
 	};
 
+	function getURL() : string
+	{
+		var ret =  "other world";
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/twFactorQR'; //fixme
+				const headers = {
+					'authorization'	: user ? (user.accessCode) : '',
+					'grant-type': 'authorization-code',
+				}
+				console.log(url);
+				const respo = axios({
+					method: 'get',
+					url: url,
+					headers: headers,
+				})
+				.then(res => {
+					ret = res.data.url;
+					setQrUri(res.data.url);
+				})
+				.catch(res => {
+					console.log(res); //fix parseme pls /!\
+					setIsTwoFactor(isTwoFactor);
+					return "";
+				});
+
+				
+				return ret;
+	}
+
 	useEffect(() => {
 		if (user)
 			user.useTwoFa = isTwoFactor;
+		getURL();
 	},[user, isTwoFactor])
 
 	function getKeyInputVisibility()
@@ -80,12 +111,18 @@ function TwoFactorAuthSetting(props: twoFAProps)
 			</label>
 			{user?.secret}
 			<input id="tfa_key_input" className={getKeyInputVisibility()} type="text" placeholder={user?.secret} />
-
-			<Popup open={isOpen} onClose={() => setIsOpen(false)}>
-				<input id="tfa_key_input" type="text" onKeyPress={pressedSend} maxLength={6}/>
+			
+			
+				
+			<Popup className="my-popup" open={isOpen} onClose={() => setIsOpen(false)}>
+				<div id="qrstyle" >
+					<QRCode  value={qrUri} size={124} />
+					Enter code to turn token {isTwoFactor ? 'off' : 'on'}
+					<input id="tfa_key_input" type="text" onKeyPress={pressedSend} maxLength={6}/>
+				</div>
 			</Popup>
 		</div>
 	);
-}
+}//
 
 export default TwoFactorAuthSetting;

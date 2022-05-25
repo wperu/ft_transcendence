@@ -254,7 +254,7 @@ export class UsersService
 	getQR(secret: string)
 	{
 		const optAuth = this.twoFactorService.getOtpAuth('ft', secret);
-
-		return this.twoFactorService.getQrUrl(optAuth);
+		return optAuth;
+		//return this.twoFactorService.getQrUrl(optAuth);
 	}
 }

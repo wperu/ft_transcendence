@@ -32,17 +32,5 @@ export class TwoFactorService {
 		return otpauth;
 	}
 
-	getQrUrl(otpauth: string) : string | undefined
-	{
-		const url = qrcode.toDataURL(otpauth, (err, imageUrl) => {
-			if (err) {
-			  console.log('Error with QR');
-			  return undefined;
-			}
-			console.log(imageUrl);
-			return imageUrl;
-		  });
 
-		return url;
-	}
 }

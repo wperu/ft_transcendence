@@ -116,7 +116,7 @@ export class UsersController
 		const user = await this.userService.findUserByReferenceID(id);
 
 		
-		return (this.userService.getQR(user.SecretCode));
+		return response.status(HttpStatus.OK).json({url: this.userService.getQR(user.SecretCode)});
 	}
 
 	@Put("/:id/avatar")
