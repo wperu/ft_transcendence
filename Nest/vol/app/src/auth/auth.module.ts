@@ -9,14 +9,15 @@ import { User } from 'src/entities/user.entity';
 import { TokenService } from './token.service';
 import { TokenValidatorEntity } from 'src/entities/token_validator.entity';
 import { JwtModule } from '@nestjs/jwt'
-import e from 'express';
+import { TwoFactorService } from './auth.twoFactor.service';
 
 @Module({
 	imports: [
 		...AuthModule.getDependencies()
 	 ],
-	providers: [AuthService, UsersService, TokenService],
+	providers: [AuthService, UsersService, TokenService, TwoFactorService],
 	controllers: [AuthController],
+	exports: [TwoFactorService]
 })
 
 export class AuthModule

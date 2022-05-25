@@ -9,7 +9,7 @@ function LogOutButton () : JSX.Element
 
 	function delUser()
 	{
-		localStorage.removeItem('user');
+		sessionStorage.removeItem('user');
 	}
 
 	function LogOutClick ()

@@ -4,6 +4,7 @@ import Chat from "../Chat/Chat";
 import Channels from "../Channels/Channels";
 import Friends from "../Friends/Friends";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
+import { Socket } from "socket.io-client";
 
 interface prop
 {
@@ -40,8 +41,7 @@ function Sidebar()
 			chatCtx.setCurrentTab(ECurrentTab.channels);
 	}, [chatCtx.currentRoom])
 
-
-
+	if (chatCtx.socket.connected)
 	return (
 		<div id="sidebar">
 			<input id="toggle" type="checkbox" />
@@ -68,6 +68,18 @@ function Sidebar()
 			</div>
 		</div>
 	);
+	else
+	return (
+		<div id="sidebar">
+		<input id="toggle" type="checkbox" />
+		<label htmlFor="toggle"></label>
+		<div id="actual_bar">
+			<header>
+				<div className="loader"></div>
+			</header>
+		</div>
+	</div>
+	)
 }
 
 export default Sidebar;

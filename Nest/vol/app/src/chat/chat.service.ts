@@ -36,7 +36,7 @@ export class ChatService {
 	{
         const data: ChatUser = this.tokenService.decodeToken(socket.handshake.auth.token) as ChatUser;
 
-		if (data === undefined)
+		if (data === undefined || data === null)
 			return undefined;
 
 		let idx = this.users.push({

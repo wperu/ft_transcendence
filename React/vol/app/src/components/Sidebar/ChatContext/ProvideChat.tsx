@@ -100,7 +100,7 @@ function useChatProvider() : IChatContext
 	const notify	= useNotifyContext();
 	const [socket]	= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN, { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
-			token: useAuth().user?.access_token_42
+			token: useAuth().user?.accessCode,
 		}
 	}));
 	const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
@@ -447,7 +447,7 @@ export function ProvideChat( {children}: {children: JSX.Element} ): JSX.Element
 {
 	const chatCtx = useChatProvider();
 
-	return(
+	return (
 		<chatContext.Provider value={chatCtx}>
 			{children}
 		</chatContext.Provider>

@@ -30,6 +30,10 @@ export class AuthGuard implements CanActivate {
 		const target_user = await this.usersService.findUserByAccessToken(req.headers['authorization']);
 		if (target_user === undefined)
 			throw new ForbiddenException("Invalid access token");
+		if (target_user.username === null)
+		{
+			throw new ForbiddenException("User not register");
+		}
 		if (!await this.usersService.checkAccessTokenExpiration(target_user))
 		{
 			try {
@@ -38,7 +42,7 @@ export class AuthGuard implements CanActivate {
 				target_user.access_token_42 = new_token.access_token;
 				target_user.refresh_token_42 = new_token.refresh_token;
 				target_user.token_expiration_date_42 = new Date(Date.now() + new_token.expires_in * 1000);
-				this.usersService.saveUser(target_user);
+				await this.usersService.saveUser(target_user);
 				console.log("retrieved new access_token");
 			}
 			catch(e)

@@ -9,24 +9,11 @@ import SidebarWithContext from '../components/SidebarWithContext/SidebarWithCont
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
 
-
-interface Props{
-	element:any;
-	path:string;
-	children?:any;
-  }
-
-function ProtectedRoute({element, path, children}:Props)
-{
-
-}
-
-
 function AppRoute() : JSX.Element
 {
 	const element =
-	<ProvideAuth>
-		<ProvideNotify>
+	<ProvideNotify>
+		<ProvideAuth>
 			<BrowserRouter>
 				<Routes>
 				<Route path="/login" element={<HomeLoggedOut />}/>
@@ -45,8 +32,8 @@ function AppRoute() : JSX.Element
 				</Route>
 				</Routes>
 			</BrowserRouter>
-		</ProvideNotify>
-	</ProvideAuth>;
+		</ProvideAuth>
+	</ProvideNotify>;
 
 	return element;
 }
