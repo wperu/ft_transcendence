@@ -3,6 +3,10 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { ELevel, useNotifyContext } from "../../components/NotifyContext/NotifyContext";
 
+//TODO rm comm
+//TODO check error
+//todo complet form with PP
+//todo style/css
 function Callback() : JSX.Element
 {
 	const { search  } = useLocation();
@@ -34,9 +38,22 @@ function Callback() : JSX.Element
 				window.opener.postMessage(res.data, process.env.REACT_APP_ORIGIN_URL);
 				window.close();
 			})
-			.catch(e =>
+			.catch(error =>
 			{
-				//console.log(e);
+				if (error.response) {
+					// The request was made and the server responded with a status code
+					// that falls out of the range of 2xx
+					// console.log(error.response.data);
+					notif.addNotice(ELevel.error, error.response.data.message, 3000);
+				  } else if (error.request) {
+					// The request was made but no response was received
+					// `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+					// http.ClientRequest in node.js
+					// console.log(error.request);
+				  } else {
+					// Something happened in setting up the request that triggered an Error
+					// console.log('Error', error.message);
+				  }
 			})
 				
 		}
@@ -66,7 +83,7 @@ function Callback() : JSX.Element
 			authUser();
 	}, [needForm])
 
-	//todo register part
+
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
 	{
 		const searchParams	= new URLSearchParams(search);
@@ -121,7 +138,7 @@ function Callback() : JSX.Element
 		}
 	}
 
-	//todo form
+
 	if (needForm)
 		return(	<div>
 				<input type="text" maxLength={20} placeholder={'username'} onKeyPress={pressedSend}  />

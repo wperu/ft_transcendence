@@ -81,7 +81,7 @@ export class AuthController
         let token = await this.authService.getAccessToken(req.headers['authorization-code']);
         if (token === undefined)
             throw new ForbiddenException("wrong access code");
-        /* validates user, deletes code */
+        /* validates user */
         let user = await this.usersService.findUserByAccessToken(token);
 		if (user === undefined)
 			throw new ForbiddenException("wrong access code");
