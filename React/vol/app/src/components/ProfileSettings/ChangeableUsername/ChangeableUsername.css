@@ -1,0 +1,49 @@
+#current_profile_username, #profile_username
+{
+	margin: 0 auto;
+}
+
+#current_profile_username
+{
+	display: grid;
+}
+
+#profile_username_input
+{
+	padding: 0.05em 0.2em;
+	font-size: 1em;
+	color: whitesmoke;
+	font-size: 1.2em;
+	background-color: #282c3450;
+	border: none;
+	border-radius: 4px;
+	width: 20vw;
+}
+
+#new_username_submit
+{
+	font-size: 0.4em;
+	grid-column: 2;
+	grid-row: 1;
+	margin: auto;
+	margin-left: 1vw;
+	color: white;
+	background-color: #79bbe4;
+	padding: 2vmin 0.8vmin;
+	text-transform: uppercase;
+	border: none;
+	border-radius: 7px;
+	transition: 0.2s;
+}
+
+#new_username_submit:hover
+{
+	transform: scale(1.10,1.10);
+	-webkit-transform: scale(1.10,1.10);
+	-moz-transform: scale(1.10,1.10);
+}
+
+#profile_username_input::placeholder
+{
+	opacity: 1;
+}

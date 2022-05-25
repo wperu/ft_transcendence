@@ -7,6 +7,7 @@ interface Room
     name: string,
 	private_room: boolean,
 	owner: ChatUser,
+	admins: Array<ChatUser>
 	users: Array<ChatUser>
 	invited : Array<string>,
 	muted : Array<string>,

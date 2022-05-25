@@ -1,6 +1,48 @@
-#profile-page
+#profile_page footer
+{
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+	margin: 2vmin;
+}
+
+#profile_header
+{
+	width: 100%;
+	height: max-content;
+	background-color: #5f7fb9;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	color: whitesmoke;
+	font-size: 1.2em;
+}
+
+#profile_stats
+{
+	margin: 0 auto;
+}
+
+#profile_stats
 {
 	display: flex;
-	justify-content: space-around;
 	flex-direction: column;
+	align-items: center;
+}
+
+#ratio_caption
+{
+	font-size: 0.6em;
+}
+
+#ratio_wins
+{
+	color: greenyellow;
+}
+
+#ratio_losses
+{
+	color: rgb(235, 43, 43);
 }

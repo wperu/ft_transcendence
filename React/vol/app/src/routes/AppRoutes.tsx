@@ -13,24 +13,11 @@ import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 import { ProvideChat } from '../components/Sidebar/ChatContext/ProvideChat';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 
-
-interface Props{
-	element:any;
-	path:string;
-	children?:any;
-  }
-
-function ProtectedRoute({element, path, children}:Props)
-{
-
-}
-
-
 function AppRoute() : JSX.Element
 {
 	const element =
-	<ProvideAuth>
-		<ProvideNotify>
+	<ProvideNotify>
+		<ProvideAuth>
 			<BrowserRouter>
 				<Routes>
 
@@ -61,8 +48,8 @@ function AppRoute() : JSX.Element
 					</Route>
 				</Routes>
 			</BrowserRouter>
-		</ProvideNotify>
-	</ProvideAuth>;
+		</ProvideAuth>
+	</ProvideNotify>;
 
 	return element;
 }

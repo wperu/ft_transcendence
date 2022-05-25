@@ -1,0 +1,98 @@
+#match_history
+{
+	width: 100%;
+	display: block;
+}
+
+@media only screen and (max-width: 1400px)
+{
+	#match_history
+	{
+		font-size: 0.6em;
+	}
+}
+
+.history_match_infos > *
+{
+	display: inline;
+	text-align: center;
+}
+
+.history_match
+{
+	font-size: 1.1em;
+	background-color: #2d3444;
+	color: whitesmoke;
+	width: 60%;
+	margin: 0.5em auto;
+	border: 1px solid whitesmoke;
+	list-style-type: none;
+}
+
+.history_match_infos
+{
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	height: 1.7em;
+}
+
+.history_match_user
+{
+	width: 20%;
+}
+
+.history_match_score
+{
+	width: 10%;
+}
+
+.match_score_separator
+{
+	width: fit-content;
+	color: lightblue;
+}
+
+.victory, .defeat, .draw, .history_match_date
+{
+	height: fit-content;
+	width: 15%;
+}
+
+.victory, .defeat, .draw
+{
+	font-size: 0.6em;
+	text-transform: uppercase;
+	text-align: center;
+	text-justify: center;
+}
+
+.victory, .match_option_on
+{
+	color: greenyellow;
+}
+
+.defeat, .match_option_off
+{
+	color: red;
+}
+
+.draw
+{
+	color: lightgrey;
+}
+
+.history_match_date
+{
+	font-size: 0.55em;
+	display: flex;
+	flex-direction: column;
+	color: rgb(194, 192, 192);
+}
+
+.history_match_settings
+{
+	display: flex;
+	justify-content: space-evenly;
+	font-size: 0.5em;
+}

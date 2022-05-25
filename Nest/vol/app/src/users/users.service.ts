@@ -6,6 +6,8 @@ import { User } from '../entities/user.entity';
 import bcrypt = require('bcrypt')
 import { TokenService } from 'src/auth/token.service';
 import { UserToken } from '../Common/Dto/User/UserToken'
+import IUser from 'src/Common/Dto/User/User';
+import { TwoFactorService } from 'src/auth/auth.twoFactor.service';
 
 @Injectable()
 export class UsersService 
@@ -16,6 +18,7 @@ export class UsersService
 		private usersRepository: Repository<User>,
 
 		private readonly tokenService: TokenService,
+		private readonly twoFactorService: TwoFactorService,
 	) {}
 
 
@@ -41,12 +44,55 @@ export class UsersService
 	}
 
 
+	getIUserFromUser(user : User)
+	{
+		let ret : IUser;
+
+		ret = {
+			id: user.id,
+			reference_id: user.reference_id,
+			username: user.username,
+			accessCode: user.access_token_42,
+			creation_date: user.creation_date,
+			avatar_id : 0,
+			useTwoFa: user.setTwoFA,
+		}
+
+		return ret;
+	}
 
 	async findUserByReferenceID(reference_id: number): Promise<User | undefined>
 	{
 		const user = await this.usersRepository.findOne({ 
 			where: {
 				reference_id: In([reference_id])
+			},
+		});
+
+		if (user !== undefined)
+			return user
+		return (undefined)
+	}
+
+	async findUserByName(name: string): Promise<User | undefined>
+	{
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				username: In([name])
+			},
+		});
+
+		if (user !== undefined)
+			return user
+		return (undefined)
+	}
+
+
+	async findUserByUsername(username: string): Promise<User | undefined>
+	{
+		const user = await this.usersRepository.findOne({ 
+			where: {
+				username: In([username])
 			},
 		});
 
@@ -84,7 +130,7 @@ export class UsersService
 		});
 
 		if (user !== undefined)
-			return user
+			return user;
 		return (undefined)
 	}
 
@@ -106,6 +152,7 @@ export class UsersService
 		user.username = username;
 		user.refresh_token_42 = token.refresh_token;
 		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
+		user.SecretCode = this.twoFactorService.generateSecret();
 
 		/* sign the token with jwt */
 		const user_data : UserToken = {
@@ -155,13 +202,75 @@ export class UsersService
 
 
 
-	async updateUserName(id: Number, newUserName : string)
+	async updateUserName(id: Number, newUserName : string) : Promise<boolean>
 	{
-		await this.usersRepository
-				.createQueryBuilder()
-				.update(User)
-				.set({username: newUserName})
-				.where("id = :id", {id})
-				.execute();
+		try {
+			await this.usersRepository
+					.createQueryBuilder()
+					.update(User)
+					.set({username: newUserName})
+					.where("id = :id", {id})
+					.execute();
+		}
+		catch(e)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	async checkAccesWithRefId(access: string, refId : number)
+	{
+		const ret = await this.findUserByAccessToken(access);
+		if (ret === undefined)
+			return false;
+
+		return (ret.reference_id === refId);
+	}
+
+	async setTwoFa(access: string, set: boolean)
+	{
+		const user = await this.findUserByAccessToken(access);
+
+		console.log(user + ' ' + set);
+		if (user === undefined)
+			return ;
+	
+		if (user.setTwoFA === set)
+			return ; // nothing to do ...
+		if (set === true)
+		{
+			if (user.SecretCode === null)
+			{
+				console.log("Generating SecretCode...");
+				user.SecretCode = this.twoFactorService.generateSecret();
+			}
+			console.log("turn ON 2FA");
+			user.setTwoFA = set;
+		}
+		else
+		{
+			console.log("turn OFF 2FA");
+			user.setTwoFA = set;
+		}
+		await this.saveUser(user);
+	}
+
+	checkToken(token: string, secret: string): boolean
+	{
+		let ret = this.twoFactorService.isValide(token, secret);
+
+		if (typeof ret === 'boolean')
+		{
+			return ret;
+		}
+		return false;
+	}
+
+	getQR(secret: string)
+	{
+		const optAuth = this.twoFactorService.getOtpAuth('ft', secret);
+		return optAuth;
+		//return this.twoFactorService.getQrUrl(optAuth);
 	}
 }

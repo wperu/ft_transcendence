@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
-import IUser from "../interface/User";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import IUser from '../Common/Dto/User/User';
 import openLoginPopup from "./openLoginPopup";
 
 interface IContext
@@ -29,8 +29,8 @@ function useAuth() : IContext
 */
 function useProvideAuth(): IContext
 {
-	const [isAuth, setIsAuth] = useState<boolean>(true);
-	const [user, setUser] = useState<IUser | null>(null);
+	const [user, setUser] = useState<IUser | null>(getUser());
+	const [isAuth, setIsAuth] = useState<boolean>( user !== null );
 
 	const signin = (cb: () => void) =>
 	{
@@ -42,6 +42,32 @@ function useProvideAuth(): IContext
 		setIsAuth(false);
 		cb();
 	}
+
+	useEffect(() => {
+		if (user !== null)
+			setIsAuth(true);
+	}, [user])
+
+	function getUser() : IUser | null
+	{
+		let rawUser : string | null = sessionStorage.getItem('user');
+
+		if (rawUser !== null)
+		{
+			//setIsAuth(true);
+			return (JSON.parse(rawUser));
+		}
+		else
+		{
+			return null
+		}
+	}
+
+	/*useEffect(() => {
+		if (user === null || user === undefined || user.accessCode === undefined )
+			setIsAuth(false);
+		console.log(user);
+	}, [user])*/
 
 
 	return {

@@ -72,3 +72,10 @@
 	text-transform: uppercase;
 	transition: 0.2s cubic-bezier(.23,1,.32,1);
 }
+
+#add_friend_button:hover
+{
+	transform: scale(1.05,1.05);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.05,1.05);
+}

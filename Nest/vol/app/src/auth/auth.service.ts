@@ -86,7 +86,7 @@ export class AuthService {
         if (user === undefined)
         {
             console.log("Unknown user, creating it...");
-            user = await this.usersService.createUser(info.data.id, info.data.login, token);
+            user = await this.usersService.createUser(info.data.id, null, token);
         }
         else
         {
@@ -112,8 +112,12 @@ export class AuthService {
     async getAccessToken(code: string) : Promise<string | undefined>
     {
         let access_token = await this.tokenService.getAccessToken(code);
-        this.tokenService.deleteAccessCode(code);
         return (access_token);
+    }
+
+	async destroyAccessToken(code: string) : Promise<void>
+    {
+        this.tokenService.deleteAccessCode(code);
     }
 }
 

@@ -17,7 +17,8 @@
 
 .friends_notification_date
 {
-	font-size: 0.55em;
+	text-align: center;
+	font-size: 0.3em;
 	color: rgb(165, 165, 165);
 	width: 15%;
 }
@@ -51,7 +52,7 @@
 
 .friends_notif_name
 {
-	width: 20%;
+	max-width: 30%;
 	font-size: 0.5em;
 	text-overflow: ellipsis;
 	white-space: nowrap;

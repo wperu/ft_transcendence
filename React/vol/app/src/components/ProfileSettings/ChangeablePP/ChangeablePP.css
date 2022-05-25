@@ -1,0 +1,41 @@
+#pp_label
+{
+	display: grid;
+}
+
+.edit_logo
+{
+	width: 2vh;
+	transition: 0.3s;
+}
+
+
+#profile_pic, #profile_pic_edit_logo, #profile_username_input
+{
+	grid-column: 1;
+	grid-row: 1;
+}
+
+#profile_pic_edit_logo
+{
+	margin: auto 0.7em 0.7em auto;
+}
+
+#profile_pic
+{
+	border: 4px solid whitesmoke;
+	width: 15vh;
+	margin: 2vmin 2vmin;
+}
+
+#new_pp_input
+{
+	display: none;
+}
+
+.edit_logo:hover, #profile_pic:hover + #profile_pic_edit_logo
+{
+	transform: scale(1.25,1.25);
+	-webkit-transform: scale(1.25,1.25);
+	-moz-transform: scale(1.25,1.25);
+}
