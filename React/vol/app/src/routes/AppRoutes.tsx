@@ -9,19 +9,6 @@ import SidebarWithContext from '../components/SidebarWithContext/SidebarWithCont
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
 
-
-interface Props{
-	element:any;
-	path:string;
-	children?:any;
-  }
-
-function ProtectedRoute({element, path, children}:Props)
-{
-
-}
-
-
 function AppRoute() : JSX.Element
 {
 	const element =
