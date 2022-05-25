@@ -1,0 +1,72 @@
+#tfa_setting
+{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 14%;
+	text-align: center;
+}
+
+#tfa_checkbox
+{
+	display: none;
+}
+
+#tfa_switch
+{
+	z-index: 1;
+	position: relative;
+	width: 10vmin;
+	height: 5vh;
+	background-color: rgb(221, 26, 26);
+	border-radius: 100px;
+	padding: 2px;
+}
+
+#tfa_slider
+{
+	display: block;
+	position: absolute;
+	left: 2%;
+	border-radius: 100px;
+	height: 5vh;
+	width: 5vh;
+	background-color: whitesmoke;
+}
+
+#tfa_checkbox:checked + #tfa_switch
+{
+	background-color: yellowgreen;
+}
+
+#tfa_checkbox:checked + #tfa_switch #tfa_slider
+{
+	right: 2%;
+	left: auto;
+}
+
+#tfa_key_input
+{
+	margin-top: 0.3em;
+	text-align: center;
+	padding: 0.05em 0.2em;
+	font-size: 1em;
+	color: whitesmoke;
+	font-size: 0.6em;
+	background-color: #282c3450;
+	border: none;
+	border-radius: 4px;
+	width: 100%;
+}
+
+#tfa_setting
+{
+	margin: 0 auto;
+}
+
+
+.my-popup-content {  margin: auto;  background: rgb(255, 255, 255);  width: 50%;  padding: 5px;}
+.my-popup-arrow {  color: rgb(255, 255, 255);}[role='tooltip']
+.my-popup-content {  width: 200px;  box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 3px;}
+.my-popup-overlay {  background: rgba(0, 0, 0, 0.5);}[data-popup='tooltip']
+.my-popup-overlay { background: #ffffff;}

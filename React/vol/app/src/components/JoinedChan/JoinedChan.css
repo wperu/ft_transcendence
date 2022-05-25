@@ -1,10 +1,15 @@
-@import url("../../ressources/base.css");
-
 .joined_chan
 {
 	width: var(--open-sidebar-size);
 	font-size: 4vmin;
 	box-sizing: border-box;
+
+}
+
+.channel_label > *
+{
+	width: fit-content;
+	margin: 0 2%;
 }
 
 .connect_chan
@@ -13,7 +18,7 @@
 	box-sizing: border-box;
 }
 
-.connect_chan + label
+.channel_label
 {
 	text-align: left;
 	box-sizing: border-box;
@@ -21,35 +26,37 @@
 	padding: var(--channel_padding);
 	border-radius: 15px;
 	width: calc(0.98 * (var(--open-sidebar-size) - var(--channel_margin) - var(--channel_padding)));
-	display: block;
+	display: flex;
+	flex-direction: row;
 	justify-content: space-between;
+	
+}
+
+.joined_chan_name
+{
+	width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.connect_chan + label:hover, .selected_chan
+.channel_label:hover, .selected_chan
 {
 	background-color: rgba(255, 255, 255, 0.1);
 }
-/*
-.leave_chan
+
+.joined_chan_notif_number
+{
+	background-color: rgb(39, 178, 39);
+	padding: 0 1%;
+	border-radius: 0.35em;
+	font-size: 0.8em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.no_notif
 {
 	display: none;
 }
-
-.leave_chan + label
-{
-	text-align: right;
-	font-size: 0.65em;
-	background-color: firebrick;
-	opacity: 85%;
-	margin-right: 4px;
-	padding: 4px;
-	border-radius: 10px;
-}
-
-.leave_chan + label:hover
-{
-	opacity: 1;
-} */

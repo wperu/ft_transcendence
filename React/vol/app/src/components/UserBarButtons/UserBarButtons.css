@@ -35,3 +35,90 @@
 {
 	transform: rotate(180deg);
 }
+
+.close_notification_button
+{
+	margin: 0 0.3em;
+	opacity: 50%;
+	height: 30%;
+	width: max-content;
+	background-color: transparent;
+	border: none;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.close_notification_button img
+{
+	max-width: auto;
+	max-height: 100%;
+	vertical-align: middle;
+}
+
+.mute_ban_popup
+{
+	box-sizing: border-box;
+	width: max-content;
+	height: max-content;
+	background-color: rgb(214, 40, 40);
+	color: white;
+	border-radius: 0.4em;
+}
+
+.mute_ban_popup > *
+{
+	width: 100%;
+	text-align: center;
+	margin: auto;
+}
+
+.popup-overlay {  background: rgba(0, 0, 0, 0.5);}
+
+.mute_ban_popup > .header
+{
+	margin-bottom: 0.5em;
+	text-transform: uppercase;
+}
+
+.mute_ban_popup > .content
+{
+	display: flex;
+	justify-content: center;
+	margin-bottom: 0.5em;
+}
+
+.mute_ban_popup > .content > input
+{
+	background-color: rgba(0, 0, 0, 0.297);
+	color: white;
+	border: none;
+	border-radius: 4px;
+	font-size: 0.8em;
+	width: 30%;
+	margin: 0 1em;
+}
+
+.mute_ban_popup > .actions
+{
+	margin: auto;
+}
+
+.mute_ban_popup > .actions > input:hover
+{
+	transform: scale(1.03,1.03);
+	-webkit-transform: scale(1.03,1.03);
+	-moz-transform: scale(1.03,1.03);
+}
+
+.mute_ban_popup > .actions > input
+{
+	margin: 0 0.8em 0.2em;
+	font-size: 1em;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.297);
+	border: none;
+	border-radius: 10px;
+	padding: 10px;
+	transition: 0.2s;
+}

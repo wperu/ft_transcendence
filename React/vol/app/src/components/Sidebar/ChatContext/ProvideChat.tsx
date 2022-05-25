@@ -1,9 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { RcvMessageDto} from "../../../interface/chat/chatDto";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { RoomJoined } from "../../../Common/Dto/chat/RoomJoined";
+import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
-import { RoomLeftDto } from "../../../Common/Dto/chat/room";
+import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
+import { useNotifyContext } from "../../NotifyContext/NotifyContext";
+import { NoticeDTO } from "../../../Common/Dto/chat/notice";
+
+/** //fix
+ *  NOTIF rework notif system
+ * 	dub request && invalide request...
+ * 	room add is_pm
+ */
+
+enum ENotification
+{
+	INFO,
+	GAME_REQUEST,
+	FRIEND_REQUEST
+}
 
 export enum ELevelInRoom
 {
@@ -19,90 +33,165 @@ export enum ECurrentTab
 	chat = "chat",
 }
 
+export enum JOINSTATUS
+{
+	JOIN = 0,
+	ERROR = 1,
+	CONNECT = 2,
+}
+
+export interface INotif
+{
+	id: string;
+	type: ENotification;
+
+	req_id?: number;
+	username?: string;
+	content? : string;
+	refId?: number;
+	date: Date;
+}
+
 export interface IRoom
 {
-	private: boolean;
-	protected: boolean;
-	user_level: ELevelInRoom;
-	room_name: string;
-	room_message: RcvMessageDto[];
+	id:				number
+	private:		boolean;
+	protected:		boolean;
+	user_level:		ELevelInRoom;
+	room_name:		string;
+	room_message:	RcvMessageDto[];
+	isDm:			boolean;
+	owner:			number;
+	nb_notifs:		number;
 }
 
 interface IChatContext
 {
-	socket: Socket;
-	currentRoom?: IRoom;
-	setCurrentRoom: (room: IRoom | undefined) => void;
-	setCurrentRoomByName: (rname: string) => void;
+	socket:			Socket;
+	currentRoom?:	IRoom;
+
+	setCurrentRoom:			(room: IRoom | undefined) => void;
+	setCurrentRoomById:		(id: number) => void;
+	findRoomById:			(id: number) => IRoom | undefined;
 	
 	rooms: IRoom[];
-	addRoom: (room_name: string, is_protected: boolean) => void;
+	//addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
 
-	currentTab: ECurrentTab;
-	setCurrentTab: (tab: ECurrentTab) => void;
+	notification:	INotif[];
+	rmNotif:		(id: string) => void;
+	rmFriendNotif: 	(id: number) => void;
+
+	currentTab:		ECurrentTab;
+	setCurrentTab:	(tab: ECurrentTab) => void;
+	awaitDm:		(refId: number) => void;
+	goToDmWith		(id: number) : boolean;
+
+	friendsList:			Array<UserDataDto>;
+	blockList:				Array<UserDataDto>;
+	//RequestList:		Array<UserDataDto>;
 }
 
-//const cltSocket = 
+const generateKey = (id : number) => {
+    return `${ id }_${ new Date().getTime()}_${Math.random() * 25}`;
+}
 
 function useChatProvider() : IChatContext
 {
+	const notify	= useNotifyContext();
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/chat", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{ 
-			token: useAuth().user?.access_token_42
+			token: useAuth().user?.accessCode,
 		}
 	}));
-    const [currentRoom, setCurrentRoom] = useState<IRoom | undefined>();
-    const [rooms, setRooms] = useState<IRoom[]>([]);
-	const [currentTab, setCurrentTab] = useState<ECurrentTab>(ECurrentTab.channels);
+	const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
+	const [rooms, setRooms]					= useState<IRoom[]>([]);
+	const [currentTab, setCurrentTab]		= useState<ECurrentTab>(ECurrentTab.channels);
+	const [notification, setNotification] 	= useState<INotif[]>([]);
+	const [friendsList, setFriendsList]		= useState<Array<UserDataDto>>([]);
+	const [requestList, setRequestList]		= useState<Array<UserDataDto>>([]);
+	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
+	const [jumpDm, awaitDm]					= useState<number | undefined>(undefined);
 
-	
-    function addRoom(room_name: string, is_protected: boolean)
-    {
-		const newRoom : IRoom = {
-			user_level: ELevelInRoom.owner,
-			room_name: room_name,
-            room_message: [],
-			private: false,
-			protected: is_protected,
-        };
+	/**
+	 * ***** Room *****
+	 */
+
+
+	const goToDmWith = useCallback((id: number) => {
+		const res = rooms.find((r) => (r.isDm === true && r.owner === id));
 		
-        setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
-		if (currentRoom !== undefined)
-			setCurrentRoomByName(currentRoom.room_name);
-    };
+		if (res === undefined)
+			return false;
+		setCurrentRoom(res);
+		setCurrentTab(ECurrentTab.chat);
+		return true;
+	}, [rooms])
 
-
-	function rmRoom(room_name: string)
-	{
+	const setCurrentRoomById = useCallback((id: number) => {
+		setCurrentRoom(rooms.find(o => {
+			return (o.id === id);
+		}));
+	}, [rooms]);
+	
+	const rmRoom = useCallback((id: number) => {
 		setRooms(prev => {
 			return prev.filter((o) => {
-				return (o.room_name !== room_name);
+				return (o.id !== id);
 			})
 		});
-	};
-	
-	function setCurrentRoomByName (name: string)
-	{
-		setCurrentRoom(rooms.find(o => {
-			return (o.room_name === name);
-		}));
-	};
+	}, []);
 
-	function findRoomByName (name: string)
+	const findRoomById = useCallback((id: number) => 
 	{
 		return (rooms.find(o => {
-			return (o.room_name === name);
+			return (o.id === id);
 		}));
-	}
+	}, [rooms]);
+
+	const addRoom = useCallback((room: RoomJoinedDTO) => {
+		if (findRoomById(room.id) !== undefined)
+			return;
+
+		const newRoom : IRoom = {
+			id: room.id,
+			user_level: room.level,
+			room_name: room.room_name,
+			room_message: [],
+			private: false, //fix me ?!
+			protected: room.protected,
+			isDm: room.isDm,
+			owner: room.owner,
+			nb_notifs: 0,
+		};
+		
+
+		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
+		if (currentRoom !== undefined)
+			setCurrentRoomById(currentRoom.id);
+
+    }, [currentRoom, setCurrentRoomById, findRoomById]);
+
+	useEffect(() => {
+		if (jumpDm !== undefined)
+		{
+			const room = rooms.find(r => (r.isDm === true && r.owner === jumpDm))
+			if (room !== undefined)
+			{
+				setCurrentRoomById(room.id);
+				setCurrentTab(ECurrentTab.chat);
+				awaitDm(undefined);
+			}
+		}
+	}, [jumpDm, rooms, setCurrentRoomById])
 
 	useEffect(() => {
 		
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-			let targetRoom = findRoomByName(data.room_name);
+			let targetRoom = findRoomById(data.room_id);
 			if (targetRoom !== undefined)
 			{
-				console.log("[CHAT] rcv: ", data);
 				targetRoom.room_message.push(data);
+				targetRoom.nb_notifs++;
 			}
 		});
 
@@ -112,19 +201,14 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_MSG');
 			}
 		};
-	}, [rooms]);
+	}, [rooms, findRoomById, socket]);
 
 	useEffect(() => {
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
-			if (currentRoom !== undefined && currentRoom.room_name === data.room_name)
+			if (currentRoom !== undefined && currentRoom.id === data.id)
 				setCurrentRoom(undefined);
-			/*setRooms(prevRooms => {
-				return prevRooms.splice(prevRooms.findIndex((o) => {
-					return (o.room_name === data.room_name);
-				}), 1)
-			});*/
-			if (data.room_name !== undefined)
-				rmRoom(data.room_name);
+			if (data.id !== undefined)
+				rmRoom(data.id);
 		})
 
 		return function cleanup() {		
@@ -133,22 +217,18 @@ function useChatProvider() : IChatContext
 				socket.off('LEFT_ROOM');
 			}
 		};
-	}, [currentRoom, rooms]);
+	}, [currentRoom, rooms, socket, rmRoom]);
+
 
 	useEffect(() => {
+
 		socket.connect();
 		
-		socket.on("JOINED_ROOM", (data: RoomJoined) => {
-			if (data.status === 0 && data.room_name !== undefined)
-			{
-				//alert("Channel " + data.room_name + " rejoint");
-				addRoom(data.room_name, false);
-			}
-			else if (data.status_message !== undefined)
-			{
-				alert(data.status_message);
-			}
-		})
+		socket.on("disconnect", () => {
+			setRooms([]); //clean rooms
+			setCurrentRoom(undefined);
+			awaitDm(undefined);
+		  });
 
 		return function cleanup() {
 			if (socket !== undefined)
@@ -156,17 +236,193 @@ function useChatProvider() : IChatContext
 				socket.disconnect();
 			}
 		};
+	}, [socket])
+
+	useEffect(() => {
+
+		socket.on("JOINED_ROOM", (data: RoomJoinedDTO) => {
+			addRoom(data);
+		});
+
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('JOINED_ROOM');
+			}
+		};
+	}, [socket, addRoom]);
+
+	useEffect(() => {
+		socket.on("UPDATE_ROOM", (data: RoomUpdatedDTO) => {
+			//todo for each modification
+			let refR = findRoomById(data.id);
+			if (refR !== undefined)
+			{
+				if (data.isPrivate !== undefined) refR.private = data.isPrivate;
+				if (data.name !== undefined) refR.room_name = data.name;
+				if (data.level !== undefined) refR.user_level = data.level;
+				if (data.owner !== undefined) refR.owner = data.owner;
+			}
+
+		});
+
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('ROOM_UPDATE');
+			}
+		};
+	}, [rooms, socket])
+
+	/**
+	 * **** Notice *****
+	 */
+
+	 
+	useEffect(() => {
+		socket.on('NOTIFICATION', (data : NoticeDTO) => {
+			notify.addNotice(data.level, data.content, 3000);
+		});
+		
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('NOTIFICATION');
+			}
+		};
+	}, [socket, notify]);
+
+	/**
+	 * ***** Notification *****
+	 */
+
+	const addNotif = useCallback((notif: INotif[]) =>{
+		setNotification(prev => {
+			//notif.filter((n) => {return (!(prev.find((p) => (n.req_id && p.req_id && n.req_id === p.req_id))))});
+			return [...prev, ...notif];
+		});
 	}, []);
+
+	const rmNotif = useCallback((id: string) => {
+		setNotification(prev => {
+			return prev.filter((o) => {
+				return (o.id !== id);
+			})
+		});
+	}, []);
+
+	function rmFriendNotif(id: number)
+	{
+		setNotification(prev => {
+			return prev.filter((o) => {
+				return (!(o.type === ENotification.FRIEND_REQUEST && o.req_id === id));
+			})
+		});
+	};
+
+	useEffect(() => {
+		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
+			data.forEach(d => {d.id = generateKey(d.req_id || d.type)})
+			addNotif(data);
+		});
+		
+		return function cleanup() {
+			if (socket !== undefined)
+			{
+				socket.off('RECEIVE_NOTIF');
+			}
+		};
+	}, [socket, addNotif]);
+
+	/**
+	 * ***** Relation Ship *****
+	 */
 	
+	useEffect(() => {
+
+		socket.on('FRIEND_LIST', (data: UserDataDto[]) => {
+			setFriendsList(data);
+		});
+
+		socket.emit("FRIEND_LIST");
+
+		socket.on('BLOCK_LIST', (data: UserDataDto[]) => {
+			setBlockList(data);
+		});
+
+		socket.emit("BLOCK_LIST");
+
+		return function cleanup() {		
+			if (socket !== undefined)
+			{
+				socket.off('FRIEND_LIST');
+				socket.off('BLOCK_LIST');
+			}
+		};
+
+	}, [socket]);
+
+	const isNotified = useCallback((req : number) => {
+		return ((notification.find((n) => ( req === n.req_id))));
+	}, [notification]);
+
+	function rmDeadNotif(data : UserDataDto[])
+	{
+		setNotification((prev) => (prev.filter((n) => (!(n.type === ENotification.FRIEND_REQUEST && data.find((d) => ( d.reference_id === n.req_id)) === undefined)))))
+	}
+
+	useEffect(() => {
+		socket.on('FRIEND_REQUEST_LIST', (data : UserDataDto[]) => {
+			let not : INotif[];
+
+			not = [];
+			data.forEach((req) => {
+				if (!isNotified(req.reference_id))
+				{
+					not.push({
+						id: generateKey(req.reference_id),
+						type: ENotification.FRIEND_REQUEST,
+						req_id: req.reference_id,
+						username: req.username,
+						refId: req.reference_id,
+						date: req.date || new Date(),
+					});
+				}	
+			})
+			addNotif(not);
+			setRequestList(data);
+		});
+
+		return function cleanup() {		
+			if (socket !== undefined)
+			{
+				socket.off('FRIEND_REQUEST_LIST');
+			}
+		};
+
+	}, [notification, isNotified, socket, addNotif])
+
+	useEffect(() => {
+		rmDeadNotif(requestList);
+	}, [requestList]);
+
     return({
 		socket,
-        currentRoom,
-        setCurrentRoom,
-		setCurrentRoomByName,
+		currentRoom,
+		setCurrentRoom,
+		setCurrentRoomById,
+		findRoomById,
 		currentTab,
 		setCurrentTab,
-        rooms,
-        addRoom,
+	    rooms,
+	   // addRoom,
+		notification,
+		rmNotif,
+		rmFriendNotif,
+		awaitDm,
+		goToDmWith,
+		friendsList,
+		blockList,
     });
 }
 
@@ -191,7 +447,7 @@ export function ProvideChat( {children}: {children: JSX.Element} ): JSX.Element
 {
 	const chatCtx = useChatProvider();
 
-	return(
+	return (
 		<chatContext.Provider value={chatCtx}>
 			{children}
 		</chatContext.Provider>

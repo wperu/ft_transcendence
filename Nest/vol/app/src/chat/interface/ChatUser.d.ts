@@ -1,11 +1,9 @@
 
 import { Socket } from 'socket.io'
+import { UserDataDto } from 'src/Common/Dto/chat/room';
 
-export interface UserData
-{
-	username: string,
-    reference_id: string,
-}
+export interface UserData extends UserDataDto {};
+
 
 export interface ChatUser 
 {
@@ -14,6 +12,5 @@ export interface ChatUser
 
     username: string,
     reference_id: number,
-    room_list: string[],
     /* ... */
 }

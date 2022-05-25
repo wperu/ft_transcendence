@@ -7,7 +7,6 @@ function ProfileButton ()
 
 	function ProfileClick ()
 	{
-		notify.addNotice(ELevel.info, "Have a nice day :D", 3000);
 	}
 	return <button className="main_menu_button" onClick={ProfileClick}>Mon Profil</button>;
 }

@@ -14,10 +14,12 @@
 	box-shadow: 5px 10px #242424;
 	transition: 0.2s cubic-bezier(.23,1,.32,1);
 	margin-bottom: 5vmin;
+	z-index: 1;
 }
 
 .main_menu_button:hover
 {
+	z-index: 1;
 	transform: scale(1.05,1.05);
 	-webkit-transform: scale(1.05,1.05);
 	-moz-transform: scale(1.05,1.05);

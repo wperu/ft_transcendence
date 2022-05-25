@@ -1,11 +1,10 @@
-import React, {KeyboardEvent, useState, useEffect, useRef} from "react";
+import React, {KeyboardEvent, useState, useEffect} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import { RcvMessageDto, SendMessageDto } from "../../interface/chat/chatDto";
-import "./ChatTab.css"
 import useInterval from '../../hooks/useInterval';
-
-
+import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
+import "./ChatTab.css";
+import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 function ChatTab ()
 {
@@ -20,10 +19,10 @@ function ChatTab ()
 		if (chatCtx.socket !== undefined && chatCtx.currentRoom !== undefined 
 			&& event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
-			let data : SendMessageDto =
+			let data : SendMessageDTO =
 			{
 				message: event.currentTarget.value,
-				room_name: chatCtx.currentRoom.room_name
+				room_id: chatCtx.currentRoom.id,
 			};
 			chatCtx.socket.emit('SEND_MESSAGE', data);
 			console.log("[CHAT] sending: " + event.currentTarget.value);
@@ -35,9 +34,26 @@ function ChatTab ()
 	{
 		if (chatCtx.currentRoom !== undefined)
 		{
-			chatCtx.socket.emit("LEAVE_ROOM", chatCtx.currentRoom.room_name);
+			let dto = {
+				id:		chatCtx.currentRoom.id,
+				name:	chatCtx.currentRoom.room_name,
+			}
+			chatCtx.socket.emit("LEAVE_ROOM", dto);
 			setMessages([]);
 			chatCtx.setCurrentTab(ECurrentTab.channels);
+		}
+	}
+
+	function sendInvite()
+	{
+		if (chatCtx.currentRoom !== undefined)
+		{
+			let dto : GameInviteDTO = {
+				gameRoomId: 0, //todo create room and send
+				refId: undefined,
+				chatRoomId: chatCtx.currentRoom.id,
+			}
+			chatCtx.socket.emit('GAME_INVITE', dto);
 		}
 	}
 
@@ -49,7 +65,7 @@ function ChatTab ()
 			setMessages([...chatCtx.currentRoom.room_message]);
 			setUpdated(true);
 		}
-	}, []);
+	}, [chatCtx.currentRoom, messages.length]);
 
 	useInterval(() =>
 	{
@@ -64,12 +80,14 @@ function ChatTab ()
 
 	useEffect( () =>
 	{
+		if (chatCtx.currentRoom)
+			chatCtx.currentRoom.nb_notifs = 0;
 		if (msg_list_ref.current && updated === true)
 		{
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
 			setUpdated(false);
 		}
-	}, [updated]);
+	}, [updated, msg_list_ref, chatCtx.currentRoom]);
 
 	return (
 		<div id="ChatTab">
@@ -79,17 +97,16 @@ function ChatTab ()
 					value="Quitter" onClick={pressedQuit} />
 				<input type="button"
 					name="chat_quick_invite" id="chat_quick_invite"
-					value="Inviter à jouer" />
+					value="Inviter à jouer" onClick={sendInvite} />
 			</header>
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
 				{	
-					messages.map(({message, sender, send_date} , index) => (
-						<li key={index}>
-							<ChatMessage src_name={sender} content={message} time={send_date} />
-						</li>))
-					
-				}
+					messages.map(({message, sender, send_date, refId} , index) => {
+						if (chatCtx.blockList.find(b => (b.reference_id === refId)) === undefined)
+							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
+						return (null);
+						})}
 				</ul>
 			</div>
 			<footer id="msg_footer">

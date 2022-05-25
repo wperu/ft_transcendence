@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
 import UnjoinedChan from "../UnjoinedChan/UnjoinedChan";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
-import { JoinRoomDto } from "../../interface/chat/chatDto";
 import "./UnjoinedChansTab.css";
 import useInterval from "../../hooks/useInterval";
+import { JoinRoomDto, RoomListDTO } from "../../Common/Dto/chat/room";
 
 function UnjoinedChansTab()
 {
 	const chatCtx = useChatContext();
 
-	const [roomList, setRoomList] = useState<Array<{name: string, has_password: boolean}>>([]);
-	
+	const [roomList, setRoomList] = useState<Array<RoomListDTO>>([]);
 
 	useEffect(() => {
-		chatCtx.socket.on("ROOM_LIST", (data: Array<{name: string, has_password: boolean}>) => {
+		chatCtx.socket.on("ROOM_LIST", (data: Array<RoomListDTO>) => {
 			setRoomList(data);
 		});
 
@@ -25,14 +24,13 @@ function UnjoinedChansTab()
 				chatCtx.socket.off("ROOM_LIST");
 			}
 		};
-	}, [])
+	}, [chatCtx.socket])
 
 	function refreshList()
 	{
 		chatCtx.socket.emit("ROOM_LIST");
 	}
 	
-	//request List
 	useInterval(refreshList, 2000);
 
 	function joinChan(event: React.SyntheticEvent)
@@ -52,13 +50,13 @@ function UnjoinedChansTab()
 				console.log("protected by pass: " + target.password.value);
 				data =
 				{
-					room_name: target.name.value,
+					roomName: target.name.value,
 					password: target.password.value
 				};
 			}
 			else
 			{
-				data = { room_name: target.name.value };
+				data = { roomName: target.name.value, password: null! };
 			}
 			chatCtx.socket.emit("JOIN_ROOM", data);
 			target.name.value = '';
@@ -85,7 +83,7 @@ function UnjoinedChansTab()
 				<div className="title">
 					Liste globale des channels
 				</div>
-				{roomList.map(( element ) => (<UnjoinedChan name={element.name} is_protected={element.has_password} />))}
+				{roomList.map(( element, index ) => (<li key={index}><UnjoinedChan name={element.name} id={element.id} is_protected={element.has_password} /></li>))}
 			</div>
 		</div>
 	);

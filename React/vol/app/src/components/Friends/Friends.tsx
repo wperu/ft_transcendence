@@ -2,9 +2,47 @@ import React from "react";
 import { Friend, BlockedUser } from "./Users/Users"
 import { InfoNotification, InviteNotification, NewFriendNotification } from "./Notification/Notification"
 import "./Friends.css";
+import { INotif, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import useInterval from "../../hooks/useInterval";
+import { Link } from "react-router-dom";
 
-function Friends() {
 
+enum ENotification
+{
+	INFO,
+	GAME_REQUEST,
+	FRIEND_REQUEST
+}
+interface IProp
+{
+	notif: INotif;
+}
+
+function Notification(prop : IProp) : JSX.Element
+{
+	if (prop.notif.type === ENotification.FRIEND_REQUEST
+		&& prop.notif.username !== undefined
+		&& prop.notif.req_id !== undefined)
+		return <NewFriendNotification name={prop.notif.username} date={prop.notif.date} refId={prop.notif.refId!} id={prop.notif.id} />;
+	else if (prop.notif.type === ENotification.GAME_REQUEST
+			&& prop.notif.username !== undefined
+			&& prop.notif.req_id !== undefined)
+		return <InviteNotification name={prop.notif.username} date={prop.notif.date} refId={prop.notif.refId!} id={prop.notif.id} />;
+	else if (prop.notif.type === ENotification.INFO
+			&& prop.notif.content !== undefined)
+		return <InfoNotification content={prop.notif.content} date={prop.notif.date}  id={prop.notif.id} />;	
+	return <></>;
+}
+
+//fix me status online, offline... not work
+function Friends()
+{
+	const chtCtx = useChatContext();
+
+	useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
+	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
+	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
+	
 	function addFriend(event: React.SyntheticEvent)
 	{
 		event.preventDefault();
@@ -16,60 +54,56 @@ function Friends() {
 		if (target.name.value.length !== 0)
 		{
 			console.log("add friend with name: " + target.name.value);
+			chtCtx.socket.emit('ADD_FRIEND_USERNAME', target.name.value);
+			
 			target.name.value = '';
 		}
 	}
+
 	return (
 		<div id="Friends">
 			<form id="add_friend_by_name_form" onSubmit={addFriend}>
 				<div id="add_friend_title">Ajouter un ami</div>
 				<input id="add_friend_input" type="text"
-					name="name" placeholder="Nom du fdp"/>
+					name="name" placeholder="Nom de l'utilisateur"/>
 				<input id="add_friend_button" type="submit" value="Ajouter"/>
 			</form>
+
 			<span className="friends_list_title">Notifications</span>
 			<div className="friends_tab_list notifs_list">
-				<InviteNotification name="michel" date="today" />
-				<NewFriendNotification name="michel" date="today" />
-				<InviteNotification name="jean abdul de la street" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
-				<InfoNotification content="ceci est une info dkslgabbj wjk 
-					bfewhj hj fhjds Vfhj vfhjes bfh vF Hsv hjfdsv hfd jsvdh
-					vfd hjs fhvhj vdfhsjv df mdr bite" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
-				<InfoNotification content="ceci est une info" date="today" />
+				{chtCtx.notification.map((n, index) => {
+					return <Notification key={index} notif={n} />
+					})}
 			</div>
+
 			<span className="friends_list_title">Amis</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-				<Friend name="ailly" online={true}/>
-				<Friend name="billy" online={true}/>
-				<Friend name="abcdefghijklmnopqrstuvwxyz" online={true}/>
-				<Friend name="dilly" online={true}/>
-				<Friend name="eilly" online={true}/>
-				<Friend name="filly" online={true}/>
+				{chtCtx.friendsList.map((u, index) => (
+					(u.is_connected !== undefined && u.is_connected !== false)
+					?	<Friend
+							key={u.reference_id}
+							ref_id={u.reference_id}
+							name={u.username}
+							online={u.is_connected}/>
+					: null ))}
 				<div className="user_status_tab">Offline</div>
-				<Friend name="gilly" online={false}/>
-				<Friend name="hilly" online={false}/>
-				<Friend name="iilly" online={false}/>
-				<Friend name="jilly" online={false}/>
-				<Friend name="killy" online={false}/>
+				{chtCtx.friendsList.map((u, index) => (
+					(u.is_connected !== undefined && u.is_connected === false)
+					?	<Friend key={u.reference_id}
+						ref_id={u.reference_id}
+						name={u.username}
+						online={u.is_connected}/>
+					: null ))}
 			</div>
+
 			<span className="friends_list_title">Utilisateurs bloqués</span>
 			<div className="friends_tab_list blocked_list">
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="fgerabgadjrf abFVHMWEgrfvsgnadbgrmfesvfbejfve666" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="a" />
-				<BlockedUser name="z" />
+				{chtCtx.blockList.map((u) => (
+					<BlockedUser key={u.reference_id}
+						ref_id={u.reference_id}
+						name={u.username} />
+				))}
 			</div>
 		</div>
 	);
