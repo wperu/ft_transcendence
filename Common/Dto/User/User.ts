@@ -14,9 +14,7 @@ interface IUser
 	access_token_google?: string;
 	creation_date: Date;
 	useTwoFa: boolean;
-	avatar_id: number;
-	secret: string;
-	
+	avatar_id: number;	
 }
 
 export default IUser;
