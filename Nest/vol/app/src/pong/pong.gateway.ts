@@ -52,13 +52,14 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			}
 		}
 		
-		if (user.in_game)
+		if (user.in_game && user.socket.connected === false)
 		{
 			console.log("reconnected user");
 			this.pongService.reconnectUser(user, client);
 		}
 		else
 		{
+			user.socket = client;
 			// let the client know that we have authentificated him as a PongUser
 			client.emit("AUTHENTIFICATED");
 			this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
