@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../../../auth/useAuth";
@@ -7,6 +7,8 @@ import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
 import { GameConfig } from "../../../Common/Game/GameConfig";
 import { ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
+
+ //todo stopSearchRoom
 
 export interface IPongUser
 {
@@ -54,15 +56,17 @@ export interface IPongContext
 {
     room: IPongRoom | null,
     fx: FX,
+	searchRoom: () => void,
+	stopSearchRoom: () => void,
 }
 
 
 
 function usePongProvider() : IPongContext
 {
-    const user = useAuth().user;
-    const [inGame, setInGame] = useState<boolean>(false);
-    const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
+    const { user }				= useAuth();
+    const [inGame, setInGame]	= useState<boolean>(false);
+    const [socket]				= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
         auth: {
 			token: user?.accessCode,
         }
@@ -70,6 +74,19 @@ function usePongProvider() : IPongContext
     const [room, setRoom] = useState<IPongRoom | null>(null);
     const navigate = useNavigate();
 
+	/**
+	 * Start Matchmaking
+	 */
+	const searchRoom = useCallback(() => {
+		socket.emit("SEARCH_ROOM");
+	}, [socket])
+
+	/**
+	 * stop Matchmaking
+	 */
+	const stopSearchRoom = useCallback(() => {
+		//socket.emit(""); //todo
+	}, [socket])
 
     useEffect(() => {
         socket.on('STARTING_ROOM', (data: StartPongRoomDTO) => {
@@ -122,9 +139,9 @@ function usePongProvider() : IPongContext
             /**
              *  maybe use a /game/:id syntax with some id passed in a StartRoomDTO
              */
-            navigate("/game", { replace: true });
+            navigate(`/game/${room?.room_id}`, { replace: true });
         }
-    }, [inGame])
+    }, [inGame, room])
 
     
     useEffect(() => {
@@ -139,7 +156,7 @@ function usePongProvider() : IPongContext
 
     useEffect(() => {
         socket.on("AUTHENTIFICATED", () => {
-            socket.emit("SEARCH_ROOM");
+            //socket.emit("SEARCH_ROOM");
         })
     }, [])
 
@@ -185,6 +202,8 @@ function usePongProvider() : IPongContext
     return ({
         room: room,
         fx: initFx(),
+		searchRoom,
+		stopSearchRoom,
     });
 }
 

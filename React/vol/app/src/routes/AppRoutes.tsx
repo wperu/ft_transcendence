@@ -23,14 +23,7 @@ function AppRoute() : JSX.Element
 					<Route path="/login" element={<HomeLoggedOut />}/>
 					<Route path="/login/callback" element={<Callback />}/>
 
-					<Route element= {
-						<ProvidePong>
-							<Outlet/>
-						</ProvidePong>
-					}>
-						<Route path="/matchmaking" element={<PongMatchmaking />}/>
-						<Route path="/game" element={<Pong />}/>
-					</Route>
+
 
 					<Route path="/dev_user" element={<FakeUser/>}/>
 					<Route path="*" element={<NoMatch />}/>
@@ -40,6 +33,14 @@ function AppRoute() : JSX.Element
 											<SidebarWithContext />
 											<Outlet />
 										</>}>
+							<Route element= {
+											<ProvidePong>
+												<Outlet/>
+											</ProvidePong>
+											}>
+								<Route path="/matchmaking" element={<PongMatchmaking />}/>
+								<Route path="/game/:id" element={<Pong />}/>
+							</Route>
 							<Route path="/" element={<HomeLoggedIn />}/>
 							<Route path="/profile" element={<Profile/>}/>
 							<Route path="/profile/:id" element={<Profile/>}/>
