@@ -26,7 +26,10 @@ export class PongService {
 
     private logger: Logger = new Logger('AppService');
 
-    private GAME_RATE: number = 1000 / 40; // refresh time on server side (about 60fps)
+    private GAME_RATE: number = 1000 / 60; // refresh time on server side (about 60fps)
+
+	private TERRAIN_SX: number = 2;
+	private TERRAIN_SY: number = 1;
 
     /*
     private frameCount: number = 0;
@@ -220,9 +223,9 @@ export class PongService {
 
             if (this.GAME_RATE > room.deltaTime * 1000)
             {
-               // console.log("sleeping: ", this.GAME_RATE - room.deltaTime * 1000);
-                await new Promise(res => {
-                    return setTimeout(res, this.GAME_RATE - room.deltaTime * 1000)
+               // console.log("sleeping: ", this.GAME_RATE - room.deltaTime * 1000);   
+			   	await new Promise(res => {
+                    return setTimeout(res, this.GAME_RATE - ((performance.now() - room.lastTime)))
                 })
             }
         }
@@ -384,23 +387,8 @@ export class PongService {
     {
         if (room.state !== RoomState.PAUSED)
             await this.updateRoom(room);
+		
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     async updateRoom(room: PongRoom)
@@ -411,7 +399,7 @@ export class PongService {
             room.lastTime = room.currentTime;
         room.deltaTime = (room.currentTime - room.lastTime) * 0.001;
         room.lastTime = room.currentTime;
-
+		console.log(1 / room.deltaTime);
         /* Logic update */
         await this.gameUpdate(room);
 
@@ -438,14 +426,14 @@ export class PongService {
 
     sendPlayerUpdate(room: PongRoom)
     {
-        this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
+		this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
             player_id: 2,
             position: room.player_2.position,
             velocity: room.player_2.velocity,
             key: room.player_2.key,
         } as UpdatePongPlayerDTO);    
 
-        this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
+		this.server.to(room.id).emit('UPDATE_PONG_PLAYER', {
             player_id: 1,
             position: room.player_1.position,
             velocity: room.player_1.velocity,
@@ -488,8 +476,9 @@ export class PongService {
                 room.player_2.key = data.key === 1 ? -1 : 1;
         }
 
-        this.updateRoom(room);
-        this.sendPlayerUpdate(room);
+       // this.gameUpdate(room);
+	   this.playerUpdate(room);
+       this.sendPlayerUpdate(room);
     }
 
 
@@ -502,91 +491,22 @@ export class PongService {
 
 
 
+	playerUpdate(room: PongRoom)
+	{
+		if (room.player_1.key !== 0)
+			room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED
+		else 
+			room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
 
-    /* REVIEW Game logic here, maybe rewrap this into another service */
-    async gameUpdate(room: PongRoom)
-    {
-        /*
-            TERRAIN BOUNDS AND OVERALL DIMENSIONS
-            ball:
-            x: 0 - 2
-            y: 0 - 1
-            player:
-            y: 0 - 1
-            front end will stretch the values as desired to prevent using
-            too much ressources for calculating visual effects on the back-end 
-        */
-        let terrain_sx = 2, terrain_sy = 1;
-        //console.log("updating");
+		if (room.player_2.key !== 0)
+			room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED;
+		else 
+			room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
 
-        /* Calculating next frame velocities */
-        // ball
-        if ((room.ball.pos_y > terrain_sy - GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y > 0)
-          || (room.ball.pos_y < GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y < 0))
-        {
-            room.ball.vel_y *= -1;
-            this.sendBallUpdate(room);
-        }
+		room.player_1.position += room.player_1.velocity * room.deltaTime;
+		room.player_2.position += room.player_2.velocity * room.deltaTime;
 
-        if (room.ball.pos_x > terrain_sx || room.ball.pos_x < 0)
-        {
-            // TODO points
-            await this.reloadRoom(room);
-            return ;
-        }
-
-
-        // player
-        if (room.player_1.key !== 0)
-            room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED
-        else 
-            room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
-
-        if (room.player_2.key !== 0)
-            room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED;
-        else 
-            room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
-
-
-        // ball collision with player
-        if (room.ball.vel_x < 0
-            && room.ball.pos_x > GameConfig.TERRAIN_PADDING_X
-            && room.ball.pos_x < GameConfig.TERRAIN_PADDING_X + GameConfig.BALL_SIZE
-            && room.ball.pos_y > room.player_1.position - GameConfig.PLAYER_SIZE * 0.5
-            && room.ball.pos_y < room.player_1.position + GameConfig.PLAYER_SIZE * 0.5)
-        {
-            let sweep_dir = ((room.ball.pos_y - room.player_1.position) / GameConfig.PLAYER_SIZE)
-            let sweep_force = room.player_1.velocity * 0.5;
-            room.ball.vel_y += (sweep_dir + sweep_force) * GameConfig.PLAYER_SWEEP_FORCE;
-            room.ball.vel_x *= -1;
-            this.sendBallUpdate(room);
-        }
-        
-
-        if (room.ball.vel_x > 0
-            && room.ball.pos_x < 2.0
-            && room.ball.pos_x > 2.0 - GameConfig.TERRAIN_PADDING_X - GameConfig.BALL_SIZE
-            && room.ball.pos_y > room.player_2.position - GameConfig.PLAYER_SIZE * 0.5
-            && room.ball.pos_y < room.player_2.position + GameConfig.PLAYER_SIZE * 0.5)
-        {
-            let sweep_dir = ((room.ball.pos_y - room.player_2.position) / GameConfig.PLAYER_SIZE)
-            let sweep_force = room.player_2.velocity * 0.5;
-            room.ball.vel_y += (sweep_dir + sweep_force) * GameConfig.PLAYER_SWEEP_FORCE;
-            room.ball.vel_x *= -1;
-            this.sendBallUpdate(room);
-        }
-        
-
-        /* Updating positions */
-       room.ball.pos_x += room.ball.vel_x * room.deltaTime;
-       room.ball.pos_y += room.ball.vel_y * room.deltaTime;
-       room.player_1.position += room.player_1.velocity * room.deltaTime;
-       room.player_2.position += room.player_2.velocity * room.deltaTime;
-
-
-        /* Player wall collisions */
-        // 1
-        if (room.player_1.position < GameConfig.TERRAIN_PADDING_Y)
+		if (room.player_1.position < GameConfig.TERRAIN_PADDING_Y)
         {
             room.player_1.velocity = 0;
             room.player_1.position = GameConfig.TERRAIN_PADDING_Y;
@@ -610,9 +530,96 @@ export class PongService {
             room.player_2.velocity = 0;
             room.player_2.position = 1 - GameConfig.TERRAIN_PADDING_Y;
         }
+	}
 
-        if (room.frameCount % 60)
-            this.sendBallUpdate(room);
+
+
+
+	async ballUpdate(room: PongRoom)
+	{
+		if ((room.ball.pos_y > this.TERRAIN_SY - GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y > 0)
+		|| (room.ball.pos_y < GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y < 0))
+		{
+			room.ball.vel_y *= -1;
+			this.sendBallUpdate(room);
+		}
+
+		if (room.ball.pos_x > this.TERRAIN_SX || room.ball.pos_x < 0)
+		{
+			// TODO points
+			await this.reloadRoom(room);
+			return ;
+		}
+
+		// ball collision with player
+		if (room.ball.vel_x < 0
+		  && room.ball.pos_x > GameConfig.TERRAIN_PADDING_X
+		  && room.ball.pos_x < GameConfig.TERRAIN_PADDING_X + GameConfig.BALL_SIZE
+		  && room.ball.pos_y > room.player_1.position - GameConfig.PLAYER_SIZE * 0.5
+		  && room.ball.pos_y < room.player_1.position + GameConfig.PLAYER_SIZE * 0.5)
+		{
+			let sweep_dir = ((room.ball.pos_y - room.player_1.position) / GameConfig.PLAYER_SIZE)
+			let sweep_force = room.player_1.velocity * 0.5;
+			room.ball.vel_y += (sweep_dir + sweep_force) * GameConfig.PLAYER_SWEEP_FORCE;
+			room.ball.vel_x *= -1;
+			this.sendBallUpdate(room);
+		}
+		else if (room.ball.vel_x > 0
+		  && room.ball.pos_x < 2.0
+		  && room.ball.pos_x > 2.0 - GameConfig.TERRAIN_PADDING_X - GameConfig.BALL_SIZE
+		  && room.ball.pos_y > room.player_2.position - GameConfig.PLAYER_SIZE * 0.5
+		  && room.ball.pos_y < room.player_2.position + GameConfig.PLAYER_SIZE * 0.5)
+		{
+			let sweep_dir = ((room.ball.pos_y - room.player_2.position) / GameConfig.PLAYER_SIZE)
+			let sweep_force = room.player_2.velocity * 0.5;
+			room.ball.vel_y += (sweep_dir + sweep_force) * GameConfig.PLAYER_SWEEP_FORCE;
+			room.ball.vel_x *= -1;
+			this.sendBallUpdate(room);
+		}
+
+
+		/* Updating positions */
+		room.ball.pos_x += room.ball.vel_x * room.deltaTime;
+		room.ball.pos_y += room.ball.vel_y * room.deltaTime;
+	}
+
+
+
+
+
+
+
+    /* REVIEW Game logic here, maybe rewrap this into another service */
+    async gameUpdate(room: PongRoom)
+    {
+        /*
+            TERRAIN BOUNDS AND OVERALL DIMENSIONS
+            ball:
+            x: 0 - 2
+            y: 0 - 1
+            player:
+            y: 0 - 1
+            front end will stretch the values as desired to prevent using
+            too much ressources for calculating visual effects on the back-end 
+        */
+        //console.log("updating");
+
+        /* Calculating next frame velocities */
+        // ball
+
+		await this.ballUpdate(room)
+		this.playerUpdate(room);
+       
+
+
+        /* Player wall collisions */
+        // 1
+       
+       /* if (room.frameCount % 3)
+		{
+           	this.sendBallUpdate(room);
+			this.sendPlayerUpdate(room);
+		}*/
     }
 
 

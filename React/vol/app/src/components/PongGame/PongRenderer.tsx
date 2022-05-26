@@ -113,7 +113,7 @@ function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTML
         frameCount: ++last_frame,
     };
     /* timed update  */
-    render_ctx.deltaTime = (render_ctx.frameTime - last_time) / 1000.0;
+    render_ctx.deltaTime = (render_ctx.frameTime - last_time) * 0.001;
 
     render_ctx.terrain_w = canvas.width;
     render_ctx.terrain_h = canvas.height;
@@ -176,7 +176,8 @@ async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | n
     /* **** */
     
     render_ctx.frameCount++;
-    requestAnimationFrame(() => render(pong_ctx, ctx, canvas, user, render_ctx.frameCount, render_ctx.frameTime));
+	if (pong_ctx.isRender)
+    	requestAnimationFrame(() => render(pong_ctx, ctx, canvas, user, render_ctx.frameCount, render_ctx.frameTime));
 }
 
 

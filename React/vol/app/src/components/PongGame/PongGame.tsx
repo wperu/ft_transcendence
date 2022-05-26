@@ -53,54 +53,59 @@ export function getPongOpponent(pong_ctx: IPongContext, user: IUser) : IPongUser
 
 const PongGame = (props: CanvasProps) => {
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const user = useAuth().user;
-    let pongCtx: IPongContext = usePongContext();
+    const canvasRef	= useRef<HTMLCanvasElement>(null);
+    const { user }	= useAuth();
+    const pongCtx: IPongContext = usePongContext();
 
+	console.log("/game rerender !");
 
     /* --- Event Listeners --- */
 
     /* Keypress */
-    window.addEventListener('keypress', async (event: KeyboardEvent) => {
-        if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
-        {
-            if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
-            {
-                pongCtx.room.player_1.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
-                pongCtx.room.player_2.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
-                pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
-                    room_id: pongCtx.room.room_id,
-                    key: (event.key === "z" || event.key === "Z") ? 1 : 0,
-                    state: 1,
-                } as SendPlayerKeystrokeDTO)
-            }
-        }   
-    });
 
-    /* Keyrelease */
-    window.addEventListener('keyup', async (event: KeyboardEvent) => {
-        if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
-        {
-            if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
-            {
-                let player = getPongPlayer(pongCtx, user);
-                if (player !== undefined)
-                {
-                    if ((event.key === "z" || event.key === "Z") && player.key == -1
-                    || (event.key === "s" || event.key === "S") && player.key == 1)
-                    {
-                        player.key = 0;
-                    
-                        pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
-                            room_id: pongCtx.room.room_id,
-                            key: 0,
-                            state: 0,
-                        } as SendPlayerKeystrokeDTO)
-                    }
-                }
-            }
-        }
-    });
+	useEffect(() => {
+		window.addEventListener('keypress', (event: KeyboardEvent) => {
+			if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
+			{
+				if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
+				{
+					pongCtx.room.player_1.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
+					pongCtx.room.player_2.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
+					pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
+						room_id: pongCtx.room.room_id,
+						key: (event.key === "z" || event.key === "Z") ? 1 : 0,
+						state: 1,
+					} as SendPlayerKeystrokeDTO)
+				}
+			}   
+		});
+	
+		/* Keyrelease */
+		window.addEventListener('keyup', (event: KeyboardEvent) => {
+			if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
+			{
+				if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
+				{
+					let player = getPongPlayer(pongCtx, user);
+					if (player !== undefined)
+					{
+						if ((event.key === "z" || event.key === "Z") && player.key == -1
+						|| (event.key === "s" || event.key === "S") && player.key == 1)
+						{
+							player.key = 0;
+						
+							pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
+								room_id: pongCtx.room.room_id,
+								key: 0,
+								state: 0,
+							} as SendPlayerKeystrokeDTO)
+						}
+					}
+				}
+			}
+		});
+	}, [])
+    
 
 
     /* Updates */
@@ -139,7 +144,7 @@ const PongGame = (props: CanvasProps) => {
                 }
             });
         }
-    })
+    }, [])
 
     useEffect(() => {
         if (pongCtx.room)
@@ -180,22 +185,12 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.state = RoomState.LOADING;
             });
         }
-    })
+    }, [])
 
     /* render */
     useEffect(() => {
-        if (canvasRef.current && user)
-        {
-            const canvas = canvasRef.current;
-            const context = canvas.getContext('2d');
-
-            if (context !== null)
-            {
-                context.restore();
-                render(pongCtx, context, canvas, user);
-            }
-        }       
-    });
+		pongCtx.startRender(canvasRef, pongCtx)
+    }, [pongCtx, canvasRef]);
 
     return (
         <canvas ref={canvasRef} height={props.height} width={props.width} />

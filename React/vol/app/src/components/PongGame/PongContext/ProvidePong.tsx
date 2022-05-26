@@ -1,3 +1,4 @@
+import { render } from "../PongRenderer";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
@@ -9,6 +10,7 @@ import { ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
 
  //todo stopSearchRoom
+ //todo await auth for match
 
 export interface IPongUser
 {
@@ -58,6 +60,9 @@ export interface IPongContext
     fx: FX,
 	searchRoom: () => void,
 	stopSearchRoom: () => void,
+	isRender: boolean,
+	setIsRendering: (value: boolean) => void
+	startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
 }
 
 
@@ -71,8 +76,12 @@ function usePongProvider() : IPongContext
 			token: user?.accessCode,
         }
     }));
+	const [isRender, setIsRendering] = useState<boolean>(false);
     const [room, setRoom] = useState<IPongRoom | null>(null);
     const navigate = useNavigate();
+
+
+	console.log("Create Pong ctx");
 
 	/**
 	 * Start Matchmaking
@@ -128,7 +137,7 @@ function usePongProvider() : IPongContext
         return () => {
             socket.off('STARTING_ROOM');
         };
-     }, [inGame, room]);
+     }, [inGame]);
 
 
 
@@ -136,12 +145,9 @@ function usePongProvider() : IPongContext
         if (inGame === true)
         {
             console.log("switching")
-            /**
-             *  maybe use a /game/:id syntax with some id passed in a StartRoomDTO
-             */
             navigate(`/game/${room?.room_id}`, { replace: true });
         }
-    }, [inGame, room])
+    }, [inGame])
 
     
     useEffect(() => {
@@ -203,11 +209,33 @@ function usePongProvider() : IPongContext
     }, [room])
 
 
+	const startRender = useCallback((canvasRef: React.RefObject<HTMLCanvasElement>, ctx : IPongContext) => {
+		if (canvasRef.current && user)
+        {
+            const canvas = canvasRef.current;
+            const context = canvas.getContext('2d');
+
+            if (context !== null && isRender === false)
+            {
+                context.restore();
+				console.log("start game");
+				setIsRendering(true);
+                render(ctx, context, canvas, user);
+            }
+        }
+		return () => {
+			setIsRendering(false);
+		}  
+	}, [])
+
     return ({
         room: room,
         fx: initFx(),
 		searchRoom,
 		stopSearchRoom,
+		isRender,
+		setIsRendering,
+		startRender,
     });
 }
 
