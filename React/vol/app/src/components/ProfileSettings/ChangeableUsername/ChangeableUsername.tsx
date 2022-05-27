@@ -1,5 +1,5 @@
 import axios from "axios";
-import IUser from "../../../interface/User";
+import IUser from "../../../Common/Dto/User/User";
 import "./ChangeableUsername.css";
 
 interface userProps

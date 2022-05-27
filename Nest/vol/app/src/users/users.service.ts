@@ -9,9 +9,9 @@ import { Express } from 'express';
 import { diskStorage } from 'multer';
 
 @Injectable()
-export class UsersService 
+export class UsersService
 {
-	
+
 	constructor(
 		@InjectRepository(User)
 		private usersRepository: Repository<User>,
@@ -21,7 +21,7 @@ export class UsersService
 
 
 
-	async findAll(): Promise<User[]> 
+	async findAll(): Promise<User[]>
 	{
 		return await this.usersRepository.find();
 	}
@@ -30,22 +30,19 @@ export class UsersService
 
 	async findUserByID(id: number): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				id: In([id])
 			},
 		});
-
-		if (user !== undefined)
-			return user
-		return (undefined)
+		return (user);
 	}
 
 
 
 	async findUserByReferenceID(reference_id: number): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				reference_id: In([reference_id])
 			},
@@ -58,7 +55,7 @@ export class UsersService
 
 	async findUserByName(name: string): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				username: In([name])
 			},
@@ -72,7 +69,7 @@ export class UsersService
 
 	async findUserByUsername(username: string): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				username: In([username])
 			},
@@ -88,7 +85,7 @@ export class UsersService
 
 	async findUserByAccessToken(access_token: string): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				access_token_42: access_token
 			},
@@ -112,11 +109,13 @@ export class UsersService
 		}
 	) : Promise<User>
 	{
+		let avatar_choice = Math.floor(Math.random() * 5);
 		let user: User = new User();
 		user.reference_id = reference_id;
 		user.username = username;
 		user.refresh_token_42 = token.refresh_token;
 		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
+		user.avatar_file = "avatars/defaults/user-icon-" + avatar_choice + ".png";
 
 		/* sign the token with jwt */
 		const user_data = {
@@ -137,13 +136,13 @@ export class UsersService
 
 	async checkAccessTokenExpiration(user: User) : Promise<boolean>
 	{
-		const u = await this.usersRepository.findOne({ 
+		const u = await this.usersRepository.findOne({
 			where: {
 				id: user.id,
 				token_expiration_date_42: MoreThan(format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
 			},
 		});
-		
+
 		if (u === undefined)
 			return (false);
 		return (true);
@@ -187,7 +186,7 @@ export class UsersService
 						.set({avatar_file: new_avatar_file})
 						.where("id = :id", {id})
 						.execute();
-				console.log("Avatar of " + user.username + "updated");
+				console.log("Avatar of " + user.username + " updated");
 			}
 		}
 		catch(e)
@@ -196,6 +195,14 @@ export class UsersService
 			return (undefined);
 		}
 		return (old_avatar_path);
+	}
+
+	async getAvatarPathById(id: number) : Promise<string>
+	{
+		let user = await this.findUserByID(id);
+		if (user !== undefined)
+			return (user.avatar_file);
+		return (null);
 	}
 
 	async updateUserName(id: number, newUserName : string) : Promise<boolean>

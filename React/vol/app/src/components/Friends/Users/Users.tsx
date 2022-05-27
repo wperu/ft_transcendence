@@ -1,7 +1,6 @@
 import "./Users.css";
 import { BlockUserButton, InviteUserButton, AddFriendButton, DirectMessage }
 	from "../../UserBarButtons/UserBarButtons";
-import defaultLogo from "../../../ressources/images/user-icon-0.png";
 import { Link } from "react-router-dom";
 
 
@@ -10,6 +9,7 @@ interface	user_props
 	name: string;
 	ref_id: number;
 	online: boolean;
+	// id: number;
 }
 
 interface	blocked_user_props
@@ -27,10 +27,12 @@ export function Friend(props: user_props)
 			return ("friends_tab_user");
 		return ("friends_tab_user offline");
 	}
+	// src={process.env.REACT_APP_API_USER + '/' + props.id + '/avatar'} />
 	return (
 		<div className={get_opacity()}>
 			<div className="friends_user_infos">
-				<img className="friends_user_profile_pic" src={defaultLogo} alt="truc" />
+				<img className="friends_user_profile_pic" alt="truc"
+					src="" />
 				<div className="friends_user_username">
 					<Link to={"/profile/" + props.ref_id}> {props.name}</Link>
 				</div>
@@ -52,7 +54,7 @@ export function BlockedUser(props: blocked_user_props)
 	return (
 		<div className="friends_tab_user">
 			<div className="friends_user_infos">
-				<img className="friends_user_profile_pic" src={defaultLogo} alt="truc" />
+				<img className="friends_user_profile_pic" src="" alt="truc" />
 				<div className="friends_user_username blocked_username">
 					<Link to={"/profile/" + props.ref_id}> {props.name}</Link>
 				</div>

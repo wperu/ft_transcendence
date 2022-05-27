@@ -2,7 +2,7 @@ import Popup from "reactjs-popup";
 import TwoFactorAuthSetting from "../../components/ProfileSettings/TFAsetting/TFAsetting";
 import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/ChangeablePP";
 import ChangeableUsername from "../../components/ProfileSettings/ChangeableUsername/ChangeableUsername";
-import IUser from "../../interface/User";
+import IUser from "../../Common/Dto/User/User";
 import { useState } from "react";
 
 interface popuprop

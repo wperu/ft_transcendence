@@ -16,9 +16,7 @@ interface IUser
 	access_token_google?: string;
 	is_connected: boolean; // -> enum online | offline | ingame...
 	creation_date: Date;
-	// avatar?: DatabaseFile;
-	avatar_id: number;
-	
+	avatar_last_update?: number;
 }
 
 export default IUser;

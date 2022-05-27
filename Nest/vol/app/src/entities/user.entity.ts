@@ -16,7 +16,7 @@ export class User
 
   @Column({nullable: false})
   username: string;
-  
+
   // all tokens are nullable because we dont want to keep an expired token
   @Column({nullable: true})
   access_token_42?: string;
@@ -38,7 +38,7 @@ export class User
   creation_date: Date;
 
   @Column({nullable: true})
-  avatar_file?: string;
+  avatar_file: string;
 
   //TODO : create nb_won, nb_lose,block_list,friend_list
 }

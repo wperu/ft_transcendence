@@ -1,7 +1,8 @@
 # compiled output
 /dist
 /node_modules
-/avatars
+/avatars/*
+!/avatars/defaults
 
 # Logs
 logs

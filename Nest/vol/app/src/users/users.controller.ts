@@ -20,7 +20,9 @@ import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
 import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { unlink } from 'fs';
+import { unlink, createReadStream } from 'fs';
+import * as path from "path";
+import sharp from "sharp";
 
 @Controller('users')
 export class UsersController
@@ -28,7 +30,7 @@ export class UsersController
 	constructor(
 		private readonly userService: UsersService,
 	) {}
-	
+
 
 	@Get()
 	@UseGuards(AuthGuard)
@@ -62,7 +64,7 @@ export class UsersController
 		{
 			return response.status(HttpStatus.NOT_FOUND).json();
 		}
-		
+
 		if (await this.userService.checkAccesWithRefId(request.header['authorization'],id) === false)
 			return response.status(HttpStatus.FORBIDDEN).json({error: "Invalid access token"});
 
@@ -97,9 +99,9 @@ export class UsersController
 		return (undefined);
 	}
 
-	@Put("/:id/avatar")
+	@Post("/:id/avatar")
 	//@UseGuards(AuthGuard)
-	@UseInterceptors(FileInterceptor('file', {
+	@UseInterceptors(FileInterceptor('avatar', {
 		storage: diskStorage({
 			destination: './avatars'
 		})
@@ -112,23 +114,63 @@ export class UsersController
 	{
 		let	old_avatar : string | undefined;
 		let id: number = parseInt(param);
+		var sharp = require("sharp");
 
 		if(isNaN(id) || !/^\d*$/.test(param))
-			return response.status(HttpStatus.NOT_FOUND).json();
+		{
+			unlink(file.path, (err) => {
+				if (err)
+					console.error("Failed deleting received file");
+			});
+			return (response.status(HttpStatus.NOT_FOUND).json());
+		}
 		else
 		{
-			old_avatar = await this.userService.updateAvatar(param, file.path);
-			if (old_avatar !== undefined)
-			{
-				unlink(old_avatar, (err) => {
+			const extension = file.originalname.split('.');
+			var filename = "./avatars/";
+			filename += Date.now() + '-';
+			filename += Math.round(Math.random() * 1E9);
+			filename += '.' + extension[extension.length - 1];
+			sharp(file.path)
+				.resize(300, 300)
+				.toFile(filename)
+				.error(err => {
 					if (err)
-					{
-						console.error("Old avatar didn't exist");
-					}
-					console.log('Old avatar deleted');
+						console.error("Resize cassé");
 				});
+			unlink(file.path, (err) => {
+				if (err)
+					console.error("Failed deleting received file: " + err);
+			});
+
+			console.log("Changing avatar path to : [" + file.path + "]");
+			old_avatar = await this.userService.updateAvatar(param, file.path);
+			if (old_avatar !== undefined && old_avatar !== null)
+			{
+				if (path.basename(path.dirname(old_avatar)) !== "defaults")
+				{
+					unlink(old_avatar, (err) => {
+						if (err)
+							console.error("Old avatar didn't exist");
+						console.log('Old avatar deleted');
+					});
+				}
+				else
+					console.log("Old avatar was a default one");
 			}
 		}
-		return (undefined);
+		return (response.status(201).json());
+	}
+
+	@Get("/:id/avatar")
+		async getAvatar(@Res() response: Response, @Param('id') param)
+	{
+		let id: number = parseInt(param);
+		if(isNaN(id) || !/^\d*$/.test(param))
+			return (response.status(HttpStatus.NOT_FOUND).json());
+		let path : string = await this.userService.getAvatarPathById(id);
+		const file = createReadStream(path);
+		file.pipe(response);
+		return (response);
 	}
 }

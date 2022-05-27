@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import IUser from "../interface/User";
+import IUser from "../Common/Dto/User/User";
 import openLoginPopup from "./openLoginPopup";
 
 interface IContext
