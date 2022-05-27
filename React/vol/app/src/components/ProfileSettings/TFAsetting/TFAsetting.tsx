@@ -84,7 +84,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 			return "";
 		});
 
-				
+
 				return ret;
 	}
 
@@ -101,7 +101,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 			<label id="tfa_switch" htmlFor="tfa_checkbox">
 				<span id="tfa_slider"></span>
 			</label>
-			
+
 			<Popup className="my-popup" open={isOpen} onClose={() => setIsOpen(false)}>
 				<div id="qrstyle" >
 					<QRCode  value={qrUri} size={124} />

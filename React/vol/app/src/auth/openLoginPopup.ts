@@ -2,10 +2,10 @@ import IUser from "../Common/Dto/User/User";
 
 /**
  * 	Open login popup
- * 	
+ *
  *  if auth is success
  * 	set 'user' in localstorage and launch cb()
- * 	
+ *
  * @param cb : callback fct
  */
 function openLoginPopup(cb: () => void)
@@ -19,14 +19,14 @@ function openLoginPopup(cb: () => void)
 	{
 		console.log('Messeng recv from ' + event.origin);
 		console.log(event.data);
-		
-		
+
+
 		if (event.origin !== process.env.REACT_APP_ORIGIN_URL)
 		{
 			console.log("event.origin" + event.origin);
 			return ;
 		}
-		
+
 		console.log("Get IUser");
 		//if (event.data !== undefined)
 		

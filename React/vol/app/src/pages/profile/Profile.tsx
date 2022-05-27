@@ -3,7 +3,6 @@ import {  useState } from "react";
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
-import DefaultPP from "../../ressources/images/user-icon-0.png";
 import MatchHistory from "./MatchHistory";
 import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuButton";
 import TwoFactorAuthSetting from "../../components/ProfileSettings/TFAsetting/TFAsetting";
@@ -17,9 +16,9 @@ interface headerInfo
 
 function CurrentUserProfileHeader(props : headerInfo)
 {
-	
+
 	// const inputEl = useRef(null);
-	
+
 	return (
 		<header id="profile_header">
 			<ChangeablePP user={props.user} />
@@ -40,18 +39,23 @@ function CurrentUserProfileHeader(props : headerInfo)
 
 function OtherUserProfileHeader(props : headerInfo)
 {
-	const [img, setImg] = useState(DefaultPP);
-	
 	function getUserName() : string
 	{
 		if (props.user === null)
 			return ("default");
 		return (props.user.username);
 	}
+	function getID() : number
+	{
+		if (props.user === null)
+			return (0);
+		return (props.user.id);
+	}
 
 	return (
 		<header id="profile_header">
-			<img src={img} alt="PP" id="profile_pic"/>
+			<img src={process.env.REACT_APP_API_USER + '/' + getID() + '/avatar'}
+				alt="PP" id="profile_pic"/>
 			<div id="profile_username">{getUserName()}</div>
 			<div id="profile_stats">
 				<div id="profile_lvl">Niveau 4</div>
@@ -62,7 +66,7 @@ function OtherUserProfileHeader(props : headerInfo)
 }
 
 function Profile() {
-	
+
 	let { id }						= useParams<"id">();
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
@@ -109,8 +113,7 @@ function Profile() {
 		);
 	}
 
-	
+
   }
-  
+
   export default Profile;
-  
