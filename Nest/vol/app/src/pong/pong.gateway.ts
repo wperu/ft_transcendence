@@ -1,5 +1,6 @@
 import { Logger, OnModuleInit } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { randomInt } from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
 import { PongUser } from './interfaces/PongUser';
@@ -131,5 +132,20 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
 	{
 		this.pongService.updatePlayer(client, data);
-	}	
+	}
+
+
+	/**
+	 * Event to create a cutom room
+	 * @param client 
+	 * @param data 
+	 */
+	@SubscribeMessage("CREATE_CUSTOM_ROOM")
+	createCustomRoom(client: Socket, data: void)
+	{
+		//const id: string = generateId();
+		const id: string = randomInt(100000).toString();
+		console.log('roomcreated ', id);
+		client.emit("JOINED_CUSTOM_ROOM", id);
+	}
 }

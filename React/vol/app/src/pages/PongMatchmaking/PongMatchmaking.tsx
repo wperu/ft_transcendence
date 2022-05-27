@@ -35,11 +35,11 @@ function PongMatchmaking()
 		}
 	}, [isSearching])
 
-    return (
-        <div>
-            <h1><button onClick={changeSearchStatut}>{(!isSearching) ? "matchmaking" : "stop" }</button></h1>
-        </div>
-    );
+	return (
+		<div>
+			<h1><button onClick={changeSearchStatut}>{(!isSearching) ? "matchmaking" : "stop" }</button></h1>
+		</div>
+	);
 }
 
 export { PongMatchmaking };

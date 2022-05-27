@@ -11,6 +11,7 @@ import { Pong } from '../pages/Pong/Pong';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
 import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
+import PongRequestRoom from '../components/PongGame/PongRequestRoom/PongRequestRoom';
 
 function AppRoute() : JSX.Element
 {
@@ -39,6 +40,8 @@ function AppRoute() : JSX.Element
 											</ProvidePong>
 											}>
 								<Route path="/matchmaking" element={<PongMatchmaking />}/>
+								<Route path="/matchmaking/custom" element={<PongRequestRoom />}/>
+								<Route path="/matchmaking/custom/:id" element={<PongMatchmaking />}/>
 								<Route path="/game/:id" element={<Pong />}/>
 							</Route>
 							<Route path="/" element={<HomeLoggedIn />}/>

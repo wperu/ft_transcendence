@@ -14,6 +14,7 @@ import Popup from "reactjs-popup";
 import { isPropertySignature } from "typescript";
 import React, { useCallback, useState } from "react";
 import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
+import { useNavigate } from "react-router-dom";
 
 interface Prop
 {
@@ -78,16 +79,14 @@ interface refuseProp
 
 export function InviteUserButton(prop: gameInvitationProp)
 {
-	const {socket} = useChatContext();
+	const {socket}		= useChatContext();
+	const navigate		= useNavigate();
+
 	function onClick()
 	{
+		navigate("/matchmaking/custom", {replace : false});
 		console.log("user invited");
-		let dto : GameInviteDTO = {
-			gameRoomId: 0, //todo create room and send
-			refId: prop.refId,
-			chatRoomId: undefined,
-		}
-		socket.emit('GAME_INVITE', dto);
+		
 		
 	}
 	return (

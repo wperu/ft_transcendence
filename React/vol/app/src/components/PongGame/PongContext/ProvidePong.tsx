@@ -61,24 +61,25 @@ export interface IPongContext
 	searchRoom: () => void,
 	stopSearchRoom: () => void,
 	isRender: boolean,
-	setIsRendering: (value: boolean) => void
 	startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
+	requestRoom: () => void
 }
 
 
 
 function usePongProvider() : IPongContext
 {
-    const { user }				= useAuth();
-    const [inGame, setInGame]	= useState<boolean>(false);
-    const [socket]				= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
-        auth: {
+	const { user }				= useAuth();
+	const [inGame, setInGame]	= useState<boolean>(false);
+	const [socket]				= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
+		auth: {
 			token: user?.accessCode,
-        }
-    }));
-	const [isRender, setIsRendering] = useState<boolean>(false);
-    const [room, setRoom] = useState<IPongRoom | null>(null);
-    const navigate = useNavigate();
+		}
+	}));
+	const [isRender, setIsRendering]	= useState<boolean>(false);
+	const [room, setRoom]				= useState<IPongRoom | null>(null);
+	const navigate						= useNavigate();
+	const [fx]							= useState<FX>(initFx());
 
 
 	console.log("Create Pong ctx");
@@ -97,6 +98,23 @@ function usePongProvider() : IPongContext
 		//socket.emit(""); //todo
 	}, [socket])
 
+
+	/**
+	 * Request to create custom room
+	 */
+	const requestRoom = useCallback(() => {
+		console.log("run !");
+			socket.emit("CREATE_CUSTOM_ROOM");
+	}, [])
+
+	useEffect(() => {
+		socket.on("JOINED_CUSTOM_ROOM", (id: string) => {
+			console.log(id);
+			navigate(`/matchmaking/custom/${id}`, {replace: true});
+		})
+	}, [socket, navigate])
+
+	
     useEffect(() => {
         socket.on('STARTING_ROOM', (data: StartPongRoomDTO) => {
             console.log("Room is starting");
@@ -137,25 +155,28 @@ function usePongProvider() : IPongContext
         return () => {
             socket.off('STARTING_ROOM');
         };
-     }, [inGame]);
+     }, [inGame, socket]);
 
 
 
     useEffect(() => {
         if (inGame === true)
         {
-            console.log("switching")
-            navigate(`/game/${room?.room_id}`, { replace: true });
+			console.log("switching")
+			navigate(`/game/${room?.room_id}`, { replace: true });
         }
-    }, [inGame])
+    }, [inGame, navigate])
 
     
     useEffect(() => {
-        socket.connect();
-        console.log(socket);
-
+		if (socket.connected === false)
+		{
+        	socket.connect();
+		}
+        //console.log(socket);
         return (() => {
-            socket.disconnect();
+			if (socket !== undefined && socket.connected)
+            	socket.disconnect();
         })
     }, [socket]);
 
@@ -164,7 +185,7 @@ function usePongProvider() : IPongContext
         socket.on("AUTHENTIFICATED", () => {
             //socket.emit("SEARCH_ROOM");
         })
-    }, [])
+    }, [socket])
 
 
     useEffect(() => {
@@ -206,7 +227,7 @@ function usePongProvider() : IPongContext
         return (() => {
             socket.off("RECONNECT_YOU")
         })
-    }, [room])
+    }, [room, socket])
 
 
 	const startRender = useCallback((canvasRef: React.RefObject<HTMLCanvasElement>, ctx : IPongContext) => {
@@ -229,13 +250,13 @@ function usePongProvider() : IPongContext
 	}, [])
 
     return ({
-        room: room,
-        fx: initFx(),
+        room,
+        fx,
 		searchRoom,
 		stopSearchRoom,
 		isRender,
-		setIsRendering,
 		startRender,
+		requestRoom,
     });
 }
 

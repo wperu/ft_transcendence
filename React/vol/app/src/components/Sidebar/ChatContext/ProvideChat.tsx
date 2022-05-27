@@ -5,6 +5,8 @@ import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
 import { useNotifyContext } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
+import { useNavigate } from "react-router-dom";
+import { GameInviteDTO } from "../../../Common/Dto/chat/gameInvite";
 
 /** //fix
  *  NOTIF rework notif system
@@ -111,7 +113,25 @@ function useChatProvider() : IChatContext
 	const [requestList, setRequestList]		= useState<Array<UserDataDto>>([]);
 	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
 	const [jumpDm, awaitDm]					= useState<number | undefined>(undefined);
+	const navigate							= useNavigate();
+	
 
+
+
+	/**
+	 * Pong interact
+	 */
+	const invitePlayer = useCallback((refId: number) => {
+		navigate("/matchmaking/customRoom", { replace: false })
+
+		const dto : GameInviteDTO = {
+			gameRoomId: 0, //todo create room and send
+			refId: refId,
+			chatRoomId: undefined,
+		}
+
+		socket.emit('GAME_INVITE', dto);
+	}, [navigate])
 	/**
 	 * ***** Room *****
 	 */
@@ -415,7 +435,6 @@ function useChatProvider() : IChatContext
 		currentTab,
 		setCurrentTab,
 	    rooms,
-	   // addRoom,
 		notification,
 		rmNotif,
 		rmFriendNotif,
