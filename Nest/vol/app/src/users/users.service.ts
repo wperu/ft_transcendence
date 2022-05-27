@@ -109,7 +109,7 @@ export class UsersService
 		}
 	) : Promise<User>
 	{
-		let avatar_choice = Math.floor(Math.random() * 5);
+		let avatar_choice = Math.floor(Math.random() * 4);
 		let user: User = new User();
 		user.reference_id = reference_id;
 		user.username = username;

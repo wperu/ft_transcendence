@@ -22,13 +22,14 @@ import { Request, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { unlink, createReadStream } from 'fs';
 import * as path from "path";
-import sharp from "sharp";
+import * as sharp from "sharp";
 
 @Controller('users')
 export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
+		// private readonly sharpService: SharpService
 	) {}
 
 
@@ -114,7 +115,6 @@ export class UsersController
 	{
 		let	old_avatar : string | undefined;
 		let id: number = parseInt(param);
-		var sharp = require("sharp");
 
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
@@ -131,33 +131,34 @@ export class UsersController
 			filename += Date.now() + '-';
 			filename += Math.round(Math.random() * 1E9);
 			filename += '.' + extension[extension.length - 1];
-			sharp(file.path)
-				.resize(300, 300)
-				.toFile(filename)
-				.error(err => {
+			await sharp(file.path)
+			.resize(300, 300)
+			.toFile(filename)
+			.then(async () => {
+				unlink(file.path, (err) => {
 					if (err)
-						console.error("Resize cassé");
+					{
+						console.error("Failed deleting received file: " + err);
+						return (response.status(500));
+					}
 				});
-			unlink(file.path, (err) => {
-				if (err)
-					console.error("Failed deleting received file: " + err);
-			});
-
-			console.log("Changing avatar path to : [" + file.path + "]");
-			old_avatar = await this.userService.updateAvatar(param, file.path);
-			if (old_avatar !== undefined && old_avatar !== null)
-			{
-				if (path.basename(path.dirname(old_avatar)) !== "defaults")
+				console.log("Changing avatar path to : [" + filename + "]");
+				old_avatar = await this.userService.updateAvatar(param, filename);
+				if (old_avatar !== undefined && old_avatar !== null)
 				{
-					unlink(old_avatar, (err) => {
-						if (err)
-							console.error("Old avatar didn't exist");
-						console.log('Old avatar deleted');
-					});
+					if (path.basename(path.dirname(old_avatar)) !== "defaults")
+					{
+						unlink(old_avatar, (err) => {
+							if (err)
+								console.error("Old avatar didn't exist");
+							else
+								console.log('Old avatar deleted');
+						});
+					}
+					else
+						console.log("Old avatar was a default one");
 				}
-				else
-					console.log("Old avatar was a default one");
-			}
+			});
 		}
 		return (response.status(201).json());
 	}

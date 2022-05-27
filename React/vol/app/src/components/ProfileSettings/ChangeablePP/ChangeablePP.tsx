@@ -3,6 +3,7 @@ import IUser from "../../../Common/Dto/User/User";
 import FormData from "form-data";
 import EditLogo from "../../../ressources/images/draw.png";
 import "./ChangeablePP.css"
+import { useState } from "react";
 
 interface infoProp
 {
@@ -11,6 +12,8 @@ interface infoProp
 
 function ChangeablePP (props :infoProp)
 {
+	const	[update, setUpdate] = useState<boolean>(false);
+
 	function submitPP(e: React.ChangeEvent<HTMLInputElement>)
 	{
 		if (e.target.files === null || props.user === null)
@@ -24,8 +27,8 @@ function ChangeablePP (props :infoProp)
 			console.log(res);
 		})
 		.then(res => {
-			console.log('Avatar Post succes');
 			props.user.avatar_last_update = Date.now() % 10000;
+			setUpdate(!update);
 		});
 	}
 

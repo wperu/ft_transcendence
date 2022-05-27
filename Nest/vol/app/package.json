@@ -34,10 +34,12 @@
     "dotenv": "^16.0.0",
     "dotenv-expand": "^8.0.3",
     "form-data": "^4.0.0",
+    "nestjs-sharp": "^1.1.0",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.5",
+    "sharp": "^0.30.5",
     "socket.io": "^4.4.1",
     "typeorm": "^0.2.45"
   },
