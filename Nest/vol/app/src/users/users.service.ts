@@ -9,6 +9,7 @@ import IUser from 'src/Common/Dto/User/User';
 import { TwoFactorService } from 'src/auth/auth.twoFactor.service';
 import { Express } from 'express';
 import { diskStorage } from 'multer';
+import { IProfileDTO } from 'src/Common/Dto/User/ProfileDTO';
 
 @Injectable()
 export class UsersService
@@ -42,7 +43,7 @@ export class UsersService
 	}
 
 
-	getIUserFromUser(user : User)
+	getIUserFromUser(user : User) : IUser
 	{
 		let ret : IUser;
 
@@ -52,8 +53,20 @@ export class UsersService
 			username: user.username,
 			accessCode: user.access_token_42,
 			creation_date: user.creation_date,
-			avatar_id : 0,
 			useTwoFa: user.setTwoFA,
+		}
+
+		return ret;
+	}
+
+	getProfileFromUser(user : User) : IProfileDTO
+	{
+		let ret : IProfileDTO;
+
+		ret = {
+			reference_id: user.reference_id,
+			username: user.username,
+			creation_date: user.creation_date,
 		}
 
 		return ret;
@@ -293,5 +306,15 @@ export class UsersService
 		const optAuth = this.twoFactorService.getOtpAuth('ft', secret);
 		return optAuth;
 		//return this.twoFactorService.getQrUrl(optAuth);
+	}
+
+	/**
+	 * check if username is valide
+	 * @param username 
+	 * @returns 
+	 */
+	isValideUsername(username : string) : boolean
+	{
+		return true;
 	}
 }

@@ -20,11 +20,12 @@ import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { unlink, createReadStream } from 'fs';
 import * as path from "path";
 import * as sharp from "sharp";
+import { IProfileDTO } from "../Common/Dto/User/ProfileDTO";
 
 @Controller('users')
 export class UsersController
@@ -34,31 +35,22 @@ export class UsersController
 		// private readonly sharpService: SharpService
 	) {}
 
-
-	@Get()
-	@UseGuards(AuthGuard)
-	async findAll(): Promise<User[]>
-	{
-		return await this.userService.findAll();
-	}
-
 	@Get("/profile/:id")
-	//@UseGuards(AuthGuard)
-	async findOne(@Param('id') param): Promise<User>
+	@UseGuards(AuthGuard)
+	async findOne(@Param('id') param): Promise<IProfileDTO>
 	{
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
 
-		let user = await this.userService.findUserByID(id);
+		let user = await this.userService.findUserByReferenceID(id);
 		if (user === undefined)
 			throw new NotFoundException();
 		return (user);
 	}
 
-
 	@Put("/:id/username")
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	async updateUserName(@Res() response : Response, @Req() request: Request, @Body() body, @Param('id') param)
 	{
 		// TODO update user in service
@@ -97,7 +89,7 @@ export class UsersController
 	 * @returns
 	 */
 	@Put("/:id/useTwoFactor")
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	async updateTwoFactor(@Param('id') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
 		// TODO update user in service
@@ -105,27 +97,21 @@ export class UsersController
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
+			throw new NotFoundException();
 		//	return response.status(HttpStatus.NOT_FOUND).json();
 		}
 		console.log(body['token']);
-
-
 		let user = await this.userService.findUserByReferenceID(id);
-
-
 		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
-		{
-			user.setTwoFA = !user.setTwoFA;
+			throw new BadRequestException("wrong access code"); // KO bad token
 
-			await this.userService.saveUser(user);
-			return ; // OK
-		}
-
-		throw new BadRequestException("wrong access code"); // KO bad token
+		user.setTwoFA = !user.setTwoFA;
+		await this.userService.saveUser(user);
+		return ; // OK
 	}
 
 	@Get("/:id/twFactorQR")
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	async getTwoFaQr(@Res() response : Response, @Param('id') param, @Body() body,)
 	{
 		// TODO update user in service
@@ -137,13 +123,14 @@ export class UsersController
 		}
 
 		const user = await this.userService.findUserByReferenceID(id);
-
+		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
+			throw new BadRequestException("wrong access code"); // KO bad token	
 
 		return response.status(HttpStatus.OK).json({url: this.userService.getQR(user.SecretCode)});
 	}
 
 	@Post("/:id/avatar")
-	//@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard)
 	@UseInterceptors(FileInterceptor('avatar', {
 		storage: diskStorage({
 			destination: './avatars'
