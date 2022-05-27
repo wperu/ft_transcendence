@@ -14,7 +14,6 @@ import { TokenService } from './auth/token.service';
 import { FriendShip } from './entities/friend_ship.entity';
 import { FriendsModule } from './friends/friends.module';
 import { RoomModule } from './room/room.module';
-import DatabaseFile from './entities/databaseFile.entity';
 import { ChatRoomEntity } from './entities/room.entity';
 import { ChatRoomRelationEntity } from './entities/roomRelation.entity';
 import { ChatMessageEntity } from './entities/message.entity';
@@ -36,7 +35,6 @@ import { FinishedGame } from './entities/finishedGame.entity';
 				User,
 				TokenValidatorEntity,
 				FriendShip,
-				DatabaseFile,
 				FinishedGame,
 				ChatRoomRelationEntity,
 				ChatRoomEntity,

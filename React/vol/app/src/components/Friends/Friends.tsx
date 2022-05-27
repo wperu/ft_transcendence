@@ -30,7 +30,7 @@ function Notification(prop : IProp) : JSX.Element
 		return <InviteNotification name={prop.notif.username} date={prop.notif.date} refId={prop.notif.refId!} id={prop.notif.id} />;
 	else if (prop.notif.type === ENotification.INFO
 			&& prop.notif.content !== undefined)
-		return <InfoNotification content={prop.notif.content} date={prop.notif.date}  id={prop.notif.id} />;	
+		return <InfoNotification content={prop.notif.content} date={prop.notif.date}  id={prop.notif.id} />;
 	return <></>;
 }
 
@@ -42,7 +42,7 @@ function Friends()
 	useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
 	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
 	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
-	
+
 	function addFriend(event: React.SyntheticEvent)
 	{
 		event.preventDefault();
@@ -55,7 +55,7 @@ function Friends()
 		{
 			console.log("add friend with name: " + target.name.value);
 			chtCtx.socket.emit('ADD_FRIEND_USERNAME', target.name.value);
-			
+
 			target.name.value = '';
 		}
 	}
@@ -83,6 +83,7 @@ function Friends()
 					(u.is_connected !== undefined && u.is_connected !== false)
 					?	<Friend
 							key={u.reference_id}
+							// id={u.id}
 							ref_id={u.reference_id}
 							name={u.username}
 							online={u.is_connected}/>

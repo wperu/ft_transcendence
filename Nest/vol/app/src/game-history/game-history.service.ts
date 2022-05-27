@@ -38,6 +38,7 @@ export class GameHistoryService {
 			ret = await this.finishedGames.save(new_game);
 		} catch (error)
 		{
+			console.error(error);
 			return (undefined);
 		}
 		console.log("game added");

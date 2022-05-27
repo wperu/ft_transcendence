@@ -1,16 +1,39 @@
-import { Request, Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, Put, Req, Res, UseGuards, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+	Request,
+	BadRequestException,
+	Body,
+	Controller,
+	Get,
+	HttpStatus,
+	NotFoundException,
+	ForbiddenException,
+	Param,
+	Post,
+	Put,
+	Req,
+	Res,
+	UploadedFile,
+	UseGuards,
+	UseInterceptors,
+} from '@nestjs/common';
+import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { unlink, createReadStream } from 'fs';
+import * as path from "path";
+import * as sharp from "sharp";
 
 @Controller('users')
 export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
+		// private readonly sharpService: SharpService
 	) {}
-	
+
 
 	@Get()
 	@UseGuards(AuthGuard)
@@ -44,7 +67,7 @@ export class UsersController
 		{
 			throw new NotFoundException();
 		}
-		
+
 		if (await this.userService.checkAccesWithRefId(request.headers['authorization'],id) === false)
 			throw new ForbiddenException("wrong access code");
 
@@ -65,13 +88,13 @@ export class UsersController
 
 	/**
 	 * Turn ON/OFF
-	 * 
+	 *
 	 * you need valide google authentificator to change settings
-	 * @param response 
-	 * @param param 
-	 * @param request 
-	 * @param body 
-	 * @returns 
+	 * @param response
+	 * @param param
+	 * @param request
+	 * @param body
+	 * @returns
 	 */
 	@Put("/:id/useTwoFactor")
 	//@UseGuards(AuthGuard)
@@ -88,8 +111,8 @@ export class UsersController
 
 
 		let user = await this.userService.findUserByReferenceID(id);
-		
-		
+
+
 		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
 		{
 			user.setTwoFA = !user.setTwoFA;
@@ -115,21 +138,82 @@ export class UsersController
 
 		const user = await this.userService.findUserByReferenceID(id);
 
-		
+
 		return response.status(HttpStatus.OK).json({url: this.userService.getQR(user.SecretCode)});
 	}
 
-	@Put("/:id/avatar")
+	@Post("/:id/avatar")
 	//@UseGuards(AuthGuard)
-	async updateOne(@Res() response : Response, @Param('id') param)
+	@UseInterceptors(FileInterceptor('avatar', {
+		storage: diskStorage({
+			destination: './avatars'
+		})
+	}))
+	async updateAvatar(
+		@UploadedFile() file: Express.Multer.File,
+		@Res() response : Response,
+		@Param('id') param
+	)
+	{
+		let	old_avatar : string | undefined;
+		let id: number = parseInt(param);
+
+		if(isNaN(id) || !/^\d*$/.test(param))
+		{
+			unlink(file.path, (err) => {
+				if (err)
+					console.error("Failed deleting received file");
+			});
+			return (response.status(HttpStatus.NOT_FOUND).json());
+		}
+		else
+		{
+			const extension = file.originalname.split('.');
+			var filename = "./avatars/";
+			filename += Date.now() + '-';
+			filename += Math.round(Math.random() * 1E9);
+			filename += '.' + extension[extension.length - 1];
+			await sharp(file.path)
+			.resize(300, 300)
+			.toFile(filename)
+			.then(async () => {
+				unlink(file.path, (err) => {
+					if (err)
+					{
+						console.error("Failed deleting received file: " + err);
+						return (response.status(500));
+					}
+				});
+				console.log("Changing avatar path to : [" + filename + "]");
+				old_avatar = await this.userService.updateAvatar(param, filename);
+				if (old_avatar !== undefined && old_avatar !== null)
+				{
+					if (path.basename(path.dirname(old_avatar)) !== "defaults")
+					{
+						unlink(old_avatar, (err) => {
+							if (err)
+								console.error("Old avatar didn't exist");
+							else
+								console.log('Old avatar deleted');
+						});
+					}
+					else
+						console.log("Old avatar was a default one");
+				}
+			});
+		}
+		return (response.status(201).json());
+	}
+
+	@Get("/:id/avatar")
+		async getAvatar(@Res() response: Response, @Param('id') param)
 	{
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
-		{
-			throw new NotFoundException();
-		}
-
-		// TODO update user in service
-		return (undefined);
+			return (response.status(HttpStatus.NOT_FOUND).json());
+		let path : string = await this.userService.getAvatarPathById(id);
+		const file = createReadStream(path);
+		file.pipe(response);
+		return (response);
 	}
 }

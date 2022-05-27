@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable, UploadedFile } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { format } from 'date-fns';
 import { In, MoreThan, Repository } from 'typeorm';
@@ -7,11 +7,13 @@ import { TokenService } from 'src/auth/token.service';
 import { UserToken } from '../Common/Dto/User/UserToken'
 import IUser from 'src/Common/Dto/User/User';
 import { TwoFactorService } from 'src/auth/auth.twoFactor.service';
+import { Express } from 'express';
+import { diskStorage } from 'multer';
 
 @Injectable()
-export class UsersService 
+export class UsersService
 {
-	
+
 	constructor(
 		@InjectRepository(User)
 		private usersRepository: Repository<User>,
@@ -22,7 +24,7 @@ export class UsersService
 
 
 
-	async findAll(): Promise<User[]> 
+	async findAll(): Promise<User[]>
 	{
 		return await this.usersRepository.find();
 	}
@@ -31,15 +33,12 @@ export class UsersService
 
 	async findUserByID(id: number): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				id: In([id])
 			},
 		});
-
-		if (user !== undefined)
-			return user
-		return (undefined)
+		return (user);
 	}
 
 
@@ -62,7 +61,7 @@ export class UsersService
 
 	async findUserByReferenceID(reference_id: number): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				reference_id: In([reference_id])
 			},
@@ -75,7 +74,7 @@ export class UsersService
 
 	async findUserByUsername(username: string): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				username: In([username])
 			},
@@ -88,7 +87,7 @@ export class UsersService
 
 	async findUserByName(name: string): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				username: In([name])
 			},
@@ -104,7 +103,7 @@ export class UsersService
 
 	async findUserByAccessToken(access_token: string): Promise<User | undefined>
 	{
-		const user = await this.usersRepository.findOne({ 
+		const user = await this.usersRepository.findOne({
 			where: {
 				access_token_42: access_token
 			},
@@ -128,11 +127,13 @@ export class UsersService
 		}
 	) : Promise<User>
 	{
+		let avatar_choice = Math.floor(Math.random() * 4);
 		let user: User = new User();
 		user.reference_id = reference_id;
 		user.username = username;
 		user.refresh_token_42 = token.refresh_token;
 		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
+		user.avatar_file = "avatars/defaults/user-icon-" + avatar_choice + ".png";
 		user.SecretCode = this.twoFactorService.generateSecret();
 
 		/* sign the token with jwt */
@@ -153,13 +154,13 @@ export class UsersService
 
 	async checkAccessTokenExpiration(user: User) : Promise<boolean>
 	{
-		const u = await this.usersRepository.findOne({ 
+		const u = await this.usersRepository.findOne({
 			where: {
 				id: user.id,
 				token_expiration_date_42: MoreThan(format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
 			},
 		});
-		
+
 		if (u === undefined)
 			return (false);
 		return (true);
@@ -181,9 +182,48 @@ export class UsersService
 		return (await this.usersRepository.save(user));
 	}
 
+	async updateAvatar(id : number, new_avatar_file: string) : Promise<string | undefined>
+	{
+		let	user : User;
+		let	old_avatar_path: string | undefined;
+		try {
 
+			user = await this.usersRepository.findOne({
+				where: [
+					{id: id}
+				],
+			});
+			if (user === null)
+				console.warn("User with ID: " + id + " doesn't exist");
+			else
+			{
+				old_avatar_path = user.avatar_file;
+				await this.usersRepository
+						.createQueryBuilder()
+						.update(User)
+						.set({avatar_file: new_avatar_file})
+						.where("id = :id", {id})
+						.execute();
+				console.log("Avatar of " + user.username + " updated");
+			}
+		}
+		catch(e)
+		{
+			console.error(e);
+			return (undefined);
+		}
+		return (old_avatar_path);
+	}
 
-	async updateUserName(id: Number, newUserName : string) : Promise<boolean>
+	async getAvatarPathById(id: number) : Promise<string>
+	{
+		let user = await this.findUserByID(id);
+		if (user !== undefined)
+			return (user.avatar_file);
+		return (null);
+	}
+
+	async updateUserName(id: number, newUserName : string) : Promise<boolean>
 	{
 		try {
 			await this.usersRepository
@@ -216,7 +256,7 @@ export class UsersService
 		console.log(user + ' ' + set);
 		if (user === undefined)
 			return ;
-	
+
 		if (user.setTwoFA === set)
 			return ; // nothing to do ...
 		if (set === true)
