@@ -221,9 +221,9 @@ function useChatProvider() : IChatContext
 
 
 	useEffect(() => {
+		if (socket.connected === false)
+			socket.connect();
 
-		socket.connect();
-		
 		socket.on("disconnect", () => {
 			setRooms([]); //clean rooms
 			setCurrentRoom(undefined);
@@ -231,7 +231,7 @@ function useChatProvider() : IChatContext
 		  });
 
 		return function cleanup() {
-			if (socket !== undefined)
+			if (socket !== undefined && socket.connected)
 			{
 				socket.disconnect();
 			}
