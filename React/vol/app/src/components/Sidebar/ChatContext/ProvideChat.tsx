@@ -70,6 +70,7 @@ export interface IRoom
 interface IChatContext
 {
 	socket:			Socket;
+	isConnected:	boolean;
 	currentRoom?:	IRoom;
 
 	setCurrentRoom:			(room: IRoom | undefined) => void;
@@ -105,6 +106,7 @@ function useChatProvider() : IChatContext
 			token: useAuth().user?.accessCode,
 		}
 	}));
+	const [isConnected, setIsConnected]		= useState<boolean>(false);
 	const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
 	const [rooms, setRooms]					= useState<IRoom[]>([]);
 	const [currentTab, setCurrentTab]		= useState<ECurrentTab>(ECurrentTab.channels);
@@ -239,6 +241,7 @@ function useChatProvider() : IChatContext
 		};
 	}, [currentRoom, rooms, socket, rmRoom]);
 
+	useEffect(() => { setIsConnected(socket.connected) })
 
 	useEffect(() => {
 		if (socket.connected === false)
@@ -428,6 +431,7 @@ function useChatProvider() : IChatContext
 
     return({
 		socket,
+		isConnected,
 		currentRoom,
 		setCurrentRoom,
 		setCurrentRoomById,

@@ -32,7 +32,6 @@ export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
-		// private readonly sharpService: SharpService
 	) {}
 
 	@Get("/profile/:id")
@@ -42,13 +41,22 @@ export class UsersController
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
+		
 
 		let user = await this.userService.findUserByReferenceID(id);
 		if (user === undefined)
 			throw new NotFoundException();
-		return (user);
+		return (this.userService.getProfileFromUser(user));
 	}
 
+	/**
+	 * PUT request to Update username
+	 * @param response 
+	 * @param request 
+	 * @param body 
+	 * @param param 
+	 * @returns 
+	 */
 	@Put("/:id/username")
 	@UseGuards(AuthGuard)
 	async updateUserName(@Res() response : Response, @Req() request: Request, @Body() body, @Param('id') param)
@@ -92,30 +100,23 @@ export class UsersController
 	@UseGuards(AuthGuard)
 	async updateTwoFactor(@Param('id') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
-		// TODO update user in service
-		console.log('Set two factor');
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
-		{
 			throw new NotFoundException();
-		//	return response.status(HttpStatus.NOT_FOUND).json();
-		}
-		console.log(body['token']);
+
 		let user = await this.userService.findUserByReferenceID(id);
 		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
 			throw new BadRequestException("wrong access code"); // KO bad token
 
 		user.setTwoFA = !user.setTwoFA;
 		await this.userService.saveUser(user);
-		return ; // OK
+		return undefined; // OK
 	}
 
 	@Get("/:id/twFactorQR")
 	@UseGuards(AuthGuard)
-	async getTwoFaQr(@Res() response : Response, @Param('id') param, @Body() body,)
+	async getTwoFaQr(@Param('id') param, @Body() body,)
 	{
-		// TODO update user in service
-
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
@@ -124,9 +125,9 @@ export class UsersController
 
 		const user = await this.userService.findUserByReferenceID(id);
 		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-			throw new BadRequestException("wrong access code"); // KO bad token	
+			throw new ForbiddenException("wrong access code"); // KO bad token	
 
-		return response.status(HttpStatus.OK).json({url: this.userService.getQR(user.SecretCode)});
+		return undefined;
 	}
 
 	@Post("/:id/avatar")
@@ -139,7 +140,8 @@ export class UsersController
 	async updateAvatar(
 		@UploadedFile() file: Express.Multer.File,
 		@Res() response : Response,
-		@Param('id') param
+		@Param('id') param,
+		@Body() body,
 	)
 	{
 		let	old_avatar : string | undefined;
@@ -151,10 +153,14 @@ export class UsersController
 				if (err)
 					console.error("Failed deleting received file");
 			});
-			return (response.status(HttpStatus.NOT_FOUND).json());
+			throw new NotFoundException();
 		}
 		else
 		{
+			const user = await this.userService.findUserByReferenceID(id);
+			if (this.userService.checkToken(body['token'], user.SecretCode) === false)
+				throw new ForbiddenException("wrong access code"); // KO bad token
+
 			const extension = file.originalname.split('.');
 			var filename = "./avatars/";
 			filename += Date.now() + '-';
@@ -193,12 +199,14 @@ export class UsersController
 	}
 
 	@Get("/:id/avatar")
-		async getAvatar(@Res() response: Response, @Param('id') param)
+	async getAvatar(@Res() response: Response, @Param('id') param)
 	{
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
-			return (response.status(HttpStatus.NOT_FOUND).json());
-		let path : string = await this.userService.getAvatarPathById(id);
+			throw new NotFoundException();
+		let path : string = await this.userService.getAvatarPathByRefId(id);
+		if (path === null)
+			throw new NotFoundException();
 		const file = createReadStream(path);
 		file.pipe(response);
 		return (response);

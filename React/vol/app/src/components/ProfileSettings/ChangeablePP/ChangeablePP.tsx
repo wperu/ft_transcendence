@@ -21,7 +21,7 @@ function ChangeablePP (props :infoProp)
 		// setFile(e.target.files[0]);
 		const formData = new FormData();
 		formData.append("avatar", e.target.files[0]);
-		const url = process.env.REACT_APP_API_USER + '/' + props.user.id + '/avatar';
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar';
 		axios.post(url, formData, {})
 		.catch(res => {
 			console.log(res);
@@ -43,7 +43,7 @@ function ChangeablePP (props :infoProp)
 
 	return (
 		<label id="pp_label">
-			<img src={process.env.REACT_APP_API_USER + '/' + props.user.id + '/avatar?'+ getAntiCache()}
+			<img src={process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar?'+ getAntiCache()}
 				alt="PP" id="profile_pic"/>
 			<img src={EditLogo} alt="edit" className="edit_logo"
 				id="profile_pic_edit_logo" />

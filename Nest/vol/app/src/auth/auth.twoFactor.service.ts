@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { authenticator } from 'otplib'; // v11.x
-import qrcode from 'qrcode';
 
 @Injectable()
 export class TwoFactorService {

@@ -228,9 +228,9 @@ export class UsersService
 		return (old_avatar_path);
 	}
 
-	async getAvatarPathById(id: number) : Promise<string>
+	async getAvatarPathByRefId(id: number) : Promise<string>
 	{
-		let user = await this.findUserByID(id);
+		let user = await this.findUserByReferenceID(id);
 		if (user !== undefined)
 			return (user.avatar_file);
 		return (null);

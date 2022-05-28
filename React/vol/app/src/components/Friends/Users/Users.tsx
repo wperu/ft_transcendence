@@ -9,7 +9,6 @@ interface	user_props
 	name: string;
 	ref_id: number;
 	online: boolean;
-	// id: number;
 }
 
 interface	blocked_user_props
@@ -18,7 +17,6 @@ interface	blocked_user_props
 	ref_id: number;
 }
 
-//fix add refID
 export function Friend(props: user_props)
 {
 	function get_opacity()
@@ -27,12 +25,11 @@ export function Friend(props: user_props)
 			return ("friends_tab_user");
 		return ("friends_tab_user offline");
 	}
-	// src={process.env.REACT_APP_API_USER + '/' + props.id + '/avatar'} />
 	return (
 		<div className={get_opacity()}>
 			<div className="friends_user_infos">
-				<img className="friends_user_profile_pic" alt="truc"
-					src="" />
+				<img className="friends_user_profile_pic"
+					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'}  />
 				<div className="friends_user_username">
 					<Link to={"/profile/" + props.ref_id}> {props.name}</Link>
 				</div>

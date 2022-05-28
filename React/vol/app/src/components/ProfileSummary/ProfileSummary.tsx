@@ -17,7 +17,7 @@ function ProfileSummary() {
 	{
 		if (user === null)
 			return (0);
-		return (user.id);
+		return (user.reference_id);
 	}
 	function getAntiCache() : number
 	{

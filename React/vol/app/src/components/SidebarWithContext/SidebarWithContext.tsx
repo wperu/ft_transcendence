@@ -3,6 +3,7 @@ import {ProvideChat} from  "../Sidebar/ChatContext/ProvideChat"
 
 function SidebarWithContext()
 {
+	
 	return (
 	<ProvideChat>
 		<Sidebar />

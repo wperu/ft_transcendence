@@ -8,6 +8,8 @@ import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuBu
 import TwoFactorAuthSetting from "../../components/ProfileSettings/TFAsetting/TFAsetting";
 import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/ChangeablePP";
 import ChangeableUsername from "../../components/ProfileSettings/ChangeableUsername/ChangeableUsername";
+import { IProfileDTO } from "../../Common/Dto/User/ProfileDTO";
+import axios from "axios";
 
 interface headerInfo
 {
@@ -37,7 +39,12 @@ function CurrentUserProfileHeader(props : headerInfo)
 	);
 }
 
-function OtherUserProfileHeader(props : headerInfo)
+interface profileInfo
+{
+	user: IProfileDTO | null;
+}
+
+function OtherUserProfileHeader(props : profileInfo)
 {
 	function getUserName() : string
 	{
@@ -49,7 +56,7 @@ function OtherUserProfileHeader(props : headerInfo)
 	{
 		if (props.user === null)
 			return (0);
-		return (props.user.id);
+		return (props.user.reference_id);
 	}
 
 	return (
@@ -70,13 +77,12 @@ function Profile() {
 	let { id }						= useParams<"id">();
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
+	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
 
 	if (!id)
 	{
-		//me
 		if (auth.user)
 			user = auth.user;
-		// setProfilSum(<ProfileSummarySettings/>);
 		return (
 			<div id="profile_page">
 				<CurrentUserProfileHeader user={user} />
@@ -89,25 +95,30 @@ function Profile() {
 	}
 	else
 	{
-		// const url : string	= process.env.REACT_APP_API_USER || "/";
-
-		// axios.get(url + "/" + id).then( resp => {
-		// 	let data : IUser = resp.data;
-		// 	//JSON.parse(resp.data);
-		// 	//setUser(data);
-		// })
-		// .catch(error => {
-		// 	console.log(error.response.status);
-		// 	//console.log(resp);
-		// });
-		if (auth.user)
-			user = auth.user;
+		if (profile === null)
+		{
+			if (auth.user)
+			{
+				const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id || "/";
+				const headers = {
+					authorization: auth.user.accessCode,
+				}
+				axios.get(url, {headers})
+				.then(resp => {
+				 	const data : IProfileDTO = resp.data;
+					setProfile(data);
+				})
+				.catch(error => {
+				 	console.log(error.response.status);
+				});
+			}
+		}
 		return (
 			<div id="profile_page">
-				<OtherUserProfileHeader user={user} />
+				<OtherUserProfileHeader user={profile} />
 				<MatchHistory />
 				<footer>
-					<Link to='/'><BackToMainMenuButton /></Link>
+					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
 				</footer>
 			</div>
 		);
