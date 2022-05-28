@@ -320,7 +320,6 @@ export class UsersService
 	{
 		const optAuth = this.twoFactorService.getOtpAuth('ft', secret);
 		return optAuth;
-		//return this.twoFactorService.getQrUrl(optAuth);
 	}
 
 	/**

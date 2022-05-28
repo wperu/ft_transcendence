@@ -1,5 +1,5 @@
 import "./Profile.css";
-import {  useState } from "react";
+import {  useCallback, useState } from "react";
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
@@ -74,58 +74,62 @@ function OtherUserProfileHeader(props : profileInfo)
 
 function Profile() {
 
-	let { id }						= useParams<"id">();
+	const { id }					= useParams<("id")>();
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
 	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
-	const navigate					= useNavigate();
+	//const navigate					= useNavigate();
 
-	if (!id)
-	{
-		if (auth.user)
-			user = auth.user;
-		return (
-			<div id="profile_page">
-				<CurrentUserProfileHeader user={user} />
-				<MatchHistory />
-				<footer>
-					<Link to='/'><BackToMainMenuButton /></Link>
-				</footer>
-			</div>
-		);
-	}
-	else
-	{
-		if (profile === null)
+	
+	const render = useCallback(() => {
+		if (!id)
 		{
 			if (auth.user)
-			{
-				const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id || "/";
-				const headers = {
-					authorization: auth.user.accessCode,
-				}
-				axios.get(url, {headers})
-				.then(resp => {
-				 	const data : IProfileDTO = resp.data;
-					setProfile(data);
-				})
-				.catch(error => {
-					
-				});
-			}
+				user = auth.user;
+			return (
+				<div id="profile_page">
+					<CurrentUserProfileHeader user={user} />
+					<MatchHistory />
+					<footer>
+						<Link to='/'><BackToMainMenuButton /></Link>
+					</footer>
+				</div>
+			);
 		}
-		return (
-			<div id="profile_page">
-				<OtherUserProfileHeader user={profile} />
-				<MatchHistory />
-				<footer>
-					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
-				</footer>
-			</div>
-		);
-	}
+		else
+		{
+			if (profile === null)
+			{
+				if (auth.user)
+				{
+					const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id || "/";
+					const headers = {
+						authorization: auth.user.accessCode,
+					}
+					axios.get(url, {headers})
+					.then(resp => {
+					 	const data : IProfileDTO = resp.data;
+						setProfile(data);
+					})
+					.catch(error => {
+						
+					});
+				}
+			}
+			return (
+				<div id="profile_page">
+					<OtherUserProfileHeader user={profile} />
+					<MatchHistory />
+					<footer>
+						<Link to='/' replace={false}><BackToMainMenuButton /></Link>
+					</footer>
+				</div>
+			);
+		}
+	}, [id])
 
 
+	return render();
   }
 
   export default Profile;
