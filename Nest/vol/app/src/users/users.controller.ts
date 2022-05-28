@@ -19,7 +19,7 @@ import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from '../entities/user.entity';
 import { UsersService } from './users.service';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { unlink, createReadStream } from 'fs';
 import * as path from "path";
@@ -40,7 +40,7 @@ export class UsersController
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
-		
+
 
 		let user = await this.userService.findUserByReferenceID(id);
 		if (user === undefined)
@@ -50,11 +50,11 @@ export class UsersController
 
 	/**
 	 * PUT request to Update username
-	 * @param response 
-	 * @param request 
-	 * @param body 
-	 * @param param 
-	 * @returns 
+	 * @param response
+	 * @param request
+	 * @param body
+	 * @param param
+	 * @returns
 	 */
 	@Put("/:id/username")
 	@UseGuards(AuthGuard)
@@ -74,7 +74,7 @@ export class UsersController
 			throw new BadRequestException('Username bad format !');
 		else if (await this.userService.updateUserName(id, body['username']) === false) //add alreay user responses
 			throw new BadRequestException('username already use');
-		
+
 		return response.status(HttpStatus.OK).json();
 	}
 
@@ -117,7 +117,7 @@ export class UsersController
 
 		const user = await this.userService.findUserByReferenceID(id);
 		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-			throw new ForbiddenException("wrong access code"); // KO bad token	
+			throw new ForbiddenException("wrong access code"); // KO bad token
 
 		return undefined;
 	}
