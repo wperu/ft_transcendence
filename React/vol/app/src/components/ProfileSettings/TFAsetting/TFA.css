@@ -51,12 +51,12 @@
 	text-align: center;
 	padding: 0.05em 0.2em;
 	font-size: 1em;
-	color: whitesmoke;
+	color: black;
 	font-size: 0.6em;
 	background-color: #282c3450;
 	border: none;
 	border-radius: 4px;
-	width: 100%;
+	width: 50%;
 }
 
 #tfa_setting
@@ -64,9 +64,30 @@
 	margin: 0 auto;
 }
 
+.tfa-popup
+{
+	display: flex;
+	justify-content: center;
+}
 
-.my-popup-content {  margin: auto;  background: rgb(255, 255, 255);  width: 50%;  padding: 5px;}
-.my-popup-arrow {  color: rgb(255, 255, 255);}[role='tooltip']
-.my-popup-content {  width: 200px;  box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 3px;}
-.my-popup-overlay {  background: rgba(0, 0, 0, 0.5);}[data-popup='tooltip']
-.my-popup-overlay { background: #ffffff;}
+.tfa-popup-header
+{
+	display: flex;
+	justify-content: center;
+}
+
+.tfa-popup-content
+{
+	border-radius: 10px;
+	text-align: center;
+	font-size: 0.9em;
+	margin: auto;
+	background: rgb(255, 255, 255);
+	width: 70%;
+	padding: 5px;
+}
+
+.my-popup-overlay
+{
+	background: #ffffff;
+}

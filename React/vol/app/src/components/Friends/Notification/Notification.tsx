@@ -102,7 +102,7 @@ export function NewFriendNotification(props: fren)
 	return (
 		<div className="friends_interactive_notification">
 			<DeleteNotification refId={props.refId} id={props.id} isRequestFriend={true} />
-			<div className="friends_notification_date">{props.date.toString()}</div>
+			<div className="friends_notification_date">{getTimeSince(props.date)}</div>
 			<div className="friends_notif_name"><Link to={"/profile/" + props.refId}>{props.name}</Link></div>
 			<div className="friends_interactive_notif_content"> t'as ajouté à ses amis</div>
 			<div className="notif_button_div">

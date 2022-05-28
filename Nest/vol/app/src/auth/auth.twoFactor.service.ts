@@ -6,9 +6,9 @@ export class TwoFactorService {
 
 	constructor()
 	{
-		authenticator.options = { digits: 6 };	
+		authenticator.options = { digits: 6 };
 	};
-	
+
 	private service : string = 'ft_tran';
 
 	generateSecret() : string  { return authenticator.generateSecret(); }
