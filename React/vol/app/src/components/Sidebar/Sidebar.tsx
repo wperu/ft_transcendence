@@ -41,7 +41,7 @@ function Sidebar()
 			chatCtx.setCurrentTab(ECurrentTab.channels);
 	}, [chatCtx.currentRoom])
 
-	if (chatCtx.isConnected)
+	
 		return (
 			<div id="sidebar">
 				<input id="toggle" type="checkbox" />
@@ -68,18 +68,17 @@ function Sidebar()
 				</div>
 			</div>
 		);
-		else
-		return (
-			<div id="sidebar">
-			<input id="toggle" type="checkbox" />
-			<label htmlFor="toggle"></label>
-			<div id="actual_bar">
-				<header>
-					<div className="loader"></div>
-				</header>
-			</div>
+	return (
+		<div id="sidebar">
+		<input id="toggle" type="checkbox" />
+		<label htmlFor="toggle"></label>
+		<div id="actual_bar">
+			<header>
+				<div className="loader"></div>
+			</header>
 		</div>
-		)
+	</div>
+	)
 }
 
 

@@ -1,6 +1,6 @@
 import "./Profile.css";
 import {  useState } from "react";
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import MatchHistory from "./MatchHistory";
@@ -78,6 +78,7 @@ function Profile() {
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
 	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
+	const navigate					= useNavigate();
 
 	if (!id)
 	{
@@ -109,7 +110,7 @@ function Profile() {
 					setProfile(data);
 				})
 				.catch(error => {
-				 	console.log(error.response.status);
+					
 				});
 			}
 		}

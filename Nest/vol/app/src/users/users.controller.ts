@@ -67,23 +67,16 @@ export class UsersController
 		{
 			throw new NotFoundException();
 		}
-
-		if (await this.userService.checkAccesWithRefId(request.headers['authorization'],id) === false)
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
 			throw new ForbiddenException("wrong access code");
-
-		if (body.username === undefined || body.username === "") //todo add username Rules
-		{
-			throw new BadRequestException('no username passed')
-		}
-		else
-		{
-			if (await this.userService.updateUserName(id, body.username) === false) //add alreay user responses
-			{
-				throw new BadRequestException('username already use');
-			}
-			else
-				return ;
-		}
+		if (body['username'] === undefined || body['username'] === "")
+			throw new BadRequestException('no username passed !');
+		else if (this.userService.isValideUsername(body['username']) === false)
+			throw new BadRequestException('Username bad format !');
+		else if (await this.userService.updateUserName(id, body['username']) === false) //add alreay user responses
+			throw new BadRequestException('username already use');
+		
+		return response.status(HttpStatus.OK).json();
 	}
 
 	/**

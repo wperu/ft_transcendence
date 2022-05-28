@@ -1,4 +1,6 @@
 import axios from "axios";
+import React from "react";
+import { useAuth } from "../../../auth/useAuth";
 import IUser from "../../../Common/Dto/User/User";
 import "./ChangeableUsername.css";
 
@@ -9,6 +11,7 @@ interface userProps
 
 function ChangeableUsername(props: userProps)
 {
+	const {user, setUser} = useAuth();
 	function getUserName() : string
 	{
 		if (props.user === null)
@@ -16,23 +19,55 @@ function ChangeableUsername(props: userProps)
 		return (props.user.username);
 	}
 
-	function updateUsername() : void
+	function updateUsername(event: React.SyntheticEvent) : void
 	{
-	
+		event.preventDefault();
+		
+		let target = event.target as typeof event.target & {
+			username: {value: string};
+		};
 		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/' + 'username';
 		const headers = {
-			//'authorization'	: user.access_token_42,
-			//'grant-type': 'authorization-code',
-			//'authorization-code': accessCode
-			'content-type'	: process.env.REACT_APP_AVATAR_TYPE || '',
+			'authorization'	: props.user.accessCode,
 		}
+		const data = {
+			'username' : target.username.value,
+		}
+		console.log(user?.accessCode);
+		axios({
+			method: 'put',
+			url: url,
+			headers: headers,
+			data: data,
+		})
+		.then(res => {
+			//console.log(res);
+			if (user === null)
+				return ;
+			const newUser : IUser = {
+				id:							user.id,
+				reference_id:				user.reference_id,
+				username:					target.username.value,
+				accessCode:					user.accessCode,
+				token_expiration_date_42:	user.token_expiration_date_42,
+				creation_date:				user.creation_date,
+				useTwoFa: 					user.useTwoFa,
+				avatar_last_update: 		user.avatar_last_update,
+			}
 
-		axios.put(url, )
+			setUser(newUser);
+		})
+		.catch(err => {
+			console.log('fail !');
+			console.log(err);
+		})
+
+		target.username.value = '';
 	}
 
 	return (
-		<form id="current_profile_username">
-			<input type="text" maxLength={20} id="profile_username_input"
+		<form id="current_profile_username" onSubmit={updateUsername}>
+			<input type="text" name="username" maxLength={20} id="profile_username_input"
 				placeholder={getUserName()}  />
 			<input type="submit" id="new_username_submit" value="Changer" />
 		</form>

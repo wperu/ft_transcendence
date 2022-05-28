@@ -88,14 +88,14 @@ export class AuthController
 		if (user.username !== null)
 			throw new ForbiddenException("Already register !");
 
-		let username = req.body['username'];
+		const username = req.body['username'];
 		if (username === undefined)
-			throw new BadRequestException('no username in body');
-		
+			throw new BadRequestException('no username in body !');
+		if (this.usersService.isValideUsername(username) === false)
+			throw new BadRequestException('Username bad format !');
+
 		user.username = username; //fix rule to username;
-
 		await this.usersService.saveUser(user);
-
 		return ;
     }
 

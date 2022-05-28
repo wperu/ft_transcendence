@@ -21,9 +21,23 @@ export class UsersService
 
 		private readonly tokenService: TokenService,
 		private readonly twoFactorService: TwoFactorService,
-	) {}
+
+	)
+	{
+		
+	}
 
 
+	/**
+	 *  Username options
+	 */
+	private readonly nameRegex : string | RegExp = /^[a-zA-Z0-9]+$/;
+	private readonly nameMaxLen : number = 16;
+	private readonly nameMinLen : number = 4;
+
+
+
+	
 
 	async findAll(): Promise<User[]>
 	{
@@ -243,7 +257,7 @@ export class UsersService
 					.createQueryBuilder()
 					.update(User)
 					.set({username: newUserName})
-					.where("id = :id", {id})
+					.where("reference_id = :id", {id})
 					.execute();
 		}
 		catch(e)
@@ -313,8 +327,12 @@ export class UsersService
 	 * @param username 
 	 * @returns 
 	 */
-	isValideUsername(username : string) : boolean
+	isValideUsername(name: string) : boolean
 	{
+		if(name.match(this.nameRegex) === null)
+			return false;
+		if (!(name.length <= this.nameMaxLen && name.length >= this.nameMinLen))
+			return false;
 		return true;
 	}
 }

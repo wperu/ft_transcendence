@@ -11,7 +11,6 @@ interface IUser
 	username: string;
 	accessCode : string;
 	token_expiration_date_42?: Date; // to erase
-	access_token_google?: string;
 	creation_date: Date;
 	useTwoFa: boolean;
 	avatar_last_update?: number;
