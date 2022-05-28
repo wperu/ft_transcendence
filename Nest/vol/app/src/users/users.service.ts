@@ -308,6 +308,7 @@ export class UsersService
 	{
 		let ret = this.twoFactorService.isValide(token, secret);
 
+		console.log(ret);
 		if (typeof ret === 'boolean')
 		{
 			return ret;

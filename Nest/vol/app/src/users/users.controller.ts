@@ -97,8 +97,11 @@ export class UsersController
 			throw new NotFoundException();
 
 		let user = await this.userService.findUserByReferenceID(id);
-		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
-			throw new BadRequestException("wrong access code"); // KO bad token
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
+			throw new ForbiddenException("wrong access code");
+
+		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
+			throw new BadRequestException("wrong token code"); // KO bad token
 
 		user.setTwoFA = !user.setTwoFA;
 		await this.userService.saveUser(user);
@@ -107,7 +110,7 @@ export class UsersController
 
 	@Get("/:id/twFactorQR")
 	@UseGuards(AuthGuard)
-	async getTwoFaQr(@Param('id') param, @Body() body,)
+	async getTwoFaQr(@Param('id') param, @Body() body, @Req() request: Request, @Res() response: Response)
 	{
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
@@ -116,10 +119,12 @@ export class UsersController
 		}
 
 		const user = await this.userService.findUserByReferenceID(id);
-		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-			throw new ForbiddenException("wrong access code"); // KO bad token
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
+			throw new ForbiddenException("wrong access code");
 
-		return undefined;
+		const url = this.userService.getQR(user.SecretCode);
+
+		return response.status(HttpStatus.OK).json({ url: url});
 	}
 
 	@Post("/:id/avatar")

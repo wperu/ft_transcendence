@@ -19,8 +19,9 @@ function TwoFactorAuthSetting(props: twoFAProps)
 {
 	const [isTwoFactor, setIsTwoFactor]	= useState<boolean>(props.is_active);
 	const [isOpen, setIsOpen]			= useState<boolean>(false);
-	const [qrUri, setQrUri]				= useState<string>("other world !");
 	const { user } = useAuth();
+	const [qrUri, setQrUri]				= useState<string>(getURL());
+	
 
 	function changeTwoFactor()
 	{
@@ -31,13 +32,11 @@ function TwoFactorAuthSetting(props: twoFAProps)
 	{
 		if ( event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
-			setIsTwoFactor(!isTwoFactor);
 			if (props.user)
 			{
 				const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/useTwoFactor';
 				const headers = {
 					'authorization'	: user ? (user.accessCode) : '',
-					'grant-type': 'authorization-code',
 				}
 				const body = {
 					token: event.currentTarget.value,
@@ -50,10 +49,12 @@ function TwoFactorAuthSetting(props: twoFAProps)
 				})
 				.then(res => {
 					console.log(res);
+					if (res.status === 200)
+						setIsTwoFactor(!isTwoFactor);
 				})
 				.catch(res => {
 					console.log(res); //fix parseme pls /!\
-					setIsTwoFactor(isTwoFactor);
+					
 				});
 			}
 
@@ -63,11 +64,11 @@ function TwoFactorAuthSetting(props: twoFAProps)
 
 	function getURL() : string
 	{
-		var ret =  "other world";
+
+		var ret =  "";
 		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/twFactorQR'; //fixme
 		const headers = {
 			'authorization'	: user ? (user.accessCode) : '',
-			'grant-type': 'authorization-code',
 		}
 		const respo = axios({
 			method: 'get',
@@ -80,18 +81,19 @@ function TwoFactorAuthSetting(props: twoFAProps)
 		})
 		.catch(res => {
 			console.log(res); //fix parseme pls /!\
-			setIsTwoFactor(isTwoFactor);
+			//setIsTwoFactor(isTwoFactor);
 			return "";
 		});
 
-
-				return ret;
+		return ret;
 	}
+
+
 
 	useEffect(() => {
 		if (user)
 			user.useTwoFa = isTwoFactor;
-		getURL();
+		//getURL();
 	},[user, isTwoFactor])
 
 	return (
