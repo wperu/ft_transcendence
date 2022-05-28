@@ -1,5 +1,4 @@
 import {
-	Request,
 	BadRequestException,
 	Body,
 	Controller,
@@ -179,10 +178,7 @@ export class UsersController
 			.then(async () => {
 				unlink(file.path, (err) => {
 					if (err)
-					{
 						console.error("Failed deleting received file: " + err);
-						return (response.status(500));
-					}
 				});
 				console.log("Changing avatar path to : [" + filename + "]");
 				old_avatar = await this.userService.updateAvatar(param, filename);
@@ -200,7 +196,14 @@ export class UsersController
 					else
 						console.log("Old avatar was a default one");
 				}
-			});
+			})
+			.catch(error => {
+				if (error)
+				{
+					console.error(error);
+					return (response.status(415).json());
+				}
+			})
 		}
 		return (response.status(201).json());
 	}

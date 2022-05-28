@@ -52,7 +52,6 @@ export class UsersService
 			username: user.username,
 			accessCode: user.access_token_42,
 			creation_date: user.creation_date,
-			avatar_id : 0,
 			useTwoFa: user.setTwoFA,
 		}
 
