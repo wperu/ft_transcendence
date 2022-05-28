@@ -2,12 +2,15 @@ import React, { useEffect, useState, KeyboardEvent } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { ELevel, useNotifyContext } from "../../components/NotifyContext/NotifyContext";
+import "./Callback.css";
+
+// import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/ChangeablePP";
 
 //TODO rm comm
 //TODO check error
 //todo complet form with PP
 //todo style/css
-function Callback() : JSX.Element
+function Callback()
 {
 	const { search  } = useLocation();
 	const [needForm, setNeedForm] = useState<boolean>(true);
@@ -18,7 +21,7 @@ function Callback() : JSX.Element
 	{
 		const searchParams	= new URLSearchParams(search);
 		const accessCode	= searchParams.get("code");
-		
+
 		if (window.opener === null)
 			return ;
 
@@ -55,7 +58,7 @@ function Callback() : JSX.Element
 					// console.log('Error', error.message);
 				  }
 			})
-				
+
 		}
 		else
 		{
@@ -78,7 +81,7 @@ function Callback() : JSX.Element
 		}
 	}, [])
 
-	useEffect(() => {		
+	useEffect(() => {
 		if (needForm === false && useTwoFactor === false)
 			authUser();
 	}, [needForm])
@@ -102,7 +105,7 @@ function Callback() : JSX.Element
 				data: {
 					username: event.currentTarget.value,
 				}
-				
+
 			})
 			.then((resp) => {
 				setNeedForm(false);
@@ -128,7 +131,6 @@ function Callback() : JSX.Element
 		}
 	};
 
-
 	function sendToken(event: KeyboardEvent<HTMLInputElement>)
 	{
 		if (event.key === "Enter" && event.currentTarget.value.length > 0)
@@ -138,17 +140,28 @@ function Callback() : JSX.Element
 		}
 	}
 
-
 	if (needForm)
-		return(	<div>
-				<input type="text" maxLength={20} placeholder={'username'} onKeyPress={pressedSend}  />
-			</div>);
+	{
+		return (
+			<div className="first_login">
+				Please choose a username ("Enter to continue")
+				<input id="first_login_username" type="text" maxLength={20}
+					placeholder={'username'} onKeyPress={pressedSend} />
+			</div>
+		);
+	}
 	else if (useTwoFactor)
-		return (	<div>
-						<input type="text" maxLength={6} placeholder={'token'} onKeyPress={sendToken}  />
-					</div>)
+	{
+		return (
+			<div className="first_login">
+				Please choose a username ("Enter to continue")
+				<input className="first_login_username" type="text" maxLength={6}
+					placeholder={'token'} onKeyPress={sendToken} />
+			</div>
+		);
+	}
 	else
-		return <div></div>;
+		return null;
 }
 
 export default Callback;
