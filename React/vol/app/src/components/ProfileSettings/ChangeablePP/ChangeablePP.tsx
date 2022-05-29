@@ -59,8 +59,8 @@ function ChangeablePP (props :infoProp)
 
 	return (
 		<label id="pp_label">
-			<img src={process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar?'+ getAntiCache()}
-				alt="PP" id="profile_pic"/>
+			{<img src={process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar?'+ getAntiCache()}
+				alt="PP" id="profile_pic"/>}
 			<img src={EditLogo} alt="edit" className="edit_logo"
 				id="profile_pic_edit_logo" />
 			<input id="new_pp_input" type="file" name="img"

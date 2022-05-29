@@ -52,16 +52,10 @@ function OtherUserProfileHeader(props : profileInfo)
 			return ("default");
 		return (props.user.username);
 	}
-	function getID() : number
-	{
-		if (props.user === null)
-			return (0);
-		return (props.user.reference_id);
-	}
 
 	return (
 		<header id="profile_header">
-			<img src={process.env.REACT_APP_API_USER + '/' + getID() + '/avatar'}
+			<img src={process.env.REACT_APP_API_USER + '/' + props.user?.reference_id + '/avatar'}
 				alt="PP" id="profile_pic"/>
 			<div id="profile_username">{getUserName()}</div>
 			<div id="profile_stats">
@@ -72,47 +66,13 @@ function OtherUserProfileHeader(props : profileInfo)
 	);
 }
 
-/*
-const useData = (param = 'all') => {
-	const [data, setData] = useState([]);
-	const [error, setError] = useState(null);
-	const [isLoading, setIsLoading] = useState(true);
-	  
-	useEffect(() => {
-	  const url = 'https://restcountries.com/v2/' + param;
-  
-	  const fetchAPI = async () => {
-		setIsLoading(true);
-		try {
-		  const response = await fetch(url);
-		  const json = await response.json();
-		  setData(json);
-		  setError(false);
-		} catch(err) {
-		  setError(err.message);
-		  setData(null);
-		  console.log(err);
-		}
-		setIsLoading(false);
-	  };
-	  fetchAPI(); 
-	}, [param]);
-  
-	return [data, error, isLoading];
-  }
-  */
-
-
-
 function Profile() {
 
 	const { id }					= useParams<("id")>();
-	//const [page, setPage]			= useState<JSX.Element>(<></>);
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
 	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
-	//const navigate					= useNavigate();
-	const [qrUri, setQrUri]				= useState<string>();
+	const [qrUri, setQrUri]			= useState<string>();
 
 	function getURL() : string
 	{
@@ -143,26 +103,22 @@ function Profile() {
 
 	useEffect(() => {
 		if (!id)
-		{
 			setQrUri(getURL());
-		}
 	}, [id])
 
 
 	useEffect(() => {
-		console.log('i\'m call !');
 		setProfile(null);
-		//setPage(render())
 	}, [id])
 	
 
 	useEffect(() => {
-		console.log('id: ', id);
 		if (profile === null && id)
 		{
 			if (auth.user)
 			{
 				const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id;
+				console.log(url);
 				const headers = {
 					authorization: auth.user.accessCode,
 				}
@@ -172,16 +128,14 @@ function Profile() {
 					setProfile(data);
 				})
 				.catch(error => {
-					
+					console.log(error);
 				});
 			}
 		}
-	}, [profile])
+	}, [profile, id])
 
 	if (!id)
 	{
-
-
 		if (auth.user)
 			user = auth.user;
 		return (
@@ -194,7 +148,7 @@ function Profile() {
 			</div>
 		);
 	}
-	else
+	else if (profile)
 	{
 		
 		return (
@@ -206,7 +160,12 @@ function Profile() {
 				</footer>
 			</div>
 		);
-	};
+	}
+	else
+	{
+		return <></> //todo
+	}
+	;
   }
 
   export default Profile;
