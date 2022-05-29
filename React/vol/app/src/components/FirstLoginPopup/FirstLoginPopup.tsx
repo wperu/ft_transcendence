@@ -27,7 +27,7 @@ function FirstLoginPopup(props: popuprop)
 				<div className="content">
 					<ChangeablePP user={props.user} />
 					<ChangeableUsername user={props.user} />
-					<TwoFactorAuthSetting user={props.user} is_active={true} />
+					
 				</div>
 				<div className="actions">
 					<input type="button" value="Close"
@@ -36,4 +36,5 @@ function FirstLoginPopup(props: popuprop)
 			</div>}
 		</Popup>
 	);
+	//<TwoFactorAuthSetting user={props.user} is_active={true} />
 }

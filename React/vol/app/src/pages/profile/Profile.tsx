@@ -1,5 +1,5 @@
 import "./Profile.css";
-import {  useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
@@ -13,12 +13,12 @@ import axios from "axios";
 
 interface headerInfo
 {
-	user: IUser;
+	user:	IUser;
+	qrUri:	string;
 }
 
 function CurrentUserProfileHeader(props : headerInfo)
 {
-
 	// const inputEl = useRef(null);
 
 	return (
@@ -34,7 +34,7 @@ function CurrentUserProfileHeader(props : headerInfo)
 					<span id="ratio_losses">667</span>
 				</div>
 			</div>
-			<TwoFactorAuthSetting user={props.user} is_active={props.user.useTwoFa} />
+			<TwoFactorAuthSetting user={props.user} is_active={props.user.useTwoFa} qrUri={props.qrUri} />
 		</header>
 	);
 }
@@ -72,64 +72,141 @@ function OtherUserProfileHeader(props : profileInfo)
 	);
 }
 
+/*
+const useData = (param = 'all') => {
+	const [data, setData] = useState([]);
+	const [error, setError] = useState(null);
+	const [isLoading, setIsLoading] = useState(true);
+	  
+	useEffect(() => {
+	  const url = 'https://restcountries.com/v2/' + param;
+  
+	  const fetchAPI = async () => {
+		setIsLoading(true);
+		try {
+		  const response = await fetch(url);
+		  const json = await response.json();
+		  setData(json);
+		  setError(false);
+		} catch(err) {
+		  setError(err.message);
+		  setData(null);
+		  console.log(err);
+		}
+		setIsLoading(false);
+	  };
+	  fetchAPI(); 
+	}, [param]);
+  
+	return [data, error, isLoading];
+  }
+  */
+
+
+
 function Profile() {
 
 	const { id }					= useParams<("id")>();
+	//const [page, setPage]			= useState<JSX.Element>(<></>);
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
 	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
 	//const navigate					= useNavigate();
+	const [qrUri, setQrUri]				= useState<string>();
 
-	
-	const render = useCallback(() => {
+	function getURL() : string
+	{
+		var ret =  "";
+		if (auth && auth.user)
+		{
+			const url = process.env.REACT_APP_API_USER + '/' + auth.user.reference_id +  '/twFactorQR'; //fixme
+			const headers = {
+				'authorization'	: auth.user ? (auth.user.accessCode) : '',
+			}
+			const respo = axios({
+				method: 'get',
+				url: url,
+				headers: headers,
+			})
+			.then(res => {
+				ret = res.data.url;
+				setQrUri(res.data.url);
+			})
+			.catch(res => {
+				console.log(res); //fix parseme pls /!\
+				//setIsTwoFactor(isTwoFactor);
+				return "";
+			});
+		}
+		return ret
+	}
+
+	useEffect(() => {
 		if (!id)
 		{
-			if (auth.user)
-				user = auth.user;
-			return (
-				<div id="profile_page">
-					<CurrentUserProfileHeader user={user} />
-					<MatchHistory />
-					<footer>
-						<Link to='/'><BackToMainMenuButton /></Link>
-					</footer>
-				</div>
-			);
-		}
-		else
-		{
-			if (profile === null)
-			{
-				if (auth.user)
-				{
-					const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id || "/";
-					const headers = {
-						authorization: auth.user.accessCode,
-					}
-					axios.get(url, {headers})
-					.then(resp => {
-					 	const data : IProfileDTO = resp.data;
-						setProfile(data);
-					})
-					.catch(error => {
-						
-					});
-				}
-			}
-			return (
-				<div id="profile_page">
-					<OtherUserProfileHeader user={profile} />
-					<MatchHistory />
-					<footer>
-						<Link to='/' replace={false}><BackToMainMenuButton /></Link>
-					</footer>
-				</div>
-			);
+			setQrUri(getURL());
 		}
 	}, [id])
 
 
-	return render();
+	useEffect(() => {
+		console.log('i\'m call !');
+		setProfile(null);
+		//setPage(render())
+	}, [id])
+	
+
+	useEffect(() => {
+		console.log('id: ', id);
+		if (profile === null && id)
+		{
+			if (auth.user)
+			{
+				const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id;
+				const headers = {
+					authorization: auth.user.accessCode,
+				}
+				axios.get(url, {headers})
+				.then(resp => {
+					 const data : IProfileDTO = resp.data;
+					setProfile(data);
+				})
+				.catch(error => {
+					
+				});
+			}
+		}
+	}, [profile])
+
+	if (!id)
+	{
+
+
+		if (auth.user)
+			user = auth.user;
+		return (
+			<div id="profile_page">
+				<CurrentUserProfileHeader user={user} qrUri={qrUri!}/>
+				<MatchHistory />
+				<footer>
+					<Link to='/'><BackToMainMenuButton /></Link>
+				</footer>
+			</div>
+		);
+	}
+	else
+	{
+		
+		return (
+			<div id="profile_page">
+				<OtherUserProfileHeader user={profile} />
+				<MatchHistory />
+				<footer>
+					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
+				</footer>
+			</div>
+		);
+	};
   }
 
   export default Profile;

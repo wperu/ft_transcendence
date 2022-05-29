@@ -14,6 +14,7 @@ import {
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
+	Logger,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -25,18 +26,22 @@ import { unlink, createReadStream } from 'fs';
 import * as path from "path";
 import * as sharp from "sharp";
 import { IProfileDTO } from "../Common/Dto/User/ProfileDTO";
+import { request } from 'http';
 
 @Controller('users')
 export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
+		
 	) {}
+	private logger: Logger = new Logger('UserController');
 
 	@Get("/profile/:id")
 	@UseGuards(AuthGuard)
 	async findOne(@Param('id') param): Promise<IProfileDTO>
 	{
+		this.logger.log('GET /profile/' + param);
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
@@ -60,6 +65,7 @@ export class UsersController
 	@UseGuards(AuthGuard)
 	async updateUserName(@Res() response : Response, @Req() request: Request, @Body() body, @Param('id') param)
 	{
+		this.logger.log('PUT /'+ param + '/username');
 		// TODO update user in service
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
@@ -92,6 +98,7 @@ export class UsersController
 	@UseGuards(AuthGuard)
 	async updateTwoFactor(@Param('id') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
+		this.logger.log('PUT /' + param + '/useTwoFactor');
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
@@ -112,6 +119,7 @@ export class UsersController
 	@UseGuards(AuthGuard)
 	async getTwoFaQr(@Param('id') param, @Body() body, @Req() request: Request, @Res() response: Response)
 	{
+		this.logger.log('GET /' + param + '/twFactorQR');
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 		{
@@ -138,9 +146,10 @@ export class UsersController
 		@UploadedFile() file: Express.Multer.File,
 		@Res() response : Response,
 		@Param('id') param,
-		@Body() body,
+		@Req() request,
 	)
 	{
+		this.logger.log('POST /' + param + '/avatar');
 		let	old_avatar : string | undefined;
 		let id: number = parseInt(param);
 
@@ -154,9 +163,8 @@ export class UsersController
 		}
 		else
 		{
-			const user = await this.userService.findUserByReferenceID(id);
-			if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-				throw new ForbiddenException("wrong access code"); // KO bad token
+			if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
+				throw new ForbiddenException("wrong access code");
 
 			const extension = file.originalname.split('.');
 			var filename = "./avatars/";
@@ -202,6 +210,7 @@ export class UsersController
 	@Get("/:id/avatar")
 	async getAvatar(@Res() response: Response, @Param('id') param)
 	{
+		this.logger.log('GET /' + param + '/avatar');
 		let id: number = parseInt(param);
 		if(isNaN(id) || !/^\d*$/.test(param))
 			throw new NotFoundException();
