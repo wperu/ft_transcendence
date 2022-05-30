@@ -8,6 +8,7 @@ import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
+import { ELevel } from 'src/Common/Dto/chat/notice';
 
 
 // Todo fix origin
@@ -383,6 +384,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					s.emit('FRIEND_LIST', ret3);
 				});
 			}
+		}
+		else
+		{
+			client.emit("NOTIFICATION", { level: ELevel.error, content: "Unknow User" })
+			return ;
 		}
 	  }
 	}
