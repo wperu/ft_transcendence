@@ -179,6 +179,16 @@ export class PongService {
     }
 
 
+	initPlayer(player: PongUser)
+	{
+		player.position = 0.5;
+		player.points = 0;
+		player.velocity = 0;
+		player.key = 0;
+		player.in_game = false;
+	}
+
+
 
     async searchRoom(user: PongUser, modes: PongModes = PongModes.DEFAULT)
     {
@@ -205,20 +215,18 @@ export class PongService {
 
         console.log("found opponent")
         this.waitingPool.splice(this.waitingPool.indexOf(other), 1);
+		this.initPlayer(other.user);
+		this.initPlayer(user);
         let room = this.initRoom(other.user, user);
         this.rooms.push(room);
         this.startRoom(room);
     }
 
 
-
-
-
-
-
-
-
-
+	removeRoom(room: PongRoom) : void
+	{
+		this.rooms.splice(this.rooms.findIndex(({id} ) => id === room.id), 1);
+	}
 
     async startBoss(room: PongRoom)
     {
@@ -244,8 +252,13 @@ export class PongService {
         console.log("[boss] ended");
         room.state = RoomState.FINISHED;
 
-        if (room.job_id !== "")
-            this.boss.offWork(room.id);
+		const job_id	= room.job_id;
+    
+		this.logger.log(`Room ${room.id} ended ${room.player_1.username} vs ${room.player_2.username}`);
+
+		this.removeRoom(room);
+		if (job_id !== "")
+			this.boss.offWork(job_id);
 
         this.logger.log("Room ended");
         // TODO push room in history 
@@ -272,7 +285,7 @@ export class PongService {
             }));
         }
 
-        let room_id = generateID();
+        let room_id = generateID(); //fix dup id
         creator.socket.join(room_id);
         other.socket.join(room_id);
 
@@ -389,6 +402,8 @@ export class PongService {
 
             }, GameConfig.RELOAD_TIME));
         }, GameConfig.RELOAD_TIME));
+
+		
     }
 
 
@@ -679,7 +694,7 @@ export class PongService {
     async disconnectUser(user: PongUser)
     {
         let room: PongRoom = this.rooms.find((r) => {
-            return r.player_1.reference_id === user.reference_id || r.player_2.reference_id === user.reference_id
+            return r !== undefined && (r.player_1.reference_id === user.reference_id || r.player_2.reference_id === user.reference_id)
         });
 
         if (room === undefined)
@@ -693,9 +708,9 @@ export class PongService {
             room.player_1.in_game = false;
             room.player_2.in_game = false;
             room.state = RoomState.FINISHED;
-            if (room.job_id !== "")
-                this.boss.offWork(room.job_id);
-            console.log("room ended by disconnection")
+            //if (room.job_id !== "")
+            //    this.boss.offWork(room.job_id);
+            //console.log("room ended by disconnection")
             // TODO push room in history
         }
         else if (room !== undefined && room.state !== RoomState.PAUSED)
