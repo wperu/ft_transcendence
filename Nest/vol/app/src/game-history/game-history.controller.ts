@@ -13,21 +13,21 @@ export class GameHistoryController
 		private readonly userService: UsersService
 		) {}
 
-	@Get('/:id')
-	async	getUserHistory(@Param('id') target_id) : Promise<GetFinishedGameDto []>
+	@Get('/:refId')
+	async	getUserHistory(@Param('refId') target_ref_id) : Promise<GetFinishedGameDto []>
 	{
 		let target_user: User;
 		let	entity: FinishedGame[];
 		let	history: GetFinishedGameDto[] = [];
-		target_user = await this.userService.findUserByID(target_id);
+		target_user = await this.userService.findUserByReferenceID(target_ref_id);
 		entity = await this.historyService.getUserGameHistory(target_user);
 		console.log("getting games");
 
 		let i = 0;
 		entity.map(({player_one, player_two, date, player_one_score, player_two_score}) => {
 			history.push({
-				id_one: player_one.id,
-				id_two: player_two.id,
+				ref_id_one: player_one.reference_id,
+				ref_id_two: player_two.reference_id,
 				username_one: player_one.username,
 				username_two: player_two.username,
 				score_one: player_one_score,
@@ -42,8 +42,8 @@ export class GameHistoryController
 	{
 		let user_one: User;
 		let user_two: User;
-		user_one = await this.userService.findUserByID(gameData.user_one_id);
-		user_two = await this.userService.findUserByID(gameData.user_two_id);
+		user_one = await this.userService.findUserByReferenceID(gameData.user_one_ref_id);
+		user_two = await this.userService.findUserByReferenceID(gameData.user_two_ref_id);
 		console.log("posting game: " + gameData.date);
 		return (await this.historyService.addGameToHistory(user_one, user_two,
 			gameData.user_one_score, gameData.user_two_score, gameData.date));

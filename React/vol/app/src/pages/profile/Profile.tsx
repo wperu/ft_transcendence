@@ -1,6 +1,6 @@
 import "./Profile.css";
 import {  useState } from "react";
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import MatchHistory from "./MatchHistory";
@@ -52,7 +52,7 @@ function OtherUserProfileHeader(props : profileInfo)
 			return ("default");
 		return (props.user.username);
 	}
-	function getID() : number
+	function getRefID() : number
 	{
 		if (props.user === null)
 			return (0);
@@ -61,12 +61,17 @@ function OtherUserProfileHeader(props : profileInfo)
 
 	return (
 		<header id="profile_header">
-			<img src={process.env.REACT_APP_API_USER + '/' + getID() + '/avatar'}
+			<img src={process.env.REACT_APP_API_USER + '/' + getRefID() + '/avatar'}
 				alt="PP" id="profile_pic"/>
 			<div id="profile_username">{getUserName()}</div>
 			<div id="profile_stats">
 				<div id="profile_lvl">Niveau 4</div>
-				<div id="profile_ratio"><span id="ratio_caption">W:L</span> <span id="ratio_wins">42</span>:<span id="ratio_losses">667</span></div>
+				<div id="profile_ratio">
+					<span id="ratio_caption">W:L</span>
+					<span id="ratio_wins">42</span>
+					:
+					<span id="ratio_losses">667</span>
+				</div>
 			</div>
 		</header>
 	);
@@ -78,7 +83,6 @@ function Profile() {
 	const auth						= useAuth();
 	var	user: IUser 				= null!;
 	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
-	const navigate					= useNavigate();
 
 	if (!id)
 	{
@@ -110,7 +114,7 @@ function Profile() {
 					setProfile(data);
 				})
 				.catch(error => {
-					
+
 				});
 			}
 		}
