@@ -1,7 +1,8 @@
 import { GetFinishedGameDto } from "../../Common/Dto/FinishedGameDto";
 import { useAuth } from "../../auth/useAuth";
-import "./MatchHistory.css";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "./MatchHistory.css";
 
 interface matchProps
 {
@@ -71,7 +72,11 @@ function Match(props: matchProps)
 				<div className="history_match_score">{props.current_score}</div>
 				<div className="match_score_separator">|</div>
 				<div className="history_match_score">{props.opponent_score}</div>
-				<div className="history_match_user">{props.opponent_name}</div>
+				<div className="history_match_user">
+					<Link to={"/profile/" + props.opponent_ref_id}>
+						{props.opponent_name}
+					</Link>
+				</div>
 				<div className="history_match_date">
 					<span>{ parsDate() }</span>
 					<span>{ parsTime() }</span>
