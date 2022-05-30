@@ -22,11 +22,11 @@ function ChangeableUsername(props: userProps)
 	function updateUsername(event: React.SyntheticEvent) : void
 	{
 		event.preventDefault();
-		
+
 		let target = event.target as typeof event.target & {
 			username: {value: string};
 		};
-		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/' + 'username';
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/username';
 		const headers = {
 			'authorization'	: props.user.accessCode,
 		}
@@ -49,7 +49,6 @@ function ChangeableUsername(props: userProps)
 				reference_id:				user.reference_id,
 				username:					target.username.value,
 				accessCode:					user.accessCode,
-				token_expiration_date_42:	user.token_expiration_date_42,
 				creation_date:				user.creation_date,
 				useTwoFa: 					user.useTwoFa,
 				avatar_last_update: 		user.avatar_last_update,

@@ -20,11 +20,12 @@ function ChangeablePP (props :infoProp)
 	{
 		if (e.target.files === null || props.user === null)
 			return ;
-		// setFile(e.target.files[0]);
 		const formData = new FormData();
 		formData.append("avatar", e.target.files[0]);
 		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar';
-		axios.post(url, formData, {})
+		axios.post(url, formData, {
+			headers: { "authorization" : props.user.accessCode }
+		})
 		.catch(error => {
 			if (error.response)
 			{
