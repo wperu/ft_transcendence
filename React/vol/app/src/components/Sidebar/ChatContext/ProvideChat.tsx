@@ -125,7 +125,7 @@ function useChatProvider() : IChatContext
 	 * Pong interact
 	 */
 	const invitePlayer = useCallback((refId?: number, room_id?: number) => {
-		navigate("/matchmaking/customRoom", { replace: false })
+		navigate("/matchmaking/custom", { replace: false })
 
 		const dto : GameInviteDTO = {
 			gameRoomId: 0, //todo create room and send

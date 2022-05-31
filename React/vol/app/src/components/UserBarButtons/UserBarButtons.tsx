@@ -79,13 +79,12 @@ interface refuseProp
 
 export function InviteUserButton(prop: gameInvitationProp)
 {
-	const {socket}		= useChatContext();
+	const {socket, invitePlayer}		= useChatContext();
 	const navigate		= useNavigate();
 
 	function onClick()
 	{
-		navigate("/matchmaking/custom", {replace : false});
-		console.log("user invited");
+		invitePlayer(prop.refId);
 		
 		
 	}
