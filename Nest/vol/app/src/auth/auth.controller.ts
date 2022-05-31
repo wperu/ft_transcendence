@@ -22,7 +22,6 @@ export class AuthController
     )
     {}
 
-
     @Get('/login')
     @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=bb0e2df66549b7a90ccfb9ae53736366337e6be09540ac731757e0d38f14978a&redirect_uri=https%3A%2F%2Flocalhost%2Fapi%2Fauth%2Fintra42%2Fcallback&response_type=code', 301)
     async   login()
@@ -48,12 +47,12 @@ export class AuthController
     @Post('/token')
     async   getAccessToken(@Req() req, @Body() body : Body) : Promise<IUser | undefined>
     {
-        if (req.headers['authorization-code'] === undefined)
-            throw new BadRequestException("no authorization_code in request header");
-        /* verify if code is valid and non expired */
-        let token = await this.authService.getAccessToken(req.headers['authorization-code']);
-        if (token === undefined)
-            throw new ForbiddenException("wrong access code");
+		if (req.headers['authorization-code'] === undefined)
+			throw new BadRequestException("no authorization_code in request header");
+		/* verify if code is valid and non expired */
+		let token = await this.authService.getAccessToken(req.headers['authorization-code']);
+		if (token === undefined)
+			throw new ForbiddenException("wrong access code");
 
 		const user = await this.usersService.findUserByAccessToken(token);
 		if (user === undefined)
@@ -68,7 +67,7 @@ export class AuthController
 		}
 		/* validates user, deletes code */
 		this.authService.destroyAccessToken(req.headers['authorization-code']);
-        return this.usersService.getIUserFromUser(user);
+		return this.usersService.getIUserFromUser(user);
     }
 
 	@Post('/register')

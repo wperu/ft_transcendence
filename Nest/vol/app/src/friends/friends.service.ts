@@ -28,14 +28,21 @@ export class FriendsService
 	 */
 	async findFriendOf(id_one: number): Promise<FriendShip[]>
 	{
-
-		const ret = await this.friendRepository.find({
-			where: {
-				id_one: id_one,
-				status: EStatus.FRIEND,
-			},
-		});
-		return ret;
+		try
+		{
+			const ret = await this.friendRepository.find({
+				where: {
+					id_one: id_one,
+					status: EStatus.FRIEND,
+				},
+			});
+			return ret;
+		}
+		catch(e)
+		{
+			return [];
+		}
+		
 	}
 
 	/**
@@ -45,14 +52,21 @@ export class FriendsService
 	 */
 	async findBlockedOf(userId: number): Promise<FriendShip[]>
 	{
-		const ret =  await this.friendRepository.find({
-			where: {
-				id_one: userId,
-				status: EStatus.BLOCK
-			},
-		});
+		try
+		{
+			const ret =  await this.friendRepository.find({
+				where: {
+					id_one: userId,
+					status: EStatus.BLOCK
+				},
+			});
 
-		return ret;
+			return ret;
+		}
+		catch(e)
+		{
+			return [];
+		}
 	}
 
 	/**
@@ -62,12 +76,64 @@ export class FriendsService
 	 */
 	async findRequestOf(userId: number): Promise<FriendShip[]>
 	{
-		return await this.friendRepository.find({
+		try
+		{
+			const ret =await this.friendRepository.find({
 			where: {
 				id_two: userId,
 				status: EStatus.REQUEST
 			},
-		});
+			});
+			return ret;
+		}
+		catch (e)
+		{
+			return [];
+		}
+	}
+
+	async findRelById(id: number): Promise<FriendShip | undefined>
+	{
+		try
+		{
+			const rel = await this.friendRepository.findOne({ 
+				where: {
+					id: In([id])
+				},
+			});
+
+			return rel;
+		}
+		catch (e)
+		{
+			return undefined;
+		}
+	}
+
+	async safeFriendSave(rel : FriendShip) : Promise<FriendShip>
+	{
+		try {
+			let ret = await this.friendRepository.save(rel);
+
+			return ret;
+		}
+		catch (e)
+		{
+			return undefined;
+		}
+	}
+
+	async safeFriendRm(rel : FriendShip) : Promise<FriendShip | undefined>
+	{
+		try {
+			let ret = await this.friendRepository.remove(rel);
+
+			return ret;
+		}
+		catch (e)
+		{
+			return undefined;
+		}
 	}
 
 	/**
@@ -80,12 +146,21 @@ export class FriendsService
 	{
 		if (userIdOne === userIdTwo)
 			return undefined;
-		return await this.friendRepository.findOne({
-			where: {
-				id_one: userIdOne,
-				id_two: userIdTwo
-			},
-		});
+		try
+		{
+			const ret = await this.friendRepository.findOne({
+				where: {
+					id_one: userIdOne,
+					id_two: userIdTwo
+				},
+			});
+
+			return ret;
+		}
+		catch (e)
+		{
+			return undefined;
+		}
 	}
 
 
@@ -98,14 +173,14 @@ export class FriendsService
 	 * @param userIdTwo
 	 * @returns
 	 */
-	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | string | undefined>
+	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | undefined>
 	{
 		if (userIdOne === userIdTwo)
-			return "You don't have friend ?";
+			throw new Error("Don't you have any friend ?");
 		const rel = await this.findFriendRelationOf(userIdOne, userIdTwo);
 		if (rel !== undefined ) //request already exist or isFriend
 		{
-			return "Request already sent";
+			throw new Error("Request already sent !");
 		}
 		else
 		{
@@ -113,18 +188,14 @@ export class FriendsService
 			const rel_two = await this.findFriendRelationOf(userIdTwo, userIdOne);
 
 			if (rel_two !== undefined && rel_two.status === EStatus.BLOCK)
-				return "Request impossible !"
+				throw new Error("Impossible request !");
 
 			if (rel_two !== undefined && rel_two.status === EStatus.REQUEST)
 			{
 				rel_two.status = EStatus.FRIEND;
-				try {
-					await this.friendRepository.save(rel_two);
-				}
-				catch (e)
-				{
-					return undefined;
-				}
+
+				if (await this.safeFriendSave(rel_two) === undefined)
+					throw new Error("Impossible request !");
 
 				req.status = EStatus.FRIEND;
 			}
@@ -134,16 +205,9 @@ export class FriendsService
 			}
 			req.id_one = userIdOne;
 			req.id_two = userIdTwo;
+			
 
-			try {
-				let ret = await this.friendRepository.save(req);
-
-				return ret;
-			}
-			catch (e)
-			{
-				return undefined;
-			}
+			return await this.safeFriendSave(req);
 		}
 	}
 
@@ -154,7 +218,7 @@ export class FriendsService
 	 * @param id : request_id
 	 * @returns void
 	 */
-	async rmRequestFriend(id_two: number, id_one: number) : Promise<undefined | string>
+	async rmRequestFriend(id_two: number, id_one: number) : Promise<undefined>
 	{
 		const rel = await this.findFriendRelationOf(id_one, id_two);
 
@@ -162,11 +226,11 @@ export class FriendsService
 		{
 			if (rel.status === 0)
 			{
-				await this.friendRepository.remove(rel);
+				await this.safeFriendRm(rel);
 				return undefined;
 			}
 		}
-		return "No Request Send !";
+		throw new Error("No Request Send !");
 	}
 
 	/**
@@ -179,21 +243,29 @@ export class FriendsService
 	{
 		if (userIdOne === userIdTwo)
 			return undefined;
-		await this.friendRepository
-		    .createQueryBuilder()
-		    .delete()
-		    .from(FriendShip)
-		    .where("id_one = :id_one", { id_one: userIdOne })
-			.andWhere("id_two = :id_two", { id_two: userIdTwo })
-		    .execute();
 
-		await this.friendRepository
-		    .createQueryBuilder()
-		    .delete()
-		    .from(FriendShip)
-		    .where("id_one = :id_one", { id_one: userIdTwo })
-			.andWhere("id_two = :id_two", { id_two: userIdOne })
-		    .execute();
+		try
+		{
+			await this.friendRepository
+			    .createQueryBuilder()
+			    .delete()
+			    .from(FriendShip)
+			    .where("id_one = :id_one", { id_one: userIdOne })
+				.andWhere("id_two = :id_two", { id_two: userIdTwo })
+			    .execute();
+
+			await this.friendRepository
+			    .createQueryBuilder()
+			    .delete()
+			    .from(FriendShip)
+			    .where("id_one = :id_one", { id_one: userIdTwo })
+				.andWhere("id_two = :id_two", { id_two: userIdOne })
+			    .execute();
+		}
+		catch
+		{
+			throw new Error("Impossible to remove friend relation !");
+		}
 		return ;
 	}
 
@@ -205,14 +277,14 @@ export class FriendsService
 	async acceptRequestFriend(id: number) : Promise<void>
 	{
 		//Set relation to FRIEND (1, 2)
-		const rel = await this.friendRepository.findOne({
-			where: {
-				id: In([id])
-			},
-		});
+		const rel = await this.findRelById(id);
+		if (rel === undefined)
+			throw Error("Impossible to accept friend request !");
 		rel.status = EStatus.FRIEND;
 
-		await this.friendRepository.save(rel);
+		if (await this.safeFriendSave(rel) === undefined)
+		throw Error("Impossible to accept friend request !");
+		//await this.friendRepository.(rel);
 
 		//set relation (2, 1)
 
@@ -231,7 +303,8 @@ export class FriendsService
 			rel_two.status = EStatus.FRIEND; //avoid block or request
 		}
 
-		await this.friendRepository.save(rel_two);
+		if (await this.safeFriendSave(rel_two) === undefined)
+			throw Error("Impossible to accept friend request !");
 	}
 
 	/**
@@ -240,49 +313,62 @@ export class FriendsService
 	 * @param userIdTwo
 	 * @returns Blocked relation
 	 */
-	async blockUser(userIdOne: number, userIdTwo: number): Promise<FriendShip>
+	async blockUser(userIdOne: number, userIdTwo: number): Promise<FriendShip | undefined>
 	{
 		if (userIdOne === userIdTwo)
 			return undefined;
-		//Delete if relation exist & != Block (2, 1)
-		await this.friendRepository
-		    .createQueryBuilder()
-		    .delete()
-		    .from(FriendShip)
-		    .where("id_one = :id_one", { id_one: userIdTwo })
-			.andWhere("id_two = :id_two", { id_two: userIdOne })
-			.andWhere("status != :status", { status: EStatus.BLOCK})
-		    .execute();
+		try {
+			//Delete if relation exist & != Block (2, 1)
+			await this.friendRepository
+			    .createQueryBuilder()
+			    .delete()
+			    .from(FriendShip)
+			    .where("id_one = :id_one", { id_one: userIdTwo })
+				.andWhere("id_two = :id_two", { id_two: userIdOne })
+				.andWhere("status != :status", { status: EStatus.BLOCK})
+			    .execute();
 
-		//Update relation (1, 2)
-		let relation = await this.findFriendRelationOf(userIdOne, userIdTwo);
-		if (relation === undefined)
-		{
-			relation = {
-				id: undefined,
-				id_one: userIdOne,
-				id_two: userIdTwo,
-				status: EStatus.BLOCK,
-				date: new Date(),
+			
+			let relation = await this.findFriendRelationOf(userIdOne, userIdTwo);
+			if (relation === undefined)
+			{
+				relation = {
+					id: undefined,
+					id_one: userIdOne,
+					id_two: userIdTwo,
+					status: EStatus.BLOCK,
+					date: new Date(),
+				}
 			}
-		}
-		relation.status	= EStatus.BLOCK;
 
-		return await this.friendRepository.save(relation);
+			relation.status	= EStatus.BLOCK;
+			return await this.safeFriendSave(relation);
+		}
+		catch
+		{
+			throw new Error("Impossible to block user !");
+		}
 	}
 
 	async unBlockUser(userIdOne: number, userIdTwo: number): Promise<void>
 	{
 		if (userIdOne === userIdTwo)
 			return undefined;
-		await this.friendRepository
-		.createQueryBuilder()
-		.delete()
-		.from(FriendShip)
-		.where("id_one = :id_one", { id_one: userIdOne })
-		.andWhere("id_two = :id_two", { id_two: userIdTwo })
-		.andWhere("status = :status", { status: EStatus.BLOCK})
-		.execute();
+		try
+		{	
+			await this.friendRepository
+			.createQueryBuilder()
+			.delete()
+			.from(FriendShip)
+			.where("id_one = :id_one", { id_one: userIdOne })
+			.andWhere("id_two = :id_two", { id_two: userIdTwo })
+			.andWhere("status = :status", { status: EStatus.BLOCK})
+			.execute();
+		}
+		catch (e)
+		{
+			throw new Error("Impossible to unblock user !");
+		}
 	}
 
 }

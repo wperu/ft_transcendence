@@ -13,6 +13,7 @@ interface twoFAProps
 {
 	user: IUser;
 	is_active: boolean;
+	qrUri: string;
 }
 
 function TwoFactorAuthSetting(props: twoFAProps)
@@ -20,8 +21,6 @@ function TwoFactorAuthSetting(props: twoFAProps)
 	const [isTwoFactor, setIsTwoFactor]	= useState<boolean>(props.is_active);
 	const [isOpen, setIsOpen]			= useState<boolean>(false);
 	const { user } = useAuth();
-	const [qrUri, setQrUri]				= useState<string>(getURL());
-	
 
 	function changeTwoFactor()
 	{
@@ -41,7 +40,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 				const body = {
 					token: event.currentTarget.value,
 				}
-				const respo = axios({
+				axios({
 					method: 'put',
 					url: url,
 					headers: headers,
@@ -54,46 +53,19 @@ function TwoFactorAuthSetting(props: twoFAProps)
 				})
 				.catch(res => {
 					console.log(res); //fix parseme pls /!\
-					
 				});
 			}
-
 			event.currentTarget.value = '';
 		}
 	};
 
-	function getURL() : string
-	{
-
-		var ret =  "";
-		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/twFactorQR'; //fixme
-		const headers = {
-			'authorization'	: user ? (user.accessCode) : '',
-		}
-		const respo = axios({
-			method: 'get',
-			url: url,
-			headers: headers,
-		})
-		.then(res => {
-			ret = res.data.url;
-			setQrUri(res.data.url);
-		})
-		.catch(res => {
-			console.log(res); //fix parseme pls /!\
-			//setIsTwoFactor(isTwoFactor);
-			return "";
-		});
-
-		return ret;
-	}
+	
 
 
 
 	useEffect(() => {
 		if (user)
 			user.useTwoFa = isTwoFactor;
-		//getURL();
 	},[user, isTwoFactor])
 
 	return (
@@ -106,7 +78,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 
 			<Popup className="tfa-popup" open={isOpen} onClose={() => setIsOpen(false)}>
 				<div className="tfa-popup-header">
-					<QRCode  value={qrUri} size={124} />
+					<QRCode  value={props.qrUri} size={124} />
 				</div>
 				<div className="tfa-popup-content">
 					Enter code your token to turn {isTwoFactor ? 'off' : 'on'} google authentificator

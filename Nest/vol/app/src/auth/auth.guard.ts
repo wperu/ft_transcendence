@@ -34,7 +34,7 @@ export class AuthGuard implements CanActivate {
 		{
 			throw new ForbiddenException("User not register");
 		}
-		if (!await this.usersService.checkAccessTokenExpiration(target_user))
+		/*if (!await this.usersService.checkAccessTokenExpiration(target_user))
 		{
 			try {
 				console.log("token expired, trying to refresh the token");
@@ -47,7 +47,7 @@ export class AuthGuard implements CanActivate {
 			}
 			catch(e)
 				{ throw new ForbiddenException("Token expired"); }
-		}
+		}*/
 		return (true);
 	}
 }

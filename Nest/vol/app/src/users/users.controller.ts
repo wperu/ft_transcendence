@@ -14,6 +14,7 @@ import {
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
+	Logger,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -31,12 +32,15 @@ export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
+		
 	) {}
+	private logger: Logger = new Logger('UserController');
 
 	@Get("/profile/:refId")
 	@UseGuards(AuthGuard)
 	async findOne(@Param('refId') param): Promise<IProfileDTO>
 	{
+		this.logger.log('GET /profile/' + param);
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
@@ -61,6 +65,7 @@ export class UsersController
 	async updateUserName(@Res() response : Response, @Req() request: Request,
 		@Body() body, @Param('refId') param)
 	{
+		this.logger.log('PUT /'+ param + '/username');
 		// TODO update user in service
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
@@ -93,6 +98,7 @@ export class UsersController
 	@UseGuards(AuthGuard)
 	async updateTwoFactor(@Param('refId') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
+		this.logger.log('PUT /' + param + '/useTwoFactor');
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
@@ -139,6 +145,7 @@ export class UsersController
 		@Req() request,
 	)
 	{
+		this.logger.log('POST /' + param + '/avatar');
 		let	old_avatar : string | undefined;
 		let refId: number = parseInt(param);
 

@@ -24,7 +24,7 @@ function ChangeableUsername(props: userProps)
 		let target = event.target as typeof event.target & {
 			username: {value: string};
 		};
-		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/username';
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/username';
 		const headers = {
 			'authorization'	: props.user.accessCode,
 		}
@@ -55,13 +55,12 @@ function ChangeableUsername(props: userProps)
 			target.username.value = '';
 		})
 		.catch(err => {
-			//console.log('fail !');
-			//console.log(err);
+			console.error(err);
 			target.username.value = '';
 		})
 
 		
-	}, [user, setUser])
+	}, [user, setUser, props.user.reference_id, props.user.accessCode])
 
 	return (
 		<form id="current_profile_username" onSubmit={updateUsername}>
