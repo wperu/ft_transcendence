@@ -24,7 +24,7 @@ export class UsersService
 
 	)
 	{
-		
+
 	}
 
 
@@ -37,7 +37,7 @@ export class UsersService
 
 
 
-	
+
 
 	async findAll(): Promise<User[]>
 	{
@@ -209,7 +209,7 @@ export class UsersService
 		return (await this.usersRepository.save(user));
 	}
 
-	async updateAvatar(id : number, new_avatar_file: string) : Promise<string | undefined>
+	async updateAvatar(reference_id : number, new_avatar_file: string) : Promise<string | undefined>
 	{
 		let	user : User;
 		let	old_avatar_path: string | undefined;
@@ -217,11 +217,11 @@ export class UsersService
 
 			user = await this.usersRepository.findOne({
 				where: [
-					{id: id}
+					{reference_id: reference_id}
 				],
 			});
 			if (user === null)
-				console.warn("User with ID: " + id + " doesn't exist");
+				console.warn("User with ref ID: " + reference_id + " doesn't exist");
 			else
 			{
 				old_avatar_path = user.avatar_file;
@@ -229,7 +229,7 @@ export class UsersService
 						.createQueryBuilder()
 						.update(User)
 						.set({avatar_file: new_avatar_file})
-						.where("id = :id", {id})
+						.where("reference_id = :reference_id", {reference_id})
 						.execute();
 				console.log("Avatar of " + user.username + " updated");
 			}
@@ -250,14 +250,14 @@ export class UsersService
 		return (null);
 	}
 
-	async updateUserName(id: number, newUserName : string) : Promise<boolean>
+	async updateUserName(reference_id: number, newUserName : string) : Promise<boolean>
 	{
 		try {
 			await this.usersRepository
 					.createQueryBuilder()
 					.update(User)
 					.set({username: newUserName})
-					.where("reference_id = :id", {id})
+					.where("reference_id = :reference_id", {reference_id})
 					.execute();
 		}
 		catch(e)
@@ -324,8 +324,8 @@ export class UsersService
 
 	/**
 	 * check if username is valide
-	 * @param username 
-	 * @returns 
+	 * @param username
+	 * @returns
 	 */
 	isValideUsername(name: string) : boolean
 	{

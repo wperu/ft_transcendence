@@ -134,7 +134,7 @@ export class UsersController
 		@UploadedFile() file: Express.Multer.File,
 		@Res() response : Response,
 		@Param('refId') param,
-		@Body() body,
+		@Req() request,
 	)
 	{
 		let	old_avatar : string | undefined;
@@ -151,8 +151,8 @@ export class UsersController
 		else
 		{
 			const user = await this.userService.findUserByReferenceID(refId);
-			if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-				throw new ForbiddenException("Wrong access code"); // KO bad token
+			if (await this.userService.checkAccesWithRefId(request.headers['authorization'], refId) === false)
+                throw new ForbiddenException("wrong access code");
 			const extension = file.originalname.split('.');
 			var filename = "./avatars/";
 			filename += Date.now() + '-';
@@ -167,7 +167,7 @@ export class UsersController
 						console.error("Failed deleting received file: " + err);
 				});
 				console.log("Changing avatar path to : [" + filename + "]");
-				old_avatar = await this.userService.updateAvatar(param, filename);
+				old_avatar = await this.userService.updateAvatar(refId, filename);
 				if (old_avatar !== undefined && old_avatar !== null)
 				{
 					if (path.basename(path.dirname(old_avatar)) !== "defaults")
