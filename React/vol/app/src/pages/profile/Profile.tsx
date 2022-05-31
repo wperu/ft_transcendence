@@ -114,7 +114,7 @@ function Profile() {
 	useEffect(() => {
 		setProfile(null);
 	}, [id]);
-	
+
 
 	useEffect(() => {
 		if (profile === null && id)
@@ -145,7 +145,7 @@ function Profile() {
 		return (
 			<div id="profile_page">
 				<CurrentUserProfileHeader user={user} qrUri={qrUri!}/>
-				<MatchHistory />
+				<MatchHistory ref_id={user?.reference_id || 0}/>
 				<footer>
 					<Link to='/'><BackToMainMenuButton /></Link>
 				</footer>
@@ -154,11 +154,11 @@ function Profile() {
 	}
 	else if (profile)
 	{
-		
+
 		return (
 			<div id="profile_page">
 				<OtherUserProfileHeader user={profile} />
-				<MatchHistory />
+				<MatchHistory ref_id={profile?.reference_id || 0}/>
 				<footer>
 					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
 				</footer>
@@ -169,7 +169,6 @@ function Profile() {
 	{
 		return <></> //todo
 	}
-	;
   }
 
   export default Profile;

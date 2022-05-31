@@ -61,6 +61,9 @@ function Match(props: matchProps)
 	function parsTime() : string
 	{
 		let date = new Date(props.game_date);
+		let minutes = date.getMinutes().toString();
+		if (minutes.length < 2)
+			return (date.getHours() + ":0" + date.getMinutes());
 		return (date.getHours() + ":" + date.getMinutes());
 	}
 
@@ -87,29 +90,32 @@ function Match(props: matchProps)
 					Dashes <OptionValue value={props.dashes} />
 				</div>
 				<div>
-					Double balle <OptionValue value={props.double_ball} />
+					Double ball <OptionValue value={props.double_ball} />
 				</div>
 			</div>
 		</li>
 	);
 }
 
-function MatchHistory ()
+interface historyProps
 {
-	const	auth = useAuth();
+	ref_id: number;
+}
+
+function MatchHistory(props: historyProps)
+{
 	const	[history, setHistory] = useState<GetFinishedGameDto []>([]);
 
 	useEffect(() => {
-		fetch('/api/game-history/' + auth.user?.id)
+		fetch('/api/game-history/' + props.ref_id)
 			.then(res => res.json())
 			.then(result => {
 				setHistory(result);
-				}, error => {
-				console.log("error test");
+			}, error => {
 				if (error)
 					console.log("fetch error");
 			});
-	}, [auth]);
+	}, []);
 
 	return (
 		<ul id="match_history">
@@ -117,18 +123,18 @@ function MatchHistory ()
 				(history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two}, index) => (
 					<Match
 					index={index}
-					current_user_name={(auth.user?.username !== undefined)? auth.user.username : "undefined"}
-					opponent_name={(ref_id_one !== auth.user?.reference_id)?username_one:username_two}
-					opponent_ref_id={(ref_id_one !== auth.user?.reference_id)?ref_id_one:ref_id_two}
-					current_score={(ref_id_one === auth.user?.reference_id)?score_one:score_two}
-					opponent_score={(ref_id_one !== auth.user?.reference_id)?score_one:score_two}
+					opponent_ref_id={(ref_id_one === props.ref_id)?ref_id_two:ref_id_one}
+					current_user_name={(ref_id_one === props.ref_id)?username_one:username_two}
+					opponent_name={(ref_id_one === props.ref_id)?username_two:username_one}
+					current_score={(ref_id_one === props.ref_id)?score_one:score_two}
+					opponent_score={(ref_id_one === props.ref_id)?score_two:score_one}
 					game_date={date}
 					dashes={false}
 					double_ball={false}
 					/>
-				)))
+				))).reverse()
+				// )))
 				// ))).sort((a, b) => new Date(a.props.date).parsTime() - new Date(b.props.date).parsTime())
-				// ))).reverse()
 			}
 		</ul>
 	);
