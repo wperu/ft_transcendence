@@ -498,6 +498,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('GAME_INVITE')
 	async game_invite(client: Socket, data: GameInviteDTO)
 	{
+		this.logger.log("Invite to game");
 		await this.chatService.gameInvite(client, data);
 	}
 }
