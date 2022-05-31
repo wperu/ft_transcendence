@@ -21,8 +21,6 @@ function TwoFactorAuthSetting(props: twoFAProps)
 	const [isTwoFactor, setIsTwoFactor]	= useState<boolean>(props.is_active);
 	const [isOpen, setIsOpen]			= useState<boolean>(false);
 	const { user } = useAuth();
-	//const [qrUri, setQrUri]				= useState<string>(getURL());
-	
 
 	function changeTwoFactor()
 	{
@@ -42,7 +40,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 				const body = {
 					token: event.currentTarget.value,
 				}
-				const respo = axios({
+				axios({
 					method: 'put',
 					url: url,
 					headers: headers,
@@ -55,10 +53,8 @@ function TwoFactorAuthSetting(props: twoFAProps)
 				})
 				.catch(res => {
 					console.log(res); //fix parseme pls /!\
-					
 				});
 			}
-
 			event.currentTarget.value = '';
 		}
 	};
@@ -70,7 +66,6 @@ function TwoFactorAuthSetting(props: twoFAProps)
 	useEffect(() => {
 		if (user)
 			user.useTwoFa = isTwoFactor;
-		//getURL();
 	},[user, isTwoFactor])
 
 	return (

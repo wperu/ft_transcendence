@@ -1,6 +1,6 @@
 import "./Profile.css";
 import { useCallback, useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import MatchHistory from "./MatchHistory";
@@ -74,16 +74,15 @@ function Profile() {
 	const [profile, setProfile]		= useState<IProfileDTO | null>(null);
 	const [qrUri, setQrUri]			= useState<string>();
 
-	function getURL() : string
-	{
+	const getURL = useCallback(() => {
 		var ret =  "";
 		if (auth && auth.user)
 		{
-			const url = process.env.REACT_APP_API_USER + '/' + auth.user.reference_id +  '/twFactorQR'; //fixme
+			const url = process.env.REACT_APP_API_USER + '/' + auth.user.reference_id +  '/twFactorQR';
 			const headers = {
 				'authorization'	: auth.user ? (auth.user.accessCode) : '',
 			}
-			const respo = axios({
+			axios({
 				method: 'get',
 				url: url,
 				headers: headers,
@@ -98,18 +97,18 @@ function Profile() {
 				return "";
 			});
 		}
-		return ret
-	}
+		return ret;
+	}, [auth])
 
 	useEffect(() => {
 		if (!id)
 			setQrUri(getURL());
-	}, [id])
+	}, [id, getURL]);
 
 
 	useEffect(() => {
 		setProfile(null);
-	}, [id])
+	}, [id]);
 	
 
 	useEffect(() => {
@@ -132,7 +131,7 @@ function Profile() {
 				});
 			}
 		}
-	}, [profile, id])
+	}, [profile, id, auth.user])
 
 	if (!id)
 	{
