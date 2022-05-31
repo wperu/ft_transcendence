@@ -91,7 +91,7 @@ function Profile() {
 		return (
 			<div id="profile_page">
 				<CurrentUserProfileHeader user={user} />
-				<MatchHistory />
+				<MatchHistory ref_id={auth.user?.reference_id || 0}/>
 				<footer>
 					<Link to='/'><BackToMainMenuButton /></Link>
 				</footer>
@@ -121,7 +121,7 @@ function Profile() {
 		return (
 			<div id="profile_page">
 				<OtherUserProfileHeader user={profile} />
-				<MatchHistory />
+				<MatchHistory ref_id={profile?.reference_id || 0}/>
 				<footer>
 					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
 				</footer>

@@ -1,6 +1,5 @@
 export interface PostFinishedGameDto
 {
-	date: Date,
 	user_one_ref_id: number;
 	user_two_ref_id: number;
 	user_one_score: number;
