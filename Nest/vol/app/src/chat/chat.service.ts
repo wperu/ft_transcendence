@@ -43,7 +43,7 @@ export class ChatService {
 			console.log("[PONG] unable to decode user token data");
 			return (undefined);
 		}
-		
+
 		const user_info = await this.usersService.findUserByReferenceID(data.reference_id);
 
 		if (user_info === undefined)
@@ -69,7 +69,7 @@ export class ChatService {
    async getUserFromSocket(socket: Socket): Promise<ChatUser | undefined>
     {
         const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
-       
+
 		if (data === null)
 			return (undefined);
 
@@ -132,7 +132,7 @@ export class ChatService {
 		const chatUser = await this.getUserFromSocket(socket);
 		if (chatUser === undefined)
 			return undefined;//throw error
-		
+
 		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id }), 1);
 		return (chatUser);
 	}
@@ -144,7 +144,7 @@ export class ChatService {
 		return (room.users.find((u) => { u === user }) !== undefined)
 	}
 
-	
+
 
 	async createRoom(client: Socket, user: ChatUser, data : CreateRoomDTO) : Promise<void>
 	{
@@ -167,8 +167,8 @@ export class ChatService {
 				isDm: data.isDm,
 				owner: (data.isDm === false) ? room.owner : user2.reference_id,
 			}
-			
-			for (const s of user.socket) 
+
+			for (const s of user.socket)
 			{
 				s.join(room.id.toString());
 				s.emit("JOINED_ROOM", dto);
@@ -181,7 +181,7 @@ export class ChatService {
 				dto.room_name = user1.username;
 				dto.owner= user1.reference_id;
 
-				for (const s of us.socket) 
+				for (const s of us.socket)
 				{
 					s.join(room.id.toString());
 					s.emit("JOINED_ROOM", dto);
@@ -234,7 +234,7 @@ export class ChatService {
 				s.join(room.id.toString());
 				s.emit("JOINED_ROOM", data);
 			});
-			
+
 			let data : NoticeDTO;
 			data = { level: ELevel.info, content: "Room " + room.name + " joined" };
 			client.emit("NOTIFICATION", data);
@@ -270,17 +270,17 @@ export class ChatService {
 			if (dest !== undefined)
 			{
 				dto = {id: id, level: ELevelInRoom.owner};
-				
+
 				for (const s of dest.socket)
 				{
 					s.emit('UPDATE_ROOM', dto);
 				}
-			
+
 			}
 		}
 
 		let dto: RoomLeftDto;
-		
+
 		dto = {
 			id: id,
 			room_name: roomName,
@@ -292,7 +292,7 @@ export class ChatService {
 
 		let data : NoticeDTO;
 		data = { level: ELevel.info, content: "Room " + roomName + " left" };
-		client.emit("NOTIFICATION", data);	
+		client.emit("NOTIFICATION", data);
 	}
 
 	/***
@@ -301,7 +301,7 @@ export class ChatService {
 	async roomUserList(client: Socket, user: ChatUser, roomId: number)
 	{
 		const resp = await this.roomService.userListOfRoom(roomId, user.reference_id);
-		
+
 		if (typeof resp !== 'string')
 		{
 			for (let u of resp)
@@ -325,7 +325,7 @@ export class ChatService {
 		}
 		else
 			resp = await this.roomService.unbanUser(data.id, user.reference_id, data.refId);
-		
+
 
 		let dto : NoticeDTO;
 		if (typeof resp !== "string")
@@ -346,7 +346,7 @@ export class ChatService {
 					{
 						s.leave(resp.id.toString());
 						s.emit('LEFT_ROOM', left_dto);
-						s.emit("NOTIFICATION", { level: ELevel.error, content: `Banned from ${resp.name} !` });	
+						s.emit("NOTIFICATION", { level: ELevel.error, content: `Banned from ${resp.name} !` });
 					}
 				}
 			}
@@ -355,8 +355,8 @@ export class ChatService {
 		{
 			dto = { level: ELevel.error, content: resp };
 		}
-		
-		client.emit("NOTIFICATION", dto);	
+
+		client.emit("NOTIFICATION", dto);
 	}
 
 	async roomChangePass(client: Socket, user: ChatUser, roomId: number ,pass: string)
@@ -393,7 +393,7 @@ export class ChatService {
 		client.emit("NOTIFICATION", dto);
 	}
 
-	removeUser(refId: number) 
+	removeUser(refId: number)
 	{
 		this.users.splice(this.users.findIndex((u) => { return u.reference_id === refId}))
 	}
@@ -412,14 +412,14 @@ export class ChatService {
 	async ConnectToChan(client: Socket, user: ChatUser)
 	{
 		let rooms_list = await this.roomService.roomListOfUser(user.reference_id);
-		
-		
+
+
 		for (const r of rooms_list)
 		{
-			let data : RoomJoinedDTO; 
+			let data : RoomJoinedDTO;
 			data = {
 				id: r.id,
-				room_name: r.name,		
+				room_name: r.name,
 				protected: r.has_password,
 				level: await this.roomService.getUserLevel(r.id, r.owner, user.reference_id),
 				isDm: r.isDm,
@@ -428,7 +428,7 @@ export class ChatService {
 			client.join(r.id.toString());
 			client.emit("JOINED_ROOM", data);
 		}
-		
+
 	}
 
 	async sendRoomList(client: Socket)
@@ -466,7 +466,7 @@ export class ChatService {
 	}
 
 	/**
-	 * 
+	 *
 	 * * * * RELATIONSHIP * * * * *
 	 *
 	 */
@@ -487,7 +487,7 @@ export class ChatService {
 		if (relation === undefined)
 			return [];
 		let ret: UserDataDto[];
-		
+
 		ret = [];
 		for (const rel of relation)
 		{
@@ -519,7 +519,7 @@ export class ChatService {
 		{
 			let user2 = await this.usersService.findUserByReferenceID(rel.id_two);
 			let username = user2?.username || "default";
-			
+
 			ret.push({
 				username: username,
 				reference_id: rel.id_two,
@@ -561,18 +561,18 @@ export class ChatService {
 
 
 
-	
-	
+
+
 	/**
 	 * Return true if a newRequest was created
-	 * @param user 
-	 * @param ref_id 
-	 * @returns 
+	 * @param user
+	 * @param ref_id
+	 * @returns
 	 */
 	async addFriend(client: Socket, user: ChatUser, ref_id : number) : Promise<boolean>
 	{
 		const ret = await this.friendService.addRequestFriend(user.reference_id, ref_id)
-		
+
 		if (ret === undefined)
 		{
 			return false;
@@ -585,7 +585,7 @@ export class ChatService {
 		}
 		else
 		{
-			const dto : NoticeDTO = { level: ELevel.info, content: "Request Send !" };
+			const dto : NoticeDTO = { level: ELevel.info, content: "Friend request sent" };
 			client.emit("NOTIFICATION", dto);
 			return true;
 		}
@@ -636,7 +636,7 @@ export class ChatService {
 					date: new Date(),
 					refId: user.reference_id,
 				}]
-			
+
 			//player
 			if (data.refId !== undefined)
 			{
@@ -655,7 +655,7 @@ export class ChatService {
 					}
 				}
 			}
-			else if (data.chatRoomId !== undefined) //room case 
+			else if (data.chatRoomId !== undefined) //room case
 			{
 				const resp = await this.roomService.userListOfRoom(data.chatRoomId, user.reference_id);
 

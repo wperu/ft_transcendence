@@ -33,16 +33,16 @@ export class UsersController
 		private readonly userService: UsersService,
 	) {}
 
-	@Get("/profile/:id")
+	@Get("/profile/:refId")
 	@UseGuards(AuthGuard)
-	async findOne(@Param('id') param): Promise<IProfileDTO>
+	async findOne(@Param('refId') param): Promise<IProfileDTO>
 	{
-		let id: number = parseInt(param);
-		if(isNaN(id) || !/^\d*$/.test(param))
+		let refId: number = parseInt(param);
+		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
 
 
-		let user = await this.userService.findUserByReferenceID(id);
+		let user = await this.userService.findUserByReferenceID(refId);
 		if (user === undefined)
 			throw new NotFoundException();
 		return (this.userService.getProfileFromUser(user));
@@ -56,23 +56,24 @@ export class UsersController
 	 * @param param
 	 * @returns
 	 */
-	@Put("/:id/username")
+	@Put("/:refId/username")
 	@UseGuards(AuthGuard)
-	async updateUserName(@Res() response : Response, @Req() request: Request, @Body() body, @Param('id') param)
+	async updateUserName(@Res() response : Response, @Req() request: Request,
+		@Body() body, @Param('refId') param)
 	{
 		// TODO update user in service
-		let id: number = parseInt(param);
-		if(isNaN(id) || !/^\d*$/.test(param))
+		let refId: number = parseInt(param);
+		if(isNaN(refId) || !/^\d*$/.test(param))
 		{
 			throw new NotFoundException();
 		}
-		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], refId) === false)
 			throw new ForbiddenException("wrong access code");
 		if (body['username'] === undefined || body['username'] === "")
 			throw new BadRequestException('no username passed !');
 		else if (this.userService.isValideUsername(body['username']) === false)
 			throw new BadRequestException('Username bad format !');
-		else if (await this.userService.updateUserName(id, body['username']) === false) //add alreay user responses
+		else if (await this.userService.updateUserName(refId, body['username']) === false) //add alreay user responses
 			throw new BadRequestException('username already use');
 
 		return response.status(HttpStatus.OK).json();
@@ -88,38 +89,35 @@ export class UsersController
 	 * @param body
 	 * @returns
 	 */
-	@Put("/:id/useTwoFactor")
+	@Put("/:refId/useTwoFactor")
 	@UseGuards(AuthGuard)
-	async updateTwoFactor(@Param('id') param, @Req() request: Request, @Body() body) : Promise<undefined>
+	async updateTwoFactor(@Param('refId') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
-		let id: number = parseInt(param);
-		if(isNaN(id) || !/^\d*$/.test(param))
+		let refId: number = parseInt(param);
+		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
 
-		let user = await this.userService.findUserByReferenceID(id);
-		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
-			throw new ForbiddenException("wrong access code");
-
-		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-			throw new BadRequestException("wrong token code"); // KO bad token
+		let user = await this.userService.findUserByReferenceID(refId);
+		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
+			throw new BadRequestException("wrong access code"); // KO bad token
 
 		user.setTwoFA = !user.setTwoFA;
 		await this.userService.saveUser(user);
 		return undefined; // OK
 	}
 
-	@Get("/:id/twFactorQR")
+	@Get("/:refId/twFactorQR")
 	@UseGuards(AuthGuard)
-	async getTwoFaQr(@Param('id') param, @Body() body, @Req() request: Request, @Res() response: Response)
+	async getTwoFaQr(@Param('refId') param, @Req() request: Request, @Res() response: Response)
 	{
-		let id: number = parseInt(param);
-		if(isNaN(id) || !/^\d*$/.test(param))
+		let refId: number = parseInt(param);
+		if(isNaN(refId) || !/^\d*$/.test(param))
 		{
 			throw new NotFoundException();
 		}
 
-		const user = await this.userService.findUserByReferenceID(id);
-		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], id) === false)
+		const user = await this.userService.findUserByReferenceID(refId);
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], refId) === false)
 			throw new ForbiddenException("wrong access code");
 
 		const url = this.userService.getQR(user.SecretCode);
@@ -127,7 +125,7 @@ export class UsersController
 		return response.status(HttpStatus.OK).json({ url: url});
 	}
 
-	@Post("/:id/avatar")
+	@Post("/:refId/avatar")
 	@UseGuards(AuthGuard)
 	@UseInterceptors(FileInterceptor('avatar', {
 		storage: diskStorage({
@@ -137,14 +135,14 @@ export class UsersController
 	async updateAvatar(
 		@UploadedFile() file: Express.Multer.File,
 		@Res() response : Response,
-		@Param('id') param,
-		@Body() body,
+		@Param('refId') param,
+		@Req() request,
 	)
 	{
 		let	old_avatar : string | undefined;
-		let id: number = parseInt(param);
+		let refId: number = parseInt(param);
 
-		if(isNaN(id) || !/^\d*$/.test(param))
+		if(isNaN(refId) || !/^\d*$/.test(param))
 		{
 			unlink(file.path, (err) => {
 				if (err)
@@ -154,10 +152,9 @@ export class UsersController
 		}
 		else
 		{
-			const user = await this.userService.findUserByReferenceID(id);
-			if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-				throw new ForbiddenException("wrong access code"); // KO bad token
-
+			const user = await this.userService.findUserByReferenceID(refId);
+			if (await this.userService.checkAccesWithRefId(request.headers['authorization'], refId) === false)
+                throw new ForbiddenException("wrong access code");
 			const extension = file.originalname.split('.');
 			var filename = "./avatars/";
 			filename += Date.now() + '-';
@@ -172,7 +169,7 @@ export class UsersController
 						console.error("Failed deleting received file: " + err);
 				});
 				console.log("Changing avatar path to : [" + filename + "]");
-				old_avatar = await this.userService.updateAvatar(param, filename);
+				old_avatar = await this.userService.updateAvatar(refId, filename);
 				if (old_avatar !== undefined && old_avatar !== null)
 				{
 					if (path.basename(path.dirname(old_avatar)) !== "defaults")
@@ -199,13 +196,13 @@ export class UsersController
 		return (response.status(201).json());
 	}
 
-	@Get("/:id/avatar")
-	async getAvatar(@Res() response: Response, @Param('id') param)
+	@Get("/:refId/avatar")
+	async getAvatar(@Res() response: Response, @Param('refId') param)
 	{
-		let id: number = parseInt(param);
-		if(isNaN(id) || !/^\d*$/.test(param))
+		let refId: number = parseInt(param);
+		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
-		let path : string = await this.userService.getAvatarPathByRefId(id);
+		let path : string = await this.userService.getAvatarPathByRefId(refId);
 		if (path === null)
 			throw new NotFoundException();
 		const file = createReadStream(path);

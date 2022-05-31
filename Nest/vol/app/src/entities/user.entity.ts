@@ -36,12 +36,11 @@ export class User
 	@Column()
 	SecretCode: string;
 
-
 	@CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
 	creation_date: Date;
 
-  @Column({nullable: true})
-  avatar_file: string;
+	@Column()
+	avatar_file: string;
 
   //TODO : create nb_won, nb_lose,block_list,friend_list
 }

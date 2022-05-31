@@ -16,7 +16,7 @@ function ChatTab ()
 
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
 	{
-		if (chatCtx.socket !== undefined && chatCtx.currentRoom !== undefined 
+		if (chatCtx.socket !== undefined && chatCtx.currentRoom !== undefined
 			&& event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
 			let data : SendMessageDTO =
@@ -94,14 +94,14 @@ function ChatTab ()
 			<header id="chat_quick_options">
 				<input type="button"
 					name="chat_quick_leave" id="chat_quick_leave"
-					value="Quitter" onClick={pressedQuit} />
+					value="Leave" onClick={pressedQuit} />
 				<input type="button"
 					name="chat_quick_invite" id="chat_quick_invite"
-					value="Inviter à jouer" onClick={sendInvite} />
+					value="Invite to play" onClick={sendInvite} />
 			</header>
 			<div id="messages_list" ref={msg_list_ref}>
 				<ul>
-				{	
+				{
 					messages.map(({message, sender, send_date, refId} , index) => {
 						if (chatCtx.blockList.find(b => (b.reference_id === refId)) === undefined)
 							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
@@ -110,8 +110,8 @@ function ChatTab ()
 				</ul>
 			</div>
 			<footer id="msg_footer">
-				<input type="text" id="message_input" onKeyPress={pressedSend} 
-					placeholder={chatCtx.currentRoom === undefined ? "t'es pas dans une room :/" : "Envoyer un message dans " + chatCtx.currentRoom?.room_name}/>
+				<input type="text" id="message_input" onKeyPress={pressedSend}
+					placeholder={chatCtx.currentRoom === undefined ? "you are not in a room :/" : "Send a message to " + chatCtx.currentRoom?.room_name}/>
 			</footer>
 		</div>
 	);

@@ -40,7 +40,7 @@ function OwnerChannelSettings ()
 			setUpdate(!update);
 		}
 	}
-		
+
 	function removePassword()
 	{
 		if (chatCtx.currentRoom !== undefined)
@@ -62,12 +62,12 @@ function OwnerChannelSettings ()
 		{
 			return (
 				<div id="password_channel_settings" onSubmit={passwordSubmit}>
-					<input type="button" value="Retirer le mot de passe" onClick={removePassword}/>
+					<input type="button" value="Remove password protection" onClick={removePassword}/>
 					<form id="password_form">
-						<input type="text" name="password" placeholder="Mot de passe" />
+						<input type="text" name="password" placeholder="Password" />
 						<input type="text" name="password_repeat"
-							placeholder="Confirmez le mot de passe" />
-						<input type="submit" value="Changer le mot de passe" />
+							placeholder="Confirm the password" />
+						<input type="submit" value="Change the password" />
 					</form>
 				</div>
 			);
@@ -77,10 +77,10 @@ function OwnerChannelSettings ()
 			return (
 				<div id="no_password_channel_settings">
 					<form id="password_form" onSubmit={passwordSubmit}>
-						<input type="text" name="password" placeholder="Mot de passe" />
+						<input type="text" name="password" placeholder="Password" />
 						<input type="text" name="password_repeat"
-							placeholder="Confirmez le mot de passe" />
-						<input type="submit" value="Mettre un mot de passe" />
+							placeholder="Confirm the password" />
+						<input type="submit" value="Add a password" />
 					</form>
 				</div>
 			);

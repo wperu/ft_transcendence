@@ -18,7 +18,7 @@ function LogOutButton () : JSX.Element
 	}
 
 
-	return <button className="footer_button" onClick={LogOutClick}>Se déconnecter</button>;
+	return <button className="footer_button" onClick={LogOutClick}>Log Out</button>;
 }
 
 export default LogOutButton;

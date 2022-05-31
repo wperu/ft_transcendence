@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
-import { useNotifyContext } from "../../NotifyContext/NotifyContext";
+import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
 import { useNavigate } from "react-router-dom";
 import { GameInviteDTO } from "../../../Common/Dto/chat/gameInvite";
@@ -76,7 +76,7 @@ interface IChatContext
 	setCurrentRoom:			(room: IRoom | undefined) => void;
 	setCurrentRoomById:		(id: number) => void;
 	findRoomById:			(id: number) => IRoom | undefined;
-	
+
 	rooms: IRoom[];
 	//addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
 
@@ -102,7 +102,7 @@ function useChatProvider() : IChatContext
 {
 	const notify	= useNotifyContext();
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/chat", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
-		auth:{ 
+		auth:{
 			token: useAuth().user?.accessCode,
 		}
 	}));
@@ -116,7 +116,7 @@ function useChatProvider() : IChatContext
 	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
 	const [jumpDm, awaitDm]					= useState<number | undefined>(undefined);
 	const navigate							= useNavigate();
-	
+
 
 
 
@@ -141,7 +141,7 @@ function useChatProvider() : IChatContext
 
 	const goToDmWith = useCallback((id: number) => {
 		const res = rooms.find((r) => (r.isDm === true && r.owner === id));
-		
+
 		if (res === undefined)
 			return false;
 		setCurrentRoom(res);
@@ -154,7 +154,7 @@ function useChatProvider() : IChatContext
 			return (o.id === id);
 		}));
 	}, [rooms]);
-	
+
 	const rmRoom = useCallback((id: number) => {
 		setRooms(prev => {
 			return prev.filter((o) => {
@@ -163,7 +163,7 @@ function useChatProvider() : IChatContext
 		});
 	}, []);
 
-	const findRoomById = useCallback((id: number) => 
+	const findRoomById = useCallback((id: number) =>
 	{
 		return (rooms.find(o => {
 			return (o.id === id);
@@ -185,7 +185,7 @@ function useChatProvider() : IChatContext
 			owner: room.owner,
 			nb_notifs: 0,
 		};
-		
+
 
 		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
 		if (currentRoom !== undefined)
@@ -207,7 +207,7 @@ function useChatProvider() : IChatContext
 	}, [jumpDm, rooms, setCurrentRoomById])
 
 	useEffect(() => {
-		
+
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
 			let targetRoom = findRoomById(data.room_id);
 			if (targetRoom !== undefined)
@@ -217,7 +217,7 @@ function useChatProvider() : IChatContext
 			}
 		});
 
-		return function cleanup() {		
+		return function cleanup() {
 			if (socket !== undefined)
 			{
 				socket.off('RECEIVE_MSG');
@@ -233,7 +233,7 @@ function useChatProvider() : IChatContext
 				rmRoom(data.id);
 		})
 
-		return function cleanup() {		
+		return function cleanup() {
 			if (socket !== undefined)
 			{
 				socket.off('LEFT_ROOM');
@@ -301,12 +301,12 @@ function useChatProvider() : IChatContext
 	 * **** Notice *****
 	 */
 
-	 
+
 	useEffect(() => {
 		socket.on('NOTIFICATION', (data : NoticeDTO) => {
 			notify.addNotice(data.level, data.content, 3000);
 		});
-		
+
 		return function cleanup() {
 			if (socket !== undefined)
 			{
@@ -346,9 +346,10 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
 			data.forEach(d => {d.id = generateKey(d.req_id || d.type)})
+			notify.addNotice(ELevel.info, "You have a new notification", 3000);
 			addNotif(data);
 		});
-		
+
 		return function cleanup() {
 			if (socket !== undefined)
 			{
@@ -360,7 +361,7 @@ function useChatProvider() : IChatContext
 	/**
 	 * ***** Relation Ship *****
 	 */
-	
+
 	useEffect(() => {
 
 		socket.on('FRIEND_LIST', (data: UserDataDto[]) => {
@@ -375,7 +376,7 @@ function useChatProvider() : IChatContext
 
 		socket.emit("BLOCK_LIST");
 
-		return function cleanup() {		
+		return function cleanup() {
 			if (socket !== undefined)
 			{
 				socket.off('FRIEND_LIST');
@@ -410,13 +411,13 @@ function useChatProvider() : IChatContext
 						refId: req.reference_id,
 						date: req.date || new Date(),
 					});
-				}	
+				}
 			})
 			addNotif(not);
 			setRequestList(data);
 		});
 
-		return function cleanup() {		
+		return function cleanup() {
 			if (socket !== undefined)
 			{
 				socket.off('FRIEND_REQUEST_LIST');
@@ -464,7 +465,7 @@ export function useChatContext()
 /**
  * Provide context to JSX.element child
  * @param children : JSX.element
- * @returns 
+ * @returns
  */
 export function ProvideChat( {children}: {children: JSX.Element} ): JSX.Element
 {

@@ -1,12 +1,14 @@
 import { GetFinishedGameDto } from "../../Common/Dto/FinishedGameDto";
 import { useAuth } from "../../auth/useAuth";
-import "./MatchHistory.css";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "./MatchHistory.css";
 
 interface matchProps
 {
 	current_user_name: string;
 	opponent_name: string;
+	opponent_ref_id: number;
 	current_score: number;
 	opponent_score: number;
 	index: number;
@@ -70,7 +72,11 @@ function Match(props: matchProps)
 				<div className="history_match_score">{props.current_score}</div>
 				<div className="match_score_separator">|</div>
 				<div className="history_match_score">{props.opponent_score}</div>
-				<div className="history_match_user">{props.opponent_name}</div>
+				<div className="history_match_user">
+					<Link to={"/profile/" + props.opponent_ref_id}>
+						{props.opponent_name}
+					</Link>
+				</div>
 				<div className="history_match_date">
 					<span>{ parsDate() }</span>
 					<span>{ parsTime() }</span>
@@ -108,13 +114,14 @@ function MatchHistory ()
 	return (
 		<ul id="match_history">
 			{
-				(history.map(({date, id_one, id_two, score_one, score_two, username_one, username_two}, index) => (
+				(history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two}, index) => (
 					<Match
 					index={index}
 					current_user_name={(auth.user?.username !== undefined)? auth.user.username : "undefined"}
-					opponent_name={(id_one !== auth.user?.id)?username_one:username_two}
-					current_score={(id_one === auth.user?.id)?score_one:score_two}
-					opponent_score={(id_one !== auth.user?.id)?score_one:score_two}
+					opponent_name={(ref_id_one !== auth.user?.reference_id)?username_one:username_two}
+					opponent_ref_id={(ref_id_one !== auth.user?.reference_id)?ref_id_one:ref_id_two}
+					current_score={(ref_id_one === auth.user?.reference_id)?score_one:score_two}
+					opponent_score={(ref_id_one !== auth.user?.reference_id)?score_one:score_two}
 					game_date={date}
 					dashes={false}
 					double_ball={false}

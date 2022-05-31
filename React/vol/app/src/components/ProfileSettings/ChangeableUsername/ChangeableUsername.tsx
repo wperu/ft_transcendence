@@ -20,11 +20,11 @@ function ChangeableUsername(props: userProps)
 
 	const updateUsername = useCallback((event: React.SyntheticEvent) =>	{
 		event.preventDefault();
-		
+
 		let target = event.target as typeof event.target & {
 			username: {value: string};
 		};
-		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/' + 'username';
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/username';
 		const headers = {
 			'authorization'	: props.user.accessCode,
 		}
@@ -39,28 +39,20 @@ function ChangeableUsername(props: userProps)
 			data: data,
 		})
 		.then(res => {
-			if (res.status === 200)
-			{
-				if (user === null)
-					return ;
-					
-				const value		= target.username.value;
-				console.log(value);
-				const newUser : IUser = {
-					id:							user.id,
-					reference_id:				user.reference_id,
-					username:					value,
-					accessCode:					user.accessCode,
-					token_expiration_date_42:	user.token_expiration_date_42,
-					creation_date:				user.creation_date,
-					useTwoFa: 					user.useTwoFa,
-					avatar_last_update: 		user.avatar_last_update,
-				}
-				console.log(user);
-				console.log(newUser);
-				setUser(newUser);
-				target.username.value = '';
+			//console.log(res);
+			if (user === null)
+				return ;
+			const newUser : IUser = {
+				id:							user.id,
+				reference_id:				user.reference_id,
+				username:					target.username.value,
+				accessCode:					user.accessCode,
+				creation_date:				user.creation_date,
+				useTwoFa: 					user.useTwoFa,
+				avatar_last_update: 		user.avatar_last_update,
 			}
+			setUser(newUser);
+			target.username.value = '';
 		})
 		.catch(err => {
 			//console.log('fail !');
@@ -75,7 +67,7 @@ function ChangeableUsername(props: userProps)
 		<form id="current_profile_username" onSubmit={updateUsername}>
 			<input type="text" name="username" maxLength={20} id="profile_username_input"
 				placeholder={getUserName()}  />
-			<input type="submit" id="new_username_submit" value="Changer" />
+			<input type="submit" id="new_username_submit" value="Change" />
 		</form>
 	);
 }

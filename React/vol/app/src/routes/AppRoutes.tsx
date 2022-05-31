@@ -5,7 +5,7 @@ import HomeLoggedOut from '../pages/HomeLoggedOut/HomeLoggedOut';
 import { ProvideAuth } from '../auth/useAuth';
 import { RequireAuth } from '../auth/RequireAuth';
 import Callback from '../pages/Callback/Callback';
-import SidebarWithContext from '../components/SidebarWithContext/SidebarWithContext';
+import SidebarWithContext from '../components/Sidebar/SidebarWithContext';
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
 import { FakeUser } from '../pages/FakeUser/FakeUser';

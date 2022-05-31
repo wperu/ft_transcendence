@@ -63,10 +63,10 @@ function Friends()
 	return (
 		<div id="Friends">
 			<form id="add_friend_by_name_form" onSubmit={addFriend}>
-				<div id="add_friend_title">Ajouter un ami</div>
+				<div id="add_friend_title">Add a friend</div>
 				<input id="add_friend_input" type="text"
-					name="name" placeholder="Nom de l'utilisateur"/>
-				<input id="add_friend_button" type="submit" value="Ajouter"/>
+					name="name" placeholder="Username"/>
+				<input id="add_friend_button" type="submit" value="Add"/>
 			</form>
 
 			<span className="friends_list_title">Notifications</span>
@@ -76,7 +76,7 @@ function Friends()
 					})}
 			</div>
 
-			<span className="friends_list_title">Amis</span>
+			<span className="friends_list_title">Friends</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
 				{chtCtx.friendsList.map((u, index) => (
@@ -98,7 +98,7 @@ function Friends()
 					: null ))}
 			</div>
 
-			<span className="friends_list_title">Utilisateurs bloqués</span>
+			<span className="friends_list_title">Blocked users</span>
 			<div className="friends_tab_list blocked_list">
 				{chtCtx.blockList.map((u) => (
 					<BlockedUser key={u.reference_id}

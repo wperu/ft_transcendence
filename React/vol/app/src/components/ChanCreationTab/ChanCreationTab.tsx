@@ -84,27 +84,27 @@ function ChanCreationTab()
 			<div id="visibility_options">
 				<input type="radio" name="channel_visibility" id="private_chan"
 					value="private_chan" />
-				<label htmlFor="private_chan">Privé</label>
+				<label htmlFor="private_chan">Private</label>
 				<input type="radio" name="channel_visibility" id="public_chan"
 					value="public_chan" defaultChecked />
-				<label htmlFor="public_chan">Publique</label>
+				<label htmlFor="public_chan">Public</label>
 			</div>
 			<input id="channel_name_input" type="text" name="channel_name"
-				placeholder="Nom du channel" />
+				placeholder="Channel name" />
 			<div id="password_options">
 				<div>
-					Protéger par mot de passe
+					Protect with a password
 					<input type="checkbox" id="protected" checked={is_protected}
 						onChange={changePasswordBox} name="is_protected" />
 				</div>
-				<input type="text" name="password" placeholder="Mot de passe"
+				<input type="text" name="password" placeholder="Password"
 					onChange={checkPasswordBox}/>
 				<input type="text" name="password_confirmation"
-					placeholder="Confirmez le mot de passe"/>
+					placeholder="Confirm password"/>
 			</div>
 			<footer id="create_chan_validation">
 				<input id="create_chan_button" type="submit"
-					value="Créer le channel"/>
+					value="Create the channel"/>
 			</footer>
 		</form>
 	);

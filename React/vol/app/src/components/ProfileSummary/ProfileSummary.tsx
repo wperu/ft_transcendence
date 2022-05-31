@@ -13,7 +13,7 @@ function ProfileSummary() {
 			return ("default");
 		return (user.username);
 	}
-	function getID() : number
+	function getRefID() : number
 	{
 		if (user === null)
 			return (0);
@@ -31,7 +31,7 @@ function ProfileSummary() {
 	return (
 		<aside id="profile">
 			<img id="profile_summary_img" alt="truc"
-				src={process.env.REACT_APP_API_USER + '/' + getID() + '/avatar?'+ getAntiCache()}/>
+				src={process.env.REACT_APP_API_USER + '/' + getRefID() + '/avatar?'+ getAntiCache()}/>
 			<div id="infos">
 				<p> {'> '} {getUserName()}</p>
 				<p> {'> '} Level</p>
