@@ -118,14 +118,14 @@ function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTML
     render_ctx.terrain_w = canvas.width;
     render_ctx.terrain_h = canvas.height;
 
-    /* Terrain */
-    if (canvas.height * 0.3 < canvas.width)
+    let ratio = 2;
+    if (canvas.width > canvas.height * ratio)
     {
-        render_ctx.terrain_h = canvas.width * 0.6;
+        render_ctx.terrain_w = canvas.height * ratio;
     }
     else
     {
-        render_ctx.terrain_w = canvas.height * 0.3;
+        render_ctx.terrain_h = canvas.width / ratio;
     }
 
     render_ctx.terrain_h *= 0.8;

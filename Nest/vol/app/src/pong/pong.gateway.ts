@@ -1,8 +1,9 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { forwardRef, Inject, Logger, OnModuleInit } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { randomInt } from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
+import { GameService } from './game.service';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
 
@@ -20,7 +21,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	private logger: Logger = new Logger('PongGateway');
 
 	constructor(
-		private pongService: PongService
+		@Inject(forwardRef(() => PongService))
+		private pongService: PongService,
+		@Inject(forwardRef(() => GameService))
+		private gameService: GameService
 	)
 	{
 	}
@@ -34,6 +38,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		this.logger.log("Server listening on ");
 		this.pongService.setServer(server);
+		this.gameService.setServer(server);
 	}
 	
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
@@ -134,7 +139,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
 	{
-		this.pongService.updatePlayer(client, data);
+		this.gameService.updatePlayer(client, data);
 	}
 
 

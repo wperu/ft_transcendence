@@ -11,12 +11,8 @@ import { render } from "./PongRenderer";
 
 // TODO Make matchmaking page with options             
 // TODO - Double ball mode                               
-// TODO - dash mode                                                 
-// TODO Refractor back end                            
-// REVIEW socket reconnection                     
-// TODO set room_id (0 = not in game) in users database
-// TODO 2FA auth 
-// TODO actual multiplayer 
+// TODO - dash mode                              
+
 
 interface CanvasProps
 {
@@ -216,6 +212,7 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.player_2.points = data.player_2_score;
                     pongCtx.room.state = RoomState.FINISHED;
                     pongCtx.room.setAsFinished(true);
+                    pongCtx.room.ball.size = 0;
                 }
             });
         }
