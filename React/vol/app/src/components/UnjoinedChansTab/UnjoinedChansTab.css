@@ -33,11 +33,12 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
+	width: 50%;
 }
 
 .join_chan_input
 {
-	font-size: 0.4em;
+	font-size: 0.55em;
 	color: white;
 	border: none;
 	background-color: #52565f;

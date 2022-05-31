@@ -14,7 +14,7 @@ function Channels()
 	const chatCtx = useChatContext();
 
 	if (chatCtx.rooms.length === 0)
-		return (<ThisListIsEmpty text="Tu n'as rejoins aucun channel" />);
+		return (<ThisListIsEmpty text="You haven't joined a channel yet" />);
 	else
 	{
 		return (
@@ -37,7 +37,7 @@ function PrivateMessages()
 	const chatCtx = useChatContext();
 
 	if (chatCtx.rooms.length === 0)
-		return (<ThisListIsEmpty text="Tu n'as aucune conversation privée" />);
+		return (<ThisListIsEmpty text="You have no private conversation yet" />);
 	else
 	{
 		return (

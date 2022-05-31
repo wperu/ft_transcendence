@@ -26,7 +26,7 @@ function CurrentUserProfileHeader(props : headerInfo)
 			<ChangeablePP user={props.user} />
 			<ChangeableUsername user={props.user} />
 			<div id="profile_stats">
-				<div id="profile_lvl">Niveau 4</div>
+				<div id="profile_lvl">Level 4</div>
 				<div id="profile_ratio">
 					<span id="ratio_caption">W:L</span>
 					<span id="ratio_wins">42</span>

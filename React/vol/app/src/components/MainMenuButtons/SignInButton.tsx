@@ -17,7 +17,7 @@ function SignInButton ()
 
 	/**
 	 * Callback fct for signin
-	 * 
+	 *
 	 * setAuth and Redirect to request Url
 	 */
 	function useRedirectToAuthPage()
@@ -44,7 +44,7 @@ function SignInButton ()
 		auth.signin(useRedirectToAuthPage);
 	}
 
-	return <button className="main_menu_button" onClick={signInClick}>Se connecter</button>;
+	return <button className="main_menu_button" onClick={signInClick}>Sign In</button>;
 }
 
 export default SignInButton;

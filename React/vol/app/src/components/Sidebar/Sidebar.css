@@ -3,8 +3,8 @@
 #sidebar
 {
 	--tab_button_height: 5vmin;
-	--open-sidebar-size: 60vmin;
-	--closed-sidebar-size: -60vmin;
+	--open-sidebar-size: 70vmin;
+	--closed-sidebar-size: -70vmin;
 	--transition: 0.7s;
 	z-index: 10;
 	height: 100%;
@@ -12,6 +12,7 @@
 
 #actual_bar
 {
+	font-size: 1.05em;
 	z-index: 10;
 	background-color: #454a53cb;
 	backdrop-filter: blur(20px);
@@ -109,7 +110,7 @@
 	height: 120px;
 	animation: spin 2s linear infinite;
   }
-  
+
 @keyframes spin {
 	0% { transform: rotate(0deg); }
 	100% { transform: rotate(360deg); }

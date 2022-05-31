@@ -68,7 +68,7 @@ function ChangeableUsername(props: userProps)
 		<form id="current_profile_username" onSubmit={updateUsername}>
 			<input type="text" name="username" maxLength={20} id="profile_username_input"
 				placeholder={getUserName()}  />
-			<input type="submit" id="new_username_submit" value="Changer" />
+			<input type="submit" id="new_username_submit" value="Change" />
 		</form>
 	);
 }
