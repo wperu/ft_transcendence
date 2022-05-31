@@ -42,8 +42,8 @@ import { FinishedGame } from './entities/finishedGame.entity';
 			],
 			synchronize: true,
 		}
-	), UsersModule, AuthModule, ...AuthModule.getDependencies(), ChatModule, PongModule, FriendsModule, RoomModule, GameHistoryModule],
+	), UsersModule, AuthModule, ChatModule, PongModule, FriendsModule, RoomModule, GameHistoryModule],
 	controllers: [AppController],
-	providers: [AppService, PongService, PongGateway, Array, TokenService],
+	providers: [AppService],
 })
 export class AppModule {}

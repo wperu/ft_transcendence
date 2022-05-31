@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { PongEndGame } from "../../components/PongEndGame/PongEndGame";
 import { RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { PongGame } from "../../components/PongGame/PongGame";
 import "./Pong.css"
@@ -21,12 +22,7 @@ const Pong = () => {
         return (
             <div>
                 <PongGame/>
-                <div id="end-msgbox">
-                    <h1>END GAME</h1>
-                    <Link to="/" replace = {false}>
-                        <button>Main menu</button>
-                    </Link>
-                </div>
+                <PongEndGame/>
             </div>
         )
     }
