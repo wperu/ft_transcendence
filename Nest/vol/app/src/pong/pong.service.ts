@@ -10,6 +10,8 @@ import { GameConfig } from 'src/Common/Game/GameConfig';
 import { ReconnectPlayerDTO } from 'src/Common/Dto/pong/ReconnectPlayerDTO';
 import { PongModes, PongPool } from './interfaces/PongPool';
 import { GameService } from './game.service';
+import { CustomRoom } from './interfaces/CustomRoom';
+import { UserCustomRoomDTO } from 'src/Common/Dto/pong/UserCustomRoomDTO';
 
 
 // REVIEW do we want multiple socket for pong user ? 
@@ -33,6 +35,7 @@ export class PongService {
     private users: Array<PongUser>;
     private waitingPool: Array<PongPool>;
     private rooms: Array<PongRoom>;
+	private customRooms: Array<CustomRoom>;
 
 
     constructor(
@@ -50,6 +53,7 @@ export class PongService {
         this.users = [];
         this.rooms = [];
         this.waitingPool = [];
+		this.customRooms = [];
     }
 
     
@@ -321,4 +325,122 @@ export class PongService {
             }, GameConfig.RELOAD_TIME));
         }
     }
+
+	/**
+	 * 
+	 * @param refId 
+	 * @returns 
+	 */
+	isPlaying(refId: number) : boolean
+	{
+		let user =  this.users.find((u) => { return u.reference_id === refId});
+		if (user)
+			return (user.in_game);
+
+		return (false);
+	}
+
+
+	/**
+	 *	** CUSTOM ROOMS **
+	 */
+
+	findCustomRoomOf(refId : number) : string | undefined
+	{
+		const room = this.customRooms.find((r) => {
+			return (r.users.find((u) => {return u.reference_id === refId}) !== undefined)
+		})
+
+		if (room === undefined)
+			return undefined;
+
+		return room.id;
+	}
+
+	findCustomRoom(id : string)
+	{
+		let room = this.customRooms.find((r) => (r.id === id));
+
+		if (room === undefined)
+			room = this.initCustomRoom(id);
+		
+		return room;
+	}
+
+	initCustomRoom(id: string) : CustomRoom
+	{
+		this.logger.log(`Init new Custom room ${id}`);
+		let room : CustomRoom = {
+			id: id,
+			users: [],
+			opts: undefined, //Todo
+		}
+		this.customRooms.push(room);
+
+		return room;
+	}
+
+	joinCustomRoom(id: string, user: PongUser)
+	{
+		let room = this.findCustomRoom(id);
+		room.users.push(user);
+		user.socket.join(id);
+
+		user.socket.emit("JOINED_CUSTOM_ROOM");
+		this.sendUserOfCustomRoom(id);
+		return;
+	}
+
+	leaveCustomRoom(id: string, user: PongUser)
+	{
+		const room = this.findCustomRoom(id);
+
+		if (room === undefined)
+			throw new Error("Room doesn\'t exist");
+		const idx = room.users.findIndex((u) => (u === user));
+		room.users.splice(idx, 1);
+
+		user.socket.leave(id);
+
+		//user.socket.emit("LEFT_CUSTOM_ROOM");
+		this.sendUserOfCustomRoom(id);
+		return ;
+	}
+
+	
+
+	sendUserOfCustomRoom(id: string) : Array<void>
+	{
+		
+		const room = this.findCustomRoom(id);
+
+		const toDto = (us : Array<PongUser>) => {
+			let ret: Array<UserCustomRoomDTO>
+
+			ret = [];
+
+			for (const u of us)
+			{
+				ret.push({
+					reference_id:	u.reference_id,
+					username:		u.username,
+				})
+			}
+
+			return ret;
+		}
+
+		//if (room === undefined)
+		//	throw new Error("Room doesn\'t exist");
+		
+		console.log(room.users.length);
+
+		const dto = toDto(room.users);
+		this.server.to(id).emit("USERS_CUSTOM_ROOM", dto);
+		return ;
+	}
+
+	
+
+	
 }

@@ -29,7 +29,7 @@ function FakeUser()
 				const user = rep.data as IUser;
 				auth.setUser(user);
 				auth.setIsAuth(true);
-				
+				sessionStorage.setItem("user", JSON.stringify(user));
 				navigate("/", {replace: true});
 	        });
 	        event.currentTarget.value = '';

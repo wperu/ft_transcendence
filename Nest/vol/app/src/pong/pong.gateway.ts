@@ -152,8 +152,33 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	createCustomRoom(client: Socket, data: void)
 	{
 		//const id: string = generateId();
-		const id: string = randomInt(100000).toString();
+		const id: string = randomInt(100000).toString(); //fix me check if already exist...
 		console.log('roomcreated ', id);
-		client.emit("JOINED_CUSTOM_ROOM", id);
+		client.emit("UP_CUSTOM_ROOM", id);
 	}
+
+	@SubscribeMessage("JOIN_CUSTOM_ROOM")
+	joinCustomRoom(client: Socket, room_id: string)
+	{
+		this.logger.log("Rcv JOIN_CUSTOM_ROOM");
+		let usr = this.pongService.getUserFromSocket(client);
+
+		this.pongService.joinCustomRoom(room_id, usr);
+	}
+
+	@SubscribeMessage("LEAVE_CUSTOM_ROOM")
+	leaveCustomRoom(client: Socket, room_id: string)
+	{
+		this.logger.log("Rcv LEAVE_CUSTOM_ROOM");
+		let usr = this.pongService.getUserFromSocket(client);
+
+		this.pongService.leaveCustomRoom(room_id, usr);
+	}
+
+	@SubscribeMessage("UPDATE_CUSTOM_ROOM")
+	updateCustomRoom(client: Socket, room_id: string)
+	{
+		this.logger.log("Rcv UPDATE_CUSTOM_ROOM");
+	}
+
 }

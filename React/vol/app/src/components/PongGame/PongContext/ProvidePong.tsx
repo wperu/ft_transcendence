@@ -58,6 +58,8 @@ export interface FX
 
 export interface IPongContext
 {
+	socket: Socket,
+	isAuth: boolean,
     room: IPongRoom | null,
     fx: FX,
 	searchRoom: () => void,
@@ -82,6 +84,7 @@ function usePongProvider() : IPongContext
 	const [room, setRoom]				= useState<IPongRoom | null>(null);
 	const navigate						= useNavigate();
 	const [fx]							= useState<FX>(initFx());
+	const [isAuth, setIsAuth]			= useState<boolean>(false);
 
 
 	console.log("Create Pong ctx");
@@ -105,12 +108,11 @@ function usePongProvider() : IPongContext
 	 * Request to create custom room
 	 */
 	const requestRoom = useCallback(() => {
-		console.log("run !");
 			socket.emit("CREATE_CUSTOM_ROOM");
 	}, [])
 
 	useEffect(() => {
-		socket.on("JOINED_CUSTOM_ROOM", (id: string) => {
+		socket.on("UP_CUSTOM_ROOM", (id: string) => {
 			console.log(id);
 			navigate(`/matchmaking/custom/${id}`, {replace: true});
 		})
@@ -186,7 +188,7 @@ function usePongProvider() : IPongContext
 
     useEffect(() => {
         socket.on("AUTHENTIFICATED", () => {
-            //socket.emit("SEARCH_ROOM");
+            setIsAuth(true);
         })
     }, [socket])
 
@@ -254,6 +256,8 @@ function usePongProvider() : IPongContext
 	}, [])
 
     return ({
+		socket,
+		isAuth,
         room,
         fx,
 		searchRoom,
