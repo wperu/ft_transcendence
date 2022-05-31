@@ -14,6 +14,7 @@ import {
 	UploadedFile,
 	UseGuards,
 	UseInterceptors,
+	Logger,
 } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -31,12 +32,15 @@ export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
+		
 	) {}
+	private logger: Logger = new Logger('UserController');
 
 	@Get("/profile/:refId")
 	@UseGuards(AuthGuard)
 	async findOne(@Param('refId') param): Promise<IProfileDTO>
 	{
+		this.logger.log('GET /profile/' + param);
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
@@ -61,6 +65,7 @@ export class UsersController
 	async updateUserName(@Res() response : Response, @Req() request: Request,
 		@Body() body, @Param('refId') param)
 	{
+		this.logger.log('PUT /'+ param + '/username');
 		// TODO update user in service
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
@@ -93,6 +98,7 @@ export class UsersController
 	@UseGuards(AuthGuard)
 	async updateTwoFactor(@Param('refId') param, @Req() request: Request, @Body() body) : Promise<undefined>
 	{
+		this.logger.log('PUT /' + param + '/useTwoFactor');
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
 			throw new NotFoundException();
@@ -108,7 +114,7 @@ export class UsersController
 
 	@Get("/:refId/twFactorQR")
 	@UseGuards(AuthGuard)
-	async getTwoFaQr(@Param('refId') param, @Body() body,)
+	async getTwoFaQr(@Param('refId') param, @Req() request: Request, @Res() response: Response)
 	{
 		let refId: number = parseInt(param);
 		if(isNaN(refId) || !/^\d*$/.test(param))
@@ -117,10 +123,12 @@ export class UsersController
 		}
 
 		const user = await this.userService.findUserByReferenceID(refId);
-		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
-			throw new ForbiddenException("wrong access code"); // KO bad token
+		if (await this.userService.checkAccesWithRefId(request.headers['authorization'], refId) === false)
+			throw new ForbiddenException("wrong access code");
 
-		return undefined;
+		const url = this.userService.getQR(user.SecretCode);
+
+		return response.status(HttpStatus.OK).json({ url: url});
 	}
 
 	@Post("/:refId/avatar")
@@ -137,6 +145,7 @@ export class UsersController
 		@Req() request,
 	)
 	{
+		this.logger.log('POST /' + param + '/avatar');
 		let	old_avatar : string | undefined;
 		let refId: number = parseInt(param);
 

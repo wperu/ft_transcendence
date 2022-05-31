@@ -92,6 +92,7 @@ interface IChatContext
 	friendsList:			Array<UserDataDto>;
 	blockList:				Array<UserDataDto>;
 	//RequestList:		Array<UserDataDto>;
+	invitePlayer: (refId?: number | undefined, room_id?: number | undefined) => void;
 }
 
 const generateKey = (id : number) => {
@@ -123,17 +124,17 @@ function useChatProvider() : IChatContext
 	/**
 	 * Pong interact
 	 */
-	const invitePlayer = useCallback((refId: number) => {
-		navigate("/matchmaking/customRoom", { replace: false })
+	const invitePlayer = useCallback((refId?: number, room_id?: number) => {
+		navigate("/matchmaking/custom", { replace: false })
 
 		const dto : GameInviteDTO = {
 			gameRoomId: 0, //todo create room and send
 			refId: refId,
-			chatRoomId: undefined,
+			chatRoomId: room_id,
 		}
 
 		socket.emit('GAME_INVITE', dto);
-	}, [navigate])
+	}, [socket, navigate])
 	/**
 	 * ***** Room *****
 	 */
@@ -241,7 +242,7 @@ function useChatProvider() : IChatContext
 		};
 	}, [currentRoom, rooms, socket, rmRoom]);
 
-	useEffect(() => { setIsConnected(socket.connected) })
+	useEffect(() => { setIsConnected(socket.connected) }, [socket, socket.connected])
 
 	useEffect(() => {
 		if (socket.connected === false)
@@ -295,7 +296,7 @@ function useChatProvider() : IChatContext
 				socket.off('ROOM_UPDATE');
 			}
 		};
-	}, [rooms, socket])
+	}, [rooms, socket, findRoomById])
 
 	/**
 	 * **** Notice *****
@@ -447,6 +448,7 @@ function useChatProvider() : IChatContext
 		goToDmWith,
 		friendsList,
 		blockList,
+		invitePlayer,
     });
 }
 

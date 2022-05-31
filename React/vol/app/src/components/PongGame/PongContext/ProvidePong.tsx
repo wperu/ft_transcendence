@@ -47,6 +47,8 @@ export interface IPongRoom
     spectators: Array<IPongUser>,
     state: RoomState,
     socket: Socket,
+
+    setAsFinished: (val: boolean) => void;
 }
 
 export interface FX
@@ -147,6 +149,7 @@ function usePongProvider() : IPongContext
                 spectators: [],
                 state: RoomState.ENDED,
                 socket: socket,
+                setAsFinished: () => {}
             } as IPongRoom);
 
             setInGame(true);
@@ -220,6 +223,7 @@ function usePongProvider() : IPongContext
                 spectators: [],
                 state: RoomState.LOADING,
                 socket: socket,
+                setAsFinished: () => {},
             });
             setInGame(true);
         });

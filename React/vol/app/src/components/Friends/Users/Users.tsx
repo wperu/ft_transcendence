@@ -19,6 +19,7 @@ interface	blocked_user_props
 
 export function Friend(props: user_props)
 {
+
 	function get_opacity()
 	{
 		if (props.online)
@@ -29,9 +30,9 @@ export function Friend(props: user_props)
 		<div className={get_opacity()}>
 			<div className="friends_user_infos">
 				<img className="friends_user_profile_pic"
-					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'}  />
+					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'} alt="42" />
 				<div className="friends_user_username">
-					<Link to={"/profile/" + props.ref_id}> {props.name}</Link>
+					<Link to={"/profile/" + props.ref_id}  replace={false} >{props.name}</Link>
 				</div>
 			</div>
 			<div className="chat_user_button_div">
@@ -54,7 +55,7 @@ export function BlockedUser(props: blocked_user_props)
 				<img className="friends_user_profile_pic" alt="truc"
 					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'} />
 				<div className="friends_user_username blocked_username">
-					<Link to={"/profile/" + props.ref_id}> {props.name}</Link>
+					<Link to={"/profile/" + props.ref_id} replace={false}> {props.name}</Link>
 				</div>
 			</div>
 			<div className="chat_user_button_div">

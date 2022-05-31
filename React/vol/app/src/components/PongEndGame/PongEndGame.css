@@ -1,0 +1,67 @@
+
+#end-msgbox
+{
+    position:absolute;
+    display: block;
+    z-index: 1;
+    position: absolute;
+    top: 25vh;
+    left: 30vw;
+    background-color:lightslategray;
+    width: 40vw;
+    height: 50vh;
+    border-radius: 2vw;
+}
+
+#end-msgbox h1
+{
+    position: relative;
+    color: white;
+    font-family: 'Nonfiction';
+    font-size: 40px;
+    text-align: center;
+    padding: 20px;
+}
+
+#end-msgbox #menu-button 
+{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 15%;
+    border-radius: 2vw;
+    border: none;
+    background-color: rgb(109, 144, 176);
+}
+
+#end-msgbox #menu-button:hover
+{
+    background-color: rgb(143, 162, 180);
+}
+
+#end-msgbox #end-infos
+{
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.player-score
+{
+    display: block;
+    position: relative;
+    text-align: center;
+    width: 50%;
+    top: 30%;
+    font-family: 'Nonfiction';
+}
+
+.player-score h3 {
+    color: white;
+    font-size: 4vw;
+}
+
+.player-score h4 {
+    color: rgb(167, 165, 180);
+    font-size: 2vw;
+}

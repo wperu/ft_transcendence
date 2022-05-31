@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
@@ -32,7 +32,7 @@ export class ChatService {
     	private roomService: RoomService,
     )
     {}
-
+	private logger: Logger = new Logger('ChatService');
 
 	async connectUserFromSocket(socket: Socket): Promise<ChatUser | undefined>
 	{
@@ -556,7 +556,14 @@ export class ChatService {
 
 	async denyRequestFriend(user: ChatUser, refId: number)
 	{
-		this.friendService.rmRequestFriend(user.reference_id, refId);
+		try
+		{
+			await this.friendService.rmRequestFriend(user.reference_id, refId);
+		}
+		catch (e)
+		{
+			this.logger.log(e);
+		}
 	}
 
 
@@ -571,23 +578,28 @@ export class ChatService {
 	 */
 	async addFriend(client: Socket, user: ChatUser, ref_id : number) : Promise<boolean>
 	{
-		const ret = await this.friendService.addRequestFriend(user.reference_id, ref_id)
+		try
+		{
+			const ret = await this.friendService.addRequestFriend(user.reference_id, ref_id)
+			
+			if (ret === undefined)
+			{
+				return false;
+			}
+			else
+			{
+				const dto : NoticeDTO = { level: ELevel.info, content: "Request Send !" };
+				client.emit("NOTIFICATION", dto);
+				return true;
+			}
+		}
+		catch(e)
+		{
+			this.logger.error(e);
 
-		if (ret === undefined)
-		{
-			return false;
-		}
-		else if (typeof ret === 'string')
-		{
-			const dto : NoticeDTO = { level: ELevel.error, content: ret };
+			const dto : NoticeDTO = { level: ELevel.error, content: e.message };
 			client.emit("NOTIFICATION", dto);
 			return false;
-		}
-		else
-		{
-			const dto : NoticeDTO = { level: ELevel.info, content: "Friend request sent" };
-			client.emit("NOTIFICATION", dto);
-			return true;
 		}
 	}
 
@@ -600,22 +612,38 @@ export class ChatService {
 
 	async rmFriend(user: ChatUser, ref_id : number) : Promise<void>
 	{
-		await this.friendService.rmFriend(user.reference_id, ref_id);
+		try
+		{
+			await this.friendService.rmFriend(user.reference_id, ref_id);
+		}
+		catch (e)
+		{
+			this.logger.error(e);
+		}
 
 		return;
 	}
 
 	async blockUser(user: ChatUser, ref_id : number) : Promise<void>
 	{
-		await this.friendService.blockUser(user.reference_id, ref_id);
+		try {
+			await this.friendService.blockUser(user.reference_id, ref_id);
+		}
+		catch (e) {
+			this.logger.error(e);
+		}
 
 		return;
 	}
 
 	async unBlockUser(user: ChatUser, ref_id : number) : Promise<void>
 	{
-		await this.friendService.unBlockUser(user.reference_id, ref_id);
-
+		try {
+			await this.friendService.unBlockUser(user.reference_id, ref_id);
+		}
+		catch (e) {
+			this.logger.error(e);
+		}
 		return;
 	}
 
@@ -647,8 +675,6 @@ export class ChatService {
 				}
 				else
 				{
-
-
 					for (const s of dest.socket)
 					{
 						s.emit('RECEIVE_NOTIF', dto);

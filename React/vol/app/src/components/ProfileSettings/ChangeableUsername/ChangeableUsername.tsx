@@ -1,5 +1,5 @@
 import axios from "axios";
-import React from "react";
+import React, { useCallback } from "react";
 import { useAuth } from "../../../auth/useAuth";
 import IUser from "../../../Common/Dto/User/User";
 import "./ChangeableUsername.css";
@@ -12,21 +12,19 @@ interface userProps
 function ChangeableUsername(props: userProps)
 {
 	const {user, setUser} = useAuth();
-	function getUserName() : string
-	{
-		if (props.user === null)
-			return ("default");
-		return (props.user.username);
-	}
+	
+	
+	const getUserName = useCallback(() => {
+		return user?.username
+	}, [user])
 
-	function updateUsername(event: React.SyntheticEvent) : void
-	{
+	const updateUsername = useCallback((event: React.SyntheticEvent) =>	{
 		event.preventDefault();
 
 		let target = event.target as typeof event.target & {
 			username: {value: string};
 		};
-		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/username';
+		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id +  '/username';
 		const headers = {
 			'authorization'	: props.user.accessCode,
 		}
@@ -53,16 +51,16 @@ function ChangeableUsername(props: userProps)
 				useTwoFa: 					user.useTwoFa,
 				avatar_last_update: 		user.avatar_last_update,
 			}
-
 			setUser(newUser);
+			target.username.value = '';
 		})
 		.catch(err => {
-			console.log('fail !');
-			console.log(err);
+			console.error(err);
+			target.username.value = '';
 		})
 
-		target.username.value = '';
-	}
+		
+	}, [user, setUser, props.user.reference_id, props.user.accessCode])
 
 	return (
 		<form id="current_profile_username" onSubmit={updateUsername}>

@@ -13,6 +13,8 @@ export enum RoomState
 export interface PongRoom
 {
     id: string,
+    job_id: string,
+    
     player_1: PongUser,
     player_2: PongUser,
     ball: PongBall,
@@ -23,4 +25,6 @@ export interface PongRoom
     deltaTime: number,
     lastTime: number,
     currentTime: number,
+
+    endScore: number,
 }

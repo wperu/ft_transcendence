@@ -308,6 +308,7 @@ export class UsersService
 	{
 		let ret = this.twoFactorService.isValide(token, secret);
 
+		console.log(ret);
 		if (typeof ret === 'boolean')
 		{
 			return ret;
@@ -319,7 +320,6 @@ export class UsersService
 	{
 		const optAuth = this.twoFactorService.getOtpAuth('ft', secret);
 		return optAuth;
-		//return this.twoFactorService.getQrUrl(optAuth);
 	}
 
 	/**

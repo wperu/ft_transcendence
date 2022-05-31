@@ -1,8 +1,9 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { forwardRef, Inject, Logger, OnModuleInit } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { randomInt } from 'crypto';
 import { Server, Socket } from 'socket.io';
 import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeDTO';
+import { GameService } from './game.service';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
 
@@ -20,7 +21,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	private logger: Logger = new Logger('PongGateway');
 
 	constructor(
-		private pongService: PongService
+		@Inject(forwardRef(() => PongService))
+		private pongService: PongService,
+		@Inject(forwardRef(() => GameService))
+		private gameService: GameService
 	)
 	{
 	}
@@ -34,12 +38,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		this.logger.log("Server listening on ");
 		this.pongService.setServer(server);
+		this.gameService.setServer(server);
 	}
 	
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
 		console.log(`CONNECTION -> ${client.id}`)
-		let user : PongUser | undefined = await this.pongService.getUserFromSocket(client);
+		let user : PongUser | undefined = this.pongService.getUserFromSocket(client);
 		
 		if (user === undefined)
 		{
@@ -58,23 +63,26 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			console.log("reconnected user");
 			this.pongService.reconnectUser(user, client);
 		}
-		else
+		else if (!user.in_game)
 		{
 			user.socket = client;
 			// let the client know that we have authentificated him as a PongUser
 			client.emit("AUTHENTIFICATED");
 			this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
 		}
+		else
+			client.disconnect();
 		
 	}
 
 	async handleDisconnect(client: Socket)
 	{
-		let usr = await this.pongService.getUserFromSocket(client);
+		let usr = this.pongService.getUserFromSocket(client);
 		if (!usr || !usr.in_game)
 			this.pongService.removeFromWaitingList(client);
 		else
 		{
+			console.log("disconnecting from game")
 			this.pongService.disconnectUser(usr);
 		}
 		console.log(`DISCONNECT <- ${client.id}`)
@@ -131,7 +139,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
 	{
-		this.pongService.updatePlayer(client, data);
+		this.gameService.updatePlayer(client, data);
 	}
 
 

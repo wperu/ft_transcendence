@@ -20,12 +20,15 @@ function ChangeablePP (props :infoProp)
 	{
 		if (e.target.files === null || props.user === null)
 			return ;
+		// setFile(e.target.files[0]);
+
+		const headers = {
+			'authorization': props.user.accessCode,
+		}
 		const formData = new FormData();
 		formData.append("avatar", e.target.files[0]);
 		const url = process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar';
-		axios.post(url, formData, {
-			headers: { "authorization" : props.user.accessCode }
-		})
+		axios.post(url, formData, {headers:headers})
 		.catch(error => {
 			if (error.response)
 			{
@@ -56,8 +59,8 @@ function ChangeablePP (props :infoProp)
 
 	return (
 		<label id="pp_label">
-			<img src={process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar?'+ getAntiCache()}
-				alt="PP" id="profile_pic"/>
+			{<img src={process.env.REACT_APP_API_USER + '/' + props.user.reference_id + '/avatar?'+ getAntiCache()}
+				alt="PP" id="profile_pic"/>}
 			<img src={EditLogo} alt="edit" className="edit_logo"
 				id="profile_pic_edit_logo" />
 			<input id="new_pp_input" type="file" name="img"

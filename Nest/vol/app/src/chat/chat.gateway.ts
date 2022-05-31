@@ -8,6 +8,7 @@ import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
+import { ELevel } from 'src/Common/Dto/chat/notice';
 
 
 // Todo fix origin
@@ -384,6 +385,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				});
 			}
 		}
+		else
+		{
+			client.emit("NOTIFICATION", { level: ELevel.error, content: "Unknow User" })
+			return ;
+		}
 	  }
 	}
 
@@ -492,6 +498,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage('GAME_INVITE')
 	async game_invite(client: Socket, data: GameInviteDTO)
 	{
+		this.logger.log("Invite to game");
 		await this.chatService.gameInvite(client, data);
 	}
 }
