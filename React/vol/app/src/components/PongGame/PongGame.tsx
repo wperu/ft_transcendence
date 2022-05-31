@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UpdatePongBallDTO } from "../../Common/Dto/pong/UpdatePongBallDTO";
 import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
+import { UpdatePongPointsDTO } from "../../Common/Dto/pong/UpdatePongPointsDTO"
 import { ReconnectPlayerDTO } from "../../Common/Dto/pong/ReconnectPlayerDTO"
 import { IPongContext, IPongUser, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
@@ -104,7 +105,22 @@ const PongGame = (props: CanvasProps) => {
 				}
 			}
 		});
+
+
 	}, [])
+
+    
+    useEffect(() => {
+        window.addEventListener('resize', () => {
+            if (pongCtx.room && canvasRef.current)
+            {
+                console.log("resizing: " + window.innerWidth + ", " + window.innerHeight);
+            
+                canvasRef.current.width = window.innerWidth;
+                canvasRef.current.height =  window.innerHeight;
+            }
+        })
+    }, [])
     
 
 
@@ -143,6 +159,14 @@ const PongGame = (props: CanvasProps) => {
                     }
                 }
             });
+
+            pongCtx.room.socket.on("UPDATE_POINTS", (data: UpdatePongPointsDTO) => {
+                if (pongCtx.room)
+                {
+                    pongCtx.room.player_1.points = data.player_1_score;
+                    pongCtx.room.player_2.points = data.player_2_score;
+                }
+            })
         }
     }, [])
 
@@ -183,6 +207,16 @@ const PongGame = (props: CanvasProps) => {
             pongCtx.room.socket.on("PLAYER_RECONNECT", () => {
                 if (pongCtx.room)
                     pongCtx.room.state = RoomState.LOADING;
+            });
+
+            pongCtx.room.socket.on("ROOM_FINISHED", (data: UpdatePongPointsDTO) => {
+                if (pongCtx.room)
+                {
+                    pongCtx.room.player_1.points = data.player_1_score;
+                    pongCtx.room.player_2.points = data.player_2_score;
+                    pongCtx.room.state = RoomState.FINISHED;
+                    pongCtx.room.setAsFinished(true);
+                }
             });
         }
     }, [])

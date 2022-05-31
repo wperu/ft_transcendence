@@ -7,6 +7,7 @@ import { UsersService } from 'src/users/users.service';
 import { PongRoom, RoomState } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { StartPongRoomDTO } from '../Common/Dto/pong/StartPongRoomDTO'
+import { UpdatePongPointsDTO } from '../Common/Dto/pong/UpdatePongPointsDTO'
 import { PongBall } from './interfaces/PongBall';
 import { UpdatePongBallDTO } from 'src/Common/Dto/pong/UpdatePongBallDTO';
 import { GameConfig } from 'src/Common/Game/GameConfig';
@@ -17,6 +18,7 @@ import { ReconnectPlayerDTO } from 'src/Common/Dto/pong/ReconnectPlayerDTO';
 import { PongModes, PongPool } from './interfaces/PongPool';
 import * as PgBoss from 'pg-boss';
 import { threadId } from 'worker_threads';
+import { userInfo } from 'os';
 
 
 // REVIEW do we want multiple socket for pong user ? 
@@ -87,11 +89,19 @@ export class PongService {
 		
         const user_info: User = await this.usersService.findUserByReferenceID(data.reference_id)
 
+        // FIX verify if already exists
+
         if (user_info === undefined)
         {
             console.log(`[PONG] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`);
             socket.disconnect();
             return (undefined);
+        }
+
+        let u = this.users.find((u) => { return u.reference_id === user_info.reference_id });
+        if (u !== undefined)
+        {
+            return (u);
         }
 
 		let idx = this.users.push({
@@ -169,6 +179,16 @@ export class PongService {
     }
 
 
+	initPlayer(player: PongUser)
+	{
+		player.position = 0.5;
+		player.points = 0;
+		player.velocity = 0;
+		player.key = 0;
+		player.in_game = false;
+	}
+
+
 
     async searchRoom(user: PongUser, modes: PongModes = PongModes.DEFAULT)
     {
@@ -195,20 +215,18 @@ export class PongService {
 
         console.log("found opponent")
         this.waitingPool.splice(this.waitingPool.indexOf(other), 1);
+		this.initPlayer(other.user);
+		this.initPlayer(user);
         let room = this.initRoom(other.user, user);
         this.rooms.push(room);
         this.startRoom(room);
     }
 
 
-
-
-
-
-
-
-
-
+	removeRoom(room: PongRoom) : void
+	{
+		this.rooms.splice(this.rooms.findIndex(({id} ) => id === room.id), 1);
+	}
 
     async startBoss(room: PongRoom)
     {
@@ -221,24 +239,26 @@ export class PongService {
         {
             await this.runRoom(room)
 
-            if (this.GAME_RATE > room.deltaTime * 1000)
+            let t = performance.now();
+            if (this.GAME_RATE > t - room.lastTime)
             {
-               // console.log("sleeping: ", this.GAME_RATE - room.deltaTime * 1000);   
+               // console.log("sleeping: ", this.GAME_RATE - room.deltaTime * 1000); 
 			   	await new Promise(res => {
-                    return setTimeout(res, this.GAME_RATE - ((performance.now() - room.lastTime)))
+                    return setTimeout(res, this.GAME_RATE - (t - room.lastTime))
                 })
             }
         }
 
         console.log("[boss] ended");
         room.state = RoomState.FINISHED;
-        /*if (room.interval !== undefined)
-        {
-            clearInterval(room.interval);
-            console.log("cleared interval");
-        }*/
 
-        this.boss.offWork(room.id);
+		const job_id	= room.job_id;
+    
+		this.logger.log(`Room ${room.id} ended ${room.player_1.username} vs ${room.player_2.username}`);
+
+		this.removeRoom(room);
+		if (job_id !== "")
+			this.boss.offWork(job_id);
 
         this.logger.log("Room ended");
         // TODO push room in history 
@@ -265,12 +285,13 @@ export class PongService {
             }));
         }
 
-        let room_id = generateID();
+        let room_id = generateID(); //fix dup id
         creator.socket.join(room_id);
         other.socket.join(room_id);
 
         return ({
             id: room_id,
+            job_id: "",
             player_1: creator,
             player_2: other,
             ball: {
@@ -286,6 +307,7 @@ export class PongService {
             deltaTime: 0,
             lastTime: 0,
             frameCount: 0,
+            endScore: 3, // REVIEW modiffy here
         });
     }
 
@@ -304,6 +326,7 @@ export class PongService {
             })
         }
 
+        // FIX disconnection here
         await sleep();
 
         room.ball.pos_x = 1;
@@ -314,17 +337,23 @@ export class PongService {
         room.player_2.position = 0.5;
         room.player_1.key = 0;
         room.player_2.key = 0;
-        this.server.to(room.id).emit("LOAD_GAME");
-        console.log("[reload] loading");
-        this.sendBallUpdate(room);
-        this.sendPlayerUpdate(room);
 
-        await sleep();
+        if (room.state === RoomState.PLAYING)
+        {
+            this.server.to(room.id).emit("LOAD_GAME");
+            console.log("[reload] loading");
+            this.sendBallUpdate(room);
+            this.sendPlayerUpdate(room);
+            await sleep();
+        }
+        // is still playing ?
+        if (room.state === RoomState.PLAYING)
+        {
+            console.log("[reload] starting");
+            this.server.to(room.id).emit("START_GAME");
+        }
 
-        console.log("[reload] starting");
-        this.server.to(room.id).emit("START_GAME");
         room.lastTime = 0;
-
         console.log("RELOAD ENDED");
     }
 
@@ -349,12 +378,11 @@ export class PongService {
         room.state = RoomState.PLAYING;
         this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
 
-        console.log("START -> sent room start request");
+        console.log("STARTING_ROOM -> sent room start request");
 
         new Promise(async () => setTimeout(async () => {
-            console.log("loading");
             this.server.to(room.id).emit("LOAD_GAME");
-            console.log("START -> sent load request");
+            console.log("LOAD -> sent load request");
             await new Promise(async () => setTimeout(async () => {
                 console.log("starting");
                 this.sendBallUpdate(room);
@@ -365,29 +393,36 @@ export class PongService {
 
 
                // room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
-                let boss_id = await this.boss.send(room.id, {});
-                console.log("[boss] starting job: " + boss_id);
+                room.job_id = await this.boss.send(room.id, {});
+                console.log("[boss] starting job: " + room.job_id);
                 this.boss.work(room.id, {
                     teamSize: 10,
                     teamConcurrency: 10,
                 },() => this.startBoss(room))
-                .catch((error) => {
-                    console.log(error);
-                })
-                .then(() => {
-                    console.log("[boss] job ended");
-                });
+
             }, GameConfig.RELOAD_TIME));
         }, GameConfig.RELOAD_TIME));
+
+		
     }
 
 
 
     async runRoom(room: PongRoom) : Promise<void>
     {
-        if (room.state !== RoomState.PAUSED)
+      //  console.log("updating");
+        if (room.state !== RoomState.PAUSED && room.state !== RoomState.FINISHED)
             await this.updateRoom(room);
-		
+        else if (room.state === RoomState.PAUSED)
+        {
+            while (room.state === RoomState.PAUSED)
+            {
+                console.log("awaiting player")
+                await new Promise(res => {
+                    return (setTimeout(res, 200));
+                })
+            }
+        }
     }
 
 
@@ -399,7 +434,7 @@ export class PongService {
             room.lastTime = room.currentTime;
         room.deltaTime = (room.currentTime - room.lastTime) * 0.001;
         room.lastTime = room.currentTime;
-		console.log(1 / room.deltaTime);
+
         /* Logic update */
         await this.gameUpdate(room);
 
@@ -534,7 +569,6 @@ export class PongService {
 
 
 
-
 	async ballUpdate(room: PongRoom)
 	{
 		if ((room.ball.pos_y > this.TERRAIN_SY - GameConfig.BALL_SIZE * 0.5 && room.ball.vel_y > 0)
@@ -546,8 +580,28 @@ export class PongService {
 
 		if (room.ball.pos_x > this.TERRAIN_SX || room.ball.pos_x < 0)
 		{
-			// TODO points
-			await this.reloadRoom(room);
+            if (room.ball.pos_x < 0)
+                room.player_2.points++;
+            else
+                room.player_1.points++;
+            if (room.endScore === room.player_1.points || room.endScore === room.player_2.points)
+            {
+                this.server.to(room.id).emit("ROOM_FINISHED", {
+                    player_1_score: room.player_1.points,
+                    player_2_score: room.player_2.points,
+                } as UpdatePongPointsDTO)
+                room.player_1.in_game = false;
+                room.player_2.in_game = false;
+                room.state = RoomState.FINISHED;
+            }
+            else
+            {
+                this.server.to(room.id).emit("UPDATE_POINTS", {
+                    player_1_score: room.player_1.points,
+                    player_2_score: room.player_2.points,
+                } as UpdatePongPointsDTO)
+                await this.reloadRoom(room);
+            }
 			return ;
 		}
 
@@ -576,7 +630,6 @@ export class PongService {
 			room.ball.vel_x *= -1;
 			this.sendBallUpdate(room);
 		}
-
 
 		/* Updating positions */
 		room.ball.pos_x += room.ball.vel_x * room.deltaTime;
@@ -615,7 +668,8 @@ export class PongService {
         /* Player wall collisions */
         // 1
        
-       /* if (room.frameCount % 3)
+        /*
+        if (room.frameCount % 3)
 		{
            	this.sendBallUpdate(room);
 			this.sendPlayerUpdate(room);
@@ -640,20 +694,29 @@ export class PongService {
     async disconnectUser(user: PongUser)
     {
         let room: PongRoom = this.rooms.find((r) => {
-            return r.player_1.reference_id === user.reference_id || r.player_2.reference_id === user.reference_id
+            return r !== undefined && (r.player_1.reference_id === user.reference_id || r.player_2.reference_id === user.reference_id)
         });
+
+        if (room === undefined)
+        {
+            console.log("disconnection from unknown room");
+            return ;
+        }
 
         if (room !== undefined && room.state === RoomState.PAUSED)
         {
             room.player_1.in_game = false;
             room.player_2.in_game = false;
             room.state = RoomState.FINISHED;
-            await this.boss.offWork(room.id);
+            //if (room.job_id !== "")
+            //    this.boss.offWork(room.job_id);
+            //console.log("room ended by disconnection")
             // TODO push room in history
         }
         else if (room !== undefined && room.state !== RoomState.PAUSED)
         {
             room.state = RoomState.PAUSED;
+            //this.boss.cancel(room.job_id);
             this.server.to(room.id).emit("PLAYER_DISCONNECT");
             console.log("player disconnected")
         }
@@ -705,13 +768,6 @@ export class PongService {
                 this.sendPlayerUpdate(room);
                 this.server.to(room.id).emit("START_GAME");
                 room.lastTime = 0;
-
-
-
-
-                //room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
-                this.startBoss(room);
-
 
             }, GameConfig.RELOAD_TIME));
         }
