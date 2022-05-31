@@ -22,13 +22,13 @@ export class FriendsService
 	) {}
 
 	/**
-	 * 
-	 * @param userId 
+	 *
+	 * @param userId
 	 * @returns Array of relation
 	 */
 	async findFriendOf(id_one: number): Promise<FriendShip[]>
 	{
-		
+
 		const ret = await this.friendRepository.find({
 			where: {
 				id_one: id_one,
@@ -37,11 +37,11 @@ export class FriendsService
 		});
 		return ret;
 	}
-	
+
 	/**
-	 * 
-	 * @param userId 
-	 * @returns 
+	 *
+	 * @param userId
+	 * @returns
 	 */
 	async findBlockedOf(userId: number): Promise<FriendShip[]>
 	{
@@ -56,9 +56,9 @@ export class FriendsService
 	}
 
 	/**
-	 * 
-	 * @param userId 
-	 * @returns 
+	 *
+	 * @param userId
+	 * @returns
 	 */
 	async findRequestOf(userId: number): Promise<FriendShip[]>
 	{
@@ -72,8 +72,8 @@ export class FriendsService
 
 	/**
 	 * return rel (1, 2)
-	 * @param userIdOne 
-	 * @param userIdTwo 
+	 * @param userIdOne
+	 * @param userIdTwo
 	 * @returns <FriendShip | undefined>
 	 */
 	async findFriendRelationOf(userIdOne: number, userIdTwo: number): Promise<FriendShip | undefined>
@@ -92,10 +92,10 @@ export class FriendsService
 	//Todo if user1 and user2 request call -> accepteRequestFriend
 	/**
 	 * add new friend Request
-	 * 
+	 *
 	 * Send new request create or string with error or undefined for dupRequest
-	 * @param userIdOne 
-	 * @param userIdTwo 
+	 * @param userIdOne
+	 * @param userIdTwo
 	 * @returns
 	 */
 	async addRequestFriend(userIdOne: number, userIdTwo: number) : Promise<FriendShip | string | undefined>
@@ -105,7 +105,7 @@ export class FriendsService
 		const rel = await this.findFriendRelationOf(userIdOne, userIdTwo);
 		if (rel !== undefined ) //request already exist or isFriend
 		{
-			return "Request already send !";
+			return "Request already sent";
 		}
 		else
 		{
@@ -134,7 +134,7 @@ export class FriendsService
 			}
 			req.id_one = userIdOne;
 			req.id_two = userIdTwo;
-			
+
 			try {
 				let ret = await this.friendRepository.save(req);
 
@@ -150,8 +150,8 @@ export class FriendsService
 
 
 	/**
-	 * 
-	 * @param id : request_id 
+	 *
+	 * @param id : request_id
 	 * @returns void
 	 */
 	async rmRequestFriend(id_two: number, id_one: number) : Promise<undefined | string>
@@ -170,10 +170,10 @@ export class FriendsService
 	}
 
 	/**
-	 * 
-	 * @param userIdOne 
-	 * @param userIdTwo 
-	 * @returns 
+	 *
+	 * @param userIdOne
+	 * @param userIdTwo
+	 * @returns
 	 */
 	async rmFriend(userIdOne: number, userIdTwo: number): Promise<void>
 	{
@@ -196,16 +196,16 @@ export class FriendsService
 		    .execute();
 		return ;
 	}
-	
+
 
 	/**
-	 * 
+	 *
 	 * @param id request_id
 	 */
 	async acceptRequestFriend(id: number) : Promise<void>
 	{
 		//Set relation to FRIEND (1, 2)
-		const rel = await this.friendRepository.findOne({ 
+		const rel = await this.friendRepository.findOne({
 			where: {
 				id: In([id])
 			},
@@ -235,9 +235,9 @@ export class FriendsService
 	}
 
 	/**
-	 * 
-	 * @param userIdOne 
-	 * @param userIdTwo 
+	 *
+	 * @param userIdOne
+	 * @param userIdTwo
 	 * @returns Blocked relation
 	 */
 	async blockUser(userIdOne: number, userIdTwo: number): Promise<FriendShip>

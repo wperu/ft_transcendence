@@ -51,7 +51,8 @@ export function BlockedUser(props: blocked_user_props)
 	return (
 		<div className="friends_tab_user">
 			<div className="friends_user_infos">
-				<img className="friends_user_profile_pic" src="" alt="truc" />
+				<img className="friends_user_profile_pic" alt="truc"
+					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'} />
 				<div className="friends_user_username blocked_username">
 					<Link to={"/profile/" + props.ref_id}> {props.name}</Link>
 				</div>
