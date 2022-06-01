@@ -12,9 +12,10 @@ interface infos
 interface invite
 {
 	id:			string;
-	name: string;
-	date: Date;
-	refId: number;
+	name:		string;
+	date:		Date;
+	refId:		number;
+	roomId:		string | undefined;
 }
 
 interface fren
@@ -96,7 +97,7 @@ export function InviteNotification(props: invite)
       <div className="friends_notif_name"><Link to={"/profile/" + props.refId}>{props.name}</Link></div>
 			<div className="friends_interactive_notif_content">t'as invité à jouer</div>
 			<div className="notif_button_div">
-				<AcceptGameInvitation src_name={props.name} refId={props.refId}/>
+				<AcceptGameInvitation src_name={props.name} refId={props.refId} gameId={props.roomId}/>
 				<DirectMessage name={props.name} refId={props.refId}/>
 				<AddFriendButton user_name={props.name} already_friend={false} refId={props.refId}/>
 				<BlockUserButton user_name={props.name} already_blocked={false} refId={props.refId}/>

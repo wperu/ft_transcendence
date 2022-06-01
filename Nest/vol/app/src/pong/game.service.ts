@@ -91,7 +91,7 @@ export class GameService {
 
 
 
-    initRoom(creator: PongUser, other: PongUser = undefined) : PongRoom
+    initRoom(creator: PongUser, other: PongUser = undefined, spectators : Array<PongUser> = []) : PongRoom
     {
         function generateID() {
             return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
@@ -104,6 +104,13 @@ export class GameService {
         creator.socket.join(room_id);
         other.socket.join(room_id);
 
+		spectators.forEach((u) => {
+			u.socket.join(room_id);
+		});
+		creator.points = 0;
+		other.points = 0;
+		creator.position = 0.5;
+		other.position = 0.5;
         return ({
             id: room_id,
             job_id: "",
@@ -115,14 +122,14 @@ export class GameService {
                 vel_x: randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
                 vel_y: randomInt(-100, 100) / 1000
             } as PongBall,
-            spectators: [],
+            spectators: spectators,
             state: RoomState.WAITING,
 
             currentTime: 0,
             deltaTime: 0,
             lastTime: 0,
             frameCount: 0,
-            endScore: 3, // REVIEW modiffy here
+            endScore: GameConfig.DEFAULT_MAX_SCORE,
         });
     }
 

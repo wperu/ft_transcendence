@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
 import { TokenService } from 'src/auth/token.service';
 import { ChatUser, UserData } from 'src/chat/interface/ChatUser'
@@ -15,6 +15,7 @@ import { User } from 'src/entities/user.entity';
 import { FriendsService } from 'src/friends/friends.service';
 import { RoomService } from 'src/room/room.service';
 import { Room } from './interface/room';
+import { PongService } from 'src/pong/pong.service';
 
 
 /** //todo
@@ -24,12 +25,16 @@ import { Room } from './interface/room';
 
 @Injectable()
 export class ChatService {
+
+	private users: ChatUser[] = [];
+
     constructor (
 		private usersService: UsersService,
     	private tokenService: TokenService,
 		private friendService: FriendsService,
-		private users: ChatUser[],
     	private roomService: RoomService,
+		@Inject(forwardRef(() => PongService))
+		private pongService: PongService,
     )
     {}
 	private logger: Logger = new Logger('ChatService');
@@ -658,12 +663,13 @@ export class ChatService {
 			dto =[
 				{
 					type: ENotification.GAME_REQUEST,
-					req_id: data.gameRoomId,
+					req_id: user.reference_id,
+					room_id: this.pongService.findCustomRoomOf(user.reference_id), //DEFINE IDROOM
 					content: undefined,
 					username: await this.getUsernameFromID(user.reference_id),
 					date: new Date(),
 					refId: user.reference_id,
-				}]
+				}] 
 
 			//player
 			if (data.refId !== undefined)
@@ -708,4 +714,12 @@ export class ChatService {
 		}
 	}
 
+
+	confirmCustomRoom(room_id: string, ref_id: number)
+	{
+		let usr = this.users.find((u) => u.reference_id === ref_id);
+		if (usr === undefined)
+			return ;
+		usr.socket.forEach((s) => s.emit("CONFIRM_CUSTOM_ROOM", {room_id: room_id}));
+	}
 }

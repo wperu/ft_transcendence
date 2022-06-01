@@ -1,4 +1,4 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { forwardRef, Inject, Logger, OnModuleInit } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
@@ -12,7 +12,6 @@ import { ELevel } from 'src/Common/Dto/chat/notice';
 
 
 // Todo fix origin
-// Todo add namespace
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
 	namespace: "/chat",
@@ -28,6 +27,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	constructor(
+		@Inject(forwardRef(() => ChatService))
 		private chatService: ChatService,
 	) { }
 
@@ -501,4 +501,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.logger.log("Invite to game");
 		await this.chatService.gameInvite(client, data);
 	}
+
+	
 }

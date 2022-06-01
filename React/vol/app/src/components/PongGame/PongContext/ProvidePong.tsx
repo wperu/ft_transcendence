@@ -1,6 +1,6 @@
 import { render } from "../PongRenderer";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../../../auth/useAuth";
 import { ReconnectPlayerDTO } from "../../../Common/Dto/pong/ReconnectPlayerDTO";
@@ -87,6 +87,7 @@ function usePongProvider() : IPongContext
 	const [isAuth, setIsAuth]			= useState<boolean>(false);
 
 
+
 	console.log("Create Pong ctx");
 
 	/**
@@ -109,7 +110,7 @@ function usePongProvider() : IPongContext
 	 */
 	const requestRoom = useCallback(() => {
 			socket.emit("CREATE_CUSTOM_ROOM");
-	}, [])
+	}, [socket])
 
 	useEffect(() => {
 		socket.on("UP_CUSTOM_ROOM", (id: string) => {

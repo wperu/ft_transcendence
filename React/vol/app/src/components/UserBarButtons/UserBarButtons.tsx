@@ -57,6 +57,7 @@ interface acceptGameInvitationProp
 {
 	src_name: string;
 	refId: number;
+	gameId: string | undefined;
 }
 
 interface dmProp
@@ -407,8 +408,11 @@ export function AddFriendButton(prop: friendProp)
 
 export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 {
+	const navigate = useNavigate()
+	
 	function accept()
 	{
+		navigate(`/matchmaking/custom/${prop.gameId}`)	
 		console.log("accepted game invitation from " + prop.src_name)
 	}
 	return (

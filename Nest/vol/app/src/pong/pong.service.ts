@@ -12,6 +12,7 @@ import { PongModes, PongPool } from './interfaces/PongPool';
 import { GameService } from './game.service';
 import { CustomRoom } from './interfaces/CustomRoom';
 import { UserCustomRoomDTO } from 'src/Common/Dto/pong/UserCustomRoomDTO';
+import { ChatService } from 'src/chat/chat.service';
 
 
 // REVIEW do we want multiple socket for pong user ? 
@@ -41,6 +42,9 @@ export class PongService {
     constructor(
         private usersService: UsersService,
         private tokenService: TokenService,
+
+		@Inject(forwardRef(() => ChatService))
+		private chatService: ChatService,
     
         @Inject(forwardRef(() => GameService))
         private gameService: GameService,
@@ -147,6 +151,11 @@ export class PongService {
     getRoomById(id: string)
     {
         return this.rooms.find ((r) => r.id === id);
+    }
+
+	getUserFromRefId(ref_id: number): PongUser | undefined
+    {
+		return (this.users.find((u) => { return u.reference_id === ref_id}))
     }
 
 
@@ -352,27 +361,21 @@ export class PongService {
 
 	findCustomRoomOf(refId : number) : string | undefined
 	{
-		const room = this.customRooms.find((r) => {
-			return (r.users.find((u) => {return u.reference_id === refId}) !== undefined)
-		})
+		const us = this.getUserFromRefId(refId);
 
-		if (room === undefined)
+		if (us === undefined)
 			return undefined;
-
-		return room.id;
+		return us.in_room;
 	}
 
 	findCustomRoom(id : string)
 	{
 		let room = this.customRooms.find((r) => (r.id === id));
 
-		if (room === undefined)
-			room = this.initCustomRoom(id);
-		
 		return room;
 	}
 
-	initCustomRoom(id: string) : CustomRoom
+	initCustomRoom(id: string, refId: number) : CustomRoom
 	{
 		this.logger.log(`Init new Custom room ${id}`);
 		let room : CustomRoom = {
@@ -381,7 +384,8 @@ export class PongService {
 			opts: undefined, //Todo
 		}
 		this.customRooms.push(room);
-
+		// review 
+		this.chatService.confirmCustomRoom(id, refId);
 		return room;
 	}
 
@@ -390,6 +394,10 @@ export class PongService {
 		if (user.in_room !== undefined)
 			throw new Error("Already in room !");
 		let room = this.findCustomRoom(id);
+
+		if (room === undefined)
+			room = this.initCustomRoom(id, user.reference_id);
+		
 		room.users.push(user);
 		user.socket.join(id);
 
@@ -404,7 +412,7 @@ export class PongService {
 		const room = this.findCustomRoom(id);
 
 		if (room === undefined)
-			throw new Error("Room doesn\'t exist");
+			return ;//throw new Error("Room doesn\'t exist");
 		const idx = room.users.findIndex((u) => (u === user));
 		room.users.splice(idx, 1);
 
@@ -447,13 +455,55 @@ export class PongService {
 		}
 
 		if (room === undefined)
-			throw new Error("Room doesn\'t exist");
+			return ;//	throw new Error("Room doesn\'t exist");
 		
 		console.log(room.users.length);
 
 		const dto = toDto(room.users);
 		this.server.to(id).emit("USERS_CUSTOM_ROOM", dto);
 		return ;
+	}
+
+
+	startCustomRoom(client: Socket, id : string)
+	{
+
+		const croom = this.findCustomRoom(id);
+		const usr = this.getUserFromSocket(client);
+		if (usr === undefined)
+			return ;
+
+		if (croom === undefined)
+			return ; //error
+
+		if (croom.users.length < 2)
+			return ;// error
+
+		if (usr.reference_id !== croom.users[0].reference_id)
+			return ; //error
+		
+		const owner = croom.users[0];
+		const other = croom.users[1];
+
+		croom.users.splice(0, 2); //rm player
+		const room = this.gameService.initRoom(owner, other, croom.users);
+
+		// for game options croom.opts //todo
+		owner.in_room = undefined;
+		other.in_room = undefined;
+
+		for (let u of croom.users)
+		{
+			u.in_room = undefined;
+		}
+		this.rooms.push(room);
+		this.gameService.startRoom(room);
+
+		const i = this.customRooms.indexOf(croom);
+		this.customRooms.splice(i, 1);
+		console.log('Room destroy');
+
+
 	}
 
 	
