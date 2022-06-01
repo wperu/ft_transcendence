@@ -222,39 +222,44 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
         let pts_text_size = render_ctx.terrain_h * 0.3;
         let names_text_size = render_ctx.terrain_h * 0.07;
 
-        if (player !== undefined)
+		let player_name = player !== undefined ? player.username : pong_ctx.room.player_1.username;
+		let opponent_name = opponent !== undefined ? opponent.username : pong_ctx.room.player_2.username;
+		let player_points = player !== undefined ? player.points : pong_ctx.room.player_1.points;
+		let opponent_points = opponent !== undefined ? opponent.points : pong_ctx.room.player_2.points;
+
+        //if (player !== undefined )
         {        
             ctx.save();
             ctx.translate(render_ctx.terrain_x - 10, render_ctx.terrain_y + render_ctx.terrain_h);
             ctx.rotate(Math.PI + Math.PI * 0.5);
             ctx.fillStyle = "#FFFFFF";
             ctx.font = names_text_size.toString() + "px NonFiction"
-            ctx.fillText(player.username.toUpperCase(), 0, 0);
+            ctx.fillText(player_name.toUpperCase(), 0, 0);
             ctx.restore();
 
             ctx.save();
             ctx.textAlign = "center"
             ctx.fillStyle = "#404050";
             ctx.font = pts_text_size.toString() + "px NonFiction";
-            ctx.fillText(player.points.toString(), render_ctx.terrain_x + render_ctx.terrain_w * 0.25, render_ctx.terrain_y + render_ctx.terrain_h * 0.5 + pts_text_size * 0.3);
+            ctx.fillText(player_points.toString(), render_ctx.terrain_x + render_ctx.terrain_w * 0.25, render_ctx.terrain_y + render_ctx.terrain_h * 0.5 + pts_text_size * 0.3);
             ctx.restore();
         }
 
-        if (opponent !== undefined)
+        //if (opponent !== undefined)
         { 
             ctx.save();
             ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + 10, render_ctx.terrain_y);
             ctx.rotate(Math.PI * 0.5);
             ctx.fillStyle = "#FFFFFF";
             ctx.font = names_text_size.toString() + "px NonFiction"
-            ctx.fillText(opponent.username.toUpperCase(), 0, 0);
+            ctx.fillText(opponent_name.toUpperCase(), 0, 0);
             ctx.restore();
 
             ctx.save();
             ctx.textAlign = "center"
             ctx.fillStyle = "#404050";
             ctx.font = pts_text_size.toString() + "px NonFiction";
-            ctx.fillText(opponent.points.toString(), render_ctx.terrain_x + render_ctx.terrain_w * 0.75, render_ctx.terrain_y + render_ctx.terrain_h * 0.5 + pts_text_size * 0.3);
+            ctx.fillText(opponent_points.toString(), render_ctx.terrain_x + render_ctx.terrain_w * 0.75, render_ctx.terrain_y + render_ctx.terrain_h * 0.5 + pts_text_size * 0.3);
             ctx.restore();
         }
     }
@@ -281,17 +286,18 @@ function renderPlayers(ctx : CanvasRenderingContext2D, render_ctx: PongRendering
 
     /* Player 1-2 in the context ARE NOT the same as player_1 and player_2 in front-end
        player_1 is always the current player, and player_2 is the opponent */    
-    if (user.username === room.player_1.username)
+    
+	if (user.username === room.player_2.username)
+	{
+	   player_pos = room.player_2.position;
+	   opponent_pos = room.player_1.position;  
+	}
+	else
     {
         player_pos = room.player_1.position;
         opponent_pos = room.player_2.position;
     }
-    else if (user.username === room.player_2.username)
-    {
-        player_pos = room.player_2.position;
-        opponent_pos = room.player_1.position;  
-    }
-
+    
     player_1_x = render_ctx.terrain_x + terrain_padding;
     player_1_y = render_ctx.terrain_y + (player_pos) * render_ctx.terrain_h - player_1_sz_y * 0.5;
 
@@ -313,15 +319,15 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
     if (!pong_ctx.room)
         return ;
 
-    if (user.username === pong_ctx.room.player_1.username)
-    {
-        ball_x = render_ctx.terrain_x + (pong_ctx.room.ball.pos_x) * (render_ctx.terrain_w * 0.5);
-        ball_y = render_ctx.terrain_y + (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
-    }
-    else if (user.username === pong_ctx.room.player_2.username)
+	if (user.username === pong_ctx.room.player_2.username)
     {
         ball_x = render_ctx.terrain_x + render_ctx.terrain_w - ((pong_ctx.room.ball.pos_x) * (render_ctx.terrain_w * 0.5));
         ball_y = render_ctx.terrain_y +  (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
+    }
+    else
+    {
+        ball_x = render_ctx.terrain_x + (pong_ctx.room.ball.pos_x) * (render_ctx.terrain_w * 0.5);
+        ball_y = render_ctx.terrain_y + (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
     }
 
     if (pong_ctx.room.state === RoomState.LOADING && pong_ctx.room.ball.size < GameConfig.BALL_SIZE)
@@ -365,53 +371,6 @@ function renderPauseScreen(ctx: CanvasRenderingContext2D, render_ctx: PongRender
     ctx.fillText("Player disconnected", render_ctx.width * 0.5, render_ctx.height * 0.5 - 100);
     ctx.fillText("Waiting for reconnection...", render_ctx.width * 0.5, render_ctx.height * 0.5 - 50);
     ctx.textAlign = 'start'
-}
-
-function renderEndScreen(ctx: CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, user: IUser)
-{
-    ctx.fillStyle = '#1010169D'
-    ctx.fillRect(0, 0, render_ctx.width, render_ctx.height);
-   
-    ctx.fillStyle = '#404050'
-    ctx.strokeStyle = '#404050'
-    roundRect(ctx, render_ctx.width * 0.33, render_ctx.height * 0.33, render_ctx.width * 0.33, render_ctx.height * 0.33);
-    ctx.fill();
-    ctx.textAlign = 'center'
-    ctx.fillStyle = '#FFFFFF'
-    ctx.font = (render_ctx.width * 0.04) + "px Nonfiction";
-
-    let player = getPongPlayer(pong_ctx, user);
-    if (player?.points === 3)
-    {
-        ctx.fillText("You won !", render_ctx.width * 0.5, render_ctx.height * 0.4);
-    }
-    else
-    {
-        ctx.fillText("You suck !", render_ctx.width * 0.5, render_ctx.height * 0.4);
-    }
-   
-   
-    ctx.fillStyle = '#FFFFFF'
-    ctx.textAlign = 'center'
-    ctx.font = "30px Nonfiction";
-    ctx.textAlign = 'start'
-}
-
-
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number = 5,
-  )
-{
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
 }
 
 export { render }

@@ -26,6 +26,7 @@ export interface NotifDTO
 	username:	string;
 	date:		Date;
 	refId?:		number;
+	room_id?:	string;
 }
 
 export interface FriendDTO

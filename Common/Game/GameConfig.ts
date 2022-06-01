@@ -10,6 +10,7 @@ const GameConfig =
     TERRAIN_PADDING_X: 0.05,
     TERRAIN_PADDING_Y: 0.11, // 0.13
     RELOAD_TIME: 1000,
+	DEFAULT_MAX_SCORE: 11,
 }
 
 export { GameConfig } 

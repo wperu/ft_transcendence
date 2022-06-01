@@ -8,14 +8,17 @@ import { RoomModule } from 'src/room/room.module';
 import { UsersModule } from 'src/users/users.module';
 import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
+import { PongModule } from 'src/pong/pong.module';
 
 @Module({
 	imports: [
 		FriendsModule,
 		UsersModule,
 		RoomModule,
-		AuthModule
+		AuthModule,
+		PongModule,
 	],
-	providers: [Array, ChatService, ChatGateway]
+	providers: [ChatService, ChatGateway],
+	exports: [ChatService]
 })
 export class ChatModule {}

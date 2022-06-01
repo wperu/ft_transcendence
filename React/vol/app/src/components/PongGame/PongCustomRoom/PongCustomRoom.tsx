@@ -4,16 +4,20 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
 import { usePongContext } from "../PongContext/ProvidePong";
 import { UserCustomRoomDTO } from "../../../Common/Dto/pong/UserCustomRoomDTO";
+import { useAuth } from "../../../auth/useAuth";
 
+
+
+//Reload When chang id;
 export function PongCustomRoom() : JSX.Element
 {
 	const { socket, isAuth }	= usePongContext();
+	const { user }				= useAuth();
 	const [inRoom, setInRoom]	= useState<boolean>(false);
 	const [users, setUsers]		= useState<Array<UserCustomRoomDTO> >([]);
 	const { id }				= useParams<("id")>();
 	const navigate				= useNavigate();
-
-
+	const [isOwner, setIsOwner]				= useState<boolean>(false);
 	/**
 	 *
 	 */
@@ -42,6 +46,17 @@ export function PongCustomRoom() : JSX.Element
 	}, [])
 
 	useEffect(() => {
+		if (user && users.length !== 0 && user.reference_id === users[0].reference_id)
+		{
+			setIsOwner(true);
+		}
+		else
+		{
+			setIsOwner(false);
+		}
+	}, [users, user])
+
+	useEffect(() => {
 			socket.on("JOINED_CUSTOM_ROOM", () => {
 
 				setInRoom(true);
@@ -68,6 +83,10 @@ export function PongCustomRoom() : JSX.Element
 
 	}, [socket])
 
+	const startGame = useCallback(() => {
+			socket.emit("START_CUSTOM_ROOM", id);
+	}, [socket, id])
+
 
 	return	<div>
 				auth :				{isAuth ? "true" : "false"}<br/>
@@ -79,5 +98,7 @@ export function PongCustomRoom() : JSX.Element
 				<button onClick={leaveRoom}>Leave</button><br/>
 				{users.map((u, index) => {return <li key={index}>{u.username}</li>})}
 				<Link to="/" replace={false}><button>main</button></Link>
+
+				{isOwner && users.length >= 2 ? <><button onClick={startGame}>Start</button></>: <></>  }
 			</div>;
 }

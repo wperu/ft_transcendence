@@ -5,7 +5,7 @@ import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
 import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { GameInviteDTO } from "../../../Common/Dto/chat/gameInvite";
 
 /** //fix
@@ -48,6 +48,7 @@ export interface INotif
 	type: ENotification;
 
 	req_id?: number;
+	room_id?: string;
 	username?: string;
 	content? : string;
 	refId?: number;
@@ -117,7 +118,11 @@ function useChatProvider() : IChatContext
 	const [blockList, setBlockList]			= useState<Array<UserDataDto>>([]);
 	const [jumpDm, awaitDm]					= useState<number | undefined>(undefined);
 	const navigate							= useNavigate();
+	const { id }							= useParams<"id">();
+	const location							= useLocation();
 
+
+	const [dto, setDto] = useState<GameInviteDTO | undefined>(undefined);
 
 
 
@@ -125,16 +130,45 @@ function useChatProvider() : IChatContext
 	 * Pong interact
 	 */
 	const invitePlayer = useCallback((refId?: number, room_id?: number) => {
-		navigate("/matchmaking/custom", { replace: false })
+		
+		if (`/matchmaking/custom/${id}` === location.pathname)
+		{
+			const dto : GameInviteDTO = {
+				gameRoomId: 0, //todo create room and send
+				refId: refId,
+				chatRoomId: room_id,
+			}
+			socket.emit('GAME_INVITE', dto);
+			return;
+		}
+		else
+		{
+			navigate("/matchmaking/custom", { replace: false })
 
+		
+		}
 		const dto : GameInviteDTO = {
 			gameRoomId: 0, //todo create room and send
 			refId: refId,
 			chatRoomId: room_id,
 		}
+		setDto(dto);
 
-		socket.emit('GAME_INVITE', dto);
-	}, [socket, navigate])
+	}, [socket, navigate, location, id])
+
+
+	useEffect(() => {
+		//if (dto !== undefined)
+			socket.on("CONFIRM_CUSTOM_ROOM", (data: {room_id: string}) => {
+				//dto?.gameRoomId = data.room_id;
+				socket.emit('GAME_INVITE', dto);
+				setDto(undefined);
+			});
+
+		return () => {
+			socket.off("CONFIRM_CUSTOM_ROOM");
+		}
+	}, [socket, dto])
 	/**
 	 * ***** Room *****
 	 */

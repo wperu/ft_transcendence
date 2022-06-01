@@ -190,4 +190,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.logger.log("Rcv UPDATE_CUSTOM_ROOM");
 	}
 
+	@SubscribeMessage("START_CUSTOM_ROOM")
+	startCustomRoom(client: Socket, room_id: string)
+	{
+		this.logger.log("Rcv START_CUSTOM_ROOM");
+		this.pongService.startCustomRoom(client, room_id) //add client ot check owner
+	}
 }
