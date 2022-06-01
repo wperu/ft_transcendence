@@ -14,12 +14,12 @@ export function PongCustomRoom() : JSX.Element
 
 
 	/**
-	 * 
+	 *
 	 */
 	useEffect(() => {
 		if (isAuth && inRoom === false)
 		{
-			console.log("Send !");
+			console.log("Sent !");
 			socket.emit("JOIN_CUSTOM_ROOM", id)
 		}
 	}, [socket, id, isAuth, inRoom])
