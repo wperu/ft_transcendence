@@ -581,14 +581,14 @@ export class ChatService {
 		try
 		{
 			const ret = await this.friendService.addRequestFriend(user.reference_id, ref_id)
-			
+
 			if (ret === undefined)
 			{
 				return false;
 			}
 			else
 			{
-				const dto : NoticeDTO = { level: ELevel.info, content: "Request Send !" };
+				const dto : NoticeDTO = { level: ELevel.info, content: "Request sent !" };
 				client.emit("NOTIFICATION", dto);
 				return true;
 			}

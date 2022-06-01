@@ -8,8 +8,7 @@ import { RoomRename, RoomChangePassDTO } from '../Common/Dto/chat/RoomRename';
 import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
-import { ELevel } from 'src/Common/Dto/chat/notice';
-
+import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
 
 // Todo fix origin
 // Todo add namespace
@@ -19,10 +18,10 @@ import { ELevel } from 'src/Common/Dto/chat/notice';
 	cors: {
 		origin: '*',
 	},
-	transports: ['websocket'] 
+	transports: ['websocket']
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, OnModuleInit
-{	
+{
 	@WebSocketServer() server: Server;
 	private logger: Logger = new Logger('ChatGateway');
 
@@ -37,7 +36,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
-	afterInit(server: Server) 
+	afterInit(server: Server)
 	{
 		this.logger.log("Server listening on ");
 	}
@@ -64,8 +63,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			room_id:	payload.room_id
 		};
 
-		// TODO check if user is actually in room           
-		// TODO maybe store in DB if we want chat history ? 
+		// TODO check if user is actually in room
+		// TODO maybe store in DB if we want chat history ?
 
 		this.logger.log("[Socket io] new message: " + msg_obj.message);
 		this.server.to(payload.room_id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
@@ -73,14 +72,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 
-	
+
 	@SubscribeMessage('CREATE_ROOM')
 	async createRoom(client: Socket, payload: CreateRoomDTO): Promise<void>
 	{
 		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 		return ;//todo trown error and disconnect
-		
+
 		await this.chatService.createRoom(client, user, payload);
 
 	}
@@ -89,10 +88,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	/**
 	 * Emit to this event to join a room
-	 * 
+	 *
 	 * @field name: the room name to join
 	 * @field password?: optional, the password of the room to join
-	 * 
+	 *
 	 * If the room doesn't exist, the room is created and the user becomes it's owner.
 	 * In that case, even if a password is specified, the room protection is set to NONE
 	 * upgrade room protection using 'PROTECT_ROOM' event
@@ -110,10 +109,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 
-	// TODO SECURITY what happens if owner leaves ? 
+	// TODO SECURITY what happens if owner leaves ?
 	/**
 	 * Emit to this event to leave a specific room
-	 * 
+	 *
 	 * @param room: the room name to leave.
 	 */
 	@SubscribeMessage('LEAVE_ROOM')
@@ -122,7 +121,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
 			return ;//todo trown error and disconnect
-		
+
 		await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name);
 	}
 
@@ -133,9 +132,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	/**
 	 * Emit to this event to set a protection on a room
 	 * To be able to edit a room protection, you need to be the owner of that room
-	 * 
+	 *
 	 * @field room_name: The name of the room to protect
-	 * @field protection_mode: the mode of protection to switch to, available modes are 
+	 * @field protection_mode: the mode of protection to switch to, available modes are
 	 * 	- "NONE" -> No protection
 	 *  - "PROTECTED" -> Invite Only
 	 *  - "PRIVATE" -> Password protected (the password MUST be specified in opt parameter)
@@ -150,14 +149,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	/**
 	 * Emit on this event to change the name of a room
-	 * 
+	 *
 	 * @field old_name: the old name of the room that will be changed
 	 * @field new_name: the new name for the room
 	 */
 	@SubscribeMessage('RENAME_ROOM')
 	async renameRoom(client: Socket, payload: RoomRename)
 	{
-    
+
 	}
 
 
@@ -172,7 +171,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	async roomChangePass(client: Socket, payload: RoomChangePassDTO)
 	{
 		let user: ChatUser = await this.chatService.getUserFromSocket(client);
-		
+
 		if (user === undefined)
 			return ;
 
@@ -183,7 +182,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	async user_list(client: Socket , payload: number) : Promise<void>
 	{
 		let user :ChatUser = await this.chatService.getUserFromSocket(client);
-		
+
 		if (user !== undefined)
 			await this.chatService.roomUserList(client, user, payload);
 	}
@@ -204,7 +203,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	async room_mute(client:Socket, payload: RoomMuteDto): Promise<void>
 	{
 		let user :ChatUser = await this.chatService.getUserFromSocket(client);
-		
+
 		if (user === undefined)
 				return ;//fix
 		await this.chatService.roomMute(client, user, payload);
@@ -228,7 +227,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
 		let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
-		
+
 		if (user === undefined)
 		{
 			user = await this.chatService.connectUserFromSocket(client);
@@ -251,7 +250,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			this.logger.log(`Chat warning: Unable to retrieve users informations on socket ${client.id}`);
 			return ;
-			
+
 		}
 
 
@@ -264,13 +263,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	/**
 	 * Upon disconnection, sockets leave all the channels they were part of automatically, and no special teardown is needed on your part.
 	 * https://socket.io/docs/v3/rooms/#disconnection
-	 * @param client 
+	 * @param client
 	 */
 	async handleDisconnect(client: Socket)
 	{
 		this.logger.log(`Client disconnected: ${client.id}`);
 		//this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
-		
+
 		let userInfo : ChatUser | undefined = await this.chatService.disconnectClient(client);
 		if (userInfo !== undefined)
 		{
@@ -291,8 +290,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 	 /**
-	  * 
-	  * @param client 
+	  *
+	  * @param client
 	  * @param payload refId
 	  */
 	@SubscribeMessage('ADD_FRIEND')
@@ -318,13 +317,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 					content: undefined,
 					date: new Date(),
 				}]
-				
+
 				let ret = await this.chatService.getFriendList(us) as UserDataDto[];
 				let ret2 = await this.chatService.getRequestList(us) as UserDataDto[];
 
+				let notifDto : NoticeDTO;
 				us.socket.forEach(s => {
 					s.emit('FRIEND_LIST', ret);
 					s.emit('FRIEND_REQUEST_LIST', ret2);
+					notifDto = { level: ELevel.info, content: "Someone wants to be your friend" };
+					s.emit('NOTIFICATION', notifDto);
 				});
 
 				let ret3 = await this.chatService.getFriendList(user) as UserDataDto[];
@@ -337,23 +339,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	/**
-	 * 
-	 * @param client 
-	 * @param payload 
-	 * @returns 
+	 *
+	 * @param client
+	 * @param payload
+	 * @returns
 	 */
 	@SubscribeMessage('ADD_FRIEND_USERNAME')
 	async add_friend_by_username(client: Socket, payload: string) : Promise<void>
 	{
-	  let user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
+	  let src_user : ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
-	  if (user !== undefined)
+	  if (src_user !== undefined)
 	  {
-		  
+
 		let us = await this.chatService.getUserByUsername(payload);
 		if (us !== undefined)
 		{
-			if(await this.chatService.addFriend(client, user, us.reference_id) === false)
+			if(await this.chatService.addFriend(client, src_user, us.reference_id) === false)
 				return ;
 
 			let recv = this.chatService.getUserFromID(us.reference_id);
@@ -364,23 +366,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 				dto = [{
 					type: ENotification.FRIEND_REQUEST,
-					req_id: user.reference_id,
-					username: user.username,
+					req_id: src_user.reference_id,
+					username: src_user.username,
 					content: undefined,
 					date: new Date(),
 				}]
-				
+
 				let ret = await this.chatService.getFriendList(recv) as UserDataDto[];
 				let ret2 = await this.chatService.getRequestList(recv) as UserDataDto[];
 
+				let notifDto : NoticeDTO;
 				recv.socket.forEach(s => {
 					s.emit('FRIEND_LIST', ret);
 					s.emit('FRIEND_REQUEST_LIST', ret2);
+					notifDto = { level: ELevel.info, content: "Someone wants to be your friend" };
+					s.emit('NOTIFICATION', notifDto);
 				});
 
-				let ret3 = await this.chatService.getFriendList(user) as UserDataDto[];
+				let ret3 = await this.chatService.getFriendList(src_user) as UserDataDto[];
 
-				user.socket.forEach(s => {
+				src_user.socket.forEach(s => {
 					s.emit('FRIEND_LIST', ret3);
 				});
 			}
@@ -430,11 +435,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			await this.chatService.blockUser(user, payload);
 
 			let ret = await this.chatService.getBlockList(user) as UserDataDto[];
-			
+
 			user.socket.forEach(s => {
 				s.emit('BLOCK_LIST', ret);
 			});
-			
+
 		}
 	}
 
@@ -462,7 +467,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			let ret = await this.chatService.getFriendList(user) as UserDataDto[];
-			
+
 			client.emit('FRIEND_LIST', ret);
 		}
 	}
@@ -490,7 +495,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user !== undefined)
 		{
 			const ret = await this.chatService.getBlockList(user) as UserDataDto[];
-			
+
 			client.emit('BLOCK_LIST', ret);
 		}
 	}
