@@ -42,7 +42,7 @@ export class FriendsService
 		{
 			return [];
 		}
-		
+
 	}
 
 	/**
@@ -96,7 +96,7 @@ export class FriendsService
 	{
 		try
 		{
-			const rel = await this.friendRepository.findOne({ 
+			const rel = await this.friendRepository.findOne({
 				where: {
 					id: In([id])
 				},
@@ -205,7 +205,7 @@ export class FriendsService
 			}
 			req.id_one = userIdOne;
 			req.id_two = userIdTwo;
-			
+
 
 			return await this.safeFriendSave(req);
 		}
@@ -230,7 +230,7 @@ export class FriendsService
 				return undefined;
 			}
 		}
-		throw new Error("No Request Send !");
+		throw new Error("No request sent !");
 	}
 
 	/**
@@ -328,7 +328,7 @@ export class FriendsService
 				.andWhere("status != :status", { status: EStatus.BLOCK})
 			    .execute();
 
-			
+
 			let relation = await this.findFriendRelationOf(userIdOne, userIdTwo);
 			if (relation === undefined)
 			{
@@ -355,7 +355,7 @@ export class FriendsService
 		if (userIdOne === userIdTwo)
 			return undefined;
 		try
-		{	
+		{
 			await this.friendRepository
 			.createQueryBuilder()
 			.delete()
