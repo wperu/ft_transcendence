@@ -23,8 +23,6 @@ interface headerInfo
 function CurrentUserProfileHeader(props : headerInfo)
 {
 	// const inputEl = useRef(null);
-	console.log("truc");
-
 	return (
 		<header id="profile_header">
 			<ChangeablePP user={props.user} />

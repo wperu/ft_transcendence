@@ -29,7 +29,7 @@ function getTimeSince(date : Date) : string
 {
 	let tmp = new Date(date);
 	let time = Math.floor((Date.now() - tmp.getTime()) / 1000);
-	let finalString: string =  "il y a ";
+	let finalString: string =  "";
 	if (Math.floor(time / 3600))
 	{
 		time = Math.floor(time / 3600);
@@ -37,19 +37,26 @@ function getTimeSince(date : Date) : string
 		{
 			time = Math.floor(time / 24);
 			if (Math.floor(time / 30))
-				finalString += (Math.floor((time / 30))).toString() + " mois";
+			{
+				finalString += (Math.floor((time / 30))).toString() + " month";
+				if ((Math.floor((time / 30))) > 1)
+					finalString += 's';
+				finalString += " ago";
+			}
 			else
 			{
-				finalString += time.toString() + " jour";
+				finalString += time.toString() + " day";
 				if (time > 1)
 					finalString += 's';
+				finalString += " ago";
 			}
 		}
 		else
 		{
-			finalString += time.toString() + " heure";
+			finalString += time.toString() + " hour";
 			if (time > 1)
 				finalString += 's';
+			finalString += " ago";
 		}
 	}
 	else
@@ -60,9 +67,10 @@ function getTimeSince(date : Date) : string
 			finalString += time.toString() + " minute";
 			if (time > 1)
 				finalString += 's';
+			finalString += " ago";
 		}
 		else
-			finalString = "à l'instant";
+			finalString = "just now";
 	}
 	return (finalString);
 }
