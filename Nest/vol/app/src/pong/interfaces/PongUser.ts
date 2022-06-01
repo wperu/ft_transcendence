@@ -9,5 +9,6 @@ export interface PongUser
     position: number,
     velocity: number,
     key: number,
-    in_game: boolean
+    in_game: boolean,
+	in_room: string | undefined,
 }

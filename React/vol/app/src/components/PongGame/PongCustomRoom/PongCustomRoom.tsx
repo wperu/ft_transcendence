@@ -1,16 +1,17 @@
 import { cleanup } from "@testing-library/react";
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
 import { usePongContext } from "../PongContext/ProvidePong";
 import { UserCustomRoomDTO } from "../../../Common/Dto/pong/UserCustomRoomDTO";
 
 export function PongCustomRoom() : JSX.Element
 {
-	const {socket, isAuth}		= usePongContext();
+	const { socket, isAuth }	= usePongContext();
 	const [inRoom, setInRoom]	= useState<boolean>(false);
 	const [users, setUsers]		= useState<Array<UserCustomRoomDTO> >([]);
 	const { id }				= useParams<("id")>();
+	const navigate				= useNavigate();
 
 
 	/**
@@ -28,14 +29,15 @@ export function PongCustomRoom() : JSX.Element
 	const leaveRoom = useCallback(() => {
 		if (inRoom)
 		{
-			socket.emit("LEAVE_CUSTOM_ROOM", id)
-			setInRoom(false);
+		//	socket.emit("LEAVE_CUSTOM_ROOM", id);
+		//	setInRoom(false);
 		}
-	}, [inRoom, socket])
+		navigate("/matchmaking", { replace: false })
+	}, [inRoom, socket, navigate])
 
 	useEffect(() => {
 		return () =>  {
-			socket.emit("LEAVE_CUSTOM_ROOM", id)
+			socket.emit("LEAVE_CUSTOM_ROOM", id);
 		}
 	}, [])
 
@@ -70,10 +72,12 @@ export function PongCustomRoom() : JSX.Element
 	return	<div>
 				auth :				{isAuth ? "true" : "false"}<br/>
 				status :			{inRoom ? "true" : "false"}<br/>
+				can play : 			{users.length >= 2 ? "true" : "false"}<br/>
 				numbers of users :	{users.length}<br/>
 				owner : 			{users.length !== 0 ? users[0].username : "n/a"}<br/>
 
 				<button onClick={leaveRoom}>Leave</button><br/>
 				{users.map((u, index) => {return <li key={index}>{u.username}</li>})}
+				<Link to="/" replace={false}><button>main</button></Link>
 			</div>;
 }

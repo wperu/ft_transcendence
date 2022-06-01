@@ -64,6 +64,10 @@ export class PongService {
         this.server = server;
     }
 
+	findUserBy(id: string)
+	{
+
+	}
 
 
 
@@ -105,6 +109,7 @@ export class PongService {
             velocity: 0,
             key: 0,
             in_game: false,
+			in_room: undefined,
         } as PongUser)
 
 		return this.users[idx - 1];
@@ -382,11 +387,14 @@ export class PongService {
 
 	joinCustomRoom(id: string, user: PongUser)
 	{
+		if (user.in_room !== undefined)
+			throw new Error("Already in room !");
 		let room = this.findCustomRoom(id);
 		room.users.push(user);
 		user.socket.join(id);
 
 		user.socket.emit("JOINED_CUSTOM_ROOM");
+		user.in_room = id;
 		this.sendUserOfCustomRoom(id);
 		return;
 	}
@@ -401,17 +409,25 @@ export class PongService {
 		room.users.splice(idx, 1);
 
 		user.socket.leave(id);
-
-		//user.socket.emit("LEFT_CUSTOM_ROOM");
+		user.socket.emit("LEFT_CUSTOM_ROOM");
+		user.in_room = undefined;
 		this.sendUserOfCustomRoom(id);
+
+		if (room.users.length === 0)
+		{
+			const i = this.customRooms.indexOf(room);
+			this.customRooms.splice(i, 1);
+			console.log('Room destroy');
+		}
+		
 		return ;
+
 	}
 
 	
 
 	sendUserOfCustomRoom(id: string) : Array<void>
 	{
-		
 		const room = this.findCustomRoom(id);
 
 		const toDto = (us : Array<PongUser>) => {
@@ -430,8 +446,8 @@ export class PongService {
 			return ret;
 		}
 
-		//if (room === undefined)
-		//	throw new Error("Room doesn\'t exist");
+		if (room === undefined)
+			throw new Error("Room doesn\'t exist");
 		
 		console.log(room.users.length);
 

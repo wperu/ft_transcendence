@@ -77,6 +77,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	async handleDisconnect(client: Socket)
 	{
+		this.logger.log("Rcv DISCONNECT");
 		let usr = this.pongService.getUserFromSocket(client);
 		if (!usr || !usr.in_game)
 			this.pongService.removeFromWaitingList(client);
@@ -84,7 +85,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			console.log("disconnecting from game")
 			this.pongService.disconnectUser(usr);
+			
 		}
+		if (usr && usr.in_room !== undefined)
+				this.pongService.leaveCustomRoom(usr.in_room, usr);
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
 
@@ -153,8 +157,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		//const id: string = generateId();
 		const id: string = randomInt(100000).toString(); //fix me check if already exist...
+		let usr = this.pongService.getUserFromSocket(client);
+
+		if (usr !== undefined && usr.in_room !== undefined)
+			client.emit("UP_CUSTOM_ROOM", usr.in_room);
+		else
+			client.emit("UP_CUSTOM_ROOM", id);
 		console.log('roomcreated ', id);
-		client.emit("UP_CUSTOM_ROOM", id);
 	}
 
 	@SubscribeMessage("JOIN_CUSTOM_ROOM")
