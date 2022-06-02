@@ -343,7 +343,10 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
     }
 
     /* Ball */
-    let ball_size = render_ctx.terrain_h * (pong_ctx.room.ball.size * 0.1);
+    let ball_size = render_ctx.terrain_h * (pong_ctx.room.ball.size * 0.5);
+
+	if (ball_size > GameConfig.BALL_SIZE * 0.5)
+		ball_size = render_ctx.terrain_h * GameConfig.BALL_SIZE * 0.5;
     if (pong_ctx.room.state === RoomState.ENDED)
         ball_size = 0;
     ctx.fillStyle = '#FFFFFF'
@@ -357,9 +360,6 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
     ctx.fill();
     ctx.restore();
 }
-
-
-
 
 function renderPauseScreen(ctx: CanvasRenderingContext2D, render_ctx: PongRenderingContext)
 {

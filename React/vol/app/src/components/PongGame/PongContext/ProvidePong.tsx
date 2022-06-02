@@ -174,7 +174,6 @@ function usePongProvider() : IPongContext
         }
     }, [inGame, navigate])
 
-
 	const reconnect = useCallback(() => {
 		if (needReconect)
 			socket.connect();
