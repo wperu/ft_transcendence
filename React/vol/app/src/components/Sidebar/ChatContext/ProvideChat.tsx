@@ -281,10 +281,15 @@ function useChatProvider() : IChatContext
 			socket.connect();
 
 		socket.on("disconnect", () => {
-			setRooms([]); //clean rooms
+			setRooms([]);
 			setCurrentRoom(undefined);
 			awaitDm(undefined);
+			setIsConnected(false);
 		  });
+
+		socket.on("connect", () => {
+			setIsConnected(true)
+		});
 
 		return function cleanup() {
 			if (socket !== undefined && socket.connected)

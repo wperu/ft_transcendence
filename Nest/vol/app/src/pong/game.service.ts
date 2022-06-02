@@ -86,11 +86,6 @@ export class GameService {
         return ;
     }
 
-
-
-
-
-
     initRoom(creator: PongUser, other: PongUser = undefined, spectators : Array<PongUser> = []) : PongRoom
     {
         function generateID() {
@@ -229,8 +224,6 @@ export class GameService {
 
 		
     }
-
-
 
     async runRoom(room: PongRoom) : Promise<void>
     {
