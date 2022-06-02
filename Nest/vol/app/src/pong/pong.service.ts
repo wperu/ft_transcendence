@@ -15,13 +15,13 @@ import { UserCustomRoomDTO } from 'src/Common/Dto/pong/UserCustomRoomDTO';
 import { ChatService } from 'src/chat/chat.service';
 
 
-// REVIEW do we want multiple socket for pong user ? 
+// REVIEW do we want multiple socket for pong user ?
+//TODO updateCustomRoom
 
 @Injectable()
 export class PongService {
 
     private logger: Logger = new Logger('PongService');
-
 
     /*
     private frameCount: number = 0;
@@ -134,7 +134,7 @@ export class PongService {
         return (undefined);
     }
 
-    getRoomById(id: string)
+    getRoomById(id: string) : undefined | PongRoom
     {
         return this.rooms.find ((r) => r.id === id);
     }
@@ -379,6 +379,15 @@ export class PongService {
 		return room;
 	}
 
+	isOwner(usr: PongUser, room: CustomRoom) : boolean
+	{
+		if (room.users.length === 0)
+			return false;
+		if (room.users[0].reference_id === usr.reference_id)
+			return true;
+		return false;
+	}
+
 	initCustomRoom(id: string, refId: number) : CustomRoom
 	{
 		this.logger.log(`Init new Custom room ${id}`);
@@ -483,7 +492,7 @@ export class PongService {
 		if (croom.users.length < 2)
 			return ;// error
 
-		if (usr.reference_id !== croom.users[0].reference_id)
+		if (this.isOwner(usr, croom) === false)
 			return ; //error
 		
 		const owner = croom.users[0];
@@ -506,8 +515,26 @@ export class PongService {
 		const i = this.customRooms.indexOf(croom);
 		this.customRooms.splice(i, 1);
 		console.log('Room destroy');
+	}
+
+	updateCustomRoom(client: Socket, id: string, opts: any)
+	{
+		const room = this.findCustomRoom(id);
+		const usr = this.getUserFromSocket(client);
+		if (usr === undefined)
+			return ;
+
+		if (room === undefined)
+			return ; //error
+
+		if (room.users.length < 2)
+			return ;// error
+
+		if (this.isOwner(usr, room) === false)
+			return ; //error
 
 
+		//TODO 
 	}
 	
 }

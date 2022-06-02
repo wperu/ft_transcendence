@@ -95,12 +95,16 @@ export class GameService {
     {
         function generateID() {
             return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
-                const r = Math.floor(Math.random() * 16);  
-                return r.toString(16);  
+                const r = Math.floor(Math.random() * 16); 
+                return r.toString(16);
             }));
         }
 
-        let room_id = generateID(); //fix dup id
+       
+		let room_id = generateID();
+		while (this.pongService.getRoomById(room_id) !== undefined)
+			room_id = generateID();
+
         creator.socket.join(room_id);
         other.socket.join(room_id);
 
@@ -213,8 +217,6 @@ export class GameService {
                 this.server.to(room.id).emit("START_GAME");
                 room.lastTime = 0;
 
-
-               // room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
                 room.job_id = await this.boss.send(room.id, {});
                 console.log("[boss] starting job: " + room.job_id);
                 this.boss.work(room.id, {

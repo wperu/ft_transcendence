@@ -128,8 +128,17 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage("CREATE_CUSTOM_ROOM")
 	createCustomRoom(client: Socket, data: void)
 	{
-		//const id: string = generateId();
-		const id: string = randomInt(100000).toString(); //fix me check if already exist...
+		function generateID() {
+			return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
+				const r = Math.floor(Math.random() * 16); 
+				return r.toString(16);  
+			}));
+		}
+		
+		let id = generateID();
+		while (this.pongService.findCustomRoom(id) !== undefined)
+			id = generateID();
+
 		let usr = this.pongService.getUserFromSocket(client);
 
 		if (usr !== undefined && usr.in_room !== undefined)
@@ -158,15 +167,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage("UPDATE_CUSTOM_ROOM")
-	updateCustomRoom(client: Socket, room_id: string)
+	updateCustomRoom(client: Socket, data: {room_id: string, opts: any}) //todo opt
 	{
 		this.logger.log("Rcv UPDATE_CUSTOM_ROOM");
+		this.pongService.updateCustomRoom(client, data.room_id, data.opts);
 	}
 
 	@SubscribeMessage("START_CUSTOM_ROOM")
 	startCustomRoom(client: Socket, room_id: string)
 	{
 		this.logger.log("Rcv START_CUSTOM_ROOM");
-		this.pongService.startCustomRoom(client, room_id) //add client ot check owner
+		this.pongService.startCustomRoom(client, room_id);
 	}
 }
