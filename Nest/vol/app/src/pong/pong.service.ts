@@ -60,9 +60,6 @@ export class PongService {
 		this.customRooms = [];
     }
 
-    
-
-
     setServer(server: Server)
     {
         this.server = server;
@@ -72,10 +69,6 @@ export class PongService {
 	{
 
 	}
-
-
-
-
 
     async registerUserFromSocket(socket: Socket): Promise<PongUser | undefined>
 	{
@@ -119,9 +112,6 @@ export class PongService {
 		return this.users[idx - 1];
 	}
 
-
-
-
     getUserFromSocket(socket: Socket): PongUser | undefined
     {
         const data: UserToken = this.tokenService.decodeToken(socket.handshake.auth.token) as UserToken;
@@ -144,10 +134,6 @@ export class PongService {
         return (undefined);
     }
 
-
-
-
-
     getRoomById(id: string)
     {
         return this.rooms.find ((r) => r.id === id);
@@ -157,14 +143,6 @@ export class PongService {
     {
 		return (this.users.find((u) => { return u.reference_id === ref_id}))
     }
-
-
-
-
-
-
-
-
 
     async removeFromWaitingList(client: Socket)
     {
@@ -279,12 +257,10 @@ export class PongService {
 
 	}
 
-
 	removeRoom(room: PongRoom) : void
 	{
 		this.rooms.splice(this.rooms.findIndex(({id} ) => id === room.id), 1);
 	}
-
 
     async disconnectUser(user: PongUser)
     {
@@ -533,8 +509,5 @@ export class PongService {
 
 
 	}
-
-	
-
 	
 }

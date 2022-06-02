@@ -66,7 +66,9 @@ export interface IPongContext
 	stopSearchRoom: () => void,
 	isRender: boolean,
 	startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
-	requestRoom: () => void
+	requestRoom: () => void,
+	needReconect : boolean,
+	reconnect: () => void,
 }
 
 
@@ -85,8 +87,7 @@ function usePongProvider() : IPongContext
 	const navigate						= useNavigate();
 	const [fx]							= useState<FX>(initFx());
 	const [isAuth, setIsAuth]			= useState<boolean>(false);
-
-
+	const [needReconect, setNeedReconnect]	= useState<boolean>(false);
 
 	console.log("Create Pong ctx");
 
@@ -173,7 +174,24 @@ function usePongProvider() : IPongContext
         }
     }, [inGame, navigate])
 
+
+	const reconnect = useCallback(() => {
+		if (needReconect)
+			socket.connect();
+	}, [socket, needReconect])
     
+	useEffect(() => {
+		socket.on("disconnect", () => {
+			setNeedReconnect(true);
+			console.log("Disconnected !");
+		})
+
+		socket.on("connect", () => {
+			console.log("connected !");
+			setNeedReconnect(false);
+		})
+	}, [socket])
+
     useEffect(() => {
 		if (socket.connected === false)
 		{
@@ -266,6 +284,8 @@ function usePongProvider() : IPongContext
 		isRender,
 		startRender,
 		requestRoom,
+		needReconect,
+		reconnect,
     });
 }
 

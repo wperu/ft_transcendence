@@ -63,7 +63,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			console.log("reconnected user");
 			this.pongService.reconnectUser(user, client);
 		}
-		else if (!user.in_game)
+		else if (!user.in_game && user.socket.connected === false)
 		{
 			user.socket = client;
 			// let the client know that we have authentificated him as a PongUser
@@ -91,7 +91,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				this.pongService.leaveCustomRoom(usr.in_room, usr);
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
-
 
 	@SubscribeMessage('SEARCH_ROOM')
 	async searchRoom(client: Socket)

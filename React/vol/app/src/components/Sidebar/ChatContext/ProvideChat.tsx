@@ -143,9 +143,7 @@ function useChatProvider() : IChatContext
 		}
 		else
 		{
-			navigate("/matchmaking/custom", { replace: false })
-
-		
+			navigate("/matchmaking/custom", { replace: false, })
 		}
 		const dto : GameInviteDTO = {
 			gameRoomId: 0, //todo create room and send
