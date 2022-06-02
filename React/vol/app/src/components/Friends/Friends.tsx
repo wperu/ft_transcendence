@@ -65,7 +65,7 @@ function Friends()
 			<form id="add_friend_by_name_form" onSubmit={addFriend}>
 				<div id="add_friend_title">Add a friend</div>
 				<input id="add_friend_input" type="text"
-					name="name" placeholder="Username"/>
+					name="name" placeholder="username"/>
 				<input id="add_friend_button" type="submit" value="Add"/>
 			</form>
 

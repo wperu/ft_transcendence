@@ -111,7 +111,7 @@ function useChatProvider() : IChatContext
 	const [isConnected, setIsConnected]		= useState<boolean>(false);
 	const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
 	const [rooms, setRooms]					= useState<IRoom[]>([]);
-	const [currentTab, setCurrentTab]		= useState<ECurrentTab>(ECurrentTab.channels);
+	const [currentTab, setCurrentTab]		= useState<ECurrentTab>(ECurrentTab.friends);
 	const [notification, setNotification] 	= useState<INotif[]>([]);
 	const [friendsList, setFriendsList]		= useState<Array<UserDataDto>>([]);
 	const [requestList, setRequestList]		= useState<Array<UserDataDto>>([]);
@@ -130,7 +130,7 @@ function useChatProvider() : IChatContext
 	 * Pong interact
 	 */
 	const invitePlayer = useCallback((refId?: number, room_id?: number) => {
-		
+
 		if (`/matchmaking/custom/${id}` === location.pathname)
 		{
 			const dto : GameInviteDTO = {
@@ -145,7 +145,7 @@ function useChatProvider() : IChatContext
 		{
 			navigate("/matchmaking/custom", { replace: false })
 
-		
+
 		}
 		const dto : GameInviteDTO = {
 			gameRoomId: 0, //todo create room and send

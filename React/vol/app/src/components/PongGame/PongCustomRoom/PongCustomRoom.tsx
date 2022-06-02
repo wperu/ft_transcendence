@@ -5,8 +5,47 @@ import { Socket } from "socket.io-client";
 import { usePongContext } from "../PongContext/ProvidePong";
 import { UserCustomRoomDTO } from "../../../Common/Dto/pong/UserCustomRoomDTO";
 import { useAuth } from "../../../auth/useAuth";
+import BackToMainMenuButton from "../../FooterButton/BackToMainMenuButton";
+import "./PongCustomRoom.css";
 
+// enum pongUserStatus
+// {
+// 	player,
+// 	owner,
+// 	spectator,
+// }
 
+interface pongUserProp
+{
+	username: string;
+	ref_id: number;
+	position: number;
+}
+
+function PongUser(props: pongUserProp)
+{
+	let	status: string;
+
+	if (props.position === 0)
+		status = "player, owner";
+	else if (props.position === 1)
+		status = "player";
+	else
+		status = "spectator";
+
+	return (
+		<div key={props.position} className="custom_room_user">
+			<Link to={"/profile/" + props.ref_id}  replace={false}>
+				<img alt="" className="custom_room_avatar"
+					src={process.env.REACT_APP_API_USER + '/' + props.ref_id.toString() + '/avatar'} />
+			</Link>
+			<Link to={"/profile/" + props.ref_id}  replace={false}>
+				{props.username}
+			</Link>
+			<div className="custom_room_user_status">{status}</div>
+		</div>
+	);
+}
 
 //Reload When chang id;
 export function PongCustomRoom() : JSX.Element
@@ -18,9 +57,7 @@ export function PongCustomRoom() : JSX.Element
 	const { id }				= useParams<("id")>();
 	const navigate				= useNavigate();
 	const [isOwner, setIsOwner]				= useState<boolean>(false);
-	/**
-	 *
-	 */
+
 	useEffect(() => {
 		if (isAuth && inRoom === false)
 		{
@@ -87,18 +124,32 @@ export function PongCustomRoom() : JSX.Element
 			socket.emit("START_CUSTOM_ROOM", id);
 	}, [socket, id])
 
-
-	return	<div>
-				auth :				{isAuth ? "true" : "false"}<br/>
-				status :			{inRoom ? "true" : "false"}<br/>
-				can play : 			{users.length >= 2 ? "true" : "false"}<br/>
-				numbers of users :	{users.length}<br/>
-				owner : 			{users.length !== 0 ? users[0].username : "n/a"}<br/>
-
-				<button onClick={leaveRoom}>Leave</button><br/>
-				{users.map((u, index) => {return <li key={index}>{u.username}</li>})}
-				<Link to="/" replace={false}><button>main</button></Link>
-
-				{isOwner && users.length >= 2 ? <><button onClick={startGame}>Start</button></>: <></>  }
-			</div>;
+	return (
+		<div id="custom_room">
+			{
+				// auth 			{isAuth ? "true" : "false"}<br/>
+				// status :			{inRoom ? "true" : "false"}<br/>
+				// can play : 			{users.length >= 2 ? "true" : "false"}<br/>
+				// numbers of users :	{users.length}<br/>
+				// owner : 			{users.length !== 0 ? users[0].username : "n/a"}<br/>
+			}
+			<div id="custom_room_users">
+				{users.map(({username, reference_id}, index) => {
+					return (
+						<PongUser username={username} ref_id={reference_id} position={index}/>
+					);
+				})}
+			</div>
+			<div id="custom_room_start">
+				{!isOwner ? "The owner of the room can start the game" : null}
+			</div>
+			<footer>
+				<Link to="/" replace={false}> <BackToMainMenuButton /> </Link>
+				{isOwner && users.length >= 2 ?
+					<button className="start_game_button" onClick={startGame}>Start</button>
+					: null}
+				<button className="footer_button" onClick={leaveRoom}>Go to matchmaking</button>
+			</footer>
+		</div>
+	);
 }

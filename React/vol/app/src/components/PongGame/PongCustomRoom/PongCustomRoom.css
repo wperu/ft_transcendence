@@ -1,0 +1,98 @@
+#custom_room
+{
+	width: 100%;
+	height: 100%;
+	color: white;
+}
+
+#custom_room footer
+{
+	position: fixed;
+	bottom: 0;
+	width: 90%;
+	margin: 3vmin 4%;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+#custom_room_users
+{
+	background-color: rgba(0, 0, 0, 0.15);
+	width: auto;
+	height: 45vh;
+	display: flex;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	margin: 0.6em 2em 0;
+	padding: 0 0.2em;
+	scroll-behavior: auto;
+	overflow-x: hidden;
+	/* overflow-y: auto; */
+}
+
+.custom_room_user
+{
+	font-size: 30px;
+	width: 250px;
+	height: 150px;
+	margin: 15px 10px;
+	padding: 5px 0px;
+	border: none;
+	border-radius: 10px;
+	background-color: rgba(255, 255, 255, 0.20);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.custom_room_user_status
+{
+	font-style: italic;
+	text-transform: capitalize;
+	font-size: 0.8em;
+}
+
+#custom_room a
+{
+	margin: 0;
+	padding: 0;
+	width: fit-content;
+	height: fit-content;
+}
+
+.custom_room_avatar
+{
+	width: 70px;
+	height: auto;
+}
+
+#custom_room_start
+{
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	margin-top: 1.5em;
+}
+
+.start_game_button
+{
+	margin: 0;
+	color: white;
+	background-color: #537896;/* #077ca3 */
+	padding: 2vmin 3.5vmin;
+	border-style: none;
+	border-radius: 10px;
+	font-size: 6vmin;
+	text-transform: uppercase;
+	box-shadow: 5px 10px #242424;
+	transition: 0.2s cubic-bezier(.23,1,.32,1);
+}
+
+.start_game_button:hover
+{
+	transform: scale(1.05,1.05);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.05,1.05);
+}

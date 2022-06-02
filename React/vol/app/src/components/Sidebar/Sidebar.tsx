@@ -15,10 +15,10 @@ function Content(props: prop)
 {
 	if (props.currentTab === ECurrentTab.chat)
 		return (<Chat />);
-	else if (props.currentTab === ECurrentTab.friends)
-		return (<Friends />);
-	else
+	else if (props.currentTab === ECurrentTab.channels)
 		return (<Channels />);
+	else
+		return (<Friends />);
 }
 
 function Sidebar()
