@@ -8,7 +8,7 @@ import { usePongContext } from "../../components/PongGame/PongContext/ProvidePon
 function PongMatchmaking()
 {
 	const [isSearching, setIsSearching] = useState<boolean>(false);
-	const { searchRoom, stopSearchRoom } = usePongContext();
+	const { searchRoom, stopSearchRoom, isAuth } = usePongContext();
 
 	const changeSearchStatut = useCallback(() => {
 		if (!isSearching)
@@ -37,7 +37,9 @@ function PongMatchmaking()
 
 	return (
 		<div>
-			<h1><button onClick={changeSearchStatut}>{(!isSearching) ? "matchmaking" : "stop" }</button></h1>
+			<h1><button onClick={changeSearchStatut}>{(!isSearching) ? "matchmaking" : "stop" }</button></h1><br/>
+			<div>Auth : {(isAuth) ? "True" : "False"}</div><br/>
+			<div>Searching : {(isSearching) ? "True" : "False"}</div><br/>
 		</div>
 	);
 }

@@ -237,25 +237,47 @@ export class PongService {
         this.gameService.startRoom(room);
     }
 
+	joinRoom(usr: PongUser, id: string)
+	{
+		const room = this.getRoomById(id);
+
+		if (room === undefined)
+			return ; //error
+		
+		room.spectators.push(usr);
+		usr.socket.join(room.id);
+		usr.in_game = true;
+		usr.socket.emit("RECONNECT_YOU", {
+			room_id: room.id,
+			player_1: {
+				position: room.player_1.position,
+				username: room.player_1.username,
+				points: room.player_1.points,
+			},
+			player_2: {
+				position: room.player_2.position,
+				username: room.player_2.username,
+				points: room.player_2.points,
+			},
+			ball: {
+				x: room.ball.pos_x,
+				y: room.ball.pos_y,
+				vel_x: room.ball.vel_x,
+				vel_y: room.ball.vel_y,
+			},
+		});
+
+		this.gameService.sendBallUpdate(room);
+		this.gameService.sendPlayerUpdate(room);
+		usr.socket.emit("START_GAME");
+
+	}
+
 
 	removeRoom(room: PongRoom) : void
 	{
 		this.rooms.splice(this.rooms.findIndex(({id} ) => id === room.id), 1);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     async disconnectUser(user: PongUser)

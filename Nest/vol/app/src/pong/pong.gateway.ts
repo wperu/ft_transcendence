@@ -100,45 +100,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.pongService.searchRoom(user);
 	}
 
-
-	/*
-	@SubscribeMessage("REQUEST_ROOM")
-	async requestRoom(client: Socket)
+	@SubscribeMessage('JOIN_ROOM')
+	async joinRoom(client: Socket, id: string)
 	{
-		let room = this.pongService.createMatch(client);
-
-		// pass back room_id to frontend
-		client.emit("ROOM_CREATED", {
-			room_id: room.id,
-		})
+		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		this.pongService.joinRoom(user, id);
 	}
-
-	@SubscribeMessage("START_ROOM")
-	async startRoom(client: Socket)
-	{
-		let room = this.pongService.startRoom(client);
-	}
-
-	@SubscribeMessage("UPDATE_ROOM")
-	async startRoom(client: Socket, data: {
-
-	})
-	{
-		let room = this.pongService.updateMatch(data);
-
-		// pass back room_id to frontend
-		client.emit("ROOM_CREATED", {
-			room_id: room.id,
-		})
-	}
-
-	@SubscribeMessage("INVITE_USER")
-	async joinRoom(client: Socket, data: {
-		user_id: number
-	})
-	{
-		this.pongService.joinMatch(data.user_id);
-	}*/
 
 	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
@@ -147,11 +114,11 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
+
 	/**
-	 * Event to create a cutom room
-	 * @param client 
-	 * @param data 
+	 * ** *** CUSTOM ROOM *** **
 	 */
+
 	@SubscribeMessage("CREATE_CUSTOM_ROOM")
 	createCustomRoom(client: Socket, data: void)
 	{

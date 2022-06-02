@@ -7,7 +7,7 @@ import "./Pong.css"
 
 const Pong = () => {
 	const { id } = useParams<"id">();
-    const { room, isAuth } = usePongContext();
+    const { room, isAuth, socket } = usePongContext();
     const [finished, setAsFinished] = useState<boolean>(false);
 
     useEffect(() => {
@@ -18,13 +18,14 @@ const Pong = () => {
     }, [room]);
 
 	useEffect(() => {
-		if (isAuth === true)
+		console.log("isAuth " + isAuth + " room :" + (room !== undefined));
+		if (isAuth === true && !room)
 		{
+			console.log("Request to spectate")
 			//todo try to join as spectator
+			socket.emit("JOIN_ROOM", id);
 		}
-	}, [isAuth])
-
-
+	}, [isAuth, room, socket, id])
 
     if (finished)
     {
