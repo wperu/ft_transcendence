@@ -101,7 +101,7 @@ function usePongProvider() : IPongContext
 	 * stop Matchmaking
 	 */
 	const stopSearchRoom = useCallback(() => {
-		//socket.emit(""); //todo
+		socket.emit("STOP_SEARCH_ROOM");
 	}, [socket])
 
 

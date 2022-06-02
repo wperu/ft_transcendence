@@ -217,7 +217,6 @@ export class PongService {
 
         if (other === undefined || this.waitingPool.length === 0)
         {
-            //this.createRoom(user);
             let pool_usr: PongPool = {
                 user: user,
                 modes: modes,
@@ -225,6 +224,7 @@ export class PongService {
 
             this.waitingPool.push(pool_usr);
             this.logger.log("joined waiting room: " + pool_usr.user.username);
+			user.socket.emit("IS_SEARCHING_ROOM", true);
             return ;
         }
 
@@ -236,6 +236,12 @@ export class PongService {
         this.rooms.push(room);
         this.gameService.startRoom(room);
     }
+
+	async stopSearchRoom(user: PongUser, modes: PongModes = PongModes.DEFAULT)
+	{
+		await this.removeFromWaitingList(user.socket);
+		user.socket.emit("IS_SEARCHING_ROOM", false);
+	}
 
 	joinRoom(usr: PongUser, id: string)
 	{

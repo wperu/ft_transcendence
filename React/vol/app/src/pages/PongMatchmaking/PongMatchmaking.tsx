@@ -8,21 +8,26 @@ import { usePongContext } from "../../components/PongGame/PongContext/ProvidePon
 function PongMatchmaking()
 {
 	const [isSearching, setIsSearching] = useState<boolean>(false);
-	const { searchRoom, stopSearchRoom, isAuth } = usePongContext();
+	const { searchRoom, stopSearchRoom, isAuth, socket } = usePongContext();
 
 	const changeSearchStatut = useCallback(() => {
 		if (!isSearching)
 		{
-			setIsSearching(true);
 			searchRoom()
 		}
 		else
 		{
 			stopSearchRoom()
-			setIsSearching(false);
 		}
 
 	}, [searchRoom, stopSearchRoom, isSearching])
+
+
+	useEffect(() => {
+		socket.on("IS_SEARCHING_ROOM", (isSearching : boolean) => {
+			setIsSearching(isSearching);
+		})
+	}, [socket])
 
 	useEffect(() => {
 		if (isSearching)

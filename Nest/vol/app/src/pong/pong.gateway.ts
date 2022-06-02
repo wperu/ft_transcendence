@@ -100,6 +100,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.pongService.searchRoom(user);
 	}
 
+	@SubscribeMessage('STOP_SEARCH_ROOM')
+	async stopSearchRoom(client: Socket)
+	{
+		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		this.pongService.stopSearchRoom(user);
+	}
+
 	@SubscribeMessage('JOIN_ROOM')
 	async joinRoom(client: Socket, id: string)
 	{
