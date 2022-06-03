@@ -55,8 +55,8 @@ export class GameService {
       //  room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
         
         console.log("[boss] waiting");
-        while (room.player_1.in_game !== false
-            && room.player_2.in_game !== false)
+        while (room.player_1.in_game !== undefined
+            && room.player_2.in_game !== undefined)
         {
             await this.runRoom(room)
 
@@ -193,8 +193,8 @@ export class GameService {
                 username: room.player_2.username,
             }
         }
-        room.player_1.in_game = true;
-        room.player_2.in_game = true;
+        room.player_1.in_game = room.id;
+        room.player_2.in_game = room.id;
 
         room.state = RoomState.PLAYING;
         this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
@@ -400,8 +400,8 @@ export class GameService {
                     player_1_score: room.player_1.points,
                     player_2_score: room.player_2.points,
                 } as UpdatePongPointsDTO)
-                room.player_1.in_game = false;
-                room.player_2.in_game = false;
+                room.player_1.in_game = undefined;
+                room.player_2.in_game = undefined;
                 room.state = RoomState.FINISHED;
             }
             else

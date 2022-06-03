@@ -84,11 +84,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		else
 		{
 			console.log("disconnecting from game")
-			this.pongService.disconnectUser(usr);
-			
+			this.pongService.disconnectUser(usr);		
 		}
 		if (usr && usr.in_room !== undefined)
 				this.pongService.leaveCustomRoom(usr.in_room, usr);
+		if (usr && !usr.in_room && !usr.in_game)
+			console.log("destroy client !");
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
 

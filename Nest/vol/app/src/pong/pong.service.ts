@@ -105,7 +105,7 @@ export class PongService {
             position: 0.5,
             velocity: 0,
             key: 0,
-            in_game: false,
+            in_game: undefined,
 			in_room: undefined,
         } as PongUser)
 
@@ -178,7 +178,7 @@ export class PongService {
 		player.points = 0;
 		player.velocity = 0;
 		player.key = 0;
-		player.in_game = false;
+		player.in_game = undefined;
 	}
 
 
@@ -230,7 +230,7 @@ export class PongService {
 		
 		room.spectators.push(usr);
 		usr.socket.join(room.id);
-		usr.in_game = true;
+		usr.in_game = room.id;
 		usr.socket.emit("RECONNECT_YOU", {
 			room_id: room.id,
 			player_1: {
@@ -271,13 +271,14 @@ export class PongService {
         if (room === undefined)
         {
             console.log("disconnection from unknown room");
+			user.in_game = undefined;
             return ;
         }
 
         if (room !== undefined && room.state === RoomState.PAUSED)
         {
-            room.player_1.in_game = false;
-            room.player_2.in_game = false;
+            room.player_1.in_game = undefined;
+            room.player_2.in_game = undefined;
             room.state = RoomState.FINISHED;
             //if (room.job_id !== "")
             //    this.boss.offWork(room.job_id);
@@ -353,9 +354,45 @@ export class PongService {
 	{
 		let user =  this.users.find((u) => { return u.reference_id === refId});
 		if (user)
-			return (user.in_game);
+			return (user.in_game !== undefined);
 
 		return (false);
+	}
+
+
+	playerStatus(refId: number)
+	{
+		const user = this.getUserFromRefId(refId);
+		if (user === undefined)
+		{
+			return {
+				connected : false,
+				status: "",
+			}
+		}
+		else if (user.in_game !== undefined)
+		{
+			return {
+				connected : true,
+				status: "in game",
+				id: user.in_game,
+			}
+		}
+		else if (user.in_room !== undefined)
+		{
+			return  {
+				connected : true,
+				status: "create room",
+				id: user.in_room,
+			}
+		}
+		else
+		{
+			return {
+				connected : false,
+				status: "",
+			}
+		}
 	}
 
 
