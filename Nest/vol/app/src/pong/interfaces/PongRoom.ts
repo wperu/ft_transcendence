@@ -24,6 +24,7 @@ export interface PongRoom
     player_1: PongUser,
     player_2: PongUser,
     ball: PongBall,
+    ball2?: PongBall,
     spectators: Array<PongUser>,
     state: RoomState,
 

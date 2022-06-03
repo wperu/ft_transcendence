@@ -313,6 +313,12 @@ export class PongService {
                     vel_x: room.ball.vel_x,
                     vel_y: room.ball.vel_y,
                 },
+                ball2: (room.options & RoomOptions.DOUBLE_BALL) ? {
+                    x: room.ball2?.pos_x,
+                    y: room.ball2?.pos_y,
+                    vel_x: room.ball2?.vel_x,
+                    vel_y: room.ball2?.vel_y,
+                } : undefined
             } as ReconnectPlayerDTO);
 
             console.log("player reconnected")
@@ -498,7 +504,7 @@ export class PongService {
 		const other = croom.users[1];
 
 		croom.users.splice(0, 2); //rm player
-		const room = this.gameService.initRoom(owner, other, croom.users);
+		const room = this.gameService.initRoom(owner, other, croom.users, croom.opts);
         room.options = croom.opts;
 
 		// for game options croom.opts //todo

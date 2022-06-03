@@ -21,4 +21,12 @@ export interface ReconnectPlayerDTO
         vel_x: number,
         vel_y: number,
     }
+
+
+    ball2?: {
+        x: number,
+        y: number,
+        vel_x: number,
+        vel_y: number,
+    }
 }
