@@ -1,7 +1,7 @@
 import { createJsxText, getGeneratedNameForNode } from "typescript";
 import { GameConfig } from "../../Common/Game/GameConfig";
 import IUser from "../../Common/Dto/User/User";
-import { IPongContext, IPongRoom, RoomState } from "./PongContext/ProvidePong";
+import { IPongContext, IPongRoom, RoomOptions, RoomState } from "./PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "./PongGame";
 import { clear_particles } from "./PongParticleSystem";
 import { add_particles, clear_trail, plot_trail } from "./PongTrail";
@@ -31,22 +31,75 @@ function updatePlayer(room: IPongRoom, user: IUser, deltaTime: number)
     if (user.username === room.player_1.username)
     {
         if (room.player_1.key !== 0)
-            room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED
+        {
+            if (room.options & RoomOptions.ICE_FRICTION && room.player_1.velocity < GameConfig.PLAYER_SPEED)
+            {
+                room.player_1.velocity += room.player_1.key * deltaTime;
+            }
+            else
+                room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED;
+        }
         else 
-            room.player_1.velocity *= GameConfig.PLAYER_FRICTION; 
+        {
+            if (room.options & RoomOptions.ICE_FRICTION)
+            {
+                room.player_1.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+                if  ((room.player_1.position < GameConfig.TERRAIN_PADDING_Y)
+                ||  (room.player_1.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+                    room.player_1.velocity *= -1;
+            }
+            else
+                room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
+        }
     
-        if (room.player_2.key === 0)
-            room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        if (room.player_2.key === 0) 
+        {
+            if (room.options & RoomOptions.ICE_FRICTION)
+            {
+                room.player_2.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+                if  ((room.player_2.position < GameConfig.TERRAIN_PADDING_Y)
+                ||  (room.player_2.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+                    room.player_2.velocity *= -1;
+            }
+            else
+                room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        }
     }
     else if (user.username === room.player_2.username)
     {
         if (room.player_2.key !== 0)
-            room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED
-        else 
-            room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        {
+            if (room.options & RoomOptions.ICE_FRICTION && room.player_2.velocity < GameConfig.PLAYER_SPEED)
+            {
+                room.player_2.velocity += room.player_2.key * deltaTime;
+            }
+            else
+                room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED;
+        }        else 
+        {
+            if (room.options & RoomOptions.ICE_FRICTION)
+            {
+                room.player_2.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+                if  ((room.player_2.position < GameConfig.TERRAIN_PADDING_Y)
+                ||  (room.player_2.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+                    room.player_2.velocity *= -1;
+            }
+            else
+                room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        }
         
         if (room.player_1.key === 0)
-            room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
+        {
+            if (room.options & RoomOptions.ICE_FRICTION)
+            {
+                room.player_1.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+                if  ((room.player_1.position < GameConfig.TERRAIN_PADDING_Y)
+                ||  (room.player_1.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+                    room.player_1.velocity *= -1;
+            }
+            else
+                room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
+        }
     }
 
     /* update positions */

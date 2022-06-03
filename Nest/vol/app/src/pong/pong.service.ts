@@ -296,6 +296,7 @@ export class PongService {
             user.socket.join(room.id);
             user.socket.emit("RECONNECT_YOU", {
                 room_id: room.id,
+                options: room.options,
                 player_1: {
                     position: room.player_1.position,
                     username: room.player_1.username,

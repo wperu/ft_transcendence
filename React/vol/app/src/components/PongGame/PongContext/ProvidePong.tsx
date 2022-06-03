@@ -55,6 +55,8 @@ export interface IPongRoom
     state: RoomState,
     socket: Socket,
 
+    options: number,
+
     setAsFinished: (val: boolean) => void;
 }
 
@@ -156,6 +158,8 @@ function usePongProvider() : IPongContext
                     vel_y: 0
                 } as IPongBall,
 
+                options: data.options,
+
                 spectators: [],
                 state: RoomState.ENDED,
                 socket: socket,
@@ -229,6 +233,8 @@ function usePongProvider() : IPongContext
                     vel_x: data.ball.vel_x,
                     vel_y: data.ball.vel_y
                 } as IPongBall,
+
+                options: data.options,
 
                 spectators: [],
                 state: RoomState.LOADING,

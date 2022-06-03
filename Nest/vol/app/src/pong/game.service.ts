@@ -187,6 +187,7 @@ export class GameService {
     {
         let starting_obj: StartPongRoomDTO = {
             room_id: room.id,
+            options: room.options,
 
             player_1: {
                 username: room.player_1.username,
@@ -346,14 +347,50 @@ export class GameService {
 	playerUpdate(room: PongRoom)
 	{
 		if (room.player_1.key !== 0)
-			room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED
-		else 
-			room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
+        {
+            if (room.options & RoomOptions.ICE_FRICTION && room.player_1.velocity < GameConfig.PLAYER_SPEED)
+            {
+                room.player_1.velocity += room.player_1.key * room.deltaTime;
+            }
+            else
+                room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED;
+        }
+        else 
+        {
+            if (room.options & RoomOptions.ICE_FRICTION && Math.abs(room.player_2.velocity) > 0.0001)
+            {
+                room.player_1.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+                if  ((room.player_1.position < GameConfig.TERRAIN_PADDING_Y)
+                ||  (room.player_1.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+                    room.player_1.velocity *= -1;
+                this.sendPlayerUpdate(room);
+            }
+            else
+                room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
+        }
 
 		if (room.player_2.key !== 0)
-			room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED;
+        {
+            if (room.options & RoomOptions.ICE_FRICTION && room.player_2.velocity < GameConfig.PLAYER_SPEED)
+            {
+                room.player_2.velocity += room.player_2.key * room.deltaTime;
+            }
+            else
+                room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED;
+        }
 		else 
-			room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        {
+            if (room.options & RoomOptions.ICE_FRICTION && Math.abs(room.player_2.velocity) > 0.0001)
+            {
+			    room.player_2.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+                if  ((room.player_2.position < GameConfig.TERRAIN_PADDING_Y)
+                ||  (room.player_2.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+                    room.player_2.velocity *= -1;
+                this.sendPlayerUpdate(room);
+            }
+            else
+			    room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        }
 
 		room.player_1.position += room.player_1.velocity * room.deltaTime;
 		room.player_2.position += room.player_2.velocity * room.deltaTime;

@@ -3,6 +3,8 @@ export interface ReconnectPlayerDTO
 {
     room_id: string,
 
+    options: number,
+
     player_1: {
         position: number,
         username: string,
