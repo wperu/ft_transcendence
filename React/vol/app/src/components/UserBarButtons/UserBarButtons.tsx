@@ -11,9 +11,7 @@ import CloseLogo from "../../ressources/images/close.png";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
 import Popup from "reactjs-popup";
-import { isPropertySignature } from "typescript";
 import React, { useCallback, useState } from "react";
-import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 import { useNavigate } from "react-router-dom";
 
 interface Prop
@@ -57,6 +55,7 @@ interface acceptGameInvitationProp
 {
 	src_name: string;
 	refId: number;
+	notifId: string;
 	gameId: string | undefined;
 }
 
@@ -80,14 +79,11 @@ interface refuseProp
 
 export function InviteUserButton(prop: gameInvitationProp)
 {
-	const {socket, invitePlayer}		= useChatContext();
-	const navigate		= useNavigate();
+	const {invitePlayer}		= useChatContext();
 
 	function onClick()
 	{
 		invitePlayer(prop.refId);
-
-
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={onClick}><img alt="" src={InviteLogo}/>invite</button>
@@ -108,15 +104,6 @@ export function BanUserButton(prop: banProp)
 	function open()
 	{
 		setIsOpen(true);
-	}
-
-	function handleSubmit()
-	{
-		close()
-		if (prop.isBanned)
-			ban();
-		else
-			unban();
 	}
 
 	const ban = useCallback(() => {
@@ -410,10 +397,15 @@ export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 {
 	const navigate = useNavigate()
 
+	const { rmNotif } = useChatContext();
+	function close()
+	{
+		rmNotif(prop.notifId);
+	}
 	function accept()
 	{
-		navigate(`/matchmaking/custom/${prop.gameId}`)
-		console.log("accepted game invitation from " + prop.src_name)
+		navigate(`/matchmaking/custom/${prop.gameId}`);
+		close();
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitationLogo}/>play</button>
