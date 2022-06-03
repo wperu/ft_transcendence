@@ -6,6 +6,7 @@ import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeD
 import { GameService } from './game.service';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
+import { UpdateCustomRoomDTO } from '../Common/Dto/pong/UpdateCustomRoomDTO'  
 
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
@@ -156,6 +157,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	createCustomRoom(client: Socket, data: void)
 	{
 		//const id: string = generateId();
+		// TODO check if both users are friends        
 		const id: string = randomInt(100000).toString(); //fix me check if already exist...
 		let usr = this.pongService.getUserFromSocket(client);
 
@@ -185,9 +187,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage("UPDATE_CUSTOM_ROOM")
-	updateCustomRoom(client: Socket, room_id: string)
+	updateCustomRoom(client: Socket, data: UpdateCustomRoomDTO)
 	{
-		this.logger.log("Rcv UPDATE_CUSTOM_ROOM");
+		this.pongService.updateCustomRoom(data)
 	}
 
 	@SubscribeMessage("START_CUSTOM_ROOM")

@@ -1,9 +1,8 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { PongRoom, RoomState } from './interfaces/PongRoom';
+import { PongRoom, RoomOptions, RoomState } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { StartPongRoomDTO } from '../Common/Dto/pong/StartPongRoomDTO'
-import { UpdatePongPointsDTO } from '../Common/Dto/pong/UpdatePongPointsDTO'
 import { PongBall } from './interfaces/PongBall';
 import { UpdatePongBallDTO } from 'src/Common/Dto/pong/UpdatePongBallDTO';
 import { GameConfig } from 'src/Common/Game/GameConfig';
@@ -12,6 +11,7 @@ import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeD
 import { UpdatePongPlayerDTO } from 'src/Common/Dto/pong/UpdatePongPlayerDTO';
 import { PongService } from './pong.service';
 import * as PgBoss from 'pg-boss';
+import { UpdatePongPointsDTO } from 'src/Common/Dto/pong/UpdatePongPointsDTO';
 
 
 
@@ -124,6 +124,8 @@ export class GameService {
             } as PongBall,
             spectators: spectators,
             state: RoomState.WAITING,
+
+            options: RoomOptions.DEFAULT,
 
             currentTime: 0,
             deltaTime: 0,

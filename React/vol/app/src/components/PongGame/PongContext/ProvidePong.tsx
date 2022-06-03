@@ -38,6 +38,13 @@ export enum RoomState {
     PAUSED,
 }
 
+export const RoomOptions = {
+    DEFAULT: 0b00,
+    DOUBLE_BALL: 0b01,
+    ICE_FRICTION: 0b10,
+};
+
+
 export interface IPongRoom
 {
     room_id: string,

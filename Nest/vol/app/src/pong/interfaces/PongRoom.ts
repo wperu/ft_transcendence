@@ -10,6 +10,12 @@ export enum RoomState
     PAUSED,
 }
 
+export const RoomOptions = {
+    DEFAULT: 0b00,
+    DOUBLE_BALL: 0b01,
+    ICE_FRICTION: 0b10,
+};
+
 export interface PongRoom
 {
     id: string,
@@ -25,6 +31,8 @@ export interface PongRoom
     deltaTime: number,
     lastTime: number,
     currentTime: number,
+
+    options: number; // use binary or ( | ) to chain options
 
     endScore: number,
 }

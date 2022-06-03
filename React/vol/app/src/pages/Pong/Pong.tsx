@@ -12,7 +12,6 @@ const Pong = () => {
     useEffect(() => {
         if (pongCtx.room)
         {
-
             pongCtx.room.setAsFinished = setAsFinished;
         }
     }, [pongCtx.room])
