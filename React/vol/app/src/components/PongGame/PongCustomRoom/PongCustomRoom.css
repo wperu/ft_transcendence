@@ -9,8 +9,8 @@
 {
 	position: fixed;
 	bottom: 0;
-	width: 90%;
-	margin: 3vmin 4%;
+	width: calc(100% - 2em);
+	margin: 3vmin 1em;
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-end;

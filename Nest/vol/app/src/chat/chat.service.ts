@@ -336,7 +336,7 @@ export class ChatService {
 		if (typeof resp !== "string")
 		{
 			let left_dto : RoomLeftDto;
-
+			
 			left_dto = {
 				id : resp.id,
 				room_name: resp.name,
@@ -382,7 +382,9 @@ export class ChatService {
 
 		if (data.isMute)
 		{
-			const mute_expire = new Date(Date.now()+ data.expires_in * 1000);
+			let hours : Date = new Date(0);
+			hours.setHours(data.expires_in);
+			const mute_expire = new Date(Date.now() + hours.getTime());
 			resp = await this.roomService.roomMute(data.roomId, user.reference_id, data.refId, mute_expire);
 		}
 		else
@@ -669,7 +671,7 @@ export class ChatService {
 					username: await this.getUsernameFromID(user.reference_id),
 					date: new Date(),
 					refId: user.reference_id,
-				}] 
+				}]
 
 			//player
 			if (data.refId !== undefined)

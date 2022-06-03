@@ -86,8 +86,8 @@ export function InviteUserButton(prop: gameInvitationProp)
 	function onClick()
 	{
 		invitePlayer(prop.refId);
-		
-		
+
+
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={onClick}><img alt="" src={InviteLogo}/>invite</button>
@@ -128,10 +128,10 @@ export function BanUserButton(prop: banProp)
 				refId: prop.refId,
 				expires_in: duration,
 				isBan: true,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
-		console.log("duration " + duration);
+		close();
 	}, [duration])
 
 	function unban()
@@ -144,10 +144,10 @@ export function BanUserButton(prop: banProp)
 				refId: prop.refId,
 				expires_in: -1,
 				isBan: false,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
-		console.log("user unbanned");
+		close();
 	}
 
 	if (!prop.isBanned)
@@ -170,9 +170,9 @@ export function BanUserButton(prop: banProp)
 						hours
 					</div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
-						<input type="button" value={"ban " + prop.user_name} 
+						<input type="button" value={"ban " + prop.user_name}
 							onClick={ban}/>
 					</div>
 				</div>}
@@ -190,7 +190,7 @@ export function BanUserButton(prop: banProp)
 				{<div className="mute_ban_popup">
 					<div className="header"> Are you sure ? </div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
 						<input type="button" value={"unban " + prop.user_name}
 						onClick={unban}/>
@@ -236,7 +236,7 @@ export function MuteUserButton(prop: muteProp)
 				refId: prop.refId,
 				isMute: true,
 				expires_in: duration,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}
 	}
@@ -276,9 +276,9 @@ export function MuteUserButton(prop: muteProp)
 						hours
 					</div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
-						<input type="button" value={"mute " + prop.user_name} 
+						<input type="button" value={"mute " + prop.user_name}
 							onClick={handleSubmit}/>
 					</div>
 				</div>}
@@ -296,7 +296,7 @@ export function MuteUserButton(prop: muteProp)
 				{<div className="mute_ban_popup">
 					<div className="header"> Are you sure ? </div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
 						<input type="button" value={"unmute " + prop.user_name}
 						onClick={handleSubmit}/>
@@ -311,7 +311,7 @@ export function MuteUserButton(prop: muteProp)
 export function BlockUserButton(prop: blockProp)
 {
 	const chtCtx = useChatContext();
-	
+
 	function blockUser()
 	{
 		chtCtx.rmFriendNotif(prop.refId);
@@ -351,7 +351,7 @@ export function PromoteUserButton(prop: promoteProp)
 				room_id: chtCtx.currentRoom.id,
 				refId: prop.refId,
 				isPromote: true,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
 		}
 		console.log("user promoted");
@@ -366,7 +366,7 @@ export function PromoteUserButton(prop: promoteProp)
 				room_id: chtCtx.currentRoom.id,
 				refId: prop.refId,
 				isPromote: false,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
 		}
 	}
@@ -386,7 +386,7 @@ export function AddFriendButton(prop: friendProp)
 		chtCtx.rmFriendNotif(prop.refId);
 		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
-	
+
 	function removeFriend()
 	{
 		chtCtx.socket.emit('RM_FRIEND', prop.refId);
@@ -409,10 +409,10 @@ export function AddFriendButton(prop: friendProp)
 export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 {
 	const navigate = useNavigate()
-	
+
 	function accept()
 	{
-		navigate(`/matchmaking/custom/${prop.gameId}`)	
+		navigate(`/matchmaking/custom/${prop.gameId}`)
 		console.log("accepted game invitation from " + prop.src_name)
 	}
 	return (
@@ -426,7 +426,7 @@ export function DeleteNotification(prop: refuseProp)
 	function close()
 	{
 		rmNotif(prop.id);
-		
+
 		console.log("refuse invitation");
 
 		if (prop.isRequestFriend === true)

@@ -73,7 +73,7 @@ function Friends()
 			<div className="friends_tab_list notifs_list">
 				{chtCtx.notification.map((n, index) => {
 					return <Notification key={index} notif={n} />
-					})}
+				}).reverse()}
 			</div>
 
 			<span className="friends_list_title">Friends</span>
