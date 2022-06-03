@@ -26,7 +26,7 @@ export function getPongPlayer(pong_ctx: IPongContext, user: IUser) : IPongUser |
     {
         return (pong_ctx.room.player_1);
     }
-    else if (pong_ctx.room && user.username === pong_ctx.room.player_2.username)
+    else if (pong_ctx.room)
     {
         return (pong_ctx.room.player_2);
     }
@@ -39,7 +39,7 @@ export function getPongOpponent(pong_ctx: IPongContext, user: IUser) : IPongUser
     {
         return (pong_ctx.room.player_1);
     }
-    else if (pong_ctx.room && user.username !== pong_ctx.room.player_2.username)
+    else if (pong_ctx.room)
     {
         return (pong_ctx.room.player_2);
     }

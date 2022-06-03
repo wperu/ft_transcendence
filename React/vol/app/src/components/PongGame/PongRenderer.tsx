@@ -224,6 +224,7 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
 
 		let player_name = player !== undefined ? player.username : pong_ctx.room.player_1.username;
 		let opponent_name = opponent !== undefined ? opponent.username : pong_ctx.room.player_2.username;
+		
 		let player_points = player !== undefined ? player.points : pong_ctx.room.player_1.points;
 		let opponent_points = opponent !== undefined ? opponent.points : pong_ctx.room.player_2.points;
 
