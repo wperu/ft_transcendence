@@ -156,7 +156,7 @@ function useChatProvider() : IChatContext
 
 
 	useEffect(() => {
-		//if (dto !== undefined)
+		if (dto !== undefined)
 			socket.on("CONFIRM_CUSTOM_ROOM", (data: {room_id: string}) => {
 				//dto?.gameRoomId = data.room_id;
 				socket.emit('GAME_INVITE', dto);

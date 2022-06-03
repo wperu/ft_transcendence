@@ -171,6 +171,22 @@ export class PongService {
         }
     }
 
+	async removeFromUserList(client: Socket)
+    {
+        const user : PongUser = await this.getUserFromSocket(client);
+
+        if (user === undefined)
+        {
+            return console.log("cannot remove user from waiting list: undefined user")
+        }
+        if (this.waitingPool !== undefined)
+        {
+			const idx = this.users.findIndex((u) => { return u === user})
+			this.users.splice(idx, 1);
+			console.log(`removed user ${user.username} from users list`);
+        }
+    }
+
 
 	initPlayer(player: PongUser)
 	{

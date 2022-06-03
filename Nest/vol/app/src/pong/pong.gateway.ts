@@ -54,11 +54,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			{
 				console.log("Unknown user tried to join the pong");
 				client.disconnect();
-				return ;
 			}
+			else
+				client.emit("AUTHENTIFICATED");
+			return ;
 		}
 		
-		if (user.in_game && user.socket.connected === false)
+		if (user.in_game && user.socket.connected === false) //In room
 		{
 			console.log("reconnected user");
 			this.pongService.reconnectUser(user, client);
@@ -71,8 +73,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
 		}
 		else
+		{
+			this.logger.log(`${user.username} already connected to the pong under id : ${client.id}`);
 			client.disconnect();
-		
+		}
 	}
 
 	async handleDisconnect(client: Socket)
@@ -89,7 +93,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (usr && usr.in_room !== undefined)
 				this.pongService.leaveCustomRoom(usr.in_room, usr);
 		if (usr && !usr.in_room && !usr.in_game)
-			console.log("destroy client !");
+		{
+			this.pongService.removeFromUserList(client);
+		}
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
 
