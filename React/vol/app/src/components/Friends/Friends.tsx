@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Friend, BlockedUser } from "./Users/Users"
 import { InfoNotification, InviteNotification, NewFriendNotification } from "./Notification/Notification"
 import "./Friends.css";
 import { INotif, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from "../../hooks/useInterval";
-import { Link } from "react-router-dom";
+import { info } from "console";
 
 
 enum ENotification
@@ -36,12 +36,14 @@ function Notification(prop : IProp) : JSX.Element
 
 //fix me status online, offline... not work
 function Friends()
-{
-	const chtCtx = useChatContext();
+{	
+	const [online, setOnline] = useState<JSX.Element[]>([]);
+	const [offline, setOffline] = useState<JSX.Element[]>([]);
+	const {socket, friendsList, blockList, notification} = useChatContext();
 
-	useInterval(() => {chtCtx.socket.emit("FRIEND_REQUEST_LIST");}, 1000);
-	useInterval(() => {chtCtx.socket.emit("FRIEND_LIST");}, 1000);
-	useInterval(() => {chtCtx.socket.emit("BLOCK_LIST");}, 1000);
+	useInterval(() => {socket.emit("FRIEND_REQUEST_LIST");}, 2000);
+	useInterval(() => {socket.emit("FRIEND_LIST");}, 2000);
+	useInterval(() => {socket.emit("BLOCK_LIST");}, 2000);
 
 	function addFriend(event: React.SyntheticEvent)
 	{
@@ -54,11 +56,39 @@ function Friends()
 		if (target.name.value.length !== 0)
 		{
 			console.log("add friend with name: " + target.name.value);
-			chtCtx.socket.emit('ADD_FRIEND_USERNAME', target.name.value);
+			socket.emit('ADD_FRIEND_USERNAME', target.name.value);
 
 			target.name.value = '';
 		}
 	}
+
+	useEffect(() => {
+		//console.log("reload : " + online.length);
+		setOnline(
+			friendsList.map((u, index) => {
+				if (u.is_connected !== undefined && u.is_connected === true)
+					return	<Friend
+						key={u.reference_id + "_online" + u.infos.status}
+						ref_id={u.reference_id}
+						name={u.username}
+						online={u.is_connected}
+						infos={u.infos}/>
+				else
+					return  null! }))
+
+		setOffline(friendsList.map((u, index) => {
+				if (u.is_connected === undefined || u.is_connected === false)
+					return	<Friend
+						key={u.reference_id + "_offline"}
+						ref_id={u.reference_id}
+						name={u.username}
+						online={u.is_connected || false}
+						infos={u.infos}/>
+				else
+					return  null! }))
+
+	}, [friendsList])
+
 
 	return (
 		<div id="Friends">
@@ -71,7 +101,7 @@ function Friends()
 
 			<span className="friends_list_title">Notifications</span>
 			<div className="friends_tab_list notifs_list">
-				{chtCtx.notification.map((n, index) => {
+				{notification.map((n, index) => {
 					return <Notification key={index} notif={n} />
 				}).reverse()}
 			</div>
@@ -79,28 +109,14 @@ function Friends()
 			<span className="friends_list_title">Friends</span>
 			<div className="friends_tab_list friends_list">
 				<div className="user_status_tab">Online</div>
-				{chtCtx.friendsList.map((u, index) => (
-					(u.is_connected !== undefined && u.is_connected !== false)
-					?	<Friend
-							key={u.reference_id}
-							// id={u.id}
-							ref_id={u.reference_id}
-							name={u.username}
-							online={u.is_connected}/>
-					: null ))}
+					{online.map(e => {return e})}
 				<div className="user_status_tab">Offline</div>
-				{chtCtx.friendsList.map((u, index) => (
-					(u.is_connected !== undefined && u.is_connected === false)
-					?	<Friend key={u.reference_id}
-						ref_id={u.reference_id}
-						name={u.username}
-						online={u.is_connected}/>
-					: null ))}
+					{offline.map(e => {return e})}
 			</div>
 
 			<span className="friends_list_title">Blocked users</span>
 			<div className="friends_tab_list blocked_list">
-				{chtCtx.blockList.map((u) => (
+				{blockList.map((u) => (
 					<BlockedUser key={u.reference_id}
 						ref_id={u.reference_id}
 						name={u.username} />

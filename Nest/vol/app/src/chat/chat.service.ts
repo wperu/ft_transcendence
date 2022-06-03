@@ -503,10 +503,16 @@ export class ChatService {
 			let username = user2?.username || "default";
 			let status = this.isConnected(rel.id_two);
 
+			
+
+			const info = this.pongService.playerStatus(user2.reference_id);
+		//	console.log(username + " " + status);
+		//	console.log(username + " " + info.status);
 			ret.push({
 				username: username,
 				reference_id: rel.id_two,
 				is_connected: status,
+				infos:		 info,
 			});
 		};
 		return ret;

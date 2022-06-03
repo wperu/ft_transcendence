@@ -54,16 +54,18 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			{
 				console.log("Unknown user tried to join the pong");
 				client.disconnect();
-				return ;
 			}
+			else
+				client.emit("AUTHENTIFICATED");
+			return ;
 		}
 		
-		if (user.in_game && user.socket.connected === false)
+		if (user.in_game && user.socket.connected === false) //In room
 		{
 			console.log("reconnected user");
 			this.pongService.reconnectUser(user, client);
 		}
-		else if (!user.in_game)
+		else if (!user.in_game && user.socket.connected === false)
 		{
 			user.socket = client;
 			// let the client know that we have authentificated him as a PongUser
@@ -71,8 +73,10 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			this.logger.log(`${user.username} connected to the pong under id : ${client.id}`);
 		}
 		else
+		{
+			this.logger.log(`${user.username} already connected to the pong under id : ${client.id}`);
 			client.disconnect();
-		
+		}
 	}
 
 	async handleDisconnect(client: Socket)
@@ -84,14 +88,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		else
 		{
 			console.log("disconnecting from game")
-			this.pongService.disconnectUser(usr);
-			
+			this.pongService.disconnectUser(usr);		
 		}
 		if (usr && usr.in_room !== undefined)
 				this.pongService.leaveCustomRoom(usr.in_room, usr);
+		if (usr && !usr.in_room && !usr.in_game)
+		{
+			this.pongService.removeFromUserList(client);
+		}
 		console.log(`DISCONNECT <- ${client.id}`)
 	}
-
 
 	@SubscribeMessage('SEARCH_ROOM')
 	async searchRoom(client: Socket)
@@ -100,45 +106,19 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.pongService.searchRoom(user);
 	}
 
-
-	/*
-	@SubscribeMessage("REQUEST_ROOM")
-	async requestRoom(client: Socket)
+	@SubscribeMessage('STOP_SEARCH_ROOM')
+	async stopSearchRoom(client: Socket)
 	{
-		let room = this.pongService.createMatch(client);
-
-		// pass back room_id to frontend
-		client.emit("ROOM_CREATED", {
-			room_id: room.id,
-		})
+		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		this.pongService.stopSearchRoom(user);
 	}
 
-	@SubscribeMessage("START_ROOM")
-	async startRoom(client: Socket)
+	@SubscribeMessage('JOIN_ROOM')
+	async joinRoom(client: Socket, id: string)
 	{
-		let room = this.pongService.startRoom(client);
+		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		this.pongService.joinRoom(user, id);
 	}
-
-	@SubscribeMessage("UPDATE_ROOM")
-	async startRoom(client: Socket, data: {
-
-	})
-	{
-		let room = this.pongService.updateMatch(data);
-
-		// pass back room_id to frontend
-		client.emit("ROOM_CREATED", {
-			room_id: room.id,
-		})
-	}
-
-	@SubscribeMessage("INVITE_USER")
-	async joinRoom(client: Socket, data: {
-		user_id: number
-	})
-	{
-		this.pongService.joinMatch(data.user_id);
-	}*/
 
 	@SubscribeMessage("SEND_PLAYER_KEYSTROKE")
 	updatePlayerPos(client: Socket, data: SendPlayerKeystrokeDTO)
@@ -147,16 +127,25 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 
+
 	/**
-	 * Event to create a cutom room
-	 * @param client 
-	 * @param data 
+	 * ** *** CUSTOM ROOM *** **
 	 */
+
 	@SubscribeMessage("CREATE_CUSTOM_ROOM")
 	createCustomRoom(client: Socket, data: void)
 	{
-		//const id: string = generateId();
-		const id: string = randomInt(100000).toString(); //fix me check if already exist...
+		function generateID() {
+			return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
+				const r = Math.floor(Math.random() * 16); 
+				return r.toString(16);  
+			}));
+		}
+		
+		let id = generateID();
+		while (this.pongService.findCustomRoom(id) !== undefined)
+			id = generateID();
+
 		let usr = this.pongService.getUserFromSocket(client);
 
 		if (usr !== undefined && usr.in_room !== undefined)
@@ -185,15 +174,16 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage("UPDATE_CUSTOM_ROOM")
-	updateCustomRoom(client: Socket, room_id: string)
+	updateCustomRoom(client: Socket, data: {room_id: string, opts: any}) //todo opt
 	{
 		this.logger.log("Rcv UPDATE_CUSTOM_ROOM");
+		this.pongService.updateCustomRoom(client, data.room_id, data.opts);
 	}
 
 	@SubscribeMessage("START_CUSTOM_ROOM")
 	startCustomRoom(client: Socket, room_id: string)
 	{
 		this.logger.log("Rcv START_CUSTOM_ROOM");
-		this.pongService.startCustomRoom(client, room_id) //add client ot check owner
+		this.pongService.startCustomRoom(client, room_id);
 	}
 }
