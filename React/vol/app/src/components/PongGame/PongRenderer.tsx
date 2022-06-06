@@ -1,10 +1,9 @@
-import { createJsxText, getGeneratedNameForNode } from "typescript";
 import { GameConfig } from "../../Common/Game/GameConfig";
 import IUser from "../../Common/Dto/User/User";
-import { IPongContext, IPongRoom, RoomState } from "./PongContext/ProvidePong";
+import { IPongContext, IPongRoom, RoomState, usePongContext } from "./PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "./PongGame";
-import { clear_particles } from "./PongParticleSystem";
 import { add_particles, clear_trail, plot_trail } from "./PongTrail";
+import { useEffect } from "react";
 
 /*** UPDATE ***/
 
@@ -136,52 +135,63 @@ function getRenderingContext(ctx : CanvasRenderingContext2D | null, canvas: HTML
     return (render_ctx);
 }
 
+const useRender = (canvasRef: React.RefObject<HTMLCanvasElement>, user: IUser, last_frame: number = 0, last_time: number = performance.now()) => {
+	
+	const pong_ctx: IPongContext = usePongContext();
+	
+	useEffect(() => {
+		let frameId : number;
+		const canvas = canvasRef.current;
+		const ctx = canvas?.getContext('2d');
 
-async function render(pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_frame: number = 0, last_time: number = performance.now())
-{ 
-    /* Background */
-    ctx = canvas.getContext('2d');
-    if (!ctx)
-        return (console.log("null cnv"));
-    if (pong_ctx === null || pong_ctx.room === null)
-    {
-        console.log("ctx is null");
-        return ;
-    }
+		const render = async (pong_ctx: IPongContext, ctx : CanvasRenderingContext2D | null, canvas: HTMLCanvasElement, user: IUser, last_frame: number = 0, last_time: number = performance.now()) =>
+		{ 
+			/* Background */
+			ctx = canvas.getContext('2d');
+			if (!ctx)
+				return (console.log("null cnv"));
+			if (pong_ctx === null || pong_ctx.room === null)
+			{
+				console.log("ctx is null");
+				return ;
+			}
+		
+			let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_frame, last_time);
+			
+			if (pong_ctx.room.state !== RoomState.PAUSED && pong_ctx.room.state !== RoomState.FINISHED)
+				update(pong_ctx, render_ctx.deltaTime, user);
+		
+			renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
+			renderBall(ctx, render_ctx, pong_ctx, user);
+			renderPlayers(ctx, render_ctx, pong_ctx.room, user);
+		
+			if (pong_ctx.room.state === RoomState.PAUSED)
+				renderPauseScreen(ctx, render_ctx);
+		
+			/* DEV - FPS counter */
+			ctx.font = "10px Mono"
+			ctx.fillStyle = '#FFFFFF'
+			ctx.fillText("FPS: " + (1 / render_ctx.deltaTime), render_ctx.terrain_x, render_ctx.terrain_y - 50);
+			ctx.stroke();
+		
+			ctx.fillText("delta: "  + render_ctx.deltaTime, render_ctx.terrain_x, render_ctx.terrain_y - 40);
+			ctx.stroke();
+		
+			ctx.fillText("frameCount: " + render_ctx.frameCount, render_ctx.terrain_x, render_ctx.terrain_y - 30);
+			ctx.stroke();
+			/* **** */
+			
+			render_ctx.frameCount++;
+			frameId = requestAnimationFrame(() => render(pong_ctx, ctx, canvas, user, render_ctx.frameCount, render_ctx.frameTime));
+			
+		}
+		
+		requestAnimationFrame(() => render(pong_ctx, ctx!, canvas!, user));
+		return () => cancelAnimationFrame(frameId);
+	}, [canvasRef, user, pong_ctx]);
 
-    let render_ctx: PongRenderingContext = getRenderingContext(ctx, canvas, last_frame, last_time);
-    
-    if (pong_ctx.room.state !== RoomState.PAUSED && pong_ctx.room.state !== RoomState.FINISHED)
-        update(pong_ctx, render_ctx.deltaTime, user);
-
-    renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
-    renderBall(ctx, render_ctx, pong_ctx, user);
-    renderPlayers(ctx, render_ctx, pong_ctx.room, user);
-
-    if (pong_ctx.room.state === RoomState.PAUSED)
-        renderPauseScreen(ctx, render_ctx);
-    
-    //if (pong_ctx.room.state === RoomState.FINISHED)
-    //    renderEndScreen(ctx, render_ctx, pong_ctx, user);
-    
-
-    /* DEV - FPS counter */
-    ctx.font = "10px Mono"
-    ctx.fillStyle = '#FFFFFF'
-    ctx.fillText("FPS: " + (1 / render_ctx.deltaTime), render_ctx.terrain_x, render_ctx.terrain_y - 50);
-    ctx.stroke();
-
-    ctx.fillText("delta: "  + render_ctx.deltaTime, render_ctx.terrain_x, render_ctx.terrain_y - 40);
-    ctx.stroke();
-
-    ctx.fillText("frameCount: " + render_ctx.frameCount, render_ctx.terrain_x, render_ctx.terrain_y - 30);
-    ctx.stroke();
-    /* **** */
-    
-    render_ctx.frameCount++;
-	if (pong_ctx.isRender)
-    	requestAnimationFrame(() => render(pong_ctx, ctx, canvas, user, render_ctx.frameCount, render_ctx.frameTime));
-}
+	return undefined;
+  };
 
 
 
@@ -229,7 +239,7 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
 		let opponent_points = opponent !== undefined ? opponent.points : pong_ctx.room.player_2.points;
 
         //if (player !== undefined )
-        {        
+        //{        
             ctx.save();
             ctx.translate(render_ctx.terrain_x - 10, render_ctx.terrain_y + render_ctx.terrain_h);
             ctx.rotate(Math.PI + Math.PI * 0.5);
@@ -244,10 +254,10 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
             ctx.font = pts_text_size.toString() + "px NonFiction";
             ctx.fillText(player_points.toString(), render_ctx.terrain_x + render_ctx.terrain_w * 0.25, render_ctx.terrain_y + render_ctx.terrain_h * 0.5 + pts_text_size * 0.3);
             ctx.restore();
-        }
+       // }
 
         //if (opponent !== undefined)
-        { 
+       // { 
             ctx.save();
             ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + 10, render_ctx.terrain_y);
             ctx.rotate(Math.PI * 0.5);
@@ -262,7 +272,7 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
             ctx.font = pts_text_size.toString() + "px NonFiction";
             ctx.fillText(opponent_points.toString(), render_ctx.terrain_x + render_ctx.terrain_w * 0.75, render_ctx.terrain_y + render_ctx.terrain_h * 0.5 + pts_text_size * 0.3);
             ctx.restore();
-        }
+      //  }
     }
 }
 
@@ -374,4 +384,4 @@ function renderPauseScreen(ctx: CanvasRenderingContext2D, render_ctx: PongRender
     ctx.textAlign = 'start'
 }
 
-export { render }
+export { useRender }

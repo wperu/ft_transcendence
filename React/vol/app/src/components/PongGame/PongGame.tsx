@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { UpdatePongBallDTO } from "../../Common/Dto/pong/UpdatePongBallDTO";
 import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
 import { UpdatePongPointsDTO } from "../../Common/Dto/pong/UpdatePongPointsDTO"
-import { ReconnectPlayerDTO } from "../../Common/Dto/pong/ReconnectPlayerDTO"
 import { IPongContext, IPongUser, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
-import { render } from "./PongRenderer";
+import { useRender } from "./PongRenderer";
 
 // TODO Make matchmaking page with options             
 // TODO - Double ball mode                               
@@ -86,8 +85,9 @@ const PongGame = (props: CanvasProps) => {
 					let player = getPongPlayer(pongCtx, user);
 					if (player !== undefined)
 					{
-						if ((event.key === "z" || event.key === "Z") && player.key == -1
-						|| (event.key === "s" || event.key === "S") && player.key == 1)
+						if ((event.key === "z" || event.key === "Z")
+						&& player.key === -1 || (event.key === "s" || event.key === "S")
+						&& player.key === 1)
 						{
 							player.key = 0;
 						
@@ -218,10 +218,9 @@ const PongGame = (props: CanvasProps) => {
         }
     }, [])
 
-    /* render */
-    useEffect(() => {
-		pongCtx.startRender(canvasRef, pongCtx)
-    }, [pongCtx, canvasRef]);
+	useRender(canvasRef, user!);
+
+
 
     return (
         <canvas ref={canvasRef} height={props.height} width={props.width} />

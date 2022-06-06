@@ -1,4 +1,4 @@
-import { render } from "../PongRenderer";
+import { useRender } from "../PongRenderer";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
@@ -65,7 +65,7 @@ export interface IPongContext
 	searchRoom: () => void,
 	stopSearchRoom: () => void,
 	isRender: boolean,
-	startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
+	//startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
 	requestRoom: () => void,
 	needReconect : boolean,
 	reconnect: () => void,
@@ -253,26 +253,6 @@ function usePongProvider() : IPongContext
         })
     }, [room, socket])
 
-
-	const startRender = useCallback((canvasRef: React.RefObject<HTMLCanvasElement>, ctx : IPongContext) => {
-		if (canvasRef.current && user)
-        {
-            const canvas = canvasRef.current;
-            const context = canvas.getContext('2d');
-
-            if (context !== null && isRender === false)
-            {
-                context.restore();
-				console.log("start game");
-				setIsRendering(true);
-                render(ctx, context, canvas, user);
-            }
-        }
-		return () => {
-			setIsRendering(false);
-		}  
-	}, [])
-
     return ({
 		socket,
 		isAuth,
@@ -281,7 +261,6 @@ function usePongProvider() : IPongContext
 		searchRoom,
 		stopSearchRoom,
 		isRender,
-		startRender,
 		requestRoom,
 		needReconect,
 		reconnect,
