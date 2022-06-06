@@ -90,7 +90,7 @@ export class ChatService {
 				socket.disconnect();
 				return (undefined);
 			}
-			let ret = this.users.find((u) => { return u.username === user_info.username})
+			let ret = this.users.find((u) => { return u.reference_id === user_info.reference_id})
 			return (ret);
 		}
 
