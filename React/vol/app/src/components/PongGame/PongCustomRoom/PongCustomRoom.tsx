@@ -79,8 +79,10 @@ export function PongCustomRoom() : JSX.Element
 	useEffect(() => {
 		return () =>  {
 			socket.emit("LEAVE_CUSTOM_ROOM", id);
+			setInRoom(false);
+			setUsers([]);
 		}
-	}, [])
+	}, [id, socket])
 
 	useEffect(() => {
 		if (user && users.length !== 0 && user.reference_id === users[0].reference_id)
@@ -95,13 +97,11 @@ export function PongCustomRoom() : JSX.Element
 
 	useEffect(() => {
 			socket.on("JOINED_CUSTOM_ROOM", () => {
-
 				setInRoom(true);
 				console.log("Room joined");
 			})
 
 			socket.on("LEFT_CUSTOM_ROOM", () => {
-
 				setInRoom(false);
 				console.log("Room left");
 			})
