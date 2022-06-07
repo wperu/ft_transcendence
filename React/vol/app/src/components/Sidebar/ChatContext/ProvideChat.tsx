@@ -360,7 +360,11 @@ function useChatProvider() : IChatContext
 
 	const addNotif = useCallback((notif: INotif[]) =>{
 		setNotification(prev => {
-			//notif.filter((n) => {return (!(prev.find((p) => (n.req_id && p.req_id && n.req_id === p.req_id))))});
+			for (let n of notif)
+			{
+				prev.splice(prev.findIndex((p) => (n.type === p.type && p.room_id && n.room_id && n.room_id === p.room_id )), 1)
+			}
+			
 			return [...prev, ...notif];
 		});
 	}, []);
