@@ -689,10 +689,11 @@ export class ChatService {
 				}
 				else
 				{
-					for (const s of dest.socket)
-					{
-						s.emit('RECEIVE_NOTIF', dto);
-					}
+					if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
+						for (const s of dest.socket)
+						{
+							s.emit('RECEIVE_NOTIF', dto);
+						}
 				}
 			}
 			else if (data.chatRoomId !== undefined) //room case
