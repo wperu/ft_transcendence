@@ -13,6 +13,7 @@ import { GameService } from './game.service';
 import { CustomRoom } from './interfaces/CustomRoom';
 import { UserCustomRoomDTO } from 'src/Common/Dto/pong/UserCustomRoomDTO';
 import { ChatService } from 'src/chat/chat.service';
+import { RoutesMapper } from '@nestjs/core/middleware/routes-mapper';
 
 
 // REVIEW do we want multiple socket for pong user ?
@@ -447,6 +448,7 @@ export class PongService {
 		let room : CustomRoom = {
 			id: id,
 			users: [],
+			players: [],
 			opts: undefined, //Todo
 		}
 		this.customRooms.push(room);
@@ -487,7 +489,7 @@ export class PongService {
 		user.in_room = undefined;
 		this.sendUserOfCustomRoom(id);
 
-		if (room.users.length === 0)
+		if (room.users.length === 0 && room.players.length === 0)
 		{
 			const i = this.customRooms.indexOf(room);
 			this.customRooms.splice(i, 1);
@@ -548,10 +550,10 @@ export class PongService {
 		if (this.isOwner(usr, croom) === false)
 			return ; //error
 		
-		const owner = croom.users[0];
-		const other = croom.users[1];
+		const owner = croom.players[0];
+		const other = croom.players[1];
 
-		croom.users.splice(0, 2); //rm player
+		//croom.users.splice(0, 2); //rm player
 		const room = this.gameService.initRoom(owner, other, croom.users);
 
 		// for game options croom.opts //todo
@@ -585,9 +587,45 @@ export class PongService {
 
 		if (this.isOwner(usr, room) === false)
 			return ; //error
-
+		
 
 		//TODO 
+	}
+
+	update_role_in_room(client:Socket, id:string, play_spect: PongUser)
+	{
+		const room= this.findCustomRoom(id);
+		const usr = this.getUserFromSocket(client);
+		if(usr === undefined)
+			return ;
+		
+		if(room === undefined)
+			return ;
+		
+		if(room.users.length < 2)
+			return ;
+		
+		if(this.isOwner(usr, room) === false)
+			return ;
+		
+		if(play_spect === undefined)
+			return ;
+		
+		if(room.players.indexOf(play_spect) !== -1)
+		{
+			room.users.push(play_spect);
+			room.players.splice(room.users.indexOf(play_spect));
+			this.sendUserOfCustomRoom(id);
+			return	;
+		}
+		if(room.users.indexOf(play_spect) !== -1 )
+		{
+				room.players.push(play_spect);
+				room.users.splice(room.users.indexOf(play_spect));
+				this.sendUserOfCustomRoom(id);
+				return ;
+		}
+
 	}
 	
 }

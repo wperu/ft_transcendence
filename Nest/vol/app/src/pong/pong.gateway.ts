@@ -180,6 +180,13 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.pongService.updateCustomRoom(client, data.room_id, data.opts);
 	}
 
+	@SubscribeMessage("UPDATE_CUSTOM_ROOM_ROLE")
+	updateCustomRoomRole(client: Socket, data: {room_id: string, opts: any},play_spect:PongUser)
+	{
+		this.logger.log("Rcv UPDATE_CUSTOM_ROOM_ROLE");
+		this.pongService.update_role_in_room(client, data.room_id, play_spect);
+	}
+
 	@SubscribeMessage("START_CUSTOM_ROOM")
 	startCustomRoom(client: Socket, room_id: string)
 	{
