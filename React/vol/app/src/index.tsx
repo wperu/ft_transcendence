@@ -1,11 +1,11 @@
-import React from 'react';
 import './index.css';
+import React from 'react';
 import AppRoutes from './routes/AppRoutes';
 import { createRoot } from 'react-dom/client';
 
 
 
-const container = document.getElementById('root');	
+const container = document.getElementById('root');
 const root = createRoot(container!);
 
 root.render(
