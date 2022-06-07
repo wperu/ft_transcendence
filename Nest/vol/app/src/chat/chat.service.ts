@@ -134,11 +134,11 @@ export class ChatService {
 
 		const us = data as UserData;
 
-		const chatUser = await this.getUserFromSocket(socket);
+		let chatUser = await this.getUserFromSocket(socket);
 		if (chatUser === undefined)
 			return undefined;//throw error
 
-		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id }), 1);
+		chatUser.socket = chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s === socket }), 1);
 		return (chatUser);
 	}
 
