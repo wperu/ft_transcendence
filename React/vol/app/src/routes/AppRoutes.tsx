@@ -13,6 +13,7 @@ import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 import PongRequestRoom from '../components/PongGame/PongRequestRoom/PongRequestRoom';
 import { PongCustomRoom } from '../components/PongGame/PongCustomRoom/PongCustomRoom';
+import QuatreCentQuatre from "../pages/404/404";
 
 function AppRoute() : JSX.Element
 {
@@ -48,6 +49,7 @@ function AppRoute() : JSX.Element
 							<Route path="/" element={<HomeLoggedIn />}/>
 							<Route path="/profile" element={<Profile/>}/>
 							<Route path="/profile/:id" element={<Profile/>}/>
+							<Route path="/404" element={<QuatreCentQuatre/>}/>
 						</Route>
 					</Route>
 				</Routes>

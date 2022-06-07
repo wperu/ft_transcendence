@@ -3,7 +3,7 @@ import "./PongLogo.css";
 
 function PongLogo() {
 	return (
-		<div id="logo">
+		<div className="logo">
 			<h1>PONG</h1>
 		</div>
 	);
