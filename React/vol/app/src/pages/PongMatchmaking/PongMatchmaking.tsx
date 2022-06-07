@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
-
+import { Link } from "react-router-dom"
+import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuButton";
+import Spinner from "../../components/Spinner/Spinner";
+import "./PongMatchmaking.css";
 /**
  * isSearching Matchmaking status
- * @returns 
+ * @returns
  */
 function PongMatchmaking()
 {
@@ -27,12 +30,12 @@ function PongMatchmaking()
 		socket.on("IS_SEARCHING_ROOM", (isSearching : boolean) => {
 			setIsSearching(isSearching);
 		})
+		return (() => stopSearchRoom());
 	}, [socket])
 
 	useEffect(() => {
 		if (isSearching)
 		{
-
 		}
 		else
 		{
@@ -40,12 +43,25 @@ function PongMatchmaking()
 		}
 	}, [isSearching])
 
+	// <div>Auth : {(isAuth) ? "True" : "False"}</div>
+	// <div>Searching : {(isSearching) ? "True" : "False"}</div>
 	return (
-		<div>
-			<h1><button onClick={changeSearchStatut}>{(!isSearching) ? "matchmaking" : "stop" }</button></h1><br/>
-			<div>Auth : {(isAuth) ? "True" : "False"}</div><br/>
-			<div>Searching : {(isSearching) ? "True" : "False"}</div><br/>
-			<div>{needReconect ? <button onClick={reconnect}>joinPong</button> : <></>} </div>
+		<div id="matchmaking_page">
+			<div id="matchmaking_spinner" >
+				{isSearching ? <Spinner /> : null}
+			</div>
+			<div id="matchmaking_button_section">
+				<button className="matchmaking_button" onClick={changeSearchStatut}>
+					{(!isSearching) ? "matchmaking" : "stop" }
+				</button>
+			</div>
+			<div> {needReconect ? <button onClick={reconnect}>joinPong</button> : null} </div>
+			<footer>
+				<Link to="/" replace={false}> <BackToMainMenuButton /> </Link>
+				<Link to="/matchmaking/custom" replace={false} >
+					<button className="footer_button">custom game</button>
+				</Link>
+			</footer>
 		</div>
 	);
 }

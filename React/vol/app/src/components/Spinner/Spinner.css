@@ -1,0 +1,23 @@
+.spinner
+{
+	height: 3em;
+	width: 3em;
+	border-radius: 50%;
+	border-color: whitesmoke;
+	border-width: 20px;
+	border-style: dotted;
+	content: "";
+	animation: animate linear 5s infinite;
+}
+
+@keyframes animate
+{
+	0%
+	{
+		transform:rotate(0deg);
+	}
+	100%
+ 	{
+		transform:rotate(360deg);
+	}
+}

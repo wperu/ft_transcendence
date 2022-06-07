@@ -36,7 +36,7 @@ function Notification(prop : IProp) : JSX.Element
 
 //fix me status online, offline... not work
 function Friends()
-{	
+{
 	const [online, setOnline] = useState<JSX.Element[]>([]);
 	const [offline, setOffline] = useState<JSX.Element[]>([]);
 	const {socket, friendsList, blockList, notification} = useChatContext();
@@ -63,7 +63,6 @@ function Friends()
 	}
 
 	useEffect(() => {
-		//console.log("reload : " + online.length);
 		setOnline(
 			friendsList.map((u, index) => {
 				if (u.is_connected !== undefined && u.is_connected === true)
