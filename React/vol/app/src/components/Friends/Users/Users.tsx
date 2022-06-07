@@ -21,7 +21,7 @@ interface	blocked_user_props
 
 export function Friend(props: user_props)
 {
-	
+
 
 	const getStatus = () => {
 
@@ -30,19 +30,19 @@ export function Friend(props: user_props)
 			if (props.infos.status === "create room")
 			{
 				return(
-					<Link to={"/matchmaking/custom/" + props.infos.id}  replace={false} >{" in room"}</Link>
+					<Link to={"/matchmaking/custom/" + props.infos.id}  replace={false} >{"in room"}</Link>
 				)
 			}
 			else if (props.infos.status === "in game")
 			{
 				return(
-					<Link to={"/game/" + props.infos.id}  replace={false} >{" in game"}</Link>
+					<Link to={"/game/" + props.infos.id}  replace={false} >{"in game"}</Link>
 				)
 			}
 		}
 		return <></>;
 	}
-	
+
 	const [status, setStatus] = useState<JSX.Element>(getStatus());
 
 	function get_opacity()
@@ -57,11 +57,8 @@ export function Friend(props: user_props)
 				<img className="friends_user_profile_pic"
 					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'} alt="42" />
 				<div className="friends_user_username">
-					<Link to={"/profile/" + props.ref_id}  replace={false} >{props.name}</Link>
-				</div>
-					{status}
-				<div>
-					
+						<Link to={"/profile/" + props.ref_id}  replace={false} >{props.name}</Link>
+						<span className="online_friend_status" > {status} </span>
 				</div>
 			</div>
 			<div className="chat_user_button_div">
