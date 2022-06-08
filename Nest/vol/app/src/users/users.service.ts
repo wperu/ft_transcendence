@@ -81,6 +81,10 @@ export class UsersService
 			reference_id: user.reference_id,
 			username: user.username,
 			creation_date: user.creation_date,
+			wins: user.wins,
+			losses: user.losses,
+			draws: user.draws,
+			xp: user.xp,
 		}
 
 		return ret;
@@ -334,5 +338,26 @@ export class UsersService
 		if (!(name.length <= this.nameMaxLen && name.length >= this.nameMinLen))
 			return false;
 		return true;
+	}
+
+	async	addWin(user: User)
+	{
+		user.xp += 8;
+		user.wins++;
+		await this.saveUser(user);
+	}
+
+	async	addLoss(user: User)
+	{
+		user.xp += 2;
+		user.losses++;
+		await this.saveUser(user);
+	}
+
+	async	addDraw(user: User)
+	{
+		user.xp += 5;
+		user.draws++;
+		await this.saveUser(user);
 	}
 }

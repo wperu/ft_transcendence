@@ -24,7 +24,7 @@ export class GameHistoryService {
 	}
 
 	async addGameToHistory(user_one: User, user_two: User, score_one: number,
-		score_two: number, date: Date) : Promise<FinishedGame>
+		score_two: number, date: Date, custom: boolean) : Promise<FinishedGame>
 	{
 		let new_game : FinishedGame = new FinishedGame();
 		let	ret;
@@ -33,6 +33,7 @@ export class GameHistoryService {
 		new_game.player_two = user_two;
 		new_game.player_one_score = score_one;
 		new_game.player_two_score = score_two;
+		new_game.custom = custom;
 		try
 		{
 			ret = await this.finishedGames.save(new_game);

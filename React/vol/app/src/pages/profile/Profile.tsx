@@ -9,8 +9,8 @@ import TwoFactorAuthSetting from "../../components/ProfileSettings/TFAsetting/TF
 import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/ChangeablePP";
 import ChangeableUsername from "../../components/ProfileSettings/ChangeableUsername/ChangeableUsername";
 import { IProfileDTO } from "../../Common/Dto/User/ProfileDTO";
-import { GetFinishedGameDto } from "../../Common/Dto/FinishedGameDto";
 import axios from "axios";
+import calculateLevel from "../../components/calculateLevel";
 
 interface headerInfo
 {
@@ -18,6 +18,7 @@ interface headerInfo
 	qrUri:	string;
 	wins:	number;
 	losses:	number;
+	xp: number;
 }
 
 function CurrentUserProfileHeader(props : headerInfo)
@@ -28,7 +29,7 @@ function CurrentUserProfileHeader(props : headerInfo)
 			<ChangeablePP user={props.user} />
 			<ChangeableUsername user={props.user} />
 			<div id="profile_stats">
-				<div id="profile_lvl">Level 4</div>
+				<div id="profile_lvl">Level {calculateLevel(props.xp)}</div>
 				<div id="profile_ratio">
 					<span id="ratio_caption">W:L</span>
 					<span id="ratio_wins">{props.wins}</span>
@@ -44,8 +45,6 @@ function CurrentUserProfileHeader(props : headerInfo)
 interface profileInfo
 {
 	user: IProfileDTO | null;
-	wins: number;
-	losses: number;
 }
 
 function OtherUserProfileHeader(props : profileInfo)
@@ -63,12 +62,12 @@ function OtherUserProfileHeader(props : profileInfo)
 				alt="PP" id="profile_pic"/>
 			<div id="profile_username">{getUserName()}</div>
 			<div id="profile_stats">
-				<div id="profile_lvl">Niveau 4</div>
+				<div id="profile_lvl">Niveau {calculateLevel(props.user?props.user.xp:0)}</div>
 				<div id="profile_ratio">
 					<span id="ratio_caption">W:L</span>
-					<span id="ratio_wins">{props.wins}</span>
+					<span id="ratio_wins">{props.user?.wins}</span>
 					:
-					<span id="ratio_losses">{props.losses}</span>
+					<span id="ratio_losses">{props.user?.losses}</span>
 				</div>
 			</div>
 		</header>
@@ -82,10 +81,6 @@ function Profile() {
 	var	user: IUser 				= null!;
 	const	[profile, setProfile]	= useState<IProfileDTO | null>(null);
 	const	[qrUri, setQrUri]		= useState<string>();
-	const	[history, setHistory]	= useState<GetFinishedGameDto []>([]);
-	var		ref_id					= id;
-	const	[wins, setWins]			= useState<number>(0);
-	const	[losses, setLosses]		= useState<number>(0);
 
 	const getURL = useCallback(() => {
 		var ret =  "";
@@ -126,10 +121,13 @@ function Profile() {
 	useEffect(() => {
 		if (auth.user)
 		{
-			if (profile === null && id)
+			if (profile === null)
 			{
-				const url : string	= process.env.REACT_APP_API_USER + '/profile/' + id;
-				console.log(url);
+				let url : string
+				if (id)
+					url = process.env.REACT_APP_API_USER + '/profile/' + id;
+				else
+					url = process.env.REACT_APP_API_USER + '/profile/' + auth.user.reference_id;
 				const headers = {
 					authorization: auth.user.accessCode,
 				}
@@ -142,42 +140,8 @@ function Profile() {
 					console.log(error);
 				});
 			}
-			else
-				ref_id = auth.user.reference_id.toString();
 		}
-		fetch('/api/game-history/' + ref_id)
-			.then(res => res.json())
-			.then(result => {
-				setHistory(result);
-			}, error => {
-				if (error)
-					console.log("fetch error");
-			});
 	}, [profile, id, auth.user])
-
-	useEffect(() => {
-		let tmp_wins = 0;
-		let tmp_losses = 0;
-		for(let match of history)
-		{
-			if (ref_id === match.ref_id_one.toString())
-			{
-				if (match.score_one > match.score_two)
-					tmp_wins++;
-				else
-					tmp_losses++;
-			}
-			else
-			{
-				if (match.score_two > match.score_one)
-					tmp_wins++;
-				else
-					tmp_losses++;
-			}
-		}
-		setWins(tmp_wins);
-		setLosses(tmp_losses);
-	}, [history, ref_id]);
 
 	if (!id)
 	{
@@ -185,9 +149,10 @@ function Profile() {
 			user = auth.user;
 		return (
 			<div id="profile_page">
-				<CurrentUserProfileHeader user={user} wins={wins}
-					losses={losses} qrUri={qrUri!}/>
-				<MatchHistory history={history} ref_id={user?.reference_id || 0}/>
+				<CurrentUserProfileHeader wins={profile?profile.wins:0}
+					losses={profile?profile.losses:0} xp={profile?profile.xp:0}
+					qrUri={qrUri!} user={user} />
+				<MatchHistory ref_id={user?.reference_id || 0}/>
 				<footer>
 					<Link to='/'><BackToMainMenuButton /></Link>
 				</footer>
@@ -199,8 +164,8 @@ function Profile() {
 
 		return (
 			<div id="profile_page">
-				<OtherUserProfileHeader user={profile} wins={wins} losses={losses} />
-				<MatchHistory history={history} ref_id={profile?.reference_id || 0}/>
+				<OtherUserProfileHeader user={profile} />
+				<MatchHistory ref_id={profile?.reference_id || 0}/>
 				<footer>
 					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
 				</footer>
