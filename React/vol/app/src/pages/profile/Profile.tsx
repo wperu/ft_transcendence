@@ -10,11 +10,7 @@ import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/Changeab
 import ChangeableUsername from "../../components/ProfileSettings/ChangeableUsername/ChangeableUsername";
 import { IProfileDTO } from "../../Common/Dto/User/ProfileDTO";
 import axios from "axios";
-
-function calculateLevel(xp: number) : number
-{
-	return (Math.trunc(xp / 10));
-}
+import calculateLevel from "../../components/calculateLevel";
 
 interface headerInfo
 {

@@ -1,5 +1,3 @@
-@import url("../../ressources/base.css");
-
 #profile
 {
 	display: none;
@@ -21,16 +19,17 @@
 		box-sizing: border-box;
 		border-radius: 20px;
 	}
-	
+
 	#infos
 	{
 		margin: 0;
 		margin-left: 3vmin;
-		margin-right: 6vmin;
+		margin-right: 3vmin;
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		text-align: left;
-		font-size: 2.5vmin;
+		font-size: 3vmin;
 	}
 
 	#profile_summary_img
