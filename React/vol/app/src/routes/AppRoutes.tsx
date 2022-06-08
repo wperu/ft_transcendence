@@ -29,7 +29,7 @@ function AppRoute() : JSX.Element
 
 
 					<Route path="/dev_user" element={<FakeUser/>}/>
-					<Route path="*" element={<NoMatch />}/>
+					<Route path="*" element={<QuatreCentQuatre/>}/>
 
 					<Route element={<RequireAuth/>}>
 						<Route element={<>
@@ -49,7 +49,6 @@ function AppRoute() : JSX.Element
 							<Route path="/" element={<HomeLoggedIn />}/>
 							<Route path="/profile" element={<Profile/>}/>
 							<Route path="/profile/:id" element={<Profile/>}/>
-							<Route path="/404" element={<QuatreCentQuatre/>}/>
 						</Route>
 					</Route>
 				</Routes>

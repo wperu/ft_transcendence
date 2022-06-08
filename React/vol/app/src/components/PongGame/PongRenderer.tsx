@@ -186,7 +186,7 @@ const useRender = (canvasRef: React.RefObject<HTMLCanvasElement>, user: IUser, l
 			
 		}
 		
-		requestAnimationFrame(() => render(pong_ctx, ctx!, canvas!, user));
+		frameId = requestAnimationFrame(() => render(pong_ctx, ctx!, canvas!, user));
 		return () => cancelAnimationFrame(frameId);
 	}, [canvasRef, user, pong_ctx]);
 
