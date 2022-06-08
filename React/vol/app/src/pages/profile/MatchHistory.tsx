@@ -1,4 +1,5 @@
 import { GetFinishedGameDto } from "../../Common/Dto/pong/FinishedGameDto";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./MatchHistory.css";
 
@@ -134,15 +135,27 @@ function Match(props: matchProps)
 interface historyProps
 {
 	ref_id: number;
-	history: GetFinishedGameDto[];
 }
 
 function MatchHistory(props: historyProps)
 {
+	const [history, setHistory] = useState<GetFinishedGameDto[]>([]);
+
+	useEffect(() => {
+		fetch('/api/game-history/' + props.ref_id)
+		.then(res => res.json())
+		.then(result => {
+			setHistory(result);
+		}, error => {
+			if (error)
+			console.log("fetch error");
+		});
+	}, [props.ref_id]);
+
 	return (
 		<ul id="match_history">
 			{
-				(props.history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two, custom}, index) => (
+				(history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two, custom}, index) => (
 					<Match
 					index={index}
 					opponent_ref_id={(ref_id_one === props.ref_id)?ref_id_two:ref_id_one}

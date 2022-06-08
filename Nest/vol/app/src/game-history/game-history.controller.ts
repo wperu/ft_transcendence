@@ -54,6 +54,21 @@ export class GameHistoryController
 		}
 		if (!user_one || !user_two)
 			throw new BadRequestException("User doesn't exist");
+		if (gameData.user_one_score > gameData.user_two_score)
+		{
+			this.userService.addWin(user_one);
+			this.userService.addLoss(user_two);
+		}
+		else if (gameData.user_two_score > gameData.user_one_score)
+		{
+			this.userService.addWin(user_two);
+			this.userService.addLoss(user_one);
+		}
+		else
+		{
+			this.userService.addDraw(user_one);
+			this.userService.addDraw(user_two);
+		}
 		await this.historyService.addGameToHistory(user_one, user_two,
 			gameData.user_one_score, gameData.user_two_score, new Date,
 			gameData.custom);
