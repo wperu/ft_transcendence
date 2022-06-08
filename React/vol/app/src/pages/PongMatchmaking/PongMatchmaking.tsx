@@ -48,7 +48,7 @@ function PongMatchmaking()
 	// <div>Searching : {(isSearching) ? "True" : "False"}</div>
 	return (
 		<div id="matchmaking_page">
-			{needReconect ? <Reconnect /> : null}
+			
 			<div id="matchmaking_spinner" >
 				{isSearching ? <Spinner /> : null}
 			</div>

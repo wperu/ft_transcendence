@@ -8,6 +8,7 @@ import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
 import { GameConfig } from "../../../Common/Game/GameConfig";
 import { ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
+import Reconnect from "../../Reconnect/Reconnect";
 
  //todo stopSearchRoom
  //todo await auth for match
@@ -322,6 +323,7 @@ export function ProvidePong({children}: {children: JSX.Element} ) : JSX.Element
 
 	return(
 		<pongContext.Provider value={pongCtx}>
+			{pongCtx.needReconect ? <Reconnect /> : null}
 			{children}
 		</pongContext.Provider>
     );

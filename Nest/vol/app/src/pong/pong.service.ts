@@ -242,7 +242,10 @@ export class PongService {
 		const room = this.getRoomById(id);
 
 		if (room === undefined)
-			return ; //error
+		{
+			usr.socket.emit("NO_ROOM");
+			return ;
+		}
 		
 		room.spectators.push(usr);
 		usr.socket.join(room.id);

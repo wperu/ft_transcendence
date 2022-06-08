@@ -711,10 +711,11 @@ export class ChatService {
 						const dest = this.getUserFromID(r.reference_id);
 						if (dest !== undefined && dest.reference_id !== user.reference_id)
 						{
-							for (const s of dest.socket)
-							{
-								s.emit('RECEIVE_NOTIF', dto);
-							}
+							if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
+								for (const s of dest.socket)
+								{
+									s.emit('RECEIVE_NOTIF', dto);
+								}
 						}
 					}
 				}
