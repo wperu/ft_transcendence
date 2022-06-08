@@ -1,4 +1,4 @@
-import { GetFinishedGameDto } from "../../Common/Dto/FinishedGameDto";
+import { GetFinishedGameDto } from "../../Common/Dto/pong/FinishedGameDto";
 import { Link } from "react-router-dom";
 import "./MatchHistory.css";
 
@@ -13,6 +13,7 @@ interface matchProps
 	game_date: Date;
 	dashes: boolean;
 	double_ball: boolean;
+	custom: boolean;
 }
 
 interface matchOption
@@ -20,24 +21,65 @@ interface matchOption
 	value: boolean;
 }
 
-function Match(props: matchProps)
+interface settingsValue
 {
-	function OptionValue(props: matchOption)
+	custom: boolean;
+	dashes: boolean;
+	double_ball: boolean;
+}
+
+function OptionValue(props: matchOption)
+{
+	if (props.value === true)
 	{
-		if (props.value === true)
-		{
+		return (
+			<span className="match_option_on">ON</span>
+		);
+	}
+	else
+	{
+		return (
+			<span className="match_option_off">OFF</span>
+		);
+	}
+}
+
+function MatchSettings(props: settingsValue)
+{
+	function HistorySettingsContent()
+	{
+		if (props.custom)
 			return (
-				<span className="match_option_on">ON</span>
+				<div className="history_settings">
+					<div>
+						Dashes <OptionValue value={props.dashes} />
+					</div>
+					<div>
+						Double ball <OptionValue value={props.double_ball} />
+					</div>
+				</div>
 			);
-		}
 		else
-		{
-			return (
-				<span className="match_option_off">OFF</span>
-			);
-		}
+		return (
+			<div className="history_settings">
+			</div>
+		);
 	}
 
+	return (
+		<div className="history_match_settings">
+			<div className="history_custom">
+				Custom {props.custom ?
+					<span className="match_option_on">YES</span>
+					: <span className="match_option_off">NO</span>}
+			</div>
+			<HistorySettingsContent />
+		</div>
+	);
+}
+
+function Match(props: matchProps)
+{
 	function getOutcome()
 	{
 		if (props.current_score < props.opponent_score)
@@ -83,14 +125,8 @@ function Match(props: matchProps)
 					<span>{ parsTime() }</span>
 				</div>
 			</div>
-			<div className="history_match_settings">
-				<div>
-					Dashes <OptionValue value={props.dashes} />
-				</div>
-				<div>
-					Double ball <OptionValue value={props.double_ball} />
-				</div>
-			</div>
+			<MatchSettings custom={props.custom} dashes={props.dashes}
+			double_ball={props.double_ball} />
 		</li>
 	);
 }
@@ -106,7 +142,7 @@ function MatchHistory(props: historyProps)
 	return (
 		<ul id="match_history">
 			{
-				(props.history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two}, index) => (
+				(props.history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two, custom}, index) => (
 					<Match
 					index={index}
 					opponent_ref_id={(ref_id_one === props.ref_id)?ref_id_two:ref_id_one}
@@ -117,6 +153,7 @@ function MatchHistory(props: historyProps)
 					game_date={date}
 					dashes={false}
 					double_ball={false}
+					custom={custom}
 					/>
 				))).reverse()
 				// )))

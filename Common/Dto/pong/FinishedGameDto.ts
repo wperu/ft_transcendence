@@ -4,6 +4,7 @@ export interface PostFinishedGameDto
 	user_two_ref_id: number;
 	user_one_score: number;
 	user_two_score: number;
+	custom: boolean;
 }
 
 export interface GetFinishedGameDto
@@ -15,4 +16,5 @@ export interface GetFinishedGameDto
 	username_two: string;
 	score_one: number;
 	score_two: number;
+	custom: boolean;
 }

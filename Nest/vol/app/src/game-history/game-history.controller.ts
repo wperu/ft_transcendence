@@ -3,7 +3,7 @@ import { FinishedGame } from 'src/entities/finishedGame.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { GameHistoryService } from './game-history.service';
-import { GetFinishedGameDto, PostFinishedGameDto } from 'src/Common/Dto/FinishedGameDto';
+import { GetFinishedGameDto, PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
 
 @Controller('game-history')
 export class GameHistoryController
@@ -22,7 +22,7 @@ export class GameHistoryController
 		target_user = await this.userService.findUserByReferenceID(target_ref_id);
 		entity = await this.historyService.getUserGameHistory(target_user);
 		let i = 0;
-		entity.map(({player_one, player_two, date, player_one_score, player_two_score}) => {
+		entity.map(({player_one, player_two, date, player_one_score, player_two_score, custom}) => {
 			history.push({
 				ref_id_one: player_one.reference_id,
 				ref_id_two: player_two.reference_id,
@@ -30,6 +30,7 @@ export class GameHistoryController
 				username_two: player_two.username,
 				score_one: player_one_score,
 				score_two: player_two_score,
+				custom: custom,
 				date: date,
 			});
 		});
@@ -41,8 +42,10 @@ export class GameHistoryController
 	{
 		let user_one: User;
 		let user_two: User;
+		console.log(gameData);
 		try
 		{
+			console.log(gameData.user_one_ref_id);
 			user_one = await this.userService.findUserByReferenceID(gameData.user_one_ref_id);
 			user_two = await this.userService.findUserByReferenceID(gameData.user_two_ref_id);
 		} catch (e)
@@ -52,6 +55,7 @@ export class GameHistoryController
 		if (!user_one || !user_two)
 			throw new BadRequestException("User doesn't exist");
 		await this.historyService.addGameToHistory(user_one, user_two,
-			gameData.user_one_score, gameData.user_two_score, new Date);
+			gameData.user_one_score, gameData.user_two_score, new Date,
+			gameData.custom);
 	}
 }

@@ -9,7 +9,7 @@ import TwoFactorAuthSetting from "../../components/ProfileSettings/TFAsetting/TF
 import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/ChangeablePP";
 import ChangeableUsername from "../../components/ProfileSettings/ChangeableUsername/ChangeableUsername";
 import { IProfileDTO } from "../../Common/Dto/User/ProfileDTO";
-import { GetFinishedGameDto } from "../../Common/Dto/FinishedGameDto";
+import { GetFinishedGameDto } from "../../Common/Dto/pong/FinishedGameDto";
 import axios from "axios";
 
 interface headerInfo

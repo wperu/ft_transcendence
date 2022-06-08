@@ -6,7 +6,7 @@ export class FinishedGame
 {
 	@PrimaryGeneratedColumn()
 	id: number;
-	
+
 	@ManyToOne(() => User)
 	player_one: User;
 
@@ -15,9 +15,12 @@ export class FinishedGame
 
 	@Column()
 	player_one_score: number;
-	
+
 	@Column()
 	player_two_score: number;
+
+	@Column()
+	custom: boolean;
 
 	@Column()
 	date: Date;
