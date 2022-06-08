@@ -10,9 +10,6 @@ import { ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
 import Reconnect from "../../Reconnect/Reconnect";
 
- //todo stopSearchRoom
- //todo await auth for match
-
 export interface IPongUser
 {
     username: string,

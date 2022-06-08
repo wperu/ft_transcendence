@@ -74,12 +74,12 @@ export class AuthController
     async   register(@Req() req) : Promise<void | undefined>
     {
         if (req.headers['authorization-code'] === undefined)
-            throw new BadRequestException("no authorization_code in request header");
+			throw new BadRequestException("no authorization_code in request header");
 
         /* verify if code is valid and non expired */
         let token = await this.authService.getAccessToken(req.headers['authorization-code']);
         if (token === undefined)
-            throw new ForbiddenException("wrong access code");
+			throw new ForbiddenException("wrong access code");
         /* validates user */
         let user = await this.usersService.findUserByAccessToken(token);
 		if (user === undefined)
@@ -93,7 +93,7 @@ export class AuthController
 		if (this.usersService.isValideUsername(username) === false)
 			throw new BadRequestException('Username bad format !');
 
-		user.username = username; //fix rule to username;
+		user.username = username;
 		await this.usersService.saveUser(user);
 		return ;
     }
