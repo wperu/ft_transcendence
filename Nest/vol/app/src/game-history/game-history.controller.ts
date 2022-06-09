@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, BadRequestException, UseGuards } from '@nestjs/common';
 import { FinishedGame } from 'src/entities/finishedGame.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { GameHistoryService } from './game-history.service';
 import { GetFinishedGameDto, PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
+import { AuthGuard } from "src/auth/auth.guard";
 
 @Controller('game-history')
 export class GameHistoryController
@@ -14,6 +15,7 @@ export class GameHistoryController
 		) {}
 
 	@Get('/:refId')
+	@UseGuards(AuthGuard)
 	async	getUserHistory(@Param('refId') target_ref_id) : Promise<GetFinishedGameDto []>
 	{
 		let target_user: User;

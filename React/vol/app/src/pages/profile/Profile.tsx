@@ -152,7 +152,8 @@ function Profile() {
 				<CurrentUserProfileHeader wins={profile?profile.wins:0}
 					losses={profile?profile.losses:0} xp={profile?profile.xp:0}
 					qrUri={qrUri!} user={user} />
-				<MatchHistory ref_id={user?.reference_id || 0}/>
+				<MatchHistory ref_id={user?.reference_id || 0}
+					access_code={auth.user?auth.user.accessCode:""} />
 				<footer>
 					<Link to='/'><BackToMainMenuButton /></Link>
 				</footer>
@@ -165,7 +166,8 @@ function Profile() {
 		return (
 			<div id="profile_page">
 				<OtherUserProfileHeader user={profile} />
-				<MatchHistory ref_id={profile?.reference_id || 0}/>
+				<MatchHistory ref_id={profile?.reference_id || 0}
+					access_code={auth.user?auth.user.accessCode:""} />
 				<footer>
 					<Link to='/' replace={false}><BackToMainMenuButton /></Link>
 				</footer>
