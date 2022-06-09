@@ -10,7 +10,6 @@ interface matchProps
 	opponent_ref_id: number;
 	current_score: number;
 	opponent_score: number;
-	index: number;
 	game_date: Date;
 	dashes: boolean;
 	double_ball: boolean;
@@ -109,7 +108,7 @@ function Match(props: matchProps)
 	}
 
 	return (
-		<li key={props.index} className="history_match">
+		<li className="history_match">
 			<div className="history_match_infos">
 				<div className={getOutcome()}>{getOutcome()}</div>
 				<div className="history_match_user">{props.current_user_name}</div>
@@ -157,7 +156,7 @@ function MatchHistory(props: historyProps)
 			{
 				(history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two, custom}, index) => (
 					<Match
-					index={index}
+					key={index.toString()}
 					opponent_ref_id={(ref_id_one === props.ref_id)?ref_id_two:ref_id_one}
 					current_user_name={(ref_id_one === props.ref_id)?username_one:username_two}
 					opponent_name={(ref_id_one === props.ref_id)?username_two:username_one}

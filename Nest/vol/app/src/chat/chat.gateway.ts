@@ -114,7 +114,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.joinRoom(client, user, payload);
+		if (await this.chatService.joinRoom(client, user, payload))
+		{
+			let msg_obj = {
+				message:	"User " + user.username + " has joined the channel",
+				sender:		"Server",
+				refId:		user.reference_id,
+				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				room_id:	payload.id
+			};
+
+			// TODO check if user is actually in room
+			// TODO maybe store in DB if we want chat history ?
+
+			this.server.to(payload.id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		}
 	}
 
 
@@ -133,7 +147,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name);
+		if (await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name))
+		{
+			let msg_obj = {
+				message:	"User " + user.username + " has left the channel",
+				sender:		"Server",
+				refId:		user.reference_id,
+				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				room_id:	payload.id
+			};
+
+			// TODO check if user is actually in room
+			// TODO maybe store in DB if we want chat history ?
+
+			this.server.to(payload.id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		}
 	}
 
 
