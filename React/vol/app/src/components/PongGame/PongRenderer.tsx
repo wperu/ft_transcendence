@@ -1,6 +1,6 @@
 import { GameConfig } from "../../Common/Game/GameConfig";
 import IUser from "../../Common/Dto/User/User";
-import { IPongContext, IPongRoom, RoomState, usePongContext } from "./PongContext/ProvidePong";
+import { IPongBall, IPongContext, IPongRoom, IPongUser, RoomOptions, RoomState, usePongContext } from "./PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "./PongGame";
 import { add_particles, clear_trail, plot_trail } from "./PongTrail";
 import { useEffect } from "react";
@@ -24,28 +24,54 @@ function update(pong_ctx: IPongContext, deltaTime: number, user: IUser)
 }
 
 
+function glidePlayer(room: IPongRoom, player: IPongUser)
+{
+    if (room.options & RoomOptions.ICE_FRICTION)
+    {
+        player.velocity *= GameConfig.PLAYER_FRICTION_ON_ICE;
+        if  ((player.position < GameConfig.TERRAIN_PADDING_Y)
+        ||  (player.position > 1 - GameConfig.TERRAIN_PADDING_Y))
+            player.velocity *= -1;
+    }
+    else
+        player.velocity *= GameConfig.PLAYER_FRICTION;
+}
+
+function movePlayer(room: IPongRoom, player: IPongUser, deltaTime: number)
+{
+    if (room.options & RoomOptions.ICE_FRICTION && player.velocity < GameConfig.PLAYER_SPEED)
+    {
+        player.velocity += player.key * deltaTime;
+    }
+    else
+        player.velocity = player.key * GameConfig.PLAYER_SPEED;
+}
+
+
 function updatePlayer(room: IPongRoom, user: IUser, deltaTime: number)
 {
     /* move player */
     if (user.username === room.player_1.username)
     {
         if (room.player_1.key !== 0)
-            room.player_1.velocity = room.player_1.key * GameConfig.PLAYER_SPEED
+            movePlayer(room, room.player_1, deltaTime);
         else 
-            room.player_1.velocity *= GameConfig.PLAYER_FRICTION; 
+            glidePlayer(room, room.player_1);
     
-        if (room.player_2.key === 0)
-            room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+        if (room.player_2.key === 0) 
+            glidePlayer(room, room.player_2);
     }
     else if (user.username === room.player_2.username)
     {
         if (room.player_2.key !== 0)
-            room.player_2.velocity = room.player_2.key * GameConfig.PLAYER_SPEED
+            movePlayer(room, room.player_2, deltaTime);
         else 
-            room.player_2.velocity *= GameConfig.PLAYER_FRICTION;
+            glidePlayer(room, room.player_2)
         
         if (room.player_1.key === 0)
-            room.player_1.velocity *= GameConfig.PLAYER_FRICTION;
+        {
+            glidePlayer(room, room.player_1);
+        }
     }
 
     /* update positions */
@@ -161,12 +187,15 @@ const useRender = (canvasRef: React.RefObject<HTMLCanvasElement>, user: IUser, l
 			if (pong_ctx.room.state !== RoomState.PAUSED && pong_ctx.room.state !== RoomState.FINISHED)
 				update(pong_ctx, render_ctx.deltaTime, user);
 		
-			renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
-			renderBall(ctx, render_ctx, pong_ctx, user);
-			renderPlayers(ctx, render_ctx, pong_ctx.room, user);
-		
-			if (pong_ctx.room.state === RoomState.PAUSED)
-				renderPauseScreen(ctx, render_ctx);
+
+            renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
+            renderBall(ctx, render_ctx, pong_ctx, user, pong_ctx.room.ball);
+            if (pong_ctx.room.options & RoomOptions.DOUBLE_BALL && pong_ctx.room.ball2)
+                renderBall(ctx, render_ctx, pong_ctx, user, pong_ctx.room.ball2);
+            renderPlayers(ctx, render_ctx, pong_ctx.room, user);
+    
+            if (pong_ctx.room.state === RoomState.PAUSED)
+                renderPauseScreen(ctx, render_ctx);
 		
 			/* DEV - FPS counter */
 			ctx.font = "10px Mono"
@@ -323,7 +352,7 @@ function renderPlayers(ctx : CanvasRenderingContext2D, render_ctx: PongRendering
 
 
 
-function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, user: IUser)
+function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, user: IUser, ball: IPongBall)
 {
     let ball_x = 0, ball_y = 0;
 
@@ -332,19 +361,19 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
 
 	if (user.username === pong_ctx.room.player_2.username)
     {
-        ball_x = render_ctx.terrain_x + render_ctx.terrain_w - ((pong_ctx.room.ball.pos_x) * (render_ctx.terrain_w * 0.5));
-        ball_y = render_ctx.terrain_y +  (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
+        ball_x = render_ctx.terrain_x + render_ctx.terrain_w - ((ball.pos_x) * (render_ctx.terrain_w * 0.5));
+        ball_y = render_ctx.terrain_y +  (ball.pos_y) * render_ctx.terrain_h;
     }
     else
     {
-        ball_x = render_ctx.terrain_x + (pong_ctx.room.ball.pos_x) * (render_ctx.terrain_w * 0.5);
-        ball_y = render_ctx.terrain_y + (pong_ctx.room.ball.pos_y) * render_ctx.terrain_h;
+        ball_x = render_ctx.terrain_x + (ball.pos_x) * (render_ctx.terrain_w * 0.5);
+        ball_y = render_ctx.terrain_y + (ball.pos_y) * render_ctx.terrain_h;
     }
 
-    if (pong_ctx.room.state === RoomState.LOADING && pong_ctx.room.ball.size < GameConfig.BALL_SIZE)
+    if (pong_ctx.room.state === RoomState.LOADING && ball.size < GameConfig.BALL_SIZE * 0.1)
     {
         clear_trail(pong_ctx);
-        pong_ctx.room.ball.size += render_ctx.deltaTime * 0.4;
+        ball.size += render_ctx.deltaTime * 0.4;
     }
     else
     {
@@ -354,10 +383,11 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
     }
 
     /* Ball */
-    let ball_size = render_ctx.terrain_h * (pong_ctx.room.ball.size * 0.5);
+    let ball_size = render_ctx.terrain_h * ball.size;
 
-	if (ball_size > GameConfig.BALL_SIZE * 0.5)
-		ball_size = render_ctx.terrain_h * GameConfig.BALL_SIZE * 0.5;
+	if (ball_size > GameConfig.BALL_SIZE * 0.1)
+		ball_size = render_ctx.terrain_h * (GameConfig.BALL_SIZE * 0.1);
+    
     if (pong_ctx.room.state === RoomState.ENDED)
         ball_size = 0;
     ctx.fillStyle = '#FFFFFF'

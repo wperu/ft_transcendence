@@ -573,7 +573,7 @@ export class RoomService
 	{
 		let rel = await this.findRelOf(id, refId);
 
-		if (rel.mute_expire === null)
+		if (rel === undefined || rel.mute_expire === null)
 			return false;
 
 		if (rel.mute_expire <= new Date())

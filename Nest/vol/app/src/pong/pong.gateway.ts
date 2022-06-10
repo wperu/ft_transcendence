@@ -177,7 +177,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	@SubscribeMessage("UPDATE_CUSTOM_ROOM")
 	updateCustomRoom(client: Socket, data: UpdateCustomRoomDTO)
 	{
-		this.pongService.updateCustomRoom(data)
+		this.pongService.updateCustomRoom(data, client)
 	}
 
 	@SubscribeMessage("START_CUSTOM_ROOM")
