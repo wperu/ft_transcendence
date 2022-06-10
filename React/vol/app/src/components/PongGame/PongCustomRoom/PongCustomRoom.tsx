@@ -136,7 +136,7 @@ export function PongCustomRoom() : JSX.Element
 			<div id="custom_room_users">
 				{users.map(({username, reference_id}, index) => {
 					return (
-						<PongUser username={username} ref_id={reference_id} position={index}/>
+						<PongUser key={index} username={username} ref_id={reference_id} position={index}/>
 					);
 				})}
 			</div>

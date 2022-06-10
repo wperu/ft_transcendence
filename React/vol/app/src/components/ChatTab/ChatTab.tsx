@@ -4,7 +4,6 @@ import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat"
 import useInterval from '../../hooks/useInterval';
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
 import "./ChatTab.css";
-import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 function ChatTab ()
 {
