@@ -1,10 +1,9 @@
-import React, {KeyboardEvent, useState, useEffect} from "react";
+import React, {KeyboardEvent, useState, useEffect, useCallback} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from '../../hooks/useInterval';
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
 import "./ChatTab.css";
-import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 
 function ChatTab ()
 {
@@ -44,18 +43,13 @@ function ChatTab ()
 		}
 	}
 
-	function sendInvite()
+	const sendInvite = useCallback(() => 
 	{
 		if (chatCtx.currentRoom !== undefined)
 		{
-			let dto : GameInviteDTO = {
-				gameRoomId: 0, //todo create room and send
-				refId: undefined,
-				chatRoomId: chatCtx.currentRoom.id,
-			}
-			chatCtx.socket.emit('GAME_INVITE', dto);
+			chatCtx.invitePlayer(undefined, chatCtx.currentRoom.id);
 		}
-	}
+	}, [chatCtx, chatCtx.invitePlayer, chatCtx.currentRoom])
 
 	useEffect(() =>
 	{
