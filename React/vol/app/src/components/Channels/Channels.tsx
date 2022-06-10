@@ -33,11 +33,11 @@ class Channels extends Component {
 					<input className="channels_tab_button" type="radio"
 						name="channels_tab" id="global_chans"
 						value="global_chans" onChange={this.handleChange} />
-					<label htmlFor="global_chans">Global chans</label>
+					<label htmlFor="global_chans">Join channels</label>
 					<input className="channels_tab_button" type="radio"
 						name="channels_tab" id="joined_chans"
 						value="joined_chans" onChange={this.handleChange} defaultChecked/>
-					<label htmlFor="joined_chans">Joined chans</label>
+					<label htmlFor="joined_chans">Your channels</label>
 					<input className="channels_tab_button" type="radio"
 						name="channels_tab" id="create_chan"
 						value="create_chan" onChange={this.handleChange} />

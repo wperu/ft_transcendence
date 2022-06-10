@@ -82,7 +82,7 @@ function JoinedChansList()
 				<input className="channels_pms_tab_button" type="radio"
 					name="channels_or_pms" id="private_messages_list"
 					value="pms" onChange={handleChange} />
-				<label htmlFor="private_messages_list">Private messages</label>
+				<label htmlFor="private_messages_list">Private conversations</label>
 			</header>
 			<Content which={currentTab} />
 		</div>
