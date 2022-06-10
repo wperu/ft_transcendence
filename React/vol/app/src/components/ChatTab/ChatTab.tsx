@@ -49,7 +49,7 @@ function ChatTab ()
 		{
 			chatCtx.invitePlayer(undefined, chatCtx.currentRoom.id);
 		}
-	}, [chatCtx, chatCtx.invitePlayer, chatCtx.currentRoom])
+	}, [chatCtx])
 
 	useEffect(() =>
 	{

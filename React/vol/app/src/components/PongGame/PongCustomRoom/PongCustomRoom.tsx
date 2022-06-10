@@ -159,12 +159,12 @@ export function PongCustomRoom() : JSX.Element
 		return (
 			<div id="not_owner_view">
 				<div id="options">
-					<span>Game modes selected:</span>
+					{/* <span>Game modes selected:</span> */}
 					{doubleBall ? <span className="selected_option">Double ball</span> : null}
 					{iceFritction ? <span className="selected_option">Ice friction</span> : null}
-					{!iceFritction && !doubleBall? "none" : null}
+					{/* {!iceFritction && !doubleBall? "none" : null} */}
 				</div>
-				Waiting for the owner of the room
+				<div id="info"> Waiting for the owner of the room </div>
 			</div>
 		);
 	}
