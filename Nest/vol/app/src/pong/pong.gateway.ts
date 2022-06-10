@@ -6,6 +6,7 @@ import { SendPlayerKeystrokeDTO } from 'src/Common/Dto/pong/SendPlayerKeystrokeD
 import { GameService } from './game.service';
 import { PongUser } from './interfaces/PongUser';
 import { PongService } from './pong.service';
+import { UpdateCustomRoomDTO } from '../Common/Dto/pong/UpdateCustomRoomDTO'  
 
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
 	path: "/socket.io/",
@@ -174,10 +175,9 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	}
 
 	@SubscribeMessage("UPDATE_CUSTOM_ROOM")
-	updateCustomRoom(client: Socket, data: {room_id: string, opts: any}) //todo opt
+	updateCustomRoom(client: Socket, data: UpdateCustomRoomDTO)
 	{
-		this.logger.log("Rcv UPDATE_CUSTOM_ROOM");
-		this.pongService.updateCustomRoom(client, data.room_id, data.opts);
+		this.pongService.updateCustomRoom(data, client)
 	}
 
 	@SubscribeMessage("START_CUSTOM_ROOM")

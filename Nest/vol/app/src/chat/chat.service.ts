@@ -208,10 +208,11 @@ export class ChatService {
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto)
+	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto) : Promise<boolean>
 	{
 		let userRoom = await this.usersService.findUserByReferenceID(user.reference_id);
 		let resp;
+		let ret : boolean;
 
 		if (data.id !== undefined)
 			resp = await this.roomService.joinRoomById(data.id, userRoom, data.password);
@@ -243,26 +244,29 @@ export class ChatService {
 			let data : NoticeDTO;
 			data = { level: ELevel.info, content: "Room " + room.name + " joined" };
 			client.emit("NOTIFICATION", data);
+			ret = true;
 		}
 		else
 		{
 			let data : NoticeDTO;
 			data = { level: ELevel.error, content: resp };
 			client.emit("NOTIFICATION", data);
+			ret = false
 		}
-		return;
+		return (ret);
 	}
 
-	async leaveRoom(server: Server, client: Socket, user: ChatUser, id: number, roomName: string)
+	async leaveRoom(server: Server, client: Socket, user: ChatUser, id: number, roomName: string) : Promise<boolean>
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
 		const resp = await this.roomService.leaveRoomById(id, user.reference_id)
+
 		if (typeof resp === "string")
 		{
 			let data : NoticeDTO;
 			data = { level: ELevel.error, content: resp };
 			client.emit("NOTIFICATION", data);
-			return ;
+			return (false);
 		}
 		else if (typeof resp === 'number')
 		{
@@ -298,6 +302,7 @@ export class ChatService {
 		let data : NoticeDTO;
 		data = { level: ELevel.info, content: "Room " + roomName + " left" };
 		client.emit("NOTIFICATION", data);
+		return (true);
 	}
 
 	/***
@@ -336,7 +341,7 @@ export class ChatService {
 		if (typeof resp !== "string")
 		{
 			let left_dto : RoomLeftDto;
-			
+
 			left_dto = {
 				id : resp.id,
 				room_name: resp.name,
@@ -503,7 +508,7 @@ export class ChatService {
 			let username = user2?.username || "default";
 			let status = this.isConnected(rel.id_two);
 
-			
+
 
 			const info = this.pongService.playerStatus(user2.reference_id);
 		//	console.log(username + " " + status);

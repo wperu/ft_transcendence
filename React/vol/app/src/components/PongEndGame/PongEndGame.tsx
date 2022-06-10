@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { JsxElement } from "typescript";
 import { useAuth } from "../../auth/useAuth";
+import { GameConfig } from "../../Common/Game/GameConfig";
 import { IPongContext, IPongUser, usePongContext } from "../PongGame/PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "../PongGame/PongGame";
 import './PongEndGame.css'
@@ -29,7 +30,7 @@ const PongEndGame = () => {
 
         if (player && opponent)
         { 
-            if (player.points < 3)
+            if (player.points < GameConfig.DEFAULT_MAX_SCORE)
                 message = 'You suck...'
 
             return (

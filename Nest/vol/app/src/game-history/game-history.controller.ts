@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, BadRequestException, UseGuards } from '@nestjs/common';
 import { FinishedGame } from 'src/entities/finishedGame.entity';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { GameHistoryService } from './game-history.service';
 import { GetFinishedGameDto, PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
+import { AuthGuard } from "src/auth/auth.guard";
 
 @Controller('game-history')
 export class GameHistoryController
@@ -14,6 +15,7 @@ export class GameHistoryController
 		) {}
 
 	@Get('/:refId')
+	@UseGuards(AuthGuard)
 	async	getUserHistory(@Param('refId') target_ref_id) : Promise<GetFinishedGameDto []>
 	{
 		let target_user: User;
@@ -54,21 +56,6 @@ export class GameHistoryController
 		}
 		if (!user_one || !user_two)
 			throw new BadRequestException("User doesn't exist");
-		if (gameData.user_one_score > gameData.user_two_score)
-		{
-			this.userService.addWin(user_one);
-			this.userService.addLoss(user_two);
-		}
-		else if (gameData.user_two_score > gameData.user_one_score)
-		{
-			this.userService.addWin(user_two);
-			this.userService.addLoss(user_one);
-		}
-		else
-		{
-			this.userService.addDraw(user_one);
-			this.userService.addDraw(user_two);
-		}
 		await this.historyService.addGameToHistory(user_one, user_two,
 			gameData.user_one_score, gameData.user_two_score, new Date,
 			gameData.custom);

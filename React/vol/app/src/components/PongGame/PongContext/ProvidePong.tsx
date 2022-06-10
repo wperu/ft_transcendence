@@ -36,15 +36,25 @@ export enum RoomState {
     PAUSED,
 }
 
+export const RoomOptions = {
+    DEFAULT: 0b00,
+    DOUBLE_BALL: 0b01,
+    ICE_FRICTION: 0b10,
+};
+
+
 export interface IPongRoom
 {
     room_id: string,
     player_1: IPongUser,
     player_2: IPongUser,
     ball: IPongBall,
+    ball2?: IPongBall,
     spectators: Array<IPongUser>,
     state: RoomState,
     socket: Socket,
+
+    options: number,
 
     setAsFinished: (val: boolean) => void;
 }
@@ -148,11 +158,22 @@ function usePongProvider() : IPongContext
                     vel_y: 0
                 } as IPongBall,
 
+                ball2: (data.options & RoomOptions.DOUBLE_BALL) ? {
+                    pos_x: 1,
+                    pos_y: 0.5,
+                    size: 0,
+                    vel_x: 0,
+                    vel_y: 0
+                } as IPongBall : undefined,
+
+                options: data.options,
+
                 spectators: [],
                 state: RoomState.ENDED,
                 socket: socket,
                 setAsFinished: () => {}
             } as IPongRoom);
+
 
             setInGame(true);
         });
@@ -237,6 +258,16 @@ function usePongProvider() : IPongContext
                     vel_x: data.ball.vel_x,
                     vel_y: data.ball.vel_y
                 } as IPongBall,
+
+                ball2: (data.options & RoomOptions.DOUBLE_BALL && data.ball2 !== undefined) ? {
+                    pos_x: data.ball2.x,
+                    pos_y: data.ball2.y,
+                    size: GameConfig.BALL_SIZE,
+                    vel_x: data.ball2.vel_x,
+                    vel_y: data.ball2.vel_y
+                } as IPongBall : undefined,
+
+                options: data.options,
 
                 spectators: [],
                 state: RoomState.LOADING,

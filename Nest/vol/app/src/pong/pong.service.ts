@@ -4,7 +4,7 @@ import { TokenService } from 'src/auth/token.service';
 import { UserToken } from 'src/Common/Dto/User/UserToken';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { PongRoom, RoomState } from './interfaces/PongRoom';
+import { PongRoom, RoomOptions, RoomState } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { GameConfig } from 'src/Common/Game/GameConfig';
 import { ReconnectPlayerDTO } from 'src/Common/Dto/pong/ReconnectPlayerDTO';
@@ -13,6 +13,7 @@ import { GameService } from './game.service';
 import { CustomRoom } from './interfaces/CustomRoom';
 import { UserCustomRoomDTO } from 'src/Common/Dto/pong/UserCustomRoomDTO';
 import { ChatService } from 'src/chat/chat.service';
+import { UpdateCustomRoomDTO } from 'src/Common/Dto/pong/UpdateCustomRoomDTO';
 
 
 // REVIEW do we want multiple socket for pong user ?
@@ -22,14 +23,6 @@ import { ChatService } from 'src/chat/chat.service';
 export class PongService {
 
     private logger: Logger = new Logger('PongService');
-
-    /*
-    private frameCount: number = 0;
-    private deltaTime: number = 0;
-    private last_time: number = 0;
-    private current_time: number = 0;
-    */
-
 
     private server: Server;
 
@@ -50,10 +43,6 @@ export class PongService {
         private gameService: GameService,
     )
     {
-        // console.log("init pgboss on : postgress://" + process.env.DB_USERNAME + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST + "/" + process.env.DB_NAME);
-        // this.boss = new PgBoss("postgress://" + process.env.DB_USERNAME + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST + "/" + process.env.DB_NAME)
-        // this.boss.on('error', (err) => { return console.log("[pg-boss][error] " + err) })
-        // this.boss.start();
         this.users = [];
         this.rooms = [];
         this.waitingPool = [];
@@ -332,6 +321,7 @@ export class PongService {
             user.socket.join(room.id);
             user.socket.emit("RECONNECT_YOU", {
                 room_id: room.id,
+                options: room.options,
                 player_1: {
                     position: room.player_1.position,
                     username: room.player_1.username,
@@ -348,6 +338,12 @@ export class PongService {
                     vel_x: room.ball.vel_x,
                     vel_y: room.ball.vel_y,
                 },
+                ball2: (room.options & RoomOptions.DOUBLE_BALL) ? {
+                    x: room.ball2?.pos_x,
+                    y: room.ball2?.pos_y,
+                    vel_x: room.ball2?.vel_x,
+                    vel_y: room.ball2?.vel_y,
+                } : undefined
             } as ReconnectPlayerDTO);
 
             console.log("player reconnected")
@@ -450,13 +446,41 @@ export class PongService {
 		let room : CustomRoom = {
 			id: id,
 			users: [],
-			opts: undefined, //Todo
+			opts: RoomOptions.DEFAULT,
 		}
 		this.customRooms.push(room);
 		// review 
 		this.chatService.confirmCustomRoom(id, refId);
 		return room;
-	}
+    }
+
+    updateCustomRoom(data: UpdateCustomRoomDTO, client: Socket)
+    {
+		const room = this.findCustomRoom(data.room_id);
+		const usr = this.getUserFromSocket(client);
+		if (usr === undefined)
+			return ;
+		if (this.isOwner(usr, room) === false)
+			return ; //error
+		
+		if (room === undefined)
+			return ; //error
+        
+        if (data.mode === 0)
+        {
+            room.opts &= ~data.options;
+        }
+        else
+        {
+            room.opts |= data.options;
+        }
+
+        this.server.to(room.id).emit("CUSTOM_ROOM_UPDATE_MODE", 
+        {
+            options: data.options,
+            mode: data.mode,
+        });
+    }
 
 	joinCustomRoom(id: string, user: PongUser)
 	{
@@ -555,7 +579,8 @@ export class PongService {
 		const other = croom.users[1];
 
 		croom.users.splice(0, 2); //rm player
-		const room = this.gameService.initRoom(owner, other, croom.users);
+		const room = this.gameService.initRoom(owner, other, croom.users, croom.opts);
+        room.options = croom.opts;
 
 		// for game options croom.opts //todo
 		owner.in_room = undefined;
@@ -572,25 +597,4 @@ export class PongService {
 		this.customRooms.splice(i, 1);
 		console.log('Room destroy');
 	}
-
-	updateCustomRoom(client: Socket, id: string, opts: any)
-	{
-		const room = this.findCustomRoom(id);
-		const usr = this.getUserFromSocket(client);
-		if (usr === undefined)
-			return ;
-
-		if (room === undefined)
-			return ; //error
-
-		if (room.users.length < 2)
-			return ;// error
-
-		if (this.isOwner(usr, room) === false)
-			return ; //error
-
-
-		//TODO 
-	}
-	
 }

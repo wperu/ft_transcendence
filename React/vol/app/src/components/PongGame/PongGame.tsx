@@ -3,7 +3,7 @@ import { UpdatePongBallDTO } from "../../Common/Dto/pong/UpdatePongBallDTO";
 import { UpdatePongPlayerDTO } from "../../Common/Dto/pong/UpdatePongPlayerDTO";
 import { SendPlayerKeystrokeDTO } from "../../Common/Dto/pong/SendPlayerKeystrokeDTO"
 import { UpdatePongPointsDTO } from "../../Common/Dto/pong/UpdatePongPointsDTO"
-import { IPongContext, IPongUser, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
+import { IPongContext, IPongUser, RoomOptions, RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
@@ -131,6 +131,14 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.ball.pos_y = data.ball_y;
                     pongCtx.room.ball.vel_x = data.vel_x;
                     pongCtx.room.ball.vel_y = data.vel_y;
+
+                    if (pongCtx.room.options & RoomOptions.DOUBLE_BALL && pongCtx.room.ball2 !== undefined && data.ball2 !== undefined)
+                    {
+                        pongCtx.room.ball2.pos_x = data.ball2.ball_x;
+                        pongCtx.room.ball2.pos_y = data.ball2.ball_y;
+                        pongCtx.room.ball2.vel_x = data.ball2.vel_x;
+                        pongCtx.room.ball2.vel_y = data.ball2.vel_y;
+                    }
                 }
             });
 

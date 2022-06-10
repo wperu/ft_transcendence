@@ -2,8 +2,9 @@ import { cleanup } from "@testing-library/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
-import { usePongContext } from "../PongContext/ProvidePong";
+import { RoomOptions, usePongContext } from "../PongContext/ProvidePong";
 import { UserCustomRoomDTO } from "../../../Common/Dto/pong/UserCustomRoomDTO";
+import { UpdateCustomRoomDTO } from "../../../Common/Dto/pong/UpdateCustomRoomDTO";
 import { useAuth } from "../../../auth/useAuth";
 import BackToMainMenuButton from "../../FooterButton/BackToMainMenuButton";
 import "./PongCustomRoom.css";
@@ -47,6 +48,8 @@ function PongUser(props: pongUserProp)
 	);
 }
 
+
+
 //Reload When chang id;
 export function PongCustomRoom() : JSX.Element
 {
@@ -57,6 +60,9 @@ export function PongCustomRoom() : JSX.Element
 	const { id }				= useParams<("id")>();
 	const navigate				= useNavigate();
 	const [isOwner, setIsOwner]				= useState<boolean>(false);
+
+	const [doubleBall, setDoubleBall]		= useState<boolean>(false);
+	const [iceFritction, setIceFrition]		= useState<boolean>(false);
 
 	useEffect(() => {
 		if (isAuth && inRoom === false)
@@ -75,6 +81,16 @@ export function PongCustomRoom() : JSX.Element
 		}
 		navigate("/matchmaking", { replace: false })
 	}, [inRoom, socket, navigate])
+
+	const updateOptions = useCallback((opt: number, mode: number /* 1- set / 0- unset */) => {
+		if (opt & RoomOptions.DOUBLE_BALL)
+			setDoubleBall(mode === 0 ? false : true);
+	
+		if (opt & RoomOptions.ICE_FRICTION)
+			setIceFrition(mode === 0 ? false : true);
+		
+		socket.emit("UPDATE_CUSTOM_ROOM", {room_id: id, options: opt, mode: mode} as UpdateCustomRoomDTO)
+	}, [doubleBall, iceFritction]);;
 
 	useEffect(() => {
 		return () =>  {
@@ -107,8 +123,15 @@ export function PongCustomRoom() : JSX.Element
 			})
 
 			socket.on("USERS_CUSTOM_ROOM", (users : Array<UserCustomRoomDTO>) => {
-					setUsers(users);
-					console.log(users);
+				setUsers(users);
+				console.log(users);
+			})
+
+			socket.on("CUSTOM_ROOM_UPDATE_MODE", (data: { options: number, mode: number }) => {
+				if (data.options & RoomOptions.DOUBLE_BALL)
+					setDoubleBall(data.mode === 0 ? false : true);
+				if (data.options & RoomOptions.ICE_FRICTION)
+					setIceFrition(data.mode === 0 ? false : true);
 			})
 
 		//CleanUp
@@ -116,6 +139,7 @@ export function PongCustomRoom() : JSX.Element
 			socket.off("JOINED_CUSTOM_ROOM");
 			socket.off("LEFT_CUSTOM_ROOM");
 			socket.off("USERS_CUSTOM_ROOM");
+			socket.off("CUSTOM_ROOM_UPDATE_MODE")
 		}
 
 	}, [socket])
@@ -140,8 +164,19 @@ export function PongCustomRoom() : JSX.Element
 					);
 				})}
 			</div>
+			<div id="options">
+				<div className="option-checkbox">
+					<input type='checkbox' checked={doubleBall} onChange= { (e) => updateOptions(RoomOptions.DOUBLE_BALL, e.target.checked === true ? 1 : 0) }></input>
+					<h3>Double ball</h3>
+				</div>
+
+				<div className="option-checkbox">
+					<input type='checkbox' checked={iceFritction} onChange= { (e) => updateOptions(RoomOptions.ICE_FRICTION, e.target.checked === true ? 1 : 0) }></input>
+					<h3>Ice friction</h3>
+				</div>
+			</div>
 			<div id="custom_room_start">
-				{!isOwner ? "The owner of the room can start the game" : null}
+				{!isOwner ? <h5>Only the room owner can start the game</h5> : null}
 			</div>
 			<footer>
 				<Link to="/" replace={false}> <BackToMainMenuButton /> </Link>
