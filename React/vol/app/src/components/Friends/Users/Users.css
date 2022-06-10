@@ -37,3 +37,15 @@
 {
 	color: rgb(255, 31, 31);
 }
+
+.online_friend_status
+{
+	margin-left: 1em;
+	font-size: 0.7em;
+	color: lightgrey;
+}
+
+.online_friend_status:hover
+{
+	font-style: italic;
+}

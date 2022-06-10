@@ -9,6 +9,7 @@ import { ChatService } from './chat.service';
 import { ENotification, NotifDTO } from 'src/Common/Dto/chat/notification';
 import { GameInviteDTO } from 'src/Common/Dto/chat/gameInvite';
 import { ELevel, NoticeDTO } from 'src/Common/Dto/chat/notice';
+import { RoomService } from 'src/room/room.service';
 
 // Todo fix origin
 @WebSocketGateway(+process.env.WS_CHAT_PORT, {
@@ -28,6 +29,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	constructor(
 		@Inject(forwardRef(() => ChatService))
 		private chatService: ChatService,
+		private readonly roomService: RoomService,
 	) { }
 
 	onModuleInit()
@@ -53,25 +55,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
-		let msg_obj : RcvMessageDto;
+		if (!await this.roomService.isMute(payload.room_id, user.reference_id))
+		{
+			let msg_obj : RcvMessageDto;
 
-		msg_obj = {
-			message:	payload.message,
-			sender:		user.username,
-			refId:		user.reference_id,
-			send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
-			room_id:	payload.room_id
-		};
+			msg_obj = {
+				message:	payload.message,
+				sender:		user.username,
+				refId:		user.reference_id,
+				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				room_id:	payload.room_id
+			};
 
-		// TODO check if user is actually in room
-		// TODO maybe store in DB if we want chat history ?
+			// TODO check if user is actually in room
+			// TODO maybe store in DB if we want chat history ?
 
-		this.logger.log("[Socket io] new message: " + msg_obj.message);
-		this.server.to(payload.room_id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+			this.logger.log("[Socket io] new message: " + msg_obj.message);
+			this.server.to(payload.room_id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		}
+		else
+		{
+			let dto : NoticeDTO =
+			{
+				level: ELevel.error,
+				content: "stfu, you are not allowed to talk in this room",
+			};
+			client.emit('NOTIFICATION', dto);
+		}
 	}
-
-
-
 
 	@SubscribeMessage('CREATE_ROOM')
 	async createRoom(client: Socket, payload: CreateRoomDTO): Promise<void>
@@ -103,7 +114,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.joinRoom(client, user, payload);
+		if (await this.chatService.joinRoom(client, user, payload))
+		{
+			let msg_obj = {
+				message:	"User " + user.username + " has joined the channel",
+				sender:		"Server",
+				refId:		user.reference_id,
+				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				room_id:	payload.id
+			};
+
+			// TODO check if user is actually in room
+			// TODO maybe store in DB if we want chat history ?
+
+			this.server.to(payload.id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		}
 	}
 
 
@@ -122,7 +147,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name);
+		if (await this.chatService.leaveRoom(this.server, client, user, payload.id, payload.name))
+		{
+			let msg_obj = {
+				message:	"User " + user.username + " has left the channel",
+				sender:		"Server",
+				refId:		user.reference_id,
+				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				room_id:	payload.id
+			};
+
+			// TODO check if user is actually in room
+			// TODO maybe store in DB if we want chat history ?
+
+			this.server.to(payload.id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+		}
 	}
 
 
@@ -276,10 +315,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			if(userInfo.socket.length === 0)
 			{
 				this.chatService.removeUser(userInfo.reference_id);
-			}
-			else
-			{
-				userInfo.socket.splice(userInfo.socket.findIndex((s) => (client === s)))
 			}
 		}
 	}
@@ -507,5 +542,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		await this.chatService.gameInvite(client, data);
 	}
 
-	
+
 }

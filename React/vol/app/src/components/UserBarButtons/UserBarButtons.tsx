@@ -11,9 +11,7 @@ import CloseLogo from "../../ressources/images/close.png";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
 import Popup from "reactjs-popup";
-import { isPropertySignature } from "typescript";
 import React, { useCallback, useState } from "react";
-import { GameInviteDTO } from "../../Common/Dto/chat/gameInvite";
 import { useNavigate } from "react-router-dom";
 
 interface Prop
@@ -57,6 +55,7 @@ interface acceptGameInvitationProp
 {
 	src_name: string;
 	refId: number;
+	notifId: string;
 	gameId: string | undefined;
 }
 
@@ -80,14 +79,11 @@ interface refuseProp
 
 export function InviteUserButton(prop: gameInvitationProp)
 {
-	const {socket, invitePlayer}		= useChatContext();
-	const navigate		= useNavigate();
+	const {invitePlayer}		= useChatContext();
 
 	function onClick()
 	{
 		invitePlayer(prop.refId);
-		
-		
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={onClick}><img alt="" src={InviteLogo}/>invite</button>
@@ -110,15 +106,6 @@ export function BanUserButton(prop: banProp)
 		setIsOpen(true);
 	}
 
-	function handleSubmit()
-	{
-		close()
-		if (prop.isBanned)
-			ban();
-		else
-			unban();
-	}
-
 	const ban = useCallback(() => {
 		if (chtCtx.currentRoom !== undefined)
 		{
@@ -128,10 +115,10 @@ export function BanUserButton(prop: banProp)
 				refId: prop.refId,
 				expires_in: duration,
 				isBan: true,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
-		console.log("duration " + duration);
+		close();
 	}, [duration])
 
 	function unban()
@@ -144,10 +131,10 @@ export function BanUserButton(prop: banProp)
 				refId: prop.refId,
 				expires_in: -1,
 				isBan: false,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
-		console.log("user unbanned");
+		close();
 	}
 
 	if (!prop.isBanned)
@@ -170,9 +157,9 @@ export function BanUserButton(prop: banProp)
 						hours
 					</div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
-						<input type="button" value={"ban " + prop.user_name} 
+						<input type="button" value={"ban " + prop.user_name}
 							onClick={ban}/>
 					</div>
 				</div>}
@@ -190,7 +177,7 @@ export function BanUserButton(prop: banProp)
 				{<div className="mute_ban_popup">
 					<div className="header"> Are you sure ? </div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
 						<input type="button" value={"unban " + prop.user_name}
 						onClick={unban}/>
@@ -236,7 +223,7 @@ export function MuteUserButton(prop: muteProp)
 				refId: prop.refId,
 				isMute: true,
 				expires_in: duration,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}
 	}
@@ -276,9 +263,9 @@ export function MuteUserButton(prop: muteProp)
 						hours
 					</div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
-						<input type="button" value={"mute " + prop.user_name} 
+						<input type="button" value={"mute " + prop.user_name}
 							onClick={handleSubmit}/>
 					</div>
 				</div>}
@@ -296,7 +283,7 @@ export function MuteUserButton(prop: muteProp)
 				{<div className="mute_ban_popup">
 					<div className="header"> Are you sure ? </div>
 					<div className="actions">
-						<input type="button" value="cancel" 
+						<input type="button" value="cancel"
 							onClick={close}/>
 						<input type="button" value={"unmute " + prop.user_name}
 						onClick={handleSubmit}/>
@@ -311,7 +298,7 @@ export function MuteUserButton(prop: muteProp)
 export function BlockUserButton(prop: blockProp)
 {
 	const chtCtx = useChatContext();
-	
+
 	function blockUser()
 	{
 		chtCtx.rmFriendNotif(prop.refId);
@@ -351,7 +338,7 @@ export function PromoteUserButton(prop: promoteProp)
 				room_id: chtCtx.currentRoom.id,
 				refId: prop.refId,
 				isPromote: true,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
 		}
 		console.log("user promoted");
@@ -366,7 +353,7 @@ export function PromoteUserButton(prop: promoteProp)
 				room_id: chtCtx.currentRoom.id,
 				refId: prop.refId,
 				isPromote: false,
-			} 
+			}
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
 		}
 	}
@@ -386,7 +373,7 @@ export function AddFriendButton(prop: friendProp)
 		chtCtx.rmFriendNotif(prop.refId);
 		chtCtx.socket.emit('ADD_FRIEND', prop.refId);
 	}
-	
+
 	function removeFriend()
 	{
 		chtCtx.socket.emit('RM_FRIEND', prop.refId);
@@ -409,11 +396,16 @@ export function AddFriendButton(prop: friendProp)
 export function AcceptGameInvitation(prop: acceptGameInvitationProp)
 {
 	const navigate = useNavigate()
-	
+
+	const { rmNotif } = useChatContext();
+	function close()
+	{
+		rmNotif(prop.notifId);
+	}
 	function accept()
 	{
-		navigate(`/matchmaking/custom/${prop.gameId}`)	
-		console.log("accepted game invitation from " + prop.src_name)
+		navigate(`/matchmaking/custom/${prop.gameId}`);
+		close();
 	}
 	return (
 		<button className="user_bar_button positive_user_button" onClick={accept}><img alt="" src={AcceptInvitationLogo}/>play</button>
@@ -426,7 +418,7 @@ export function DeleteNotification(prop: refuseProp)
 	function close()
 	{
 		rmNotif(prop.id);
-		
+
 		console.log("refuse invitation");
 
 		if (prop.isRequestFriend === true)

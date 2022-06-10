@@ -13,6 +13,7 @@ import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 import PongRequestRoom from '../components/PongGame/PongRequestRoom/PongRequestRoom';
 import { PongCustomRoom } from '../components/PongGame/PongCustomRoom/PongCustomRoom';
+import QuatreCentQuatre from "../pages/404/404";
 
 function AppRoute() : JSX.Element
 {
@@ -28,7 +29,7 @@ function AppRoute() : JSX.Element
 
 
 					<Route path="/dev_user" element={<FakeUser/>}/>
-					<Route path="*" element={<NoMatch />}/>
+					<Route path="*" element={<QuatreCentQuatre/>}/>
 
 					<Route element={<RequireAuth/>}>
 						<Route element={<>
@@ -56,18 +57,6 @@ function AppRoute() : JSX.Element
 	</ProvideNotify>;
 
 	return element;
-}
-
-function NoMatch() {
-	let location = useLocation();
-
-	return (
-		<div>
-			<h3>
-				No match for <code>{location.pathname}</code>
-			</h3>
-		</div>
-	);
 }
 
 export default AppRoute;

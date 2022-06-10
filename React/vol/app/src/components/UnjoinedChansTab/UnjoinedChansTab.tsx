@@ -4,6 +4,7 @@ import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./UnjoinedChansTab.css";
 import useInterval from "../../hooks/useInterval";
 import { JoinRoomDto, RoomListDTO } from "../../Common/Dto/chat/room";
+import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";
 
 function UnjoinedChansTab()
 {
@@ -63,6 +64,7 @@ function UnjoinedChansTab()
 			target.password.value = '';
 		}
 	}
+
 	return (
 		<div id="join_chans_tab">
 			<div id="join_chan_by_name">
@@ -83,7 +85,13 @@ function UnjoinedChansTab()
 				<div className="title">
 					Global channels list
 				</div>
-				{roomList.map(( element, index ) => (<li key={index}><UnjoinedChan name={element.name} id={element.id} is_protected={element.has_password} /></li>))}
+				{roomList.length !== 0 ? roomList.map(( element, index ) => (
+					<li key={index}>
+						<UnjoinedChan name={element.name} id={element.id}
+							is_protected={element.has_password} />
+					</li>
+				))
+				: <ThisListIsEmpty text="There is no public channel yet" />}
 			</div>
 		</div>
 	);

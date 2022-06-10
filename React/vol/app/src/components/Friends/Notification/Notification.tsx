@@ -97,7 +97,7 @@ export function InviteNotification(props: invite)
       <div className="friends_notif_name"><Link to={"/profile/" + props.refId}>{props.name}</Link></div>
 			<div className="friends_interactive_notif_content">invited you to play</div>
 			<div className="notif_button_div">
-				<AcceptGameInvitation src_name={props.name} refId={props.refId} gameId={props.roomId}/>
+				<AcceptGameInvitation src_name={props.name} refId={props.refId} gameId={props.roomId} notifId={props.id}/>
 				<DirectMessage name={props.name} refId={props.refId}/>
 				<AddFriendButton user_name={props.name} already_friend={false} refId={props.refId}/>
 				<BlockUserButton user_name={props.name} already_blocked={false} refId={props.refId}/>

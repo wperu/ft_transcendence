@@ -143,9 +143,7 @@ function useChatProvider() : IChatContext
 		}
 		else
 		{
-			navigate("/matchmaking/custom", { replace: false })
-
-
+			navigate("/matchmaking/custom", { replace: false, })
 		}
 		const dto : GameInviteDTO = {
 			gameRoomId: 0, //todo create room and send
@@ -158,10 +156,11 @@ function useChatProvider() : IChatContext
 
 
 	useEffect(() => {
-		//if (dto !== undefined)
+		
 			socket.on("CONFIRM_CUSTOM_ROOM", (data: {room_id: string}) => {
 				//dto?.gameRoomId = data.room_id;
-				socket.emit('GAME_INVITE', dto);
+				if (dto !== undefined)
+					socket.emit('GAME_INVITE', dto);
 				setDto(undefined);
 			});
 
@@ -283,10 +282,15 @@ function useChatProvider() : IChatContext
 			socket.connect();
 
 		socket.on("disconnect", () => {
-			setRooms([]); //clean rooms
+			setRooms([]);
 			setCurrentRoom(undefined);
 			awaitDm(undefined);
+			setIsConnected(false);
 		  });
+
+		socket.on("connect", () => {
+			setIsConnected(true)
+		});
 
 		return function cleanup() {
 			if (socket !== undefined && socket.connected)
@@ -356,7 +360,11 @@ function useChatProvider() : IChatContext
 
 	const addNotif = useCallback((notif: INotif[]) =>{
 		setNotification(prev => {
-			//notif.filter((n) => {return (!(prev.find((p) => (n.req_id && p.req_id && n.req_id === p.req_id))))});
+			for (let n of notif)
+			{
+				prev.splice(prev.findIndex((p) => (n.type === p.type && p.room_id && n.room_id && n.room_id === p.room_id )), 1)
+			}
+			
 			return [...prev, ...notif];
 		});
 	}, []);

@@ -57,6 +57,7 @@ export interface UserDataDto
     reference_id:	number,
 	is_connected?:	boolean,
 	date?:			Date,
+	infos?:			any,
 }
 
 

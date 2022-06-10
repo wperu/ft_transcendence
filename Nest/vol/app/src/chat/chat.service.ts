@@ -90,7 +90,7 @@ export class ChatService {
 				socket.disconnect();
 				return (undefined);
 			}
-			let ret = this.users.find((u) => { return u.username === user_info.username})
+			let ret = this.users.find((u) => { return u.reference_id === user_info.reference_id})
 			return (ret);
 		}
 
@@ -208,10 +208,11 @@ export class ChatService {
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto)
+	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto) : Promise<boolean>
 	{
 		let userRoom = await this.usersService.findUserByReferenceID(user.reference_id);
 		let resp;
+		let ret : boolean;
 
 		if (data.id !== undefined)
 			resp = await this.roomService.joinRoomById(data.id, userRoom, data.password);
@@ -243,26 +244,29 @@ export class ChatService {
 			let data : NoticeDTO;
 			data = { level: ELevel.info, content: "Room " + room.name + " joined" };
 			client.emit("NOTIFICATION", data);
+			ret = true;
 		}
 		else
 		{
 			let data : NoticeDTO;
 			data = { level: ELevel.error, content: resp };
 			client.emit("NOTIFICATION", data);
+			ret = false
 		}
-		return;
+		return (ret);
 	}
 
-	async leaveRoom(server: Server, client: Socket, user: ChatUser, id: number, roomName: string)
+	async leaveRoom(server: Server, client: Socket, user: ChatUser, id: number, roomName: string) : Promise<boolean>
 	{
 		//let userRoom = await this.userService.findUserByReferenceID(user.reference_id);
 		const resp = await this.roomService.leaveRoomById(id, user.reference_id)
+
 		if (typeof resp === "string")
 		{
 			let data : NoticeDTO;
 			data = { level: ELevel.error, content: resp };
 			client.emit("NOTIFICATION", data);
-			return ;
+			return (false);
 		}
 		else if (typeof resp === 'number')
 		{
@@ -298,6 +302,7 @@ export class ChatService {
 		let data : NoticeDTO;
 		data = { level: ELevel.info, content: "Room " + roomName + " left" };
 		client.emit("NOTIFICATION", data);
+		return (true);
 	}
 
 	/***
@@ -382,7 +387,9 @@ export class ChatService {
 
 		if (data.isMute)
 		{
-			const mute_expire = new Date(Date.now()+ data.expires_in * 1000);
+			let hours : Date = new Date(0);
+			hours.setHours(data.expires_in);
+			const mute_expire = new Date(Date.now() + hours.getTime());
 			resp = await this.roomService.roomMute(data.roomId, user.reference_id, data.refId, mute_expire);
 		}
 		else
@@ -501,10 +508,16 @@ export class ChatService {
 			let username = user2?.username || "default";
 			let status = this.isConnected(rel.id_two);
 
+
+
+			const info = this.pongService.playerStatus(user2.reference_id);
+		//	console.log(username + " " + status);
+		//	console.log(username + " " + info.status);
 			ret.push({
 				username: username,
 				reference_id: rel.id_two,
 				is_connected: status,
+				infos:		 info,
 			});
 		};
 		return ret;
@@ -669,7 +682,7 @@ export class ChatService {
 					username: await this.getUsernameFromID(user.reference_id),
 					date: new Date(),
 					refId: user.reference_id,
-				}] 
+				}]
 
 			//player
 			if (data.refId !== undefined)
@@ -681,10 +694,11 @@ export class ChatService {
 				}
 				else
 				{
-					for (const s of dest.socket)
-					{
-						s.emit('RECEIVE_NOTIF', dto);
-					}
+					if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
+						for (const s of dest.socket)
+						{
+							s.emit('RECEIVE_NOTIF', dto);
+						}
 				}
 			}
 			else if (data.chatRoomId !== undefined) //room case
@@ -702,10 +716,11 @@ export class ChatService {
 						const dest = this.getUserFromID(r.reference_id);
 						if (dest !== undefined && dest.reference_id !== user.reference_id)
 						{
-							for (const s of dest.socket)
-							{
-								s.emit('RECEIVE_NOTIF', dto);
-							}
+							if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
+								for (const s of dest.socket)
+								{
+									s.emit('RECEIVE_NOTIF', dto);
+								}
 						}
 					}
 				}

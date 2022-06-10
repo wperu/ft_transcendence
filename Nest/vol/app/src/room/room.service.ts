@@ -13,7 +13,7 @@ import { urlencoded } from 'express';
 export class RoomService
 {
 	constructor(
-		
+
 
 		@Inject(ChatMessageService)
 		private readonly msgService: ChatMessageService,
@@ -27,7 +27,7 @@ export class RoomService
 		@InjectRepository(ChatRoomRelationEntity)
 		private roomRelRepo: Repository<ChatRoomRelationEntity>,
 
-		
+
 	) {
 
 	}
@@ -38,7 +38,7 @@ export class RoomService
 			{
 			where: {
 				name: name,
-				isDm: false, 
+				isDm: false,
 			}
 		})
 
@@ -86,21 +86,21 @@ export class RoomService
 			level = ELevelInRoom.admin;
 		else
 			level = ELevelInRoom.casual;
-		
+
 		return level;
 	}
 
 	/**
 	 * Check if refId is in rooms
-	 * @param room 
-	 * @param refId 
+	 * @param room
+	 * @param refId
 	 * @returns true / false
 	 */
 	async isInRoom(room : ChatRoomEntity, refId: number) : Promise<boolean>
 	{
 		const ret = await this.findRelOf(room.id, refId);
 
-		
+
 		if (ret === undefined)
 			return false;
 		if (ret.ban_expire !== null)
@@ -109,10 +109,10 @@ export class RoomService
 	}
 
 	/**
-	 * 
+	 *
 	 * @param id roomId
 	 * @param refId user's refid
-	 * @returns 
+	 * @returns
 	 */
 	async isAdmin(id : number, refId: number) : Promise<boolean>
 	{
@@ -149,7 +149,7 @@ export class RoomService
 			})
 			if (resp.length === 2)
 			{
-				
+
 				console.log (resp)
 				return true
 			}
@@ -171,7 +171,7 @@ export class RoomService
 	{
 		let room	: ChatRoomEntity 			= new ChatRoomEntity();
 		let roomRel	: ChatRoomRelationEntity	= new ChatRoomRelationEntity();
-		
+
 		if (isDm !== true && await this.findRoomByName(name) !== undefined) //useless check if is Dm
 			return "room already exist";
 		if (isDm && user2 === undefined)
@@ -179,7 +179,7 @@ export class RoomService
 		if (isDm && await this.findDm(user, user2)) //fix
 			return "dm room already exist";
 	/*	if (user.reference_id === user.reference_id)
-			return "can't dm with "*/ 
+			return "can't dm with "*/
 
 		room.name			= name;
 		room.owner			= user.reference_id;
@@ -219,11 +219,11 @@ export class RoomService
 		if (await this.checkBan(room.id, user.reference_id) === true)
 			return ("banned !");
 		if (await this.isInRoom(room, user.reference_id) === true)
-			return ("already in room !");		
+			return ("already in room !");
 		if (await this.passwordService.isMatch(password_key, room.password_key) !== true)
 			return ("Wrong password !");
-	
-	
+
+
 		let roomRel	: ChatRoomRelationEntity	=  new ChatRoomRelationEntity();
 
 		roomRel.room = room;
@@ -236,10 +236,10 @@ export class RoomService
 
 	/**
 	 * add user in room
-	 * 
-	 * 
-	 * @param name 
-	 * @param user 
+	 *
+	 *
+	 * @param name
+	 * @param user
 	 * @returns  string with error or undefined
 	 */
 	async joinRoomById(id: number, user: User, password_key: string) : Promise<string | ChatRoomEntity>
@@ -258,9 +258,9 @@ export class RoomService
 
 	/**
 	 * Join room using room's name
-	 * @param chanName 
-	 * @param userId 
-	 * @returns 
+	 * @param chanName
+	 * @param userId
+	 * @returns
 	 */
 	async leaveRoomByName(chanName: string, refId: number) : Promise<boolean>
 	{
@@ -279,7 +279,7 @@ export class RoomService
 		if (ret  !== undefined)
 			this.roomRelRepo.remove(ret);
 
-		
+
 
 		return (true);
 	}
@@ -287,19 +287,19 @@ export class RoomService
 	/**
 	 * //todo destroy chan when user last user leave
 	 * Join room using room's Id
-	 * @param chanName 
-	 * @param userId 
-	 * @returns 
+	 * @param chanName
+	 * @param userId
+	 * @returns
 	 */
 	 async leaveRoomById(chanId: number, refId: number) : Promise<undefined | string | number>
 	 {
 		const room = await this.findRoomById(chanId);
- 
+
 		if (room === undefined)
 			 return "no room !";
 		if (room.isDm === true)
 			return ("You can't leave dm room !");
-		
+
 		 const ret = await this.roomRelRepo.findOne({
 			 relations : ["user", "room"],
 			 where : {
@@ -368,7 +368,7 @@ export class RoomService
 	/**
 	 * return list of User in room
 	 * @param id room id
-	 * @param refId 
+	 * @param refId
 	 * @returns UserDataDto[]
 	 */
 	async userListOfRoom(id: number, refId: number) : Promise<UserRoomDataDto[] | string>
@@ -380,7 +380,7 @@ export class RoomService
 
 		if (await this.isInRoom(room, refId) === false)
 			return ("not in room");
-		
+
 		const rel = await this.roomRelRepo.find({
 			relations: ["user", "room"],
 			where: {
@@ -408,7 +408,7 @@ export class RoomService
 
 
 	/**
-	 * @param refId 
+	 * @param refId
 	 * @returns RoomListDTO[]
 	 */
 	async roomListOfUser(refId : number) : Promise<RoomListDTO[]>
@@ -466,10 +466,10 @@ export class RoomService
 	}
 
 	/**
-	 * 
-	 * @param id 
-	 * @param refId 
-	 * @returns 
+	 *
+	 * @param id
+	 * @param refId
+	 * @returns
 	 */
 	async checkBan(id: number, refId: number) : Promise<boolean>
 	{
@@ -479,7 +479,7 @@ export class RoomService
 			return false;
 		if (rel.ban_expire === null)
 			return (false);
-		
+
 		if (rel.ban_expire <= new Date())
 		{
 			await this.roomRelRepo.remove(rel); //todo
@@ -510,11 +510,11 @@ export class RoomService
 
 		console.log(expires_in);
 		await this.roomRelRepo.save(rel);
-		
+
 		return room;
 	}
 
-	async unbanUser(id: number, senderRefId: number, refId: number) : Promise<string | undefined>
+	async unbanUser(id: number, senderRefId: number, refId: number) : Promise<string | ChatRoomEntity>
 	{
 		const room = await this.findRoomById(id);
 
@@ -534,15 +534,15 @@ export class RoomService
 			return "User is not Banned !";
 
 		await this.roomRelRepo.remove(rel);
-		return undefined;
+		return room;
 	}
 
 	/**
 	 * //fix only owner or admin too
-	 * @param id 
-	 * @param refId 
-	 * @param password 
-	 * @returns 
+	 * @param id
+	 * @param refId
+	 * @param password
+	 * @returns
 	 */
 	async roomChangePass(id: number, refId: number, password: string | undefined)
 	{
@@ -555,16 +555,18 @@ export class RoomService
 
 		if (room.owner !== refId && await this.isAdmin(room.id, refId) === false)
 			return "Only the room owner can change the password !";
-		
-		room.password_key = await this.passwordService.genHash(password);
+		if (password === null)
+			room.password_key = null;
+		else
+			room.password_key = await this.passwordService.genHash(password);
 
 		await this.roomRepo.save(room);
 	}
 
 	/**
 	 * check if mute is set & update if mute_expire is passed
-	 * @param id 
-	 * @param refId 
+	 * @param id
+	 * @param refId
 	 * @returns true / false
 	 */
 	async isMute(id: number, refId: number) : Promise<boolean>
@@ -573,7 +575,7 @@ export class RoomService
 
 		if (rel.mute_expire === null)
 			return false;
-		
+
 		if (rel.mute_expire <= new Date())
 		{
 			rel.mute_expire = null;
@@ -601,7 +603,7 @@ export class RoomService
 		if (rel === undefined)
 			return "User not in room !";
 		rel.mute_expire = mute_expire;
-		
+
 		await this.roomRelRepo.save(rel);
 		return (true);
 	}
@@ -623,12 +625,12 @@ export class RoomService
 		if (rel === undefined)
 			return "User not in room !";
 		rel.mute_expire = null;
-		
+
 		await this.roomRelRepo.save(rel);
 		return (true);
 	}
 
-	async setIsAdmin(id: number, refId: number, senderId: number, isAdmin: boolean) : Promise<string | undefined> 
+	async setIsAdmin(id: number, refId: number, senderId: number, isAdmin: boolean) : Promise<string | undefined>
 	{
 		const room = await this.findRoomById(id);
 
@@ -645,7 +647,7 @@ export class RoomService
 
 		if (ret === undefined)
 			return "User need to be in room !";
-		
+
 		ret.isAdmin = isAdmin;
 		await this.roomRelRepo.save(ret);
 		return undefined;
@@ -669,7 +671,7 @@ export class RoomService
 
 		if (rooms_list === undefined)
 			return [];
-		
+
 		rooms_list.forEach((room) => {
 			ret.push({
 				id: room.id,

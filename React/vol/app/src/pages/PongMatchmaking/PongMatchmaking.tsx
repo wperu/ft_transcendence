@@ -1,33 +1,42 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
-
+import Reconnect from "../../components/Reconnect/Reconnect";
+import { Link } from "react-router-dom"
+import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuButton";
+import Spinner from "../../components/Spinner/Spinner";
+import "./PongMatchmaking.css";
 /**
  * isSearching Matchmaking status
- * @returns 
+ * @returns
  */
 function PongMatchmaking()
 {
 	const [isSearching, setIsSearching] = useState<boolean>(false);
-	const { searchRoom, stopSearchRoom } = usePongContext();
+	const { searchRoom, stopSearchRoom, isAuth, socket, needReconect } = usePongContext();
 
 	const changeSearchStatut = useCallback(() => {
 		if (!isSearching)
 		{
-			setIsSearching(true);
 			searchRoom()
 		}
 		else
 		{
 			stopSearchRoom()
-			setIsSearching(false);
 		}
 
 	}, [searchRoom, stopSearchRoom, isSearching])
 
+
+	useEffect(() => {
+		socket.on("IS_SEARCHING_ROOM", (isSearching : boolean) => {
+			setIsSearching(isSearching);
+		})
+		return (() => stopSearchRoom());
+	}, [socket])
+
 	useEffect(() => {
 		if (isSearching)
 		{
-
 		}
 		else
 		{
@@ -35,9 +44,25 @@ function PongMatchmaking()
 		}
 	}, [isSearching])
 
+	// <div>Auth : {(isAuth) ? "True" : "False"}</div>
+	// <div>Searching : {(isSearching) ? "True" : "False"}</div>
 	return (
-		<div>
-			<h1><button onClick={changeSearchStatut}>{(!isSearching) ? "matchmaking" : "stop" }</button></h1>
+		<div id="matchmaking_page">
+			
+			<div id="matchmaking_spinner" >
+				{isSearching ? <Spinner /> : null}
+			</div>
+			<div id="matchmaking_button_section">
+				<button className="matchmaking_button" onClick={changeSearchStatut}>
+					{(!isSearching) ? "matchmaking" : "stop" }
+				</button>
+			</div>
+			<footer>
+				<Link to="/" replace={false}> <BackToMainMenuButton /> </Link>
+				<Link to="/matchmaking/custom" replace={false} >
+					<button className="footer_button">custom game</button>
+				</Link>
+			</footer>
 		</div>
 	);
 }

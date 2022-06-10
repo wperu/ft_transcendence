@@ -144,8 +144,8 @@ function Callback()
 	{
 		return (
 			<div className="first_login">
-				Please choose a username ("Enter to continue")
-				<input id="first_login_username" type="text" maxLength={20}
+				Please choose your username and press Enter
+				<input className="first_login_username" type="text" maxLength={20}
 					placeholder={'username'} onKeyPress={pressedSend} />
 			</div>
 		);
@@ -154,7 +154,7 @@ function Callback()
 	{
 		return (
 			<div className="first_login">
-				Please choose a username ("Enter to continue")
+				Please choose your username and press Enter
 				<input className="first_login_username" type="text" maxLength={6}
 					placeholder={'token'} onKeyPress={sendToken} />
 			</div>

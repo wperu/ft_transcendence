@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useCallback } from "react";
 import { useAuth } from "../../../auth/useAuth";
 import IUser from "../../../Common/Dto/User/User";
+import { ELevel, useNotifyContext } from "../../NotifyContext/NotifyContext";
 import "./ChangeableUsername.css";
 
 interface userProps
@@ -12,6 +13,8 @@ interface userProps
 function ChangeableUsername(props: userProps)
 {
 	const {user, setUser} = useAuth();
+	const notif = useNotifyContext();
+
 	
 	
 	const getUserName = useCallback(() => {
@@ -53,9 +56,10 @@ function ChangeableUsername(props: userProps)
 			}
 			setUser(newUser);
 			target.username.value = '';
+			notif.addNotice(ELevel.info, 'Username changed', 3000);
 		})
 		.catch(err => {
-			console.error(err);
+			notif.addNotice(ELevel.error, err.response.data.message, 3000);
 			target.username.value = '';
 		})
 

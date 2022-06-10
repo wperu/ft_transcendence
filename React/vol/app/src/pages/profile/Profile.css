@@ -43,6 +43,11 @@
 	color: greenyellow;
 }
 
+#ratio_draws
+{
+	color: grey;
+}
+
 #ratio_losses
 {
 	color: rgb(235, 43, 43);

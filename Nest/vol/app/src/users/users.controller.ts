@@ -32,7 +32,7 @@ export class UsersController
 {
 	constructor(
 		private readonly userService: UsersService,
-		
+
 	) {}
 	private logger: Logger = new Logger('UserController');
 

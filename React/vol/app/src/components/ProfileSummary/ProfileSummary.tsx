@@ -1,11 +1,36 @@
 import "./ProfileSummary.css";
-
 import IUser from "../../Common/Dto/User/User";
 import { useAuth } from "../../auth/useAuth";
+import { IProfileDTO } from "../../Common/Dto/User/ProfileDTO";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import calculateLevel from "../calculateLevel";
 
 function ProfileSummary() {
 
 	const user : IUser | null = useAuth().user;
+	const [profile, setProfile] = useState<IProfileDTO | null>(null);
+
+	useEffect(() => {
+		if (user)
+		{
+			if (profile === null)
+			{
+				let url = process.env.REACT_APP_API_USER + '/profile/' + user.reference_id;
+				const headers = {
+					authorization: user.accessCode,
+				}
+				axios.get(url, {headers})
+				.then(resp => {
+					 const data : IProfileDTO = resp.data;
+					setProfile(data);
+				})
+				.catch(error => {
+					console.log(error);
+				});
+			}
+		}
+	}, [user, profile])
 
 	function getUserName() : string
 	{
@@ -34,7 +59,7 @@ function ProfileSummary() {
 				src={process.env.REACT_APP_API_USER + '/' + getRefID() + '/avatar?'+ getAntiCache()}/>
 			<div id="infos">
 				<p> {'> '} {getUserName()}</p>
-				<p> {'> '} Level</p>
+				<p> {'> '} Level {calculateLevel(profile?profile.xp:0)}</p>
 			</div>
 		</aside>
 	);

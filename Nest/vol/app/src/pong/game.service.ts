@@ -55,8 +55,8 @@ export class GameService {
       //  room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
         
         console.log("[boss] waiting");
-        while (room.player_1.in_game !== false
-            && room.player_2.in_game !== false)
+        while (room.player_1.in_game !== undefined
+            && room.player_2.in_game !== undefined)
         {
             await this.runRoom(room)
 
@@ -86,21 +86,20 @@ export class GameService {
         return ;
     }
 
-
-
-
-
-
     initRoom(creator: PongUser, other: PongUser = undefined, spectators : Array<PongUser> = []) : PongRoom
     {
         function generateID() {
             return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
-                const r = Math.floor(Math.random() * 16);  
-                return r.toString(16);  
+                const r = Math.floor(Math.random() * 16); 
+                return r.toString(16);
             }));
         }
 
-        let room_id = generateID(); //fix dup id
+       
+		let room_id = generateID();
+		while (this.pongService.getRoomById(room_id) !== undefined)
+			room_id = generateID();
+
         creator.socket.join(room_id);
         other.socket.join(room_id);
 
@@ -196,8 +195,8 @@ export class GameService {
                 username: room.player_2.username,
             }
         }
-        room.player_1.in_game = true;
-        room.player_2.in_game = true;
+        room.player_1.in_game = room.id;
+        room.player_2.in_game = room.id;
 
         room.state = RoomState.PLAYING;
         this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
@@ -215,8 +214,6 @@ export class GameService {
                 this.server.to(room.id).emit("START_GAME");
                 room.lastTime = 0;
 
-
-               // room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
                 room.job_id = await this.boss.send(room.id, {});
                 console.log("[boss] starting job: " + room.job_id);
                 this.boss.work(room.id, {
@@ -229,8 +226,6 @@ export class GameService {
 
 		
     }
-
-
 
     async runRoom(room: PongRoom) : Promise<void>
     {
@@ -407,8 +402,8 @@ export class GameService {
                     player_1_score: room.player_1.points,
                     player_2_score: room.player_2.points,
                 } as UpdatePongPointsDTO)
-                room.player_1.in_game = false;
-                room.player_2.in_game = false;
+                room.player_1.in_game = undefined;
+                room.player_2.in_game = undefined;
                 room.state = RoomState.FINISHED;
             }
             else

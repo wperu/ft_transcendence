@@ -2,6 +2,7 @@ import "./Users.css";
 import { BlockUserButton, InviteUserButton, AddFriendButton, DirectMessage }
 	from "../../UserBarButtons/UserBarButtons";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 
 interface	user_props
@@ -9,6 +10,7 @@ interface	user_props
 	name: string;
 	ref_id: number;
 	online: boolean;
+	infos?: 	any;
 }
 
 interface	blocked_user_props
@@ -19,6 +21,29 @@ interface	blocked_user_props
 
 export function Friend(props: user_props)
 {
+
+
+	const getStatus = () => {
+
+		if (props.infos !== undefined)
+		{
+			if (props.infos.status === "create room")
+			{
+				return(
+					<Link to={"/matchmaking/custom/" + props.infos.id}  replace={false} >{"in room"}</Link>
+				)
+			}
+			else if (props.infos.status === "in game")
+			{
+				return(
+					<Link to={"/game/" + props.infos.id}  replace={false} >{"in game"}</Link>
+				)
+			}
+		}
+		return <></>;
+	}
+
+	const [status, setStatus] = useState<JSX.Element>(getStatus());
 
 	function get_opacity()
 	{
@@ -32,7 +57,8 @@ export function Friend(props: user_props)
 				<img className="friends_user_profile_pic"
 					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'} alt="42" />
 				<div className="friends_user_username">
-					<Link to={"/profile/" + props.ref_id}  replace={false} >{props.name}</Link>
+						<Link to={"/profile/" + props.ref_id}  replace={false} >{props.name}</Link>
+						<span className="online_friend_status" > {status} </span>
 				</div>
 			</div>
 			<div className="chat_user_button_div">

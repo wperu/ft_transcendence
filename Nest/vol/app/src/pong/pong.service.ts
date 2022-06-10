@@ -16,7 +16,8 @@ import { ChatService } from 'src/chat/chat.service';
 import { UpdateCustomRoomDTO } from 'src/Common/Dto/pong/UpdateCustomRoomDTO';
 
 
-// REVIEW do we want multiple socket for pong user ? 
+// REVIEW do we want multiple socket for pong user ?
+//TODO updateCustomRoom
 
 @Injectable()
 export class PongService {
@@ -48,9 +49,6 @@ export class PongService {
 		this.customRooms = [];
     }
 
-    
-
-
     setServer(server: Server)
     {
         this.server = server;
@@ -60,10 +58,6 @@ export class PongService {
 	{
 
 	}
-
-
-
-
 
     async registerUserFromSocket(socket: Socket): Promise<PongUser | undefined>
 	{
@@ -100,15 +94,12 @@ export class PongService {
             position: 0.5,
             velocity: 0,
             key: 0,
-            in_game: false,
+            in_game: undefined,
 			in_room: undefined,
         } as PongUser)
 
 		return this.users[idx - 1];
 	}
-
-
-
 
     getUserFromSocket(socket: Socket): PongUser | undefined
     {
@@ -132,11 +123,7 @@ export class PongService {
         return (undefined);
     }
 
-
-
-
-
-    getRoomById(id: string)
+    getRoomById(id: string) : undefined | PongRoom
     {
         return this.rooms.find ((r) => r.id === id);
     }
@@ -145,14 +132,6 @@ export class PongService {
     {
 		return (this.users.find((u) => { return u.reference_id === ref_id}))
     }
-
-
-
-
-
-
-
-
 
     async removeFromWaitingList(client: Socket)
     {
@@ -181,6 +160,22 @@ export class PongService {
         }
     }
 
+	async removeFromUserList(client: Socket)
+    {
+        const user : PongUser = await this.getUserFromSocket(client);
+
+        if (user === undefined)
+        {
+            return console.log("cannot remove user from waiting list: undefined user")
+        }
+        if (this.waitingPool !== undefined)
+        {
+			const idx = this.users.findIndex((u) => { return u === user})
+			this.users.splice(idx, 1);
+			console.log(`removed user ${user.username} from users list`);
+        }
+    }
+
 
 	initPlayer(player: PongUser)
 	{
@@ -188,7 +183,7 @@ export class PongService {
 		player.points = 0;
 		player.velocity = 0;
 		player.key = 0;
-		player.in_game = false;
+		player.in_game = undefined;
 	}
 
 
@@ -205,7 +200,6 @@ export class PongService {
 
         if (other === undefined || this.waitingPool.length === 0)
         {
-            //this.createRoom(user);
             let pool_usr: PongPool = {
                 user: user,
                 modes: modes,
@@ -213,6 +207,7 @@ export class PongService {
 
             this.waitingPool.push(pool_usr);
             this.logger.log("joined waiting room: " + pool_usr.user.username);
+			user.socket.emit("IS_SEARCHING_ROOM", true);
             return ;
         }
 
@@ -225,26 +220,55 @@ export class PongService {
         this.gameService.startRoom(room);
     }
 
+	async stopSearchRoom(user: PongUser, modes: PongModes = PongModes.DEFAULT)
+	{
+		await this.removeFromWaitingList(user.socket);
+		user.socket.emit("IS_SEARCHING_ROOM", false);
+	}
+
+	joinRoom(usr: PongUser, id: string)
+	{
+		const room = this.getRoomById(id);
+
+		if (room === undefined)
+		{
+			usr.socket.emit("NO_ROOM");
+			return ;
+		}
+		
+		room.spectators.push(usr);
+		usr.socket.join(room.id);
+		usr.in_game = room.id;
+		usr.socket.emit("RECONNECT_YOU", {
+			room_id: room.id,
+			player_1: {
+				position: room.player_1.position,
+				username: room.player_1.username,
+				points: room.player_1.points,
+			},
+			player_2: {
+				position: room.player_2.position,
+				username: room.player_2.username,
+				points: room.player_2.points,
+			},
+			ball: {
+				x: room.ball.pos_x,
+				y: room.ball.pos_y,
+				vel_x: room.ball.vel_x,
+				vel_y: room.ball.vel_y,
+			},
+		});
+
+		this.gameService.sendBallUpdate(room);
+		this.gameService.sendPlayerUpdate(room);
+		usr.socket.emit("START_GAME");
+
+	}
 
 	removeRoom(room: PongRoom) : void
 	{
 		this.rooms.splice(this.rooms.findIndex(({id} ) => id === room.id), 1);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     async disconnectUser(user: PongUser)
     {
@@ -255,13 +279,14 @@ export class PongService {
         if (room === undefined)
         {
             console.log("disconnection from unknown room");
+			user.in_game = undefined;
             return ;
         }
 
         if (room !== undefined && room.state === RoomState.PAUSED)
         {
-            room.player_1.in_game = false;
-            room.player_2.in_game = false;
+            room.player_1.in_game = undefined;
+            room.player_2.in_game = undefined;
             room.state = RoomState.FINISHED;
             //if (room.job_id !== "")
             //    this.boss.offWork(room.job_id);
@@ -337,9 +362,45 @@ export class PongService {
 	{
 		let user =  this.users.find((u) => { return u.reference_id === refId});
 		if (user)
-			return (user.in_game);
+			return (user.in_game !== undefined);
 
 		return (false);
+	}
+
+
+	playerStatus(refId: number)
+	{
+		const user = this.getUserFromRefId(refId);
+		if (user === undefined)
+		{
+			return {
+				connected : false,
+				status: "",
+			}
+		}
+		else if (user.in_game !== undefined)
+		{
+			return {
+				connected : true,
+				status: "in game",
+				id: user.in_game,
+			}
+		}
+		else if (user.in_room !== undefined)
+		{
+			return  {
+				connected : true,
+				status: "create room",
+				id: user.in_room,
+			}
+		}
+		else
+		{
+			return {
+				connected : false,
+				status: "",
+			}
+		}
 	}
 
 
@@ -363,6 +424,15 @@ export class PongService {
 		return room;
 	}
 
+	isOwner(usr: PongUser, room: CustomRoom) : boolean
+	{
+		if (room.users.length === 0)
+			return false;
+		if (room.users[0].reference_id === usr.reference_id)
+			return true;
+		return false;
+	}
+
 	initCustomRoom(id: string, refId: number) : CustomRoom
 	{
 		this.logger.log(`Init new Custom room ${id}`);
@@ -377,12 +447,17 @@ export class PongService {
 		return room;
     }
 
-    updateCustomRoom(data: UpdateCustomRoomDTO)
+    updateCustomRoom(data: UpdateCustomRoomDTO, client: Socket)
     {
-        let room = this.findCustomRoom(data.room_id);
-
-        if (room === undefined)
-            return ;
+		const room = this.findCustomRoom(data.room_id);
+		const usr = this.getUserFromSocket(client);
+		if (usr === undefined)
+			return ;
+		if (this.isOwner(usr, room) === false)
+			return ; //error
+		
+		if (room === undefined)
+			return ; //error
         
         if (data.mode === 0)
         {
@@ -490,7 +565,7 @@ export class PongService {
 		if (croom.users.length < 2)
 			return ;// error
 
-		if (usr.reference_id !== croom.users[0].reference_id)
+		if (this.isOwner(usr, croom) === false)
 			return ; //error
 		
 		const owner = croom.users[0];
@@ -515,10 +590,4 @@ export class PongService {
 		this.customRooms.splice(i, 1);
 		console.log('Room destroy');
 	}
-
-
-
-	
-
-	
 }

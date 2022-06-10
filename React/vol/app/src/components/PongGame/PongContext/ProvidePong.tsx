@@ -1,4 +1,4 @@
-import { render } from "../PongRenderer";
+import { useRender } from "../PongRenderer";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
@@ -8,9 +8,7 @@ import { StartPongRoomDTO } from '../../../Common/Dto/pong/StartPongRoomDTO'
 import { GameConfig } from "../../../Common/Game/GameConfig";
 import { ParticleEmitter } from "../PongParticleSystem";
 import { TrailFX } from "../PongTrail";
-
- //todo stopSearchRoom
- //todo await auth for match
+import Reconnect from "../../Reconnect/Reconnect";
 
 export interface IPongUser
 {
@@ -72,8 +70,10 @@ export interface IPongContext
 	searchRoom: () => void,
 	stopSearchRoom: () => void,
 	isRender: boolean,
-	startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
-	requestRoom: () => void
+	//startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
+	requestRoom: () => void,
+	needReconect : boolean,
+	reconnect: () => void,
 }
 
 
@@ -92,8 +92,7 @@ function usePongProvider() : IPongContext
 	const navigate						= useNavigate();
 	const [fx]							= useState<FX>(initFx());
 	const [isAuth, setIsAuth]			= useState<boolean>(false);
-
-
+	const [needReconect, setNeedReconnect]	= useState<boolean>(false);
 
 	console.log("Create Pong ctx");
 
@@ -108,7 +107,7 @@ function usePongProvider() : IPongContext
 	 * stop Matchmaking
 	 */
 	const stopSearchRoom = useCallback(() => {
-		//socket.emit(""); //todo
+		socket.emit("STOP_SEARCH_ROOM");
 	}, [socket])
 
 
@@ -180,7 +179,23 @@ function usePongProvider() : IPongContext
         }
     }, [inGame, navigate])
 
+	const reconnect = useCallback(() => {
+		if (needReconect)
+			socket.connect();
+	}, [socket, needReconect])
     
+	useEffect(() => {
+		socket.on("disconnect", () => {
+			setNeedReconnect(true);
+			console.log("Disconnected !");
+		})
+
+		socket.on("connect", () => {
+			console.log("connected !");
+			setNeedReconnect(false);
+		})
+	}, [socket])
+
     useEffect(() => {
 		if (socket.connected === false)
 		{
@@ -243,26 +258,6 @@ function usePongProvider() : IPongContext
         })
     }, [room, socket])
 
-
-	const startRender = useCallback((canvasRef: React.RefObject<HTMLCanvasElement>, ctx : IPongContext) => {
-		if (canvasRef.current && user)
-        {
-            const canvas = canvasRef.current;
-            const context = canvas.getContext('2d');
-
-            if (context !== null && isRender === false)
-            {
-                context.restore();
-				console.log("start game");
-				setIsRendering(true);
-                render(ctx, context, canvas, user);
-            }
-        }
-		return () => {
-			setIsRendering(false);
-		}  
-	}, [])
-
     return ({
 		socket,
 		isAuth,
@@ -271,8 +266,9 @@ function usePongProvider() : IPongContext
 		searchRoom,
 		stopSearchRoom,
 		isRender,
-		startRender,
 		requestRoom,
+		needReconect,
+		reconnect,
     });
 }
 
@@ -331,6 +327,7 @@ export function ProvidePong({children}: {children: JSX.Element} ) : JSX.Element
 
 	return(
 		<pongContext.Provider value={pongCtx}>
+			{pongCtx.needReconect ? <Reconnect /> : null}
 			{children}
 		</pongContext.Provider>
     );
