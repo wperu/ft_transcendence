@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import "./NotifyContext.css";
 
 export enum ELevel
@@ -16,7 +16,6 @@ interface INotice
 
 interface INotifyContext
 {
-	maxNotify : number,
 	msgNotify: INotice[], 
 	addNotice: (level: ELevel, message: string, time: number | undefined) => void,
 	onDelete: (id: string) => void
@@ -24,43 +23,39 @@ interface INotifyContext
 
 const notifyContext = createContext<INotifyContext>(null!);
 
-const generateKey = (id : number) => {
-    return `${ id }_${ new Date().getTime()}_${Math.random() * 25}`;
-}
+
 
 function useProvideNotify() : INotifyContext
 {
-	const [maxNotify] = useState<number>(5);
 	const [msgNotify, setMsgNotify] = useState<INotice[]>([]);
-	const [id, setId] = useState<number>(0);
+	//const [id, setId] = useState<number>(0);
 
-	function onDelete(id : string)
-	{
+	console.log("[Notify CTX] : rerender !");
+
+	const onDelete = useCallback((id : string) => {
 		setMsgNotify(msgNotify.filter((o) => { return o.idx !== id}));
-	}
+	}, [msgNotify]);
 
-	function addNotice(level: ELevel, message: string, time: number | undefined)
-	{
+	const generateKey = useCallback(() => {
+		return `${ "notice" }_${ new Date().getTime()}_${Math.random() * 25}`;
+	}, [])
+
+	const addNotice = useCallback((level: ELevel, message: string, time: number | undefined) =>	{
 		const notice: INotice = {
-			idx: generateKey(id),
+			idx: generateKey(),
 			level: level,
 			message: message,
 		};
-		setId(id + 1);
+		//setId(prev => prev + 1);
 
 		setMsgNotify(pre => {
-			
-
-			const ret = [...pre, notice];
-			
+			const ret = [...pre, notice];		
 			return ret;
 		})
-
-	}
+	}, [generateKey]);
 
 
 	return({
-		maxNotify,
 		msgNotify,
 		addNotice,
 		onDelete
@@ -75,7 +70,7 @@ export function useNotifyContext()
 
 function Notice(prop: INotice)
 {
-	const ctx = useNotifyContext();
+	const {onDelete} = useNotifyContext();
 	const closeTime = 3000;
 
 	const [isClosing, setIsClosing] = useState<boolean>(false);
@@ -90,22 +85,38 @@ function Notice(prop: INotice)
 			return () => {clearTimeout(timeId)}
 		}
 		else
-			ctx.onDelete(prop.idx);
+			onDelete(prop.idx);
 
-	}, [isClosing])
+	}, [isClosing, onDelete, prop.idx])
 
-	return <li className={"notification " + prop.level}>{prop.message}<button className="delete_notif" onClick={() => { ctx.onDelete(prop.idx)}}>dismiss</button></li>
+	return <li className={"notification " + prop.level}>{prop.message}<button className="delete_notif" onClick={() => { onDelete(prop.idx)}}>dismiss</button></li>
 }
 
-export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
+export function PrintNotify()
 {
-	const ctx = useProvideNotify();
-	
+	const ctx = useNotifyContext();
+
 	return (
-		<notifyContext.Provider value={ctx}>
-					<ul id="notify">
-						{ctx.msgNotify.map((not, index) => { return <Notice key={not.idx} idx={not.idx} level={not.level} message={not.message}></Notice> })}
-					</ul>
+		<ul id="notify">
+			{ctx.msgNotify.map((not) => { return <Notice key={not.idx} idx={not.idx} level={not.level} message={not.message}></Notice> })}
+		</ul>
+	);
+}
+
+export function ProvideNotify({children}: {children: JSX.Element[]} ): JSX.Element
+{
+	const ctx: INotifyContext = useProvideNotify();
+
+	useEffect(() => {
+		console.log("ctx : change")
+	}, [ctx]);
+	
+	useEffect(() => {
+		console.log("addNotice : change")
+	}, [ctx.addNotice]);
+
+	return (
+		<notifyContext.Provider value={React.useMemo( () => ({msgNotify: ctx.msgNotify, addNotice: ctx.addNotice, onDelete: ctx.onDelete,}), [ctx, ctx.onDelete, ctx.addNotice, ctx.msgNotify])}>
 			{children}
 		</notifyContext.Provider>
 	);

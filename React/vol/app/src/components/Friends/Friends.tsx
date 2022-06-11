@@ -34,7 +34,6 @@ function Notification(prop : IProp) : JSX.Element
 	return <></>;
 }
 
-//fix me status online, offline... not work
 function Friends()
 {
 	const [online, setOnline] = useState<JSX.Element[]>([]);
@@ -55,7 +54,6 @@ function Friends()
 
 		if (target.name.value.length !== 0)
 		{
-			console.log("add friend with name: " + target.name.value);
 			socket.emit('ADD_FRIEND_USERNAME', target.name.value);
 
 			target.name.value = '';

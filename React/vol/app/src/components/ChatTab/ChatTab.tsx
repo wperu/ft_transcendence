@@ -7,66 +7,70 @@ import "./ChatTab.css";
 
 function ChatTab ()
 {
-	const chatCtx = useChatContext();
+	const {
+		socket,
+		currentRoom,
+		setCurrentTab,
+		invitePlayer,
+		blockList,
+	} = useChatContext();
 	const [messages, setMessages] = useState<RcvMessageDto[]>([]);
 	const [updated, setUpdated] = useState<Boolean>(false);
 
 	let msg_list_ref = React.createRef<HTMLDivElement>();
 
-	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
-	{
-		if (chatCtx.socket !== undefined && chatCtx.currentRoom !== undefined
+	const pressedSend = useCallback((event: KeyboardEvent<HTMLInputElement>) =>	{
+		if (socket !== undefined && currentRoom !== undefined
 			&& event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
 			let data : SendMessageDTO =
 			{
 				message: event.currentTarget.value,
-				room_id: chatCtx.currentRoom.id,
+				room_id: currentRoom.id,
 			};
-			chatCtx.socket.emit('SEND_MESSAGE', data);
+			socket.emit('SEND_MESSAGE', data);
 			console.log("[CHAT] sending: " + event.currentTarget.value);
 			event.currentTarget.value = '';
 		}
-	};
+	}, [socket, currentRoom]);
 
-	function pressedQuit()
-	{
-		if (chatCtx.currentRoom !== undefined)
+	const pressedQuit = useCallback(() => {
+		if (currentRoom !== undefined)
 		{
 			let dto = {
-				id:		chatCtx.currentRoom.id,
-				name:	chatCtx.currentRoom.room_name,
+				id:		currentRoom.id,
+				name:	currentRoom.room_name,
 			}
-			chatCtx.socket.emit("LEAVE_ROOM", dto);
+			socket.emit("LEAVE_ROOM", dto);
 			setMessages([]);
-			chatCtx.setCurrentTab(ECurrentTab.channels);
+			setCurrentTab(ECurrentTab.channels);
 		}
-	}
+	}, [currentRoom, setCurrentTab, socket])
 
 	const sendInvite = useCallback(() => 
 	{
-		if (chatCtx.currentRoom !== undefined)
+		if (currentRoom !== undefined)
 		{
-			chatCtx.invitePlayer(undefined, chatCtx.currentRoom.id);
+			invitePlayer(undefined, currentRoom.id);
 		}
-	}, [chatCtx, chatCtx.invitePlayer, chatCtx.currentRoom])
+	}, [invitePlayer, currentRoom])
 
 	useEffect(() =>
 	{
-		if (chatCtx.currentRoom !== undefined
-			&& chatCtx.currentRoom.room_message.length !== messages.length)
+		if (currentRoom !== undefined
+			&& currentRoom.room_message.length !== messages.length)
 		{
-			setMessages([...chatCtx.currentRoom.room_message]);
+			setMessages([...currentRoom.room_message]);
 			setUpdated(true);
 		}
-	}, [chatCtx.currentRoom, messages.length]);
+	}, [currentRoom, messages.length]);
 
 	useInterval(() =>
 	{
-		if (chatCtx.currentRoom !== undefined
-			&& chatCtx.currentRoom.room_message.length !== messages.length)
+		if (currentRoom !== undefined
+			&& currentRoom.room_message.length !== messages.length)
 		{
-			setMessages([...chatCtx.currentRoom.room_message]);
+			setMessages([...currentRoom.room_message]);
 			setUpdated(true);
 		}
 	}, 200);
@@ -74,14 +78,14 @@ function ChatTab ()
 
 	useEffect( () =>
 	{
-		if (chatCtx.currentRoom)
-			chatCtx.currentRoom.nb_notifs = 0;
+		if (currentRoom)
+			currentRoom.nb_notifs = 0;
 		if (msg_list_ref.current && updated === true)
 		{
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
 			setUpdated(false);
 		}
-	}, [updated, msg_list_ref, chatCtx.currentRoom]);
+	}, [updated, msg_list_ref, currentRoom]);
 
 	return (
 		<div id="ChatTab">
@@ -97,7 +101,7 @@ function ChatTab ()
 				<ul>
 				{
 					messages.map(({message, sender, send_date, refId} , index) => {
-						if (chatCtx.blockList.find(b => (b.reference_id === refId)) === undefined)
+						if (blockList.find(b => (b.reference_id === refId)) === undefined)
 							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
 						return (null);
 						})}
@@ -105,7 +109,7 @@ function ChatTab ()
 			</div>
 			<footer id="msg_footer">
 				<input type="text" id="message_input" onKeyPress={pressedSend}
-					placeholder={chatCtx.currentRoom === undefined ? "you are not in a room :/" : "Send a message to " + chatCtx.currentRoom?.room_name}/>
+					placeholder={currentRoom === undefined ? "you are not in a room :/" : "Send a message to " + currentRoom?.room_name}/>
 			</footer>
 		</div>
 	);
