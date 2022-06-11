@@ -25,6 +25,8 @@
 
 #end-msgbox #menu-button 
 {
+    color: white;
+    text-transform: uppercase;
     position: absolute;
     bottom: 0;
     width: 100%;

@@ -1,11 +1,9 @@
-
-
 #custom_room
 {
 	width: 100%;
 	height: 100%;
 	color: white;
-	font-family: 'Nonfiction';
+	/* font-family: 'Nonfiction'; */
 }
 
 #custom_room footer
@@ -71,14 +69,6 @@
 	height: auto;
 }
 
-#custom_room_start
-{
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	margin-top: 1.5em;
-}
-
 .start_game_button
 {
 	margin: 0;
@@ -100,34 +90,61 @@
 	-moz-transform: scale(1.05,1.05);
 }
 
-#options {
+#owner_view, #not_owner_view
+{
+	font-size: 0.7em;
+	
+}
+
+#not_owner_view
+{
+	height: 25vh;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	margin: auto;
-	padding-top: 6vmin;
+	justify-content: space-between;
+	margin-top: 0.4em;
 }
 
-#options .option-checkbox
+#not_owner_view #options
+{
+	margin-left: 2.8em;
+}
+
+#not_owner_view #options span
+{
+	margin: 0.2em;
+}
+
+#not_owner_view #info
+{
+	text-align: center;
+}
+
+.selected_option
+{
+	background-color: #5d5ec0;
+	padding: 0.1em;
+	border-radius: 0.3em;
+}
+
+#owner_view
+{
+	height: 35vh;
+	display: flex;
+	justify-content: space-evenly;
+	align-items: center;
+}
+
+#owner_view .option_checkbox
 {
 	display: flex;
-	flex-direction: row;
 	justify-content: center;
-	width: 100%;
-	text-align: left;
 }
 
-#options .option-checkbox h3 
+#owner_view .option_checkbox input
 {
-	font-size: 3vmin;
-	position: relative;
-	left: 10px;
-}
-
-#custom_room_start h5
-{
-	font-size: 4vmin;
-	font-family: 'Nonfiction';
-	color:rgba(217, 217, 217, 0.581);
-	text-align: center;
+	margin-right: 1em;
+	transform: scale(1.05,1.05);
+	-webkit-transform: scale(1.05,1.05);
+	-moz-transform: scale(1.5,1.5);
 }
