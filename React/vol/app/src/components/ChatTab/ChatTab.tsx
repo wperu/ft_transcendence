@@ -14,6 +14,7 @@ function ChatTab ()
 		invitePlayer,
 		blockList,
 	} = useChatContext();
+	
 	const [messages, setMessages] = useState<RcvMessageDto[]>([]);
 	const [updated, setUpdated] = useState<Boolean>(false);
 
@@ -65,23 +66,10 @@ function ChatTab ()
 		}
 	}, [currentRoom, messages.length]);
 
-	/*useInterval(() =>
-	{
-		if (currentRoom !== undefined
-			&& currentRoom.room_message.length !== messages.length)
-		{
-			setMessages([...currentRoom.room_message]);
-			setUpdated(true);
-		}
-	}, 200);*/
-
-
-
-
 	useEffect( () =>
 	{
-		if (currentRoom)
-			currentRoom.nb_notifs = 0;
+		//if (currentRoom)
+		//	currentRoom.nb_notifs = 0;
 		if (msg_list_ref.current && updated === true)
 		{
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;

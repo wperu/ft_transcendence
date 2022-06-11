@@ -77,9 +77,9 @@ interface IChatContext
 	setCurrentRoom:			(room: IRoom | undefined) => void;
 	setCurrentRoomById:		(id: number) => void;
 	findRoomById:			(id: number) => IRoom | undefined;
+	havePendingMsg: 		() => boolean;
 
 	rooms: IRoom[];
-	//addRoom: (id: number, room_name: string, is_protected: boolean, level: ELevelInRoom) => void;
 
 	notification:	INotif[];
 	rmNotif:		(id: string) => void;
@@ -125,10 +125,12 @@ function useChatProvider() : IChatContext
 	const [dto, setDto] = useState<GameInviteDTO | undefined>(undefined);
 
 
+// -----------------------------------------
+//
+//   Pong interaction
+//
+// -----------------------------------------
 
-	/**
-	 * Pong interact
-	 */
 	const invitePlayer = useCallback((refId?: number, room_id?: number) => {
 
 		if (`/matchmaking/custom/${id}` === location.pathname)
@@ -168,10 +170,12 @@ function useChatProvider() : IChatContext
 			socket.off("CONFIRM_CUSTOM_ROOM");
 		}
 	}, [socket, dto])
-	/**
-	 * ***** Room *****
-	 */
 
+// -----------------------------------------
+//
+//    Rooms interaction
+//
+// -----------------------------------------
 
 	const goToDmWith = useCallback((id: number) => {
 		const res = rooms.find((r) => (r.isDm === true && r.owner === id));
@@ -222,10 +226,8 @@ function useChatProvider() : IChatContext
 
 
 		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
-	//	if (currentRoom !== undefined)
-	//		setCurrentRoomById(currentRoom.id);
 
-    }, [currentRoom, setCurrentRoomById, findRoomById]);
+    }, [findRoomById]);
 
 	useEffect(() => {
 		if (jumpDm !== undefined)
@@ -251,37 +253,33 @@ function useChatProvider() : IChatContext
 			setCurrentRoomById(currentRoom.id);
 	}, [rooms, setCurrentRoomById])
 
+
+	const havePendingMsg = useCallback(() : boolean => {
+
+		for (const r of rooms)
+		{
+			if (r.nb_notifs !== 0)
+				return true;
+		}
+
+		return false;
+	}, [rooms])
+
 	useEffect(() => {
 
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-			//let targetRoom = findRoomById(data.room_id);
-			//if (targetRoom !== undefined)
-			{
-				//targetRoom.room_message.push(data);
-				//targetRoom.nb_notifs++;
-			}
+
 			setRooms( prev => {
 				const id = prev.findIndex((p) => (p.id === data.room_id));
-
+				let add = 1;
+				if (currentRoom !== undefined && data.room_id === currentRoom?.id && currentTab === ECurrentTab.chat)
+					add = 0;
 				const room = [...prev]
 
-				room[id] = { ...room[id], room_message: [...room[id].room_message, data], nb_notifs: room[id].nb_notifs + 1 }
-				
-
-				console.log(room);
-				
-				//return prev;
+				room[id] = { ...room[id], room_message: [...room[id].room_message, data], nb_notifs: room[id].nb_notifs + add }
 				return room ;
 			})
 
-
-			/*
-			 this.setState(prevState => {
-		      const team = [...prevState.team];
-		      team[index] = { ...team[index], [name]: value };
-		      return { team };
-		    });
-			*/
 		});
 
 		return function cleanup() {
@@ -290,7 +288,21 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_MSG');
 			}
 		};
-	}, [rooms, findRoomById, socket]);
+	}, [rooms, currentRoom, socket, currentTab]);
+
+	useEffect(() => {
+		if (currentTab === ECurrentTab.chat && currentRoom && currentRoom.nb_notifs !== 0)
+		{
+			setRooms( prev => {
+				const id = prev.findIndex((p) => (p.id === currentRoom.id));
+				
+				const room = [...prev]
+
+				room[id] = { ...room[id], nb_notifs: 0 }
+				return room ;
+			})
+		}
+	}, [currentRoom, currentTab])
 
 	useEffect(() => {
 		socket.on("LEFT_ROOM", (data: RoomLeftDto) => {
@@ -367,9 +379,11 @@ function useChatProvider() : IChatContext
 		};
 	}, [rooms, socket, findRoomById])
 
-	/**
-	 * **** Notice *****
-	 */
+// -----------------------------------------
+//
+//    Notice part
+//
+// -----------------------------------------
 
 
 	useEffect(() => {
@@ -385,9 +399,11 @@ function useChatProvider() : IChatContext
 		};
 	}, [socket, addNotice]);
 
-	/**
-	 * ***** Notification *****
-	 */
+// -----------------------------------------
+//
+//   Notification
+//
+// -----------------------------------------
 
 	const addNotif = useCallback((notif: INotif[]) =>{
 		let news : boolean = false;
@@ -448,9 +464,11 @@ function useChatProvider() : IChatContext
 		};
 	}, [socket, addNotif]);
 
-	/**
-	 * ***** Relation Ship *****
-	 */
+// -----------------------------------------
+//
+//   Relation Ship
+//
+// -----------------------------------------
 
 	useEffect(() => {
 
@@ -527,6 +545,7 @@ function useChatProvider() : IChatContext
 		setCurrentRoom,
 		setCurrentRoomById,
 		findRoomById,
+		havePendingMsg,
 		currentTab,
 		setCurrentTab,
 	    rooms,
