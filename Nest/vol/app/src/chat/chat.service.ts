@@ -208,7 +208,7 @@ export class ChatService {
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto) : Promise<boolean>
+	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto, server: Server) : Promise<boolean>
 	{
 		let userRoom = await this.usersService.findUserByReferenceID(user.reference_id);
 		let resp;
@@ -253,6 +253,9 @@ export class ChatService {
 			client.emit("NOTIFICATION", data);
 			ret = false
 		}
+
+		this.updateUserList(data.id, user.reference_id, server);
+
 		return (ret);
 	}
 
@@ -286,7 +289,11 @@ export class ChatService {
 				}
 
 			}
+			
 		}
+		const room = await this.roomService.findRoomById(id);
+		if (room !== undefined && room != null)
+			this.updateUserList(id, room.owner, server);
 
 		let dto: RoomLeftDto;
 
@@ -322,7 +329,21 @@ export class ChatService {
 		}
 	}
 
-	async roomBanUser(client: Socket, user: ChatUser, data: RoomBanDto): Promise<void>
+	async updateUserList(id: number, refId: number, server: Server)
+	{
+		const resp = await this.roomService.userListOfRoom(id, refId);
+
+		if (typeof resp !== 'string')
+		{
+			for (let u of resp)
+			{
+				u.is_connected = this.getUserFromID(u.reference_id) !== undefined;
+			}
+			server.to(id.toString()).emit("USER_LIST", resp);
+		}
+	}
+
+	async roomBanUser(client: Socket, user: ChatUser, data: RoomBanDto, server: Server): Promise<void>
 	{
 		let resp;
 
@@ -365,7 +386,7 @@ export class ChatService {
 		{
 			dto = { level: ELevel.error, content: resp };
 		}
-
+		this.updateUserList(data.id, user.reference_id, server);
 		client.emit("NOTIFICATION", dto);
 	}
 
@@ -381,7 +402,7 @@ export class ChatService {
 		client.emit("NOTIFICATION", data);
 	}
 
-	async roomMute(client: Socket, user: ChatUser, data: RoomMuteDto)
+	async roomMute(client: Socket, user: ChatUser, data: RoomMuteDto, server: Server)
 	{
 		let resp;
 
@@ -403,6 +424,7 @@ export class ChatService {
 		else
 			dto = { level: ELevel.error, content: resp };
 		client.emit("NOTIFICATION", dto);
+		this.updateUserList(data.roomId, user.reference_id, server);
 	}
 
 	removeUser(refId: number)
@@ -450,7 +472,7 @@ export class ChatService {
 	}
 
 	//todo send to user ?
-	async setIsAdmin(client:Socket, data: RoomPromoteDto)
+	async setIsAdmin(client:Socket, data: RoomPromoteDto, server: Server)
 	{
 		const user = await this.getUserFromSocket(client);
 
@@ -475,6 +497,7 @@ export class ChatService {
 				s.emit("UPDATE_ROOM", {id: data.room_id, level: ((data.isPromote) ? ELevelInRoom.admin : ELevelInRoom.casual)});
 			}
 		}
+		this.updateUserList(data.room_id, user.reference_id, server);
 	}
 
 	/**

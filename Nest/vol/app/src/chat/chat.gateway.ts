@@ -114,7 +114,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		if (await this.chatService.joinRoom(client, user, payload))
+		if (await this.chatService.joinRoom(client, user, payload, this.server))
 		{
 			let msg_obj = {
 				message:	"User " + user.username + " has joined the channel",
@@ -234,7 +234,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user === undefined)
 			return; //todo disconect ?
-		await this.chatService.roomBanUser(client, user, payload);
+		await this.chatService.roomBanUser(client, user, payload, this.server);
 	}
 
 	//todo
@@ -245,14 +245,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 		if (user === undefined)
 				return ;//fix
-		await this.chatService.roomMute(client, user, payload);
+		await this.chatService.roomMute(client, user, payload, this.server);
 		this.logger.log(`Client emit mute: ${client.id}`);
 	}
 
 	@SubscribeMessage('ROOM_PROMOTE')
 	room_promote(client:Socket, payload: RoomPromoteDto): void
 	{
-		this.chatService.setIsAdmin(client, payload);
+		this.chatService.setIsAdmin(client, payload, this.server);
 		this.logger.log(`Client emit promote: ${client.id}`);
 	}
 
