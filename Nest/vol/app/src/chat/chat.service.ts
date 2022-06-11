@@ -664,6 +664,13 @@ export class ChatService {
 			this.logger.error(e);
 		}
 
+		const seconde = this.getUserFromID(ref_id);
+
+		if (seconde !== undefined)
+		{
+			await this.emitRelation(seconde);
+		}
+
 		return;
 	}
 
@@ -688,6 +695,20 @@ export class ChatService {
 			this.logger.error(e);
 		}
 		return;
+	}
+
+	async emitRelation(user: ChatUser)
+	{
+		const friends = await this.getFriendList(user);
+		const block = await this.getBlockList(user);
+
+
+		for (const s of user.socket)
+		{
+			s.emit('FRIEND_LIST', friends);
+			s.emit('BLOCK_LIST', block);
+		}
+
 	}
 
 

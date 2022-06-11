@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {ELevelInRoom} from "../Sidebar/ChatContext/ProvideChat"
+import {ELevelInRoom, useChatContext} from "../Sidebar/ChatContext/ProvideChat"
 import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
 	PromoteUserButton, AddFriendButton, DirectMessage} from "../UserBarButtons/UserBarButtons"
 import "./ChatUser.css"
@@ -18,6 +19,17 @@ interface	props
 
 function ChatUser(data: props)
 {
+	const { friendsList } = useChatContext();
+	const [isFriend, setIsFriend] = useState<boolean>(false);
+
+	useEffect(() => {
+		for (const f of friendsList)
+		{
+			if (f.reference_id === data.refId)
+				setIsFriend(true);
+		}
+	}, [friendsList, data.refId]);
+
 	function Buttons()
 	{
 		if (data.currentUserLvl <= data.targetUserLvl || data.isDm)
@@ -27,7 +39,7 @@ function ChatUser(data: props)
 					<DirectMessage name={data.targetUsername} refId={data.refId}/>
 					<InviteUserButton  refId={data.refId}/>
 					<AddFriendButton user_name={data.targetUsername}
-							already_friend={false} refId={data.refId}/>
+							already_friend={isFriend} refId={data.refId}/>
 					<BlockUserButton user_name={data.targetUsername}
 						already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 				</div>
@@ -42,7 +54,7 @@ function ChatUser(data: props)
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={false} refId={data.refId}/>
+							already_friend={isFriend} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
@@ -57,7 +69,7 @@ function ChatUser(data: props)
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={false} refId={data.refId}/>
+							already_friend={isFriend} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}
 							already_admin={data.targetUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}

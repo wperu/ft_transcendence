@@ -292,6 +292,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 
 		this.chatService.ConnectToChan(client, user);
+
+		await this.chatService.emitRelation(user);
+
 		this.logger.log(`${user.username} connected to the chat under id : ${client.id}`);
 		this.logger.log(`${user.username} total connection : ${user.socket.length}`);
 	}
