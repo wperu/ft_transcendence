@@ -65,7 +65,7 @@ function ChatTab ()
 		}
 	}, [currentRoom, messages.length]);
 
-	useInterval(() =>
+	/*useInterval(() =>
 	{
 		if (currentRoom !== undefined
 			&& currentRoom.room_message.length !== messages.length)
@@ -73,7 +73,9 @@ function ChatTab ()
 			setMessages([...currentRoom.room_message]);
 			setUpdated(true);
 		}
-	}, 200);
+	}, 200);*/
+
+	
 
 
 	useEffect( () =>

@@ -39,7 +39,7 @@ function ChannelUserList ()
 
 	useEffect(() => {
 		socket.on("USER_LIST", (data: Array<UserRoomDataDto>) => {
-			if (!compare_arrays(data, userList))
+			//if (!compare_arrays(data, userList))
 				setUserList(data);
 		})
 

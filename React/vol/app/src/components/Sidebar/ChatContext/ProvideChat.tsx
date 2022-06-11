@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { Component, createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
@@ -102,7 +102,7 @@ const generateKey = (id : number) => {
 
 function useChatProvider() : IChatContext
 {
-	const notify	= useNotifyContext();
+	const {addNotice}	= useNotifyContext();
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/chat", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{
 			token: useAuth().user?.accessCode,
@@ -222,8 +222,8 @@ function useChatProvider() : IChatContext
 
 
 		setRooms(prevRooms => { return ([...prevRooms, newRoom]); });
-		if (currentRoom !== undefined)
-			setCurrentRoomById(currentRoom.id);
+	//	if (currentRoom !== undefined)
+	//		setCurrentRoomById(currentRoom.id);
 
     }, [currentRoom, setCurrentRoomById, findRoomById]);
 
@@ -240,15 +240,48 @@ function useChatProvider() : IChatContext
 		}
 	}, [jumpDm, rooms, setCurrentRoomById])
 
+	/**
+	 * OnRooms Update
+	 * 
+	 * SetCurrentRoom to new Ref
+	 */
+	useEffect(() => {
+
+		if (currentRoom !== undefined)
+			setCurrentRoomById(currentRoom.id);
+	}, [rooms, setCurrentRoomById])
+
 	useEffect(() => {
 
 		socket.on('RECEIVE_MSG', (data : RcvMessageDto) => {
-			let targetRoom = findRoomById(data.room_id);
-			if (targetRoom !== undefined)
+			//let targetRoom = findRoomById(data.room_id);
+			//if (targetRoom !== undefined)
 			{
-				targetRoom.room_message.push(data);
-				targetRoom.nb_notifs++;
+				//targetRoom.room_message.push(data);
+				//targetRoom.nb_notifs++;
 			}
+			setRooms( prev => {
+				const id = prev.findIndex((p) => (p.id === data.room_id));
+
+				const room = [...prev]
+
+				room[id] = { ...room[id], room_message: [...room[id].room_message, data], nb_notifs: room[id].nb_notifs + 1 }
+				
+
+				console.log(room);
+				
+				//return prev;
+				return room ;
+			})
+
+
+			/*
+			 this.setState(prevState => {
+		      const team = [...prevState.team];
+		      team[index] = { ...team[index], [name]: value };
+		      return { team };
+		    });
+			*/
 		});
 
 		return function cleanup() {
@@ -316,7 +349,6 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on("UPDATE_ROOM", (data: RoomUpdatedDTO) => {
-			//todo for each modification
 			let refR = findRoomById(data.id);
 			if (refR !== undefined)
 			{
@@ -325,7 +357,6 @@ function useChatProvider() : IChatContext
 				if (data.level !== undefined) refR.user_level = data.level;
 				if (data.owner !== undefined) refR.owner = data.owner;
 			}
-
 		});
 
 		return function cleanup() {
@@ -343,7 +374,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		socket.on('NOTIFICATION', (data : NoticeDTO) => {
-			notify.addNotice(data.level, data.content, 3000);
+			addNotice(data.level, data.content, 3000);
 		});
 
 		return function cleanup() {
@@ -352,22 +383,38 @@ function useChatProvider() : IChatContext
 				socket.off('NOTIFICATION');
 			}
 		};
-	}, [socket, notify]);
+	}, [socket, addNotice]);
 
 	/**
 	 * ***** Notification *****
 	 */
 
 	const addNotif = useCallback((notif: INotif[]) =>{
+		let news : boolean = false;
+
 		setNotification(prev => {
-			for (let n of notif)
+			const len = prev.length;
+			
+			/*for (let n of notif)
 			{
-				prev.splice(prev.findIndex((p) => (n.type === p.type && p.room_id && n.room_id && n.room_id === p.room_id )), 1)
+				prev.splice(prev.findIndex((p) => (n.type === p.type && p.room_id && n.room_id && n.room_id === p.room_id && p.refId === n.refId)), 1)
+			}*/
+
+			for (let p of prev)
+			{
+				console.log(p);
+				notif.splice(notif.findIndex((n) => (n.type ===  ENotification.GAME_REQUEST && p.room_id  === n.room_id && p.refId === n.refId) ), 1);
 			}
+
+			if (notif.length > 0)
+				news = true;
 			
 			return [...prev, ...notif];
 		});
-	}, []);
+		
+		if (news)
+			addNotice(ELevel.info, "You have a new notification", 3000);
+	}, [addNotice]);
 
 	const rmNotif = useCallback((id: string) => {
 		setNotification(prev => {
@@ -389,7 +436,7 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		socket.on('RECEIVE_NOTIF', (data : INotif[]) => {
 			data.forEach(d => {d.id = generateKey(d.req_id || d.type)})
-			notify.addNotice(ELevel.info, "You have a new notification", 3000);
+			
 			addNotif(data);
 		});
 
