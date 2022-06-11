@@ -497,6 +497,10 @@ export class PongService {
 		user.socket.emit("JOINED_CUSTOM_ROOM");
 		user.in_room = id;
 		this.sendUserOfCustomRoom(id);
+		user.socket.emit("CUSTOM_ROOM_UPDATE_MODE", {
+			options: room.opts,
+            mode: room.opts,
+		});
 		return;
 	}
 
