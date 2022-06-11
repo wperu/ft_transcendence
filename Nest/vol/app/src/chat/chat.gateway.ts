@@ -114,20 +114,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		if (user === undefined)
 			return ;//todo trown error and disconnect
 
-		if (await this.chatService.joinRoom(client, user, payload, this.server))
+		const id = await this.chatService.joinRoom(client, user, payload, this.server);
+		if (id !== undefined)
 		{
 			let msg_obj = {
 				message:	"User " + user.username + " has joined the channel",
 				sender:		"Server",
 				refId:		user.reference_id,
 				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
-				room_id:	payload.id
-			};
+				room_id:	id
+			};	
 
-			// TODO check if user is actually in room
-			// TODO maybe store in DB if we want chat history ?
-
-			this.server.to(payload.id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+			this.server.to(id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
 		}
 	}
 

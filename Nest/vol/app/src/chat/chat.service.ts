@@ -208,11 +208,11 @@ export class ChatService {
 		return;
 	}
 
-	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto, server: Server) : Promise<boolean>
+	async joinRoom(client: Socket, user: ChatUser, data: JoinRoomDto, server: Server) : Promise<number | undefined>
 	{
 		let userRoom = await this.usersService.findUserByReferenceID(user.reference_id);
 		let resp;
-		let ret : boolean;
+		let ret: number | undefined;
 
 		if (data.id !== undefined)
 			resp = await this.roomService.joinRoomById(data.id, userRoom, data.password);
@@ -244,17 +244,19 @@ export class ChatService {
 			let data : NoticeDTO;
 			data = { level: ELevel.info, content: "Room " + room.name + " joined" };
 			client.emit("NOTIFICATION", data);
-			ret = true;
+			ret = room.id;
+			
+			this.updateUserList(room.id, user.reference_id, server);
 		}
 		else
 		{
 			let data : NoticeDTO;
 			data = { level: ELevel.error, content: resp };
 			client.emit("NOTIFICATION", data);
-			ret = false
+			ret = undefined;
 		}
 
-		this.updateUserList(data.id, user.reference_id, server);
+		
 
 		return (ret);
 	}
