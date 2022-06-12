@@ -1,4 +1,4 @@
-import React, { Component, createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
@@ -11,7 +11,6 @@ import { GameInviteDTO } from "../../../Common/Dto/chat/gameInvite";
 /** //fix
  *  NOTIF rework notif system
  * 	dub request && invalide request...
- * 	room add is_pm
  */
 
 enum ENotification
@@ -160,7 +159,6 @@ function useChatProvider() : IChatContext
 	useEffect(() => {
 		
 			socket.on("CONFIRM_CUSTOM_ROOM", (data: {room_id: string}) => {
-				//dto?.gameRoomId = data.room_id;
 				if (dto !== undefined)
 					socket.emit('GAME_INVITE', dto);
 				setDto(undefined);
@@ -251,7 +249,7 @@ function useChatProvider() : IChatContext
 
 		if (currentRoom !== undefined)
 			setCurrentRoomById(currentRoom.id);
-	}, [rooms, setCurrentRoomById])
+	}, [rooms, setCurrentRoomById, currentRoom])
 
 
 	const havePendingMsg = useCallback(() : boolean => {
@@ -409,21 +407,19 @@ function useChatProvider() : IChatContext
 		let news : boolean = false;
 
 		setNotification(prev => {
-			const len = prev.length;
-			
 			/*for (let n of notif)
 			{
 				prev.splice(prev.findIndex((p) => (n.type === p.type && p.room_id && n.room_id && n.room_id === p.room_id && p.refId === n.refId)), 1)
 			}*/
 
-			for (let p of prev)
+			/*for (let p of prev)
 			{
 				console.log(p);
-				notif.splice(notif.findIndex((n) => (n.type ===  ENotification.GAME_REQUEST && p.room_id  === n.room_id && p.refId === n.refId) ), 1);
+				notif.splice(notif.findIndex((n) => (n.type === ENotification.GAME_REQUEST && p.room_id && p.room_id === n.room_id && p.refId === n.refId) ), 1);
 			}
 
 			if (notif.length > 0)
-				news = true;
+				news = true;*/
 			
 			return [...prev, ...notif];
 		});

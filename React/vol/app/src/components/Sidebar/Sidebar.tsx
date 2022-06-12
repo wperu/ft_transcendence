@@ -1,10 +1,9 @@
-import React, {useState, useEffect} from "react";
+import React, { useEffect } from "react";
 import "./Sidebar.css";
 import Chat from "../Chat/Chat";
 import Channels from "../Channels/Channels";
 import Friends from "../Friends/Friends";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import { Socket } from "socket.io-client";
 
 interface prop
 {
@@ -39,7 +38,7 @@ function Sidebar()
 	{
 		if(chatCtx.currentRoom === undefined && chatCtx.currentTab === ECurrentTab.chat)
 			chatCtx.setCurrentTab(ECurrentTab.channels);
-	}, [chatCtx.currentRoom])
+	}, [chatCtx.currentRoom, chatCtx])
 
 	if (chatCtx.isConnected)
 		return (
@@ -49,17 +48,17 @@ function Sidebar()
 				<div id="actual_bar">
 					<header>
 						<input className="tab_button" type="radio"
-							checked={chatCtx.currentTab == ECurrentTab.friends}
+							checked={chatCtx.currentTab === ECurrentTab.friends}
 							name="tab" id="friends" value={ECurrentTab.friends}
 							onChange={handleChange} />
 						<label htmlFor="friends"> Friends</label>
 						<input className="tab_button" type="radio"
-							checked={chatCtx.currentTab == ECurrentTab.channels}
+							checked={chatCtx.currentTab === ECurrentTab.channels}
 							name="tab" id="channels" value={ECurrentTab.channels}
 							onChange={handleChange}/>
 						<label htmlFor="channels">Channels {chatCtx.havePendingMsg() ? " X" : ""} </label>
 						<input className="tab_button" type="radio"
-							checked={chatCtx.currentTab == ECurrentTab.chat}
+							checked={chatCtx.currentTab === ECurrentTab.chat}
 							name="tab" id="chats" value={ECurrentTab.chat}
 							onChange={handleChange} />
 						<label htmlFor="chats">Chat</label>

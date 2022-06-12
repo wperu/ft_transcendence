@@ -1,7 +1,6 @@
 import React, {KeyboardEvent, useState, useEffect, useCallback} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import useInterval from '../../hooks/useInterval';
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
 import "./ChatTab.css";
 
