@@ -11,6 +11,7 @@ import ChangeableUsername from "../../components/ProfileSettings/ChangeableUsern
 import { IProfileDTO } from "../../Common/Dto/User/ProfileDTO";
 import axios from "axios";
 import calculateLevel from "../../components/calculateLevel";
+import QuatreCentQuatre from "../404/404";
 
 interface headerInfo
 {
@@ -137,7 +138,7 @@ function Profile() {
 					setProfile(data);
 				})
 				.catch(error => {
-					console.log(error);
+					
 				});
 			}
 		}
@@ -176,7 +177,7 @@ function Profile() {
 	}
 	else
 	{
-		return <></> //todo
+		return <QuatreCentQuatre></QuatreCentQuatre> //todo
 	}
   }
 
