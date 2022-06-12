@@ -28,6 +28,13 @@ export class ChatService {
 
 	private users: ChatUser[] = [];
 
+	// -----------------------------------------
+	//
+	//   Opts
+	//
+	// -----------------------------------------
+	private readonly timeToReinvite : Date = new Date(0,0,0,0,0,20);
+
     constructor (
 		private usersService: UsersService,
     	private tokenService: TokenService,
@@ -714,7 +721,7 @@ export class ChatService {
 
 	async gameInvite(client: Socket, data: GameInviteDTO)
 	{
-		const user : ChatUser | undefined = await this.getUserFromSocket(client);
+		let user : ChatUser | undefined = await this.getUserFromSocket(client);
 		if (user !== undefined)
 		{
 			let dto: NotifDTO[];
@@ -740,11 +747,17 @@ export class ChatService {
 				}
 				else
 				{
-					if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
-						for (const s of dest.socket)
+					if (this.canInvite(user, data.refId, dto[0].room_id))
+					{
+						if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
 						{
-							s.emit('RECEIVE_NOTIF', dto);
+							for (const s of dest.socket)
+							{
+								s.emit('RECEIVE_NOTIF', dto);
+							}
+							this.addInvite(user, data.refId, dto[0].room_id);
 						}
+					}
 				}
 			}
 			else if (data.chatRoomId !== undefined) //room case
@@ -762,11 +775,17 @@ export class ChatService {
 						const dest = this.getUserFromID(r.reference_id);
 						if (dest !== undefined && dest.reference_id !== user.reference_id)
 						{
-							if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
-								for (const s of dest.socket)
+							if (this.canInvite(user, r.reference_id, dto[0].room_id))
+							{
+								if (dto[0].room_id !== this.pongService.findCustomRoomOf(dest.reference_id))
 								{
-									s.emit('RECEIVE_NOTIF', dto);
+									for (const s of dest.socket)
+									{
+										s.emit('RECEIVE_NOTIF', dto);
+									}
+									this.addInvite(user, r.reference_id, dto[0].room_id);
 								}
+							}
 						}
 					}
 				}
@@ -775,12 +794,81 @@ export class ChatService {
 		}
 	}
 
-
 	confirmCustomRoom(room_id: string, ref_id: number)
 	{
 		let usr = this.users.find((u) => u.reference_id === ref_id);
 		if (usr === undefined)
 			return ;
 		usr.socket.forEach((s) => s.emit("CONFIRM_CUSTOM_ROOM", {room_id: room_id}));
+	}
+
+
+	canInvite(user: ChatUser, ref_id: number, id: string) : boolean
+	{
+		if (user.gameInvite !== undefined) 
+		{
+			if (user.gameInvite.id !== id)
+			{
+				user.gameInvite = undefined;
+				return true;
+			}
+			else
+			{
+				const now = new Date();
+				for (let it of user.gameInvite.users)
+				{
+					if (it.refId === ref_id)
+					{
+						if (it.date < now)
+						{
+							return true;
+						}
+						else
+							return false
+					}
+				}
+			}
+		}
+		return (true);
+	}
+
+	addInvite(user: ChatUser, ref_id: number, id: string) : void
+	{
+		const toAdd = {refId: ref_id, date: new Date()};
+
+		toAdd.date.setMinutes(toAdd.date.getMinutes() + this.timeToReinvite.getMinutes())
+		toAdd.date.setSeconds(toAdd.date.getSeconds() + this.timeToReinvite.getSeconds())
+
+		if (user.gameInvite !== undefined) 
+		{
+			if (user.gameInvite.id !== id)
+			{
+				user.gameInvite = undefined;
+
+				user.gameInvite = {
+					id: id,
+					users: [toAdd],
+				}
+			}
+			else
+			{
+				for (let l of user.gameInvite.users)
+				{
+					if (l.refId === ref_id)
+					{
+						l.date = toAdd.date;
+						return ;
+					}
+				}
+				user.gameInvite.users.push(toAdd);
+			}
+		}
+		else
+		{
+			user.gameInvite = {
+				id: id, 
+				users: [toAdd],
+			}
+		}
 	}
 }
