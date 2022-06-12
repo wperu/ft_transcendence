@@ -153,6 +153,7 @@ function MatchHistory(props: historyProps)
 		}, error => {
 			if (error)
 			console.log("fetch error");
+			setHistory([]);
 		});
 	}, [props.ref_id, props.access_code]);
 

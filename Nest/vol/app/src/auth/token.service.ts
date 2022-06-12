@@ -52,12 +52,29 @@ export class TokenService
 
     verifyToken(token: string) : any
     {
-        return (this.jwtService.verifyAsync(token));
+		try
+		{
+			const rep = this.jwtService.verify(token);
+        	return (rep);
+		}
+		catch (error)
+		{
+			return undefined;
+		}
+		
     }
    
     decodeToken(token: string) : Object
     {
-        return (this.jwtService.decode(token));
+		try
+		{
+			const rep = this.jwtService.decode(token);
+        	return (rep);
+		}
+		catch (error)
+		{
+			return undefined;
+		}
     }
 
 
