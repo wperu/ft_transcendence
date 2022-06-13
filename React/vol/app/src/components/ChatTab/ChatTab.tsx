@@ -97,7 +97,7 @@ function ChatTab ()
 				</ul>
 			</div>
 			<footer id="msg_footer">
-				<input type="text" id="message_input" onKeyPress={pressedSend}
+				<input type="text" id="message_input" onKeyPress={pressedSend} maxLength={300}
 					placeholder={currentRoom === undefined ? "you are not in a room :/" : "Send a message to " + currentRoom?.room_name}/>
 			</footer>
 		</div>

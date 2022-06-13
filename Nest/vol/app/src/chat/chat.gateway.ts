@@ -89,10 +89,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
-		return ;//todo trown error and disconnect
+			return ;//todo trown error and disconnect
 
 		await this.chatService.createRoom(client, user, payload);
-
+		
 	}
 
 
