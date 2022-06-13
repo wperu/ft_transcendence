@@ -476,6 +476,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				s.emit('BLOCK_LIST', ret);
 			});
 
+			const ublock = this.chatService.getUserFromID(payload);
+
+			if (ublock !== undefined)
+				this.chatService.emitRelation(ublock);
+			this.chatService.emitRelation(user);
 		}
 	}
 
