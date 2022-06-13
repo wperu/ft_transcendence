@@ -458,6 +458,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			user.socket.forEach(s => {
 				s.emit('FRIEND_LIST', ret);
 			});
+
+			const add = this.chatService.getUserFromID(payload);
+
+			if (add !== undefined)
+				this.chatService.emitRelation(add);
+			this.chatService.emitRelation(user);
 		}
 	}
 
