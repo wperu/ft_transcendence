@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../auth/useAuth";
 import {ELevelInRoom, useChatContext} from "../Sidebar/ChatContext/ProvideChat"
 import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
 	PromoteUserButton, AddFriendButton, DirectMessage} from "../UserBarButtons/UserBarButtons"
@@ -21,6 +22,7 @@ function ChatUser(data: props)
 {
 	const { friendsList } = useChatContext();
 	const [isFriend, setIsFriend] = useState<boolean>(false);
+	const { user } = useAuth();
 
 	useEffect(() => {
 		for (const f of friendsList)
@@ -32,6 +34,8 @@ function ChatUser(data: props)
 
 	function Buttons()
 	{
+		if (data.refId === user?.reference_id)
+			return <></>; 
 		if (data.currentUserLvl <= data.targetUserLvl || data.isDm)
 		{
 			return (
