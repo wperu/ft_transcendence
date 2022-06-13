@@ -154,7 +154,7 @@ function Callback()
 	{
 		return (
 			<div className="first_login">
-				Please choose your username and press Enter
+				Please your google authentificator code and press Enter
 				<input className="first_login_username" type="text" maxLength={6}
 					placeholder={'token'} onKeyPress={sendToken} />
 			</div>

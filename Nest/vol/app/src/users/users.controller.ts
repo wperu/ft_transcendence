@@ -104,8 +104,8 @@ export class UsersController
 			throw new NotFoundException();
 
 		let user = await this.userService.findUserByReferenceID(refId);
-		if (this.userService.checkToken(body['token'], user.SecretCode) === true)
-			throw new BadRequestException("wrong access code"); // KO bad token
+		if (this.userService.checkToken(body['token'], user.SecretCode) === false)
+			throw new BadRequestException("Bad code"); // KO bad token
 
 		user.setTwoFA = !user.setTwoFA;
 		await this.userService.saveUser(user);
