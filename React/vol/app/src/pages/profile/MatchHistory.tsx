@@ -1,8 +1,8 @@
 import { GetFinishedGameDto } from "../../Common/Dto/pong/FinishedGameDto";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import ThisListIsEmpty from "../../components/ThisListIsEmpty/ThisListIsEmpty";
 import "./MatchHistory.css";
+import { ELevel, useNotifyContext } from "../../components/NotifyContext/NotifyContext";
 
 interface matchProps
 {
@@ -141,12 +141,20 @@ interface historyProps
 function MatchHistory(props: historyProps)
 {
 	const [history, setHistory] = useState<GetFinishedGameDto[]>([]);
+	const notify = useNotifyContext();
 
 	useEffect(() => {
 		fetch('/api/game-history/' + props.ref_id,
 			{ headers: { authorization: props.access_code } }
 		)
-		.then(res => res.json())
+		.then(res => {
+			if (res.status >= 200 && res.status <= 299)
+				return res.json();
+			notify.addNotice(ELevel.error,
+				"Error while retrieving game history: " + res.statusText,
+				3000);
+			return ([]);
+		})
 		.then(result => {
 			console.log(result);
 			setHistory(result);
@@ -160,7 +168,15 @@ function MatchHistory(props: historyProps)
 	return (
 		<ul id="match_history">
 			{
-				(history.map(({date, ref_id_one, ref_id_two, score_one, score_two, username_one, username_two, custom}, index) => (
+				(history.map(({
+					date,
+					ref_id_one,
+					ref_id_two,
+					score_one,
+					score_two,
+					username_one,
+					username_two,
+					custom}, index) => (
 					<Match
 					key={index.toString()}
 					opponent_ref_id={(ref_id_one === props.ref_id)?ref_id_two:ref_id_one}

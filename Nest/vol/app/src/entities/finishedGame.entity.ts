@@ -23,5 +23,8 @@ export class FinishedGame
 	custom: boolean;
 
 	@Column()
+	game_modes: number;
+
+	@Column()
 	date: Date;
 }
