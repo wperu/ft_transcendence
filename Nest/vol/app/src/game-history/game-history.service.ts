@@ -4,6 +4,7 @@ import { FinishedGame } from 'src/entities/finishedGame.entity';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from "src/users/users.service";
+import { PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
 
 @Injectable()
 export class GameHistoryService {
@@ -25,32 +26,50 @@ export class GameHistoryService {
 		}));
 	}
 
-	async addGameToHistory(user_one: User, user_two: User, score_one: number,
-		score_two: number, date: Date, custom: boolean) : Promise<FinishedGame>
+	async addGameToHistory(game: PostFinishedGameDto)
 	{
 		let new_game : FinishedGame = new FinishedGame();
 		let	ret;
-		new_game.date = date;
+		let user_one : User;
+		let user_two : User;
+
+		try
+		{
+			user_one = await this.usersService.findUserByReferenceID(game.ref_id_one);
+			user_two = await this.usersService.findUserByReferenceID(game.ref_id_two);
+		} catch (error)
+		{
+			console.error(error);
+			return ;
+		}
+		if (!user_one || !user_two)
+		{
+			console.error("GameHistory retrieving user error");
+			return ;
+		}
+
+		new_game.date = new Date();
 		new_game.player_one = user_one;
 		new_game.player_two = user_two;
-		new_game.player_one_score = score_one;
-		new_game.player_two_score = score_two;
-		new_game.custom = custom;
+		new_game.player_one_score = game.score_one;
+		new_game.player_two_score = game.score_two;
+		new_game.custom = game.custom;
+		new_game.game_modes = game.game_modes;
 		try
 		{
 			ret = await this.finishedGames.save(new_game);
 		} catch (error)
 		{
 			console.error(error);
-			return (undefined);
+			return ;
 		}
 
-		if (score_one > score_two)
+		if (game.score_one > game.score_two)
 		{
 			this.usersService.addWin(user_one);
 			this.usersService.addLoss(user_two);
 		}
-		else if (score_two > score_one)
+		else if (game.score_two > game.score_one)
 		{
 			this.usersService.addWin(user_two);
 			this.usersService.addLoss(user_one);
