@@ -68,7 +68,7 @@ export interface ParticleSystem
 
 function to_hex(n: number) : string
 {
-    var str = Number(~~n % 256).toString(16);
+    let str = Number(~~n % 256).toString(16);
     return str.length == 1 ? "0" + str : str;
 };
 
@@ -145,30 +145,43 @@ export async function summon_particles(system: ParticleSystem, render_ctx: PongR
 
 export async function draw_particles(ctx: CanvasRenderingContext2D, render_ctx: PongRenderingContext, system: ParticleSystem)
 {
-    ctx.save();
+    //ctx.save();
+    //let to_remove = [];
+
     system.emitters.forEach((emitter) => {
         update_emitter(emitter, render_ctx);
         emitter.particles.forEach((particle) => {
-            var particle_stage = (particle.age / emitter.lifetime);
+            let particle_stage = (particle.age / emitter.lifetime);
             if (particle_stage >= 1)
-                emitter.particles.shift();//splice(emitter.particles.indexOf(particle), 1);
+            {
+                return ;
+                //emitter.particles.shift();//splice(emitter.particles.indexOf(particle), 1);
+            }
 
-            var particle_size = ((1 - particle_stage) * emitter.start_size) + (particle_stage * emitter.end_size);
-            var particle_color = lerp_color(emitter.start_color, emitter.end_color, particle_stage);
+            let particle_size = ((1 - particle_stage) * emitter.start_size) + (particle_stage * emitter.end_size);
+            let particle_color = lerp_color(emitter.start_color, emitter.end_color, particle_stage);
 
             if (particle_size > 0)
             {
                 ctx.fillStyle = to_hex_color(particle_color);
+                ctx.strokeStyle = '#00000000';
                 ctx.beginPath();
                 ctx.ellipse(particle.x,
                             particle.y, 
                             particle_size, particle_size,
                             Math.PI / 4, 0, 2 * Math.PI);
                 ctx.fill();
+                ctx.stroke();
             }
         });
+        
+        emitter.particles = emitter.particles.filter((particle) => {
+            return particle.age <= emitter.lifetime;
+        });
     });
-    ctx.restore();
+
+
+    //ctx.restore();
 }
 
 

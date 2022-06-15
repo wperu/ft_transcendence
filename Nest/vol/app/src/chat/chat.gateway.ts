@@ -310,14 +310,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.logger.log(`Client disconnected: ${client.id}`);
 		//this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
 
-		let userInfo : ChatUser | undefined = await this.chatService.disconnectClient(client);
-		if (userInfo !== undefined)
-		{
-			if(userInfo.socket.length === 0)
-			{
-				this.chatService.removeUser(userInfo.reference_id);
-			}
-		}
+		await this.chatService.disconnectClient(client);
 	}
 
 	/**
@@ -458,6 +451,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			user.socket.forEach(s => {
 				s.emit('FRIEND_LIST', ret);
 			});
+
+			const add = this.chatService.getUserFromID(payload);
+
+			if (add !== undefined)
+				this.chatService.emitRelation(add);
+			this.chatService.emitRelation(user);
 		}
 	}
 
@@ -476,6 +475,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				s.emit('BLOCK_LIST', ret);
 			});
 
+			const ublock = this.chatService.getUserFromID(payload);
+
+			if (ublock !== undefined)
+				this.chatService.emitRelation(ublock);
+			this.chatService.emitRelation(user);
 		}
 	}
 

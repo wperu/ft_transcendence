@@ -2,17 +2,17 @@ import { useNotifyContext, ELevel } from "../NotifyContext/NotifyContext";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import ChannelUserList from "../ChannelUserList/ChannelUserList";
 import "./OwnerChannelSettings.css"
-import { useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { RoomChangePassDTO } from "../../Common/Dto/chat/RoomRename";
 
 function OwnerChannelSettings ()
 {
-	const notify = useNotifyContext();
-	const chatCtx = useChatContext();
+	const {addNotice} = useNotifyContext();
+	const {socket, currentRoom} = useChatContext();
 	const style = { "--additional_settings_space": "30vh" } as React.CSSProperties;
 	const [update, setUpdate] = useState<boolean>(false);
 
-	function passwordSubmit(event: React.SyntheticEvent)
+	const passwordSubmit = useCallback((event: React.SyntheticEvent) =>
 	{
 		event.preventDefault();
 		const target = event.target as typeof event.target & {
@@ -20,49 +20,58 @@ function OwnerChannelSettings ()
 			password_repeat: {value :string};
 		};
 		if (target.password.value.length === 0)
-			notify.addNotice(ELevel.error, "You can't set an empty password", 3000);
+			addNotice(ELevel.error, "You can't set an empty password", 3000);
 		else if (target.password.value !== target.password_repeat.value)
-			notify.addNotice(ELevel.error, "Your entries must be identical", 3000);
+			addNotice(ELevel.error, "Your entries must be identical", 3000);
 		else
 		{
-			if (chatCtx.currentRoom)
+			if (currentRoom)
 			{
-				chatCtx.currentRoom.protected = true;
+				currentRoom.protected = true;
 				let data : RoomChangePassDTO =
 				{
-					id:			chatCtx.currentRoom.id,
+					id:			currentRoom.id,
 					new_pass:	target.password.value,
 				};
-				chatCtx.socket.emit('ROOM_CHANGE_PASS', data);
+				socket.emit('ROOM_CHANGE_PASS', data);
 			}
 			target.password.value = "";
 			target.password_repeat.value = "";
-			setUpdate(!update);
+			//setUpdate(!update);
 		}
-	}
+	}, [addNotice, , socket, currentRoom, ])
 
-	function removePassword()
+	const removePassword = useCallback(() =>
 	{
-		if (chatCtx.currentRoom !== undefined)
+		if (currentRoom !== undefined)
 		{
-			chatCtx.currentRoom.protected = false;
+			currentRoom.protected = false;
 			let data : RoomChangePassDTO =
 			{
-				id: chatCtx.currentRoom.id,
+				id: currentRoom.id,
 				new_pass: null!,
 			};
-			chatCtx.socket.emit('ROOM_CHANGE_PASS', data);
-			setUpdate(!update);
+			socket.emit('ROOM_CHANGE_PASS', data);
+			//setUpdate(!update);
 		}
-	}
+	}, [socket, currentRoom])
 
-	function PasswordSettings()
+	return (
+		<div id="channel_owner_settings" style={style}>
+			<ChannelUserList />
+			<PasswordSettings isProtected={currentRoom?.protected === true} passwordSubmit={passwordSubmit} removePassword={removePassword} />
+		</div>
+	);
+}
+
+
+const PasswordSettings = memo((prop : {isProtected: boolean, passwordSubmit: (event: React.SyntheticEvent) => void, removePassword: () => void }) =>
 	{
-		if (chatCtx.currentRoom?.protected === true)
+		if (prop.isProtected === true)
 		{
 			return (
-				<div id="password_channel_settings" onSubmit={passwordSubmit}>
-					<input type="button" value="Remove password protection" onClick={removePassword}/>
+				<div id="password_channel_settings" onSubmit={prop.passwordSubmit}>
+					<input type="button" value="Remove password protection" onClick={prop.removePassword}/>
 					<form id="password_form">
 						<input type="text" name="password" placeholder="Password" />
 						<input type="text" name="password_repeat"
@@ -76,7 +85,7 @@ function OwnerChannelSettings ()
 		{
 			return (
 				<div id="no_password_channel_settings">
-					<form id="password_form" onSubmit={passwordSubmit}>
+					<form id="password_form" onSubmit={prop.passwordSubmit}>
 						<input type="text" name="password" placeholder="Password" />
 						<input type="text" name="password_repeat"
 							placeholder="Confirm the password" />
@@ -85,14 +94,11 @@ function OwnerChannelSettings ()
 				</div>
 			);
 		}
-	}
-
-	return (
-		<div id="channel_owner_settings" style={style}>
-			<ChannelUserList />
-			<PasswordSettings />
-		</div>
-	);
-}
+	})
+/*
+const PasswordInput = memo(() => 
+{
+	return 
+})*/
 
 export default OwnerChannelSettings

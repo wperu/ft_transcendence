@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import ChatTab from "../ChatTab/ChatTab";
 import OwnerChannelSettings from "../OwnerChannelSettings/OwnerChannelSettings";
@@ -7,7 +7,7 @@ import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";
 import "./Chat.css";
 
 
-function Chat()
+const Chat = memo(() =>
 {
 	const chatCtx = useChatContext();
 	const [currentTab, setCurrentTab] = useState<string>("chat");
@@ -51,6 +51,6 @@ function Chat()
 			<Content />
 		</div>
 	);
-}
+})
 
 export default Chat;

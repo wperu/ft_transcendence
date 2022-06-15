@@ -4,11 +4,9 @@ import QRCode from "react-qr-code";
 import Popup from "reactjs-popup";
 import { useAuth } from "../../../auth/useAuth";
 import IUser from "../../../Common/Dto/User/User";
+import { ELevel, useNotifyContext } from "../../NotifyContext/NotifyContext";
 import "./TFA.css";
 
-//fix me get useTwoFActor value by get /!\
-//fix rm user.useTwoFa (useLess)
-//todo style/css
 interface twoFAProps
 {
 	user: IUser;
@@ -21,6 +19,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 	const [isTwoFactor, setIsTwoFactor]	= useState<boolean>(props.is_active);
 	const [isOpen, setIsOpen]			= useState<boolean>(false);
 	const { user } = useAuth();
+	const {addNotice} = useNotifyContext()
 
 	function changeTwoFactor()
 	{
@@ -29,7 +28,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
 	{
-		if ( event.key === "Enter" && event.currentTarget.value.length > 0)
+		if (event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
 			if (props.user)
 			{
@@ -47,21 +46,16 @@ function TwoFactorAuthSetting(props: twoFAProps)
 					data: body,
 				})
 				.then(res => {
-					console.log(res);
 					if (res.status === 200)
 						setIsTwoFactor(!isTwoFactor);
 				})
 				.catch(res => {
-					console.log(res); //fix parseme pls /!\
+					addNotice(ELevel.error, res.response.data.message, 3000);
 				});
 			}
 			event.currentTarget.value = '';
 		}
 	};
-
-	
-
-
 
 	useEffect(() => {
 		if (user)

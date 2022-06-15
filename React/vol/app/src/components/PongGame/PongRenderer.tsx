@@ -20,6 +20,13 @@ function update(pong_ctx: IPongContext, deltaTime: number, user: IUser)
         /* update ball position */
         room.ball.pos_x += room.ball.vel_x * deltaTime;
         room.ball.pos_y += room.ball.vel_y * deltaTime;
+
+        if (room.options & RoomOptions.DOUBLE_BALL && room.ball2)
+        {
+            console.log("updating double ball : ", room.ball2.vel_x, " ; ", room.ball2.vel_y);
+            room.ball2.pos_x += room.ball2.vel_x * deltaTime;
+            room.ball2.pos_y += room.ball2.vel_y * deltaTime;
+        }
     }    
 }
 
@@ -189,9 +196,9 @@ const useRender = (canvasRef: React.RefObject<HTMLCanvasElement>, user: IUser, l
 		
 
             renderBackground(ctx, render_ctx, pong_ctx, canvas, user);
-            renderBall(ctx, render_ctx, pong_ctx, user, pong_ctx.room.ball);
+            renderBall(ctx, render_ctx, pong_ctx, user, pong_ctx.room.ball, 0);
             if (pong_ctx.room.options & RoomOptions.DOUBLE_BALL && pong_ctx.room.ball2)
-                renderBall(ctx, render_ctx, pong_ctx, user, pong_ctx.room.ball2);
+                renderBall(ctx, render_ctx, pong_ctx, user, pong_ctx.room.ball2, 1);
             renderPlayers(ctx, render_ctx, pong_ctx.room, user);
     
             if (pong_ctx.room.state === RoomState.PAUSED)
@@ -352,14 +359,15 @@ function renderPlayers(ctx : CanvasRenderingContext2D, render_ctx: PongRendering
 
 
 
-function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, user: IUser, ball: IPongBall)
+function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingContext, pong_ctx: IPongContext, user: IUser, ball: IPongBall, ball_id: number)
 {
     let ball_x = 0, ball_y = 0;
 
     if (!pong_ctx.room)
         return ;
 
-	if (user.username === pong_ctx.room.player_2.username)
+	if ((ball_id === 0 && user.username === pong_ctx.room.player_2.username)
+    ||  (ball_id === 1 && user.username === pong_ctx.room.player_2.username))
     {
         ball_x = render_ctx.terrain_x + render_ctx.terrain_w - ((ball.pos_x) * (render_ctx.terrain_w * 0.5));
         ball_y = render_ctx.terrain_y +  (ball.pos_y) * render_ctx.terrain_h;
@@ -386,20 +394,23 @@ function renderBall(ctx : CanvasRenderingContext2D, render_ctx: PongRenderingCon
     let ball_size = render_ctx.terrain_h * ball.size;
 
 	if (ball_size > GameConfig.BALL_SIZE * 0.1)
-		ball_size = render_ctx.terrain_h * (GameConfig.BALL_SIZE * 0.1);
+		ball_size = render_ctx.terrain_h * (GameConfig.BALL_SIZE * 0.5);
     
     if (pong_ctx.room.state === RoomState.ENDED)
         ball_size = 0;
+   // ctx.save();
     ctx.fillStyle = '#FFFFFF'
-    ctx.save();
+    //ctx.strokeStyle = '#00000000'
+    //ctx.save();
     ctx.beginPath();
     ctx.ellipse(ball_x,
                 ball_y, 
                 ball_size,
                 ball_size,
                 Math.PI / 4, 0, 2 * Math.PI);
+    //ctx.stroke();
     ctx.fill();
-    ctx.restore();
+   // ctx.restore();
 }
 
 function renderPauseScreen(ctx: CanvasRenderingContext2D, render_ctx: PongRenderingContext)

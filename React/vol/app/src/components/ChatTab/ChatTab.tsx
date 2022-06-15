@@ -1,10 +1,10 @@
-import React, {KeyboardEvent, useState, useEffect, useCallback} from "react";
+import React, {KeyboardEvent, useState, useEffect, useCallback, memo, ChangeEventHandler, ChangeEvent} from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
 import "./ChatTab.css";
 
-function ChatTab ()
+function ChatTab() 
 {
 	const {
 		socket,
@@ -16,6 +16,7 @@ function ChatTab ()
 	
 	const [messages, setMessages] = useState<RcvMessageDto[]>([]);
 	const [updated, setUpdated] = useState<Boolean>(false);
+	const [msg, setMsg] = useState<string>("");
 
 	let msg_list_ref = React.createRef<HTMLDivElement>();
 
@@ -29,10 +30,10 @@ function ChatTab ()
 				room_id: currentRoom.id,
 			};
 			socket.emit('SEND_MESSAGE', data);
-			console.log("[CHAT] sending: " + event.currentTarget.value);
 			event.currentTarget.value = '';
 		}
 	}, [socket, currentRoom]);
+
 
 	const pressedQuit = useCallback(() => {
 		if (currentRoom !== undefined)
@@ -96,12 +97,20 @@ function ChatTab ()
 						})}
 				</ul>
 			</div>
-			<footer id="msg_footer">
-				<input type="text" id="message_input" onKeyPress={pressedSend} maxLength={300}
-					placeholder={currentRoom === undefined ? "you are not in a room :/" : "Send a message to " + currentRoom?.room_name}/>
-			</footer>
+				<SendMessageBar onKeyPress={pressedSend} desc={"message"} />
+			
 		</div>
 	);
 }
+
+const SendMessageBar = React.memo((prop : { onKeyPress : (event: KeyboardEvent<HTMLInputElement>) => void, desc : string }) => 
+{
+	return (
+		<footer id="msg_footer">
+				<input type="text" id="message_input" onKeyPress={prop.onKeyPress} maxLength={300}
+					placeholder={prop.desc}/>
+		</footer>
+	)
+})
 
 export default ChatTab;
