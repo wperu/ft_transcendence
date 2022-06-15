@@ -14,4 +14,10 @@ const GameConfig =
 	DEFAULT_MAX_SCORE: 11,
 }
 
-export { GameConfig } 
+const RoomOptions = {
+    DEFAULT: 0b00,
+    DOUBLE_BALL: 0b01,
+    ICE_FRICTION: 0b10,
+};
+
+export { GameConfig, RoomOptions } 

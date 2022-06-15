@@ -53,6 +53,7 @@ export interface IPongRoom
     spectators: Array<IPongUser>,
     state: RoomState,
     socket: Socket,
+    withdrawal: boolean,
 
     options: number,
 
@@ -171,7 +172,8 @@ function usePongProvider() : IPongContext
                 spectators: [],
                 state: RoomState.ENDED,
                 socket: socket,
-                setAsFinished: () => {}
+                setAsFinished: () => {},
+                withdrawal: false,
             } as IPongRoom);
 
 
@@ -273,6 +275,7 @@ function usePongProvider() : IPongContext
                 state: RoomState.LOADING,
                 socket: socket,
                 setAsFinished: () => {},
+                withdrawal: false,
             });
             setInGame(true);
         });

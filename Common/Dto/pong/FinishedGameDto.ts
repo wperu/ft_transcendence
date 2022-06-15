@@ -6,6 +6,7 @@ export interface PostFinishedGameDto
 	score_two: number;
 	game_modes: number;
 	custom: boolean;
+	withdrew: number; // 0 or 1 or 2
 }
 
 export interface GetFinishedGameDto
@@ -19,4 +20,5 @@ export interface GetFinishedGameDto
 	score_two: number;
 	custom: boolean;
 	game_modes: number;
+	withdrew: number; // 0 = nobody, 1 = player 1, 2 = player 2
 }

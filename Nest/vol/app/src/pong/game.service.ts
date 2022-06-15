@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { PongRoom, RoomOptions, RoomState } from './interfaces/PongRoom';
+import { PongRoom, RoomState } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
 import { StartPongRoomDTO } from '../Common/Dto/pong/StartPongRoomDTO'
 import { PongBall } from './interfaces/PongBall';
@@ -12,8 +12,9 @@ import { UpdatePongPlayerDTO } from 'src/Common/Dto/pong/UpdatePongPlayerDTO';
 import { PongService } from './pong.service';
 import * as PgBoss from 'pg-boss';
 import { UpdatePongPointsDTO } from 'src/Common/Dto/pong/UpdatePongPointsDTO';
-
-
+import { GameHistoryService } from 'src/game-history/game-history.service';
+import { PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
+import { RoomOptions } from 'src/Common/Game/GameConfig';
 
 @Injectable()
 export class GameService {
@@ -32,7 +33,9 @@ export class GameService {
 
     constructor(
         @Inject(forwardRef(() => PongService))
-        private pongService: PongService
+        private pongService: PongService,
+        private historyService: GameHistoryService
+
     )
     {
         console.log("init pgboss on : postgress://" + process.env.DB_USERNAME + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST + "/" + process.env.DB_NAME);
@@ -91,7 +94,9 @@ export class GameService {
 
 
 
-    initRoom(creator: PongUser, other: PongUser = undefined, spectators : Array<PongUser> = [], options: number = 0) : PongRoom
+    initRoom(is_custom: boolean, creator: PongUser,
+        other: PongUser = undefined, spectators : Array<PongUser> = [],
+        options: number = 0) : PongRoom
     {
         function generateID() {
             return ('xxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {  
@@ -144,9 +149,10 @@ export class GameService {
             ball2: ball2,
             spectators: spectators,
             state: RoomState.WAITING,
+            reconnectTimeout: null,
 
             options: RoomOptions.DEFAULT,
-
+            custom: is_custom,
             currentTime: 0,
             deltaTime: 0,
             lastTime: 0,
@@ -480,7 +486,17 @@ export class GameService {
                 this.server.to(room.id).emit("ROOM_FINISHED", {
                     player_1_score: room.player_1.points,
                     player_2_score: room.player_2.points,
+                    withdrawal: false,
                 } as UpdatePongPointsDTO)
+                this.historyService.addGameToHistory({
+					ref_id_one: room.player_1.reference_id,
+					ref_id_two: room.player_2.reference_id,
+					score_one: room.player_1.points,
+					score_two: room.player_2.points,
+					game_modes: room.options,
+					custom: room.custom,
+					withdrew: 0
+				} as PostFinishedGameDto);
                 room.player_1.in_game = undefined;
                 room.player_2.in_game = undefined;
                 room.state = RoomState.FINISHED;
@@ -490,6 +506,7 @@ export class GameService {
                 this.server.to(room.id).emit("UPDATE_POINTS", {
                     player_1_score: room.player_1.points,
                     player_2_score: room.player_2.points,
+                    withdrawal: undefined,
                 } as UpdatePongPointsDTO)
                 await this.reloadRoom(room);
             }

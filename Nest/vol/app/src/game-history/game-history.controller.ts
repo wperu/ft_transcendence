@@ -39,7 +39,8 @@ export class GameHistoryController
 			player_one_score,
 			player_two_score,
 			custom,
-			game_modes
+			game_modes,
+			withdrew,
 		}) => {
 			history.push({
 				ref_id_one: player_one.reference_id,
@@ -51,14 +52,15 @@ export class GameHistoryController
 				custom: custom,
 				game_modes: game_modes,
 				date: date,
+				withdrew: withdrew,
 			});
 		});
 		return (history);
 	}
 
-	// @Post()
-	// async	addFinishedGame(@Body() gameData: PostFinishedGameDto)
-	// {
-	// 	this.historyService.addGameToHistory(gameData);
-	// }
+	@Post()
+	async	addFinishedGame(@Body() gameData: PostFinishedGameDto)
+	{
+		this.historyService.addGameToHistory(gameData);
+	}
 }

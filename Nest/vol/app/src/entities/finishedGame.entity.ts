@@ -27,4 +27,7 @@ export class FinishedGame
 
 	@Column()
 	date: Date;
+
+	@Column()
+	withdrew: number; // 0 or player 1 or player 2
 }

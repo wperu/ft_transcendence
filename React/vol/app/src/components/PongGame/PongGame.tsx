@@ -221,6 +221,7 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.state = RoomState.FINISHED;
                     pongCtx.room.setAsFinished(true);
                     pongCtx.room.ball.size = 0;
+                    pongCtx.room.withdrawal = data.withdrawal;
                 }
             });
         }

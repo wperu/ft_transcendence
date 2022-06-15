@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FinishedGame } from 'src/entities/finishedGame.entity';
 import { User } from 'src/entities/user.entity';
@@ -55,29 +55,36 @@ export class GameHistoryService {
 		new_game.player_two_score = game.score_two;
 		new_game.custom = game.custom;
 		new_game.game_modes = game.game_modes;
+		new_game.withdrew = game.withdrew;
 		try
 		{
 			ret = await this.finishedGames.save(new_game);
+			console.log("added game to history");
 		} catch (error)
 		{
 			console.error(error);
 			return ;
 		}
 
-		if (game.score_one > game.score_two)
+		if (game.custom)
 		{
-			this.usersService.addWin(user_one);
-			this.usersService.addLoss(user_two);
-		}
-		else if (game.score_two > game.score_one)
-		{
-			this.usersService.addWin(user_two);
-			this.usersService.addLoss(user_one);
-		}
-		else
-		{
-			this.usersService.addDraw(user_one);
-			this.usersService.addDraw(user_two);
+			if ((game.score_one > game.score_two && game.withdrew === 0)
+				|| game.withdrew === 2)
+			{
+				this.usersService.addWin(user_one);
+				this.usersService.addLoss(user_two);
+			}
+			else if ((game.score_two > game.score_one && game.withdrew === 0)
+				|| game.withdrew === 1)
+			{
+				this.usersService.addWin(user_two);
+				this.usersService.addLoss(user_one);
+			}
+			else
+			{
+				this.usersService.addDraw(user_one);
+				this.usersService.addDraw(user_two);
+			}
 		}
 		return (ret);
 	}

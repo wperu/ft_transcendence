@@ -3,6 +3,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./MatchHistory.css";
 import { ELevel, useNotifyContext } from "../../components/NotifyContext/NotifyContext";
+import { RoomOptions } from "../../Common/Game/GameConfig";
+
+enum EWhoWhithdrew
+{
+	none,
+	current,
+	opponent
+}
 
 interface matchProps
 {
@@ -12,9 +20,10 @@ interface matchProps
 	current_score: number;
 	opponent_score: number;
 	game_date: Date;
-	dashes: boolean;
+	ice: boolean;
 	double_ball: boolean;
 	custom: boolean;
+	withdrew: EWhoWhithdrew;
 }
 
 interface matchOption
@@ -25,7 +34,7 @@ interface matchOption
 interface settingsValue
 {
 	custom: boolean;
-	dashes: boolean;
+	ice: boolean;
 	double_ball: boolean;
 }
 
@@ -53,7 +62,7 @@ function MatchSettings(props: settingsValue)
 			return (
 				<div className="history_settings">
 					<div>
-						Dashes <OptionValue value={props.dashes} />
+						Ice Friction <OptionValue value={props.ice} />
 					</div>
 					<div>
 						Double ball <OptionValue value={props.double_ball} />
@@ -83,9 +92,13 @@ function Match(props: matchProps)
 {
 	function getOutcome()
 	{
-		if (props.current_score < props.opponent_score)
+		if (props.withdrew === EWhoWhithdrew.current
+			|| (props.withdrew === EWhoWhithdrew.none
+			&& props.current_score < props.opponent_score))
 			return ("defeat");
-		else if (props.current_score > props.opponent_score)
+		else if (props.withdrew === EWhoWhithdrew.opponent
+			|| (props.withdrew === EWhoWhithdrew.none
+			&& props.current_score > props.opponent_score))
 			return ("victory");
 		else
 			return ("draw");
@@ -111,7 +124,12 @@ function Match(props: matchProps)
 	return (
 		<li className="history_match">
 			<div className="history_match_infos">
-				<div className={getOutcome()}>{getOutcome()}</div>
+				<div className={getOutcome()}>
+					{getOutcome()}
+					<span className="history_withdrawal">
+						{props.withdrew !== EWhoWhithdrew.none ? "by withdrawal" : ""}
+					</span>
+				</div>
 				<div className="history_match_user">{props.current_user_name}</div>
 				<div className="history_match_score">{props.current_score}</div>
 				<div className="match_score_separator">|</div>
@@ -126,7 +144,7 @@ function Match(props: matchProps)
 					<span>{ parsTime() }</span>
 				</div>
 			</div>
-			<MatchSettings custom={props.custom} dashes={props.dashes}
+			<MatchSettings custom={props.custom} ice={props.ice}
 			double_ball={props.double_ball} />
 		</li>
 	);
@@ -159,12 +177,28 @@ function MatchHistory(props: historyProps)
 			console.log(result);
 			setHistory(result);
 		})
-	}, [props.ref_id, props.access_code]);
+	}, [props.ref_id, props.access_code, notify]);
+
+	function getWhoWithdrew(input: number, oneIsOpponent: boolean) : EWhoWhithdrew
+	{
+		if (input === 0)
+			return (EWhoWhithdrew.none);
+		if (oneIsOpponent)
+		{
+			if (input === 1)
+				return (EWhoWhithdrew.opponent);
+			return (EWhoWhithdrew.current);
+		}
+		if (input === 1)
+			return (EWhoWhithdrew.current);
+		return (EWhoWhithdrew.opponent);
+	} 
 
 	return (
 		<ul id="match_history">
 			{
-				(history.map(({
+				(history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+					.map(({
 					date,
 					ref_id_one,
 					ref_id_two,
@@ -172,6 +206,8 @@ function MatchHistory(props: historyProps)
 					score_two,
 					username_one,
 					username_two,
+					withdrew,
+					game_modes,
 					custom}, index) => (
 					<Match
 					key={index.toString()}
@@ -181,13 +217,14 @@ function MatchHistory(props: historyProps)
 					current_score={(ref_id_one === props.ref_id)?score_one:score_two}
 					opponent_score={(ref_id_one === props.ref_id)?score_two:score_one}
 					game_date={date}
-					dashes={false}
-					double_ball={false}
+					ice={(game_modes & RoomOptions.ICE_FRICTION) > 0}
+					double_ball={(game_modes & RoomOptions.DOUBLE_BALL) > 0}
 					custom={custom}
+					withdrew={getWhoWithdrew(withdrew, (ref_id_two === props.ref_id))}
 					/>
-				))).reverse()
+				)))
+				// ))).reverse()
 				// )))
-				// ))).sort((a, b) => new Date(a.props.date).parsTime() - new Date(b.props.date).parsTime())
 			}
 		</ul>
 	);

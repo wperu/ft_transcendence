@@ -29,9 +29,11 @@ const PongEndGame = () => {
         const opponent = getPongOpponent(pongCtx, user);
 
         if (player && opponent)
-        { 
-            if (player.points < GameConfig.DEFAULT_MAX_SCORE)
-                message = 'You suck...'
+        {
+            if (pongCtx.room?.withdrawal === true)
+                message = "You won by withdrawal";
+            else if (player.points < GameConfig.DEFAULT_MAX_SCORE)
+                message = 'You suck...';
 
             return (
                 <div id="end-msgbox">

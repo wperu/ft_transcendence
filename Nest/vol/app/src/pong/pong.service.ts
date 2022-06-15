@@ -14,6 +14,9 @@ import { CustomRoom } from './interfaces/CustomRoom';
 import { UserCustomRoomDTO } from 'src/Common/Dto/pong/UserCustomRoomDTO';
 import { ChatService } from 'src/chat/chat.service';
 import { UpdateCustomRoomDTO } from 'src/Common/Dto/pong/UpdateCustomRoomDTO';
+import { UpdatePongPointsDTO } from 'src/Common/Dto/pong/UpdatePongPointsDTO';
+import { GameHistoryService } from 'src/game-history/game-history.service';
+import { PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
 
 
 // REVIEW do we want multiple socket for pong user ?
@@ -35,6 +38,7 @@ export class PongService {
     constructor(
         private usersService: UsersService,
         private tokenService: TokenService,
+        private historyService: GameHistoryService,
 
 		@Inject(forwardRef(() => ChatService))
 		private chatService: ChatService,
@@ -215,7 +219,7 @@ export class PongService {
         this.waitingPool.splice(this.waitingPool.indexOf(other), 1);
 		this.initPlayer(other.user);
 		this.initPlayer(user);
-        let room = this.gameService.initRoom(other.user, user);
+        let room = this.gameService.initRoom(false, other.user, user);
         this.rooms.push(room);
         this.gameService.startRoom(room);
     }
@@ -296,6 +300,26 @@ export class PongService {
         else if (room !== undefined && room.state !== RoomState.PAUSED)
         {
             room.state = RoomState.PAUSED;
+			room.reconnectTimeout = setTimeout(() => {
+				room.player_1.in_game = undefined;
+				room.player_2.in_game = undefined;
+				room.state = RoomState.FINISHED;
+				this.server.to(room.id).emit("ROOM_FINISHED", {
+                    player_1_score: room.player_1.points,
+                    player_2_score: room.player_2.points,
+					withdrawal: true,
+                } as UpdatePongPointsDTO);
+				this.historyService.addGameToHistory({
+					ref_id_one: room.player_1.reference_id,
+					ref_id_two: room.player_2.reference_id,
+					score_one: room.player_1.points,
+					score_two: room.player_2.points,
+					game_modes: room.options,
+					custom: room.custom,
+					withdrew: (user.reference_id === room.player_1.reference_id)
+						? 1 : 2,
+				} as PostFinishedGameDto);
+			}, 10000);
             //this.boss.cancel(room.job_id);
             this.server.to(room.id).emit("PLAYER_DISCONNECT");
             console.log("player disconnected")
@@ -317,6 +341,8 @@ export class PongService {
                 player = room.player_2;
             user.socket = client;
             player.socket = user.socket;
+			if (room.reconnectTimeout)
+				clearTimeout(room.reconnectTimeout);
             this.server.to(room.id).emit("PLAYER_RECONNECT");
             user.socket.join(room.id);
             user.socket.emit("RECONNECT_YOU", {
@@ -583,7 +609,7 @@ export class PongService {
 		const other = croom.users[1];
 
 		croom.users.splice(0, 2); //rm player
-		const room = this.gameService.initRoom(owner, other, croom.users, croom.opts);
+		const room = this.gameService.initRoom(true, owner, other, croom.users, croom.opts);
         room.options = croom.opts;
 
 		// for game options croom.opts //todo
