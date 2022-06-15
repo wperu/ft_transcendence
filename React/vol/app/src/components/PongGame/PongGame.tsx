@@ -7,6 +7,7 @@ import { IPongContext, IPongUser, RoomOptions, RoomState, usePongContext } from 
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
+import PongRequestRoom from "./PongRequestRoom/PongRequestRoom";
 
 // TODO Make matchmaking page with options             
 // TODO - Double ball mode                               
@@ -132,8 +133,14 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.ball.vel_x = data.vel_x;
                     pongCtx.room.ball.vel_y = data.vel_y;
 
+                    console.log("update ball");
+                    console.log(pongCtx.room.ball2);
+                    console.log(data.ball2);
+
                     if (pongCtx.room.options & RoomOptions.DOUBLE_BALL && pongCtx.room.ball2 !== undefined && data.ball2 !== undefined)
                     {
+                        console.log("recv double ball update");
+                        console.log(data.ball2);
                         pongCtx.room.ball2.pos_x = data.ball2.ball_x;
                         pongCtx.room.ball2.pos_y = data.ball2.ball_y;
                         pongCtx.room.ball2.vel_x = data.ball2.vel_x;

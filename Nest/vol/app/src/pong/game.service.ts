@@ -182,6 +182,14 @@ export class GameService {
         room.player_1.key = 0;
         room.player_2.key = 0;
 
+        if (room.ball2 !== undefined)
+        {
+            room.ball2.pos_x = 1;
+            room.ball2.pos_y = 0.5;
+            room.ball2.vel_x = -room.ball.vel_x;
+            room.ball2.vel_y = randomInt(-100, 100) / 1000
+        }
+
         if (room.state === RoomState.PLAYING)
         {
             this.server.to(room.id).emit("LOAD_GAME");
@@ -292,6 +300,7 @@ export class GameService {
     {
         if (room.options & RoomOptions.DOUBLE_BALL && room.ball2 !== undefined)
         {
+            console.log("updating double ball");
             let ball_infos: UpdatePongBallDTO = {
                 ball_x: room.ball.pos_x,
                 ball_y: room.ball.pos_y,
@@ -305,7 +314,7 @@ export class GameService {
                     vel_y: room.ball2.vel_y,
                 }
             };
-            this.server.to(room.id).emit('UPDATE_PONG_BALL2',  ball_infos);
+            this.server.to(room.id).emit('UPDATE_PONG_BALL',  ball_infos);
         }
         else
         {
