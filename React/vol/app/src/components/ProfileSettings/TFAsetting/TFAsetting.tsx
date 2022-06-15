@@ -75,7 +75,7 @@ function TwoFactorAuthSetting(props: twoFAProps)
 					<QRCode  value={props.qrUri} size={124} />
 				</div>
 				<div className="tfa-popup-content">
-					Enter your code to turn {isTwoFactor ? 'off' : 'on'} google authentificator
+					Enter your token to turn {isTwoFactor ? 'off' : 'on'} google authentificator
 					<input id="tfa_key_input" type="text" onKeyPress={pressedSend} maxLength={6}/>
 				</div>
 			</Popup>

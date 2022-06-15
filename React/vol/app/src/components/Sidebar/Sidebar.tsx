@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import "./Sidebar.css";
 import Chat from "../Chat/Chat";
 import Channels from "../Channels/Channels";
@@ -10,7 +10,7 @@ interface prop
 	currentTab: ECurrentTab;
 }
 
-function Content(props: prop)
+const Content = memo((props: prop) =>
 {
 	if (props.currentTab === ECurrentTab.chat)
 		return (<Chat />);
@@ -18,9 +18,9 @@ function Content(props: prop)
 		return (<Channels />);
 	else
 		return (<Friends />);
-}
+})
 
-function Sidebar()
+const Sidebar = (() => 
 {
 	const chatCtx = useChatContext();
 
@@ -80,7 +80,7 @@ function Sidebar()
 				</div>
 			</div>
 		)
-}
+})
 
 
 

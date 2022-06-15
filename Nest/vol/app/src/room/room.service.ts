@@ -7,7 +7,6 @@ import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ChatMessageService } from './room.message.service';
-import { urlencoded } from 'express';
 
 @Injectable()
 export class RoomService
@@ -173,11 +172,15 @@ export class RoomService
 		let roomRel	: ChatRoomRelationEntity	= new ChatRoomRelationEntity();
 
 		if (isDm !== true && await this.findRoomByName(name) !== undefined) //useless check if is Dm
-			return "room already exist";
+			return "Room already exists";
 		if (isDm && user2 === undefined)
-			return "User doesn't exist !";
+			return "User doesn't exist";
 		if (isDm && await this.findDm(user, user2)) //fix
-			return "dm room already exist";
+			return "DM room already exists";
+		if (name.length < 3 || name.length > 16)
+			return "Name length must be between 3 and 16";
+		if (password_key && password_key.length > 16)
+			return "Password length must be less than 16";
 	/*	if (user.reference_id === user.reference_id)
 			return "can't dm with "*/
 
@@ -549,10 +552,11 @@ export class RoomService
 		const room = await this.findRoomById(id);
 
 		if (room === undefined)
-		return ("Room doesn't exist !")
+			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
-
+		if (password !== null && (password.length > 16))
+			return ("Password must be less than 16 characters long");
 		if (room.owner !== refId && await this.isAdmin(room.id, refId) === false)
 			return "Only the room owner can change the password !";
 		if (password === null)

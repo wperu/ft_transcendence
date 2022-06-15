@@ -6,7 +6,7 @@ import { ProvideAuth } from '../auth/useAuth';
 import { RequireAuth } from '../auth/RequireAuth';
 import Callback from '../pages/Callback/Callback';
 import SidebarWithContext from '../components/Sidebar/SidebarWithContext';
-import { PrintNotify, ProvideNotify } from '../components/NotifyContext/NotifyContext';
+import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
 import { FakeUser } from '../pages/FakeUser/FakeUser';
 import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
@@ -19,7 +19,6 @@ function AppRoute() : JSX.Element
 {
 	const element =
 	<ProvideNotify>
-		<PrintNotify/>
 		<ProvideAuth>
 			<BrowserRouter>
 				<Routes>

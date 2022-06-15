@@ -89,10 +89,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 		if (user === undefined)
-		return ;//todo trown error and disconnect
+			return ;//todo trown error and disconnect
 
 		await this.chatService.createRoom(client, user, payload);
-
+		
 	}
 
 
@@ -310,14 +310,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		this.logger.log(`Client disconnected: ${client.id}`);
 		//this.rooms.forEach(room => {this.leaveRoom(client,room.name)});
 
-		let userInfo : ChatUser | undefined = await this.chatService.disconnectClient(client);
-		if (userInfo !== undefined)
-		{
-			if(userInfo.socket.length === 0)
-			{
-				this.chatService.removeUser(userInfo.reference_id);
-			}
-		}
+		await this.chatService.disconnectClient(client);
 	}
 
 	/**

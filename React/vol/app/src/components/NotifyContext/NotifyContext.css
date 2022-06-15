@@ -21,6 +21,7 @@
 	padding: 0.5vmin 2vmin;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 }
 
 .error

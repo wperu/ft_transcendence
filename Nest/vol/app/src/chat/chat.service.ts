@@ -132,7 +132,7 @@ export class ChatService {
     }
 
 
-	async disconnectClient(socket: Socket): Promise<ChatUser | undefined>
+	async disconnectClient(socket: Socket): Promise<undefined>
 	{
 		const data: Object = this.tokenService.decodeToken(socket.handshake.auth.token);
 
@@ -146,7 +146,12 @@ export class ChatService {
 			return undefined;//throw error
 
 		chatUser.socket.splice(chatUser.socket.findIndex((s) => { return s.id === socket.id }), 1);
-		return (chatUser);
+
+
+		if (chatUser.socket.length === 0)
+		{
+			this.removeUser(chatUser.reference_id);
+		}
 	}
 
 
@@ -438,7 +443,7 @@ export class ChatService {
 
 	removeUser(refId: number)
 	{
-		this.users.splice(this.users.findIndex((u) => { return u.reference_id === refId}))
+		this.users.splice(this.users.findIndex((u) => { return u.reference_id === refId}), 1);
 	}
 
 	isOwner(user: ChatUser, room: Room): boolean

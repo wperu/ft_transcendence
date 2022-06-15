@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
-import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
+import { useNotifyContext, ELevel, useAddNotice } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { GameInviteDTO } from "../../../Common/Dto/chat/gameInvite";
@@ -101,7 +101,7 @@ const generateKey = (id : number) => {
 
 function useChatProvider() : IChatContext
 {
-	const {addNotice}	= useNotifyContext();
+	const {addNotice} = useNotifyContext();
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/chat", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{
 			token: useAuth().user?.accessCode,
@@ -407,23 +407,12 @@ function useChatProvider() : IChatContext
 		let news : boolean = false;
 
 		setNotification(prev => {
-			/*for (let n of notif)
-			{
-				prev.splice(prev.findIndex((p) => (n.type === p.type && p.room_id && n.room_id && n.room_id === p.room_id && p.refId === n.refId)), 1)
-			}*/
-
-			/*for (let p of prev)
-			{
-				console.log(p);
-				notif.splice(notif.findIndex((n) => (n.type === ENotification.GAME_REQUEST && p.room_id && p.room_id === n.room_id && p.refId === n.refId) ), 1);
-			}
-
 			if (notif.length > 0)
-				news = true;*/
+				news = true;
 			
 			return [...prev, ...notif];
 		});
-		
+
 		if (news)
 			addNotice(ELevel.info, "You have a new notification", 3000);
 	}, [addNotice]);

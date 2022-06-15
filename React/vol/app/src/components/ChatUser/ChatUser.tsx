@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import {ELevelInRoom, useChatContext} from "../Sidebar/ChatContext/ProvideChat"
@@ -18,21 +18,21 @@ interface	props
 	isBanned: boolean;
 }
 
-function ChatUser(data: props)
+const ChatUser = memo((data: props) =>
 {
-	const { friendsList } = useChatContext();
+	//const { friendsList } = useChatContext();
 	const [isFriend, setIsFriend] = useState<boolean>(false);
 	const { user } = useAuth();
 
-	useEffect(() => {
+	/*useEffect(() => {
 		for (const f of friendsList)
 		{
 			if (f.reference_id === data.refId)
 				setIsFriend(true);
 		}
-	}, [friendsList, data.refId]);
+	}, [friendsList, data.refId]);*/
 
-	function Buttons()
+	const Buttons = useCallback(() =>
 	{
 		if (data.refId === user?.reference_id)
 			return <></>; 
@@ -84,9 +84,9 @@ function ChatUser(data: props)
 				);
 			}
 		}
-	}
+	}, [data, isFriend, user?.reference_id])
 
-	function getSym(e: ELevelInRoom)
+	const getSym = useCallback((e: ELevelInRoom) =>
 	{
 		if (e === ELevelInRoom.owner)
 			return ' 👑';
@@ -95,7 +95,7 @@ function ChatUser(data: props)
 		else
 			return '';
 
-	}
+	}, [])
 
 	return (
 		<div className="chat_user" >
@@ -105,6 +105,6 @@ function ChatUser(data: props)
 			<Buttons />
 		</div>
 	);
-}
+})
 
 export default ChatUser;
