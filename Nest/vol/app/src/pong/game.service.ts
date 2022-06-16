@@ -86,6 +86,17 @@ export class GameService {
 
         this.logger.log("Room ended");
         // TODO push room in history 
+
+        this.historyService.addGameToHistory({
+            ref_id_one: room.player_1.reference_id,
+            ref_id_two: room.player_2.reference_id,
+            score_one: room.player_1.points,
+            score_two: room.player_2.points,
+            game_modes: room.options,
+            custom: room.custom,
+            withdrew: 0
+        } as PostFinishedGameDto);
+
         return ;
     }
 
@@ -178,15 +189,17 @@ export class GameService {
 
         // FIX disconnection here
         await sleep();
-
-        room.ball.pos_x = 1;
-        room.ball.pos_y = 0.5;
-        room.ball.vel_x = randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
-        room.ball.vel_y = randomInt(-100, 100) / 1000
-        room.player_1.position = 0.5;
-        room.player_2.position = 0.5;
-        room.player_1.key = 0;
-        room.player_2.key = 0;
+        if (room.state === RoomState.PLAYING)
+        {
+            room.ball.pos_x = 1;
+            room.ball.pos_y = 0.5;
+            room.ball.vel_x = randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
+            room.ball.vel_y = randomInt(-100, 100) / 1000
+            room.player_1.position = 0.5;
+            room.player_2.position = 0.5;
+            room.player_1.key = 0;
+            room.player_2.key = 0;
+        }
 
         if (room.ball2 !== undefined)
         {
@@ -497,7 +510,7 @@ export class GameService {
                     player_2_score: room.player_2.points,
                     withdrawal: false,
                 } as UpdatePongPointsDTO)
-                this.historyService.addGameToHistory({
+               /* this.historyService.addGameToHistory({
 					ref_id_one: room.player_1.reference_id,
 					ref_id_two: room.player_2.reference_id,
 					score_one: room.player_1.points,
@@ -505,7 +518,7 @@ export class GameService {
 					game_modes: room.options,
 					custom: room.custom,
 					withdrew: 0
-				} as PostFinishedGameDto);
+				} as PostFinishedGameDto); */
                 room.player_1.in_game = undefined;
                 room.player_2.in_game = undefined;
                 room.state = RoomState.FINISHED;

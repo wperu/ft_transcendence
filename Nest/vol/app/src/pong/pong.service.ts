@@ -4,9 +4,9 @@ import { TokenService } from 'src/auth/token.service';
 import { UserToken } from 'src/Common/Dto/User/UserToken';
 import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { PongRoom, RoomOptions, RoomState } from './interfaces/PongRoom';
+import { PongRoom, RoomState } from './interfaces/PongRoom';
 import { PongUser } from './interfaces/PongUser';
-import { GameConfig } from 'src/Common/Game/GameConfig';
+import { GameConfig, RoomOptions } from 'src/Common/Game/GameConfig';
 import { ReconnectPlayerDTO } from 'src/Common/Dto/pong/ReconnectPlayerDTO';
 import { PongModes, PongPool } from './interfaces/PongPool';
 import { GameService } from './game.service';
@@ -287,7 +287,8 @@ export class PongService {
             return ;
         }
 
-        if (room !== undefined && room.state === RoomState.PAUSED)
+        if (room !== undefined && room.state === RoomState.PAUSED 
+			&& (!room.player_1.socket.connected && !room.player_2.socket.connected))
         {
             room.player_1.in_game = undefined;
             room.player_2.in_game = undefined;
@@ -297,9 +298,13 @@ export class PongService {
             //console.log("room ended by disconnection")
             // TODO push room in history
         }
-        else if (room !== undefined && room.state !== RoomState.PAUSED)
+        else if (room !== undefined && room.state !== RoomState.PAUSED
+		 && (room.player_1.socket.connected || room.player_2.socket.connected))
         {
             room.state = RoomState.PAUSED;
+			if (room.reconnectTimeout !== undefined)
+				clearTimeout(room.reconnectTimeout);
+
 			room.reconnectTimeout = setTimeout(() => {
 				room.player_1.in_game = undefined;
 				room.player_2.in_game = undefined;
@@ -309,7 +314,7 @@ export class PongService {
                     player_2_score: room.player_2.points,
 					withdrawal: true,
                 } as UpdatePongPointsDTO);
-				this.historyService.addGameToHistory({
+				/*this.historyService.addGameToHistory({
 					ref_id_one: room.player_1.reference_id,
 					ref_id_two: room.player_2.reference_id,
 					score_one: room.player_1.points,
@@ -318,8 +323,9 @@ export class PongService {
 					custom: room.custom,
 					withdrew: (user.reference_id === room.player_1.reference_id)
 						? 1 : 2,
-				} as PostFinishedGameDto);
+				} as PostFinishedGameDto);*/
 			}, 10000);
+
             //this.boss.cancel(room.job_id);
             this.server.to(room.id).emit("PLAYER_DISCONNECT");
             console.log("player disconnected")
@@ -375,6 +381,11 @@ export class PongService {
             console.log("player reconnected")
 
             new Promise(async () => setTimeout(async () => {
+				if (!room.player_1.socket.connected || !room.player_2.socket.connected)
+				{
+					this.server.to(room.id).emit("PLAYER_DISCONNECT");
+					return ;
+				}
                 console.log("starting");
                 room.state = RoomState.PLAYING;
                 this.gameService.sendBallUpdate(room);
