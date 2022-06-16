@@ -1,27 +1,35 @@
 import { memo, useState } from "react";
-import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
+import { chatContext ,useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import ChatTab from "../ChatTab/ChatTab";
 import OwnerChannelSettings from "../OwnerChannelSettings/OwnerChannelSettings";
 import ChannelSettings from "../ChannelSettings/ChannelSettings";
 import ThisListIsEmpty from "../ThisListIsEmpty/ThisListIsEmpty";
 import "./Chat.css";
 
-
-const Chat = memo(() =>
+const Chat = () =>
 {
-	const chatCtx = useChatContext();
+	return (
+		<chatContext.Consumer>
+			{value => (<ChatConsumer currentRoom={value.currentRoom} ></ChatConsumer>)}
+		</chatContext.Consumer>
+	)
+}
+
+const ChatConsumer = memo((prop: { currentRoom: any }) =>
+{
+	//const prop = useChatContext();
 	const [currentTab, setCurrentTab] = useState<string>("chat");
 
 
 	function Content() : JSX.Element
 	{
-		if (chatCtx.currentRoom !== undefined)
+		if (prop.currentRoom !== undefined)
 		{
 			if (currentTab === "chat")
 				return (<ChatTab />);
 			else
 			{
-				if (chatCtx.currentRoom.user_level === ELevelInRoom.owner && !chatCtx.currentRoom.isDm)
+				if (prop.currentRoom.user_level === ELevelInRoom.owner && !prop.currentRoom.isDm)
 					return (<OwnerChannelSettings />);
 				else
 					return (<ChannelSettings />);

@@ -1,34 +1,44 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { UserRoomDataDto } from "../../Common/Dto/chat/room";
 import ChatUser from "../ChatUser/ChatUser";
-import { useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
+import { chatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChannelUserList.css"
+
 
 function ChannelUserList ()
 {
-	const {socket, currentRoom, friendsList} = useChatContext();
-	const user_lvl = (currentRoom !== undefined ) ? currentRoom.user_level : ELevelInRoom.casual;
+	return (
+		<chatContext.Consumer>
+			{value => (<ChannelUserListTest currentRoom={value.currentRoom} socket={value.socket} ></ChannelUserListTest>)}
+		</chatContext.Consumer>
+	)
+}
+
+
+const ChannelUserListTest = memo((prop: {currentRoom: any, socket: any}) =>
+{
+	/*const {prop.socket, prop.currentRoom, /*friendsList} = useChatContext();*/
+	const user_lvl = (prop.currentRoom !== undefined ) ? prop.currentRoom.user_level : ELevelInRoom.casual;
 	const [userList, setUserList] = useState<Array<UserRoomDataDto>>([]);
 	const [ban, setBanned] = useState<JSX.Element[]>([]);
 
-	console.log("Rerender !");
-
 	useEffect(() => {
-		socket.on("USER_LIST", (data: Array<UserRoomDataDto>) => {
+		prop.socket.on("USER_LIST", (data: Array<UserRoomDataDto>) => {
 				setUserList(data);
 		})
 
 		return function cleanup() {
-			if (socket !== undefined)
+			if (prop.socket !== undefined)
 			{
-				socket.off("USER_LIST");
+				prop.socket.off("USER_LIST");
 			}
 		};
-	}, [socket, userList]);
+	}, [prop.socket]);
 
 	useEffect(() => {
-		socket.emit("USER_LIST", currentRoom?.id);
-	}, [socket, currentRoom, currentRoom?.id])
+		console.log("CALL USERLIST")
+		prop.socket.emit("USER_LIST", prop.currentRoom?.id);
+	}, [prop.socket, prop.currentRoom, prop.currentRoom?.id])
 
 
 	useEffect(() => {
@@ -44,16 +54,16 @@ function ChannelUserList ()
 							refId={user.reference_id}
 							currentUserLvl={user_lvl}
 							isMuted={user.isMuted}
-							isDm={currentRoom !== undefined? currentRoom.isDm : false}
+							isDm={prop.currentRoom !== undefined? prop.currentRoom.isDm : false}
 							isBanned={true}
-							isFriend={friendsList.find((f) => (f.reference_id === user.reference_id)) !== undefined}/>
+							isFriend={false/*friendsList.find((f) => (f.reference_id === user.reference_id)) !== undefined*/}/>
 						);
 				}
 				else
 					return (null!);
 			})
 		)
-	}, [userList, friendsList, currentRoom, user_lvl])
+	}, [userList,/* friendsList*/, prop.currentRoom, user_lvl])
 
 	return (
 		<div id="channel_users_list">
@@ -71,9 +81,9 @@ function ChannelUserList ()
 									refId={user.reference_id}
 									currentUserLvl={user_lvl}
 									isMuted={user.isMuted}
-									isDm={currentRoom !== undefined? currentRoom.isDm : false}
+									isDm={prop.currentRoom !== undefined? prop.currentRoom.isDm : false}
 									isBanned={false}
-									isFriend={friendsList.find((f) => (f.reference_id === user.reference_id)) !== undefined}/>
+									isFriend={true/*friendsList.find((f) => (f.reference_id === user.reference_id)) !== undefined*/}/>
 								);
 						}
 						else
@@ -87,7 +97,7 @@ function ChannelUserList ()
 			</ul>
 		</div>
 	);
-}
+})
 
 
 

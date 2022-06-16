@@ -1,7 +1,8 @@
+import { memo } from "react";
 import ChannelUserList from "../ChannelUserList/ChannelUserList";
 import "./ChannelSettings.css";
 
-function ChannelSettings ()
+const ChannelSettings = memo(() =>
 {
 	var style = { "--additional_settings_space": "0vh" } as React.CSSProperties;
 
@@ -10,6 +11,6 @@ function ChannelSettings ()
 			<ChannelUserList />
 		</div>
 	);
-}
+})
 
 export default ChannelSettings;

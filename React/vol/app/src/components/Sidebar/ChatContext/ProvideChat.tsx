@@ -91,7 +91,7 @@ interface IChatContext
 
 	friendsList:			Array<UserDataDto>;
 	blockList:				Array<UserDataDto>;
-	//RequestList:		Array<UserDataDto>;
+
 	invitePlayer: (refId?: number | undefined, room_id?: number | undefined) => void;
 }
 
@@ -555,7 +555,7 @@ function useChatProvider() : IChatContext
     });
 }
 
-const chatContext = createContext<IChatContext>(null!);
+export const chatContext = createContext<IChatContext>(null!);
 
 
 /**

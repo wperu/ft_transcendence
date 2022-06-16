@@ -22,6 +22,15 @@ interface	props
 const ChatUser = memo((data: props) =>
 {
 	const { user } = useAuth();
+	const { friendsList } = useChatContext();
+	const [isFriend, setIsFriend] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (friendsList.find((f) => (f.reference_id === data.refId)))
+			setIsFriend(true);
+		else
+			setIsFriend(false);
+	}, [friendsList, user, data.refId])
 
 	const Buttons = useCallback(() =>
 	{
@@ -34,7 +43,7 @@ const ChatUser = memo((data: props) =>
 					<DirectMessage name={data.targetUsername} refId={data.refId}/>
 					<InviteUserButton  refId={data.refId}/>
 					<AddFriendButton user_name={data.targetUsername}
-							already_friend={data.isFriend} refId={data.refId}/>
+							already_friend={isFriend} refId={data.refId}/>
 					<BlockUserButton user_name={data.targetUsername}
 						already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 				</div>
@@ -49,7 +58,7 @@ const ChatUser = memo((data: props) =>
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={data.isFriend} refId={data.refId}/>
+							already_friend={isFriend} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
@@ -64,7 +73,7 @@ const ChatUser = memo((data: props) =>
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={data.isFriend} refId={data.refId}/>
+							already_friend={isFriend} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}
 							already_admin={data.targetUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
@@ -75,7 +84,7 @@ const ChatUser = memo((data: props) =>
 				);
 			}
 		}
-	}, [data, user?.reference_id])
+	}, [data, user?.reference_id, isFriend])
 
 	const getSym = useCallback((e: ELevelInRoom) =>
 	{
