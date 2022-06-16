@@ -405,8 +405,18 @@ function useChatProvider() : IChatContext
 
 	const addNotif = useCallback((notif: INotif[]) =>{
 		let news : boolean = false;
+		for (let n of notif)
+		{
+			if (n.refId !== undefined)
+			{
+				let idx = blockList.findIndex((b) => (n.refId === b.reference_id))
+				if (idx !== -1)
+					notif.splice(idx, 1);
+			}
+		}
 
 		setNotification(prev => {
+			
 			if (notif.length > 0)
 				news = true;
 			
@@ -415,7 +425,7 @@ function useChatProvider() : IChatContext
 
 		if (news)
 			addNotice(ELevel.info, "You have a new notification", 3000);
-	}, [addNotice]);
+	}, [addNotice, blockList]);
 
 	const rmNotif = useCallback((id: string) => {
 		setNotification(prev => {
