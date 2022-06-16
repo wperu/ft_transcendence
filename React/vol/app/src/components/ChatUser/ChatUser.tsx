@@ -16,21 +16,12 @@ interface	props
 	isMuted: boolean;
 	isDm: boolean;
 	isBanned: boolean;
+	isFriend: boolean;
 }
 
 const ChatUser = memo((data: props) =>
 {
-	//const { friendsList } = useChatContext();
-	const [isFriend, setIsFriend] = useState<boolean>(false);
 	const { user } = useAuth();
-
-	/*useEffect(() => {
-		for (const f of friendsList)
-		{
-			if (f.reference_id === data.refId)
-				setIsFriend(true);
-		}
-	}, [friendsList, data.refId]);*/
 
 	const Buttons = useCallback(() =>
 	{
@@ -43,7 +34,7 @@ const ChatUser = memo((data: props) =>
 					<DirectMessage name={data.targetUsername} refId={data.refId}/>
 					<InviteUserButton  refId={data.refId}/>
 					<AddFriendButton user_name={data.targetUsername}
-							already_friend={isFriend} refId={data.refId}/>
+							already_friend={data.isFriend} refId={data.refId}/>
 					<BlockUserButton user_name={data.targetUsername}
 						already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 				</div>
@@ -58,7 +49,7 @@ const ChatUser = memo((data: props) =>
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={isFriend} refId={data.refId}/>
+							already_friend={data.isFriend} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
 							already_blocked={data.isBlockedByCurrentUser} refId={data.refId}/>
 						<MuteUserButton user_name={data.targetUsername} refId={data.refId} isMuted={data.isMuted} />
@@ -73,7 +64,7 @@ const ChatUser = memo((data: props) =>
 						<DirectMessage name={data.targetUsername} refId={data.refId}/>
 						<InviteUserButton refId={data.refId}/>
 						<AddFriendButton user_name={data.targetUsername}
-							already_friend={isFriend} refId={data.refId}/>
+							already_friend={data.isFriend} refId={data.refId}/>
 						<PromoteUserButton user_name={data.targetUsername}
 							already_admin={data.targetUserLvl !== ELevelInRoom.casual} refId={data.refId}/>
 						<BlockUserButton user_name={data.targetUsername}
@@ -84,7 +75,7 @@ const ChatUser = memo((data: props) =>
 				);
 			}
 		}
-	}, [data, isFriend, user?.reference_id])
+	}, [data, user?.reference_id])
 
 	const getSym = useCallback((e: ELevelInRoom) =>
 	{

@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
 import { RcvMessageDto, RoomLeftDto, UserDataDto, RoomUpdatedDTO} from "../../../Common/Dto/chat/room";
-import { useNotifyContext, ELevel, useAddNotice } from "../../NotifyContext/NotifyContext";
+import { useNotifyContext, ELevel } from "../../NotifyContext/NotifyContext";
 import { NoticeDTO } from "../../../Common/Dto/chat/notice";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { GameInviteDTO } from "../../../Common/Dto/chat/gameInvite";

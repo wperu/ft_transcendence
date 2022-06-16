@@ -119,7 +119,7 @@ export function BanUserButton(prop: banProp)
 			chtCtx.socket.emit('ROOM_BAN', dto);
 		}
 		close();
-	}, [duration])
+	}, [duration, chtCtx.currentRoom, chtCtx.socket, prop.refId])
 
 	function unban()
 	{
