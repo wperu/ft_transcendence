@@ -68,7 +68,7 @@ function updatePlayer(room: IPongRoom, user: IUser, deltaTime: number)
         if (room.player_2.key === 0) 
             glidePlayer(room, room.player_2);
     }
-    else if (user.username === room.player_2.username)
+    else
     {
         if (room.player_2.key !== 0)
             movePlayer(room, room.player_2, deltaTime);

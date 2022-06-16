@@ -106,13 +106,18 @@ const PongGame = (props: CanvasProps) => {
 
 	}, [])
 
-    
+	useEffect(() => {
+		if (canvasRef.current)
+		{
+			canvasRef.current.width = window.innerWidth;
+			canvasRef.current.height =  window.innerHeight;
+		}
+	}, [])
+
     useEffect(() => {
         window.addEventListener('resize', () => {
             if (pongCtx.room && canvasRef.current)
             {
-                console.log("resizing: " + window.innerWidth + ", " + window.innerHeight);
-            
                 canvasRef.current.width = window.innerWidth;
                 canvasRef.current.height =  window.innerHeight;
             }
