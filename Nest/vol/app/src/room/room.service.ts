@@ -216,7 +216,7 @@ export class RoomService
 	}
 
 
-	async joinRoom(room: ChatRoomEntity, user: User, password_key: string) : Promise<ChatRoomEntity | string>
+	async joinRoom(room: ChatRoomEntity, user: User, password_key: string | null) : Promise<ChatRoomEntity | string>
 	{
 		if (room === undefined)
 			return ("no room exist !");

@@ -18,10 +18,12 @@ export class ChatPasswordService
 		return hash;
 	}
 
-	async isMatch(password: string, hash: string | null): Promise<boolean>
+	async isMatch(password: string | null, hash: string | null): Promise<boolean>
 	{
 		if (hash === null)
 			return true;
+		if (password === null)
+			return false;
 		
 		const ret = await bcrypt.compare(password, hash);
 
