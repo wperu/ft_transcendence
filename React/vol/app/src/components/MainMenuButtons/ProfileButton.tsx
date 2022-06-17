@@ -1,10 +1,7 @@
 import "./MainMenuButton.css";
-import { useNotifyContext, ELevel } from "../NotifyContext/NotifyContext";
 
 function ProfileButton ()
 {
-	const notify = useNotifyContext();
-
 	function ProfileClick ()
 	{
 	}

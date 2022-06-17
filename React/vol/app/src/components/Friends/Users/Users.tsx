@@ -2,7 +2,7 @@ import "./Users.css";
 import { BlockUserButton, InviteUserButton, AddFriendButton, DirectMessage }
 	from "../../UserBarButtons/UserBarButtons";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 interface	user_props
@@ -43,7 +43,7 @@ export function Friend(props: user_props)
 		return <></>;
 	}
 
-	const [status, setStatus] = useState<JSX.Element>(getStatus());
+	const [status] = useState<JSX.Element>(getStatus());
 
 	function get_opacity()
 	{

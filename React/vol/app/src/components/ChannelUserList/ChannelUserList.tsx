@@ -21,6 +21,7 @@ const ChannelUserListTest = memo((prop: {currentRoom: any, socket: any}) =>
 	const user_lvl = (prop.currentRoom !== undefined ) ? prop.currentRoom.user_level : ELevelInRoom.casual;
 	const [userList, setUserList] = useState<Array<UserRoomDataDto>>([]);
 	const [ban, setBanned] = useState<JSX.Element[]>([]);
+	const [users, setUsers] = useState<JSX.Element[]>([]);
 
 	useEffect(() => {
 		prop.socket.on("USER_LIST", (data: Array<UserRoomDataDto>) => {
@@ -42,6 +43,31 @@ const ChannelUserListTest = memo((prop: {currentRoom: any, socket: any}) =>
 
 
 	useEffect(() => {
+
+		setUsers(
+			userList.map((user) => {
+				if (!user.isBan)
+				{
+					return (
+							<ChatUser key={user.reference_id}
+							isBlockedByCurrentUser={false}
+							targetUserLvl={user.level}
+							targetUsername={user.username}
+							refId={user.reference_id}
+							currentUserLvl={user_lvl}
+							isMuted={user.isMuted}
+							isDm={prop.currentRoom !== undefined? prop.currentRoom.isDm : false}
+							isBanned={false}
+							/>
+						);
+				}
+				else
+				{
+					return (null!);
+				}
+			})
+		)
+
 		setBanned(
 			userList.map((user) => {
 				if (user.isBan)
@@ -56,42 +82,20 @@ const ChannelUserListTest = memo((prop: {currentRoom: any, socket: any}) =>
 							isMuted={user.isMuted}
 							isDm={prop.currentRoom !== undefined? prop.currentRoom.isDm : false}
 							isBanned={true}
-							isFriend={false/*friendsList.find((f) => (f.reference_id === user.reference_id)) !== undefined*/}/>
+							/>
 						);
 				}
 				else
 					return (null!);
 			})
 		)
-	}, [userList,/* friendsList*/, prop.currentRoom, user_lvl])
+	}, [userList, prop.currentRoom, user_lvl])
 
 	return (
 		<div id="channel_users_list">
 			<ul>
 				<span className="chat_user_status_tab">Users</span>
-				{
-					userList.map((user) => {
-						if (!user.isBan)
-						{
-							return (
-									<ChatUser key={user.reference_id}
-									isBlockedByCurrentUser={false}
-									targetUserLvl={user.level}
-									targetUsername={user.username}
-									refId={user.reference_id}
-									currentUserLvl={user_lvl}
-									isMuted={user.isMuted}
-									isDm={prop.currentRoom !== undefined? prop.currentRoom.isDm : false}
-									isBanned={false}
-									isFriend={true/*friendsList.find((f) => (f.reference_id === user.reference_id)) !== undefined*/}/>
-								);
-						}
-						else
-						{
-							return (null!);
-						}
-					})
-				}
+				{users}
 				<span className="chat_user_status_tab">Banned users</span>
 				{ban}
 			</ul>

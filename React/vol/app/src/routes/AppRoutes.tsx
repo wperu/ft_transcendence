@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import Profile from '../pages/profile/Profile';
 import HomeLoggedIn from '../pages/HomeLoggedIn/HomeLoggedIn';
 import HomeLoggedOut from '../pages/HomeLoggedOut/HomeLoggedOut';
@@ -22,15 +22,10 @@ function AppRoute() : JSX.Element
 		<ProvideAuth>
 			<BrowserRouter>
 				<Routes>
-
 					<Route path="/login" element={<HomeLoggedOut />}/>
 					<Route path="/login/callback" element={<Callback />}/>
-
-
-
 					<Route path="/dev_user" element={<FakeUser/>}/>
 					<Route path="*" element={<QuatreCentQuatre/>}/>
-
 					<Route element={<RequireAuth/>}>
 						<Route element={<>
 											<SidebarWithContext />

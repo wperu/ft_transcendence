@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import useIsFirstRender from "../../../hooks/useIsFirstRender";
+import React, { useEffect } from "react";
+import {  useNavigate } from "react-router-dom";
 import { usePongContext } from "../PongContext/ProvidePong";
 
 
@@ -12,16 +11,16 @@ function PongRequestRoom() : JSX.Element
 	useEffect(() => {
 		if (needReconect)
 		{
-				navigate(-1);
+				navigate("/matchmaking");
 				console.log("need to reconnect !");
 		}
-	}, [needReconect])
+	}, [needReconect, navigate])
 	
 	useEffect(() => {
 		console.log('render');
 		if (isAuth)
 			requestRoom();
-	}, [isAuth]);
+	}, [isAuth, requestRoom]);
 
 	return <></>
 }

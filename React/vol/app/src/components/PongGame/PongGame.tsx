@@ -7,11 +7,6 @@ import { IPongContext, IPongUser, RoomOptions, RoomState, usePongContext } from 
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
-import PongRequestRoom from "./PongRequestRoom/PongRequestRoom";
-
-// TODO Make matchmaking page with options             
-// TODO - Double ball mode                               
-// TODO - dash mode                              
 
 
 interface CanvasProps
@@ -86,9 +81,9 @@ const PongGame = (props: CanvasProps) => {
 					let player = getPongPlayer(pongCtx, user);
 					if (player !== undefined)
 					{
-						if ((event.key === "z" || event.key === "Z")
-						&& player.key === -1 || (event.key === "s" || event.key === "S")
-						&& player.key === 1)
+						if (((event.key === "z" || event.key === "Z")
+						&& player.key === -1) || ((event.key === "s" || event.key === "S")
+						&& player.key === 1))
 						{
 							player.key = 0;
 						
@@ -104,7 +99,7 @@ const PongGame = (props: CanvasProps) => {
 		});
 
 
-	}, [])
+	}, [pongCtx, user])
 
 	useEffect(() => {
 		if (canvasRef.current)
@@ -122,7 +117,7 @@ const PongGame = (props: CanvasProps) => {
                 canvasRef.current.height =  window.innerHeight;
             }
         })
-    }, [])
+    }, [pongCtx])
     
 
 
@@ -184,7 +179,7 @@ const PongGame = (props: CanvasProps) => {
                 }
             })
         }
-    }, [])
+    }, [pongCtx.room, user])
 
     useEffect(() => {
         if (pongCtx.room)
@@ -237,7 +232,7 @@ const PongGame = (props: CanvasProps) => {
                 }
             });
         }
-    }, [])
+    }, [pongCtx])
 
 	useRender(canvasRef, user!);
 

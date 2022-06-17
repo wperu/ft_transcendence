@@ -2,7 +2,7 @@ import { useNotifyContext, ELevel } from "../NotifyContext/NotifyContext";
 import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import ChannelUserList from "../ChannelUserList/ChannelUserList";
 import "./OwnerChannelSettings.css"
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import { RoomChangePassDTO } from "../../Common/Dto/chat/RoomRename";
 
 function OwnerChannelSettings ()
@@ -10,7 +10,6 @@ function OwnerChannelSettings ()
 	const {addNotice} = useNotifyContext();
 	const {socket, currentRoom} = useChatContext();
 	const style = { "--additional_settings_space": "30vh" } as React.CSSProperties;
-	const [update, setUpdate] = useState<boolean>(false);
 
 	const passwordSubmit = useCallback((event: React.SyntheticEvent) =>
 	{
@@ -37,9 +36,8 @@ function OwnerChannelSettings ()
 			}
 			target.password.value = "";
 			target.password_repeat.value = "";
-			//setUpdate(!update);
 		}
-	}, [addNotice, , socket, currentRoom, ])
+	}, [addNotice, socket, currentRoom])
 
 	const removePassword = useCallback(() =>
 	{
@@ -52,7 +50,6 @@ function OwnerChannelSettings ()
 				new_pass: null!,
 			};
 			socket.emit('ROOM_CHANGE_PASS', data);
-			//setUpdate(!update);
 		}
 	}, [socket, currentRoom])
 
@@ -95,10 +92,6 @@ const PasswordSettings = memo((prop : {isProtected: boolean, passwordSubmit: (ev
 			);
 		}
 	})
-/*
-const PasswordInput = memo(() => 
-{
-	return 
-})*/
+
 
 export default OwnerChannelSettings

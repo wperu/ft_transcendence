@@ -1,15 +1,9 @@
-import React, { useEffect, useState, KeyboardEvent } from "react";
+import React, { useEffect, useState, KeyboardEvent, useCallback } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import { ELevel, useNotifyContext } from "../../components/NotifyContext/NotifyContext";
 import "./Callback.css";
 
-// import ChangeablePP from "../../components/ProfileSettings/ChangeablePP/ChangeablePP";
-
-//TODO rm comm
-//TODO check error
-//todo complet form with PP
-//todo style/css
 function Callback()
 {
 	const { search  } = useLocation();
@@ -17,7 +11,7 @@ function Callback()
 	const [useTwoFactor, setUseTwoFactor] = useState<boolean>(true);
 	const notif = useNotifyContext();
 
-	function authUser(data: any = undefined)
+	const authUser = useCallback((data: any = undefined) =>
 	{
 		const searchParams	= new URLSearchParams(search);
 		const accessCode	= searchParams.get("code");
@@ -28,7 +22,7 @@ function Callback()
 		if (accessCode !== null)
 		{
 			const url = process.env.REACT_APP_API_URL + '/auth/token';
-			const response = axios({
+			axios({
 				method: 'post',
 				url: url,
 				headers: {
@@ -64,7 +58,7 @@ function Callback()
 		{
 			console.log('no code in query');
 		}
-	}
+	}, [notif, search])
 
 	useEffect(() => {
 		const searchParams	= new URLSearchParams(search);
@@ -79,12 +73,12 @@ function Callback()
 		{
 			setNeedForm(false);
 		}
-	}, [])
+	}, [search])
 
 	useEffect(() => {
 		if (needForm === false && useTwoFactor === false)
 			authUser();
-	}, [needForm])
+	}, [needForm, authUser, useTwoFactor])
 
 
 	function pressedSend(event: KeyboardEvent<HTMLInputElement>)
@@ -95,7 +89,7 @@ function Callback()
 		if (event.key === "Enter" && event.currentTarget.value.length > 0)
 		{
 			const url = process.env.REACT_APP_API_URL + '/auth/register';
-			const resp = axios({
+			axios({
 				method: 'post',
 				url: url,
 				headers: {

@@ -69,7 +69,7 @@ export interface ParticleSystem
 function to_hex(n: number) : string
 {
     let str = Number(~~n % 256).toString(16);
-    return str.length == 1 ? "0" + str : str;
+    return str.length === 1 ? "0" + str : str;
 };
 
 function to_hex_color(color: color) : string

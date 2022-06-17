@@ -1,6 +1,5 @@
-import { useRender } from "../PongRenderer";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+ import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../../../auth/useAuth";
 import { ReconnectPlayerDTO } from "../../../Common/Dto/pong/ReconnectPlayerDTO";
@@ -73,8 +72,6 @@ export interface IPongContext
     fx: FX,
 	searchRoom: () => void,
 	stopSearchRoom: () => void,
-	isRender: boolean,
-	//startRender: (canvasRef: React.RefObject<HTMLCanvasElement>, ctx: IPongContext) => void,
 	requestRoom: () => void,
 	needReconect : boolean,
 	reconnect: () => void,
@@ -91,7 +88,7 @@ function usePongProvider() : IPongContext
 			token: user?.accessCode,
 		}
 	}));
-	const [isRender, setIsRendering]	= useState<boolean>(false);
+
 	const [room, setRoom]				= useState<IPongRoom | null>(null);
 	const navigate						= useNavigate();
 	const [fx]							= useState<FX>(initFx());
@@ -193,7 +190,7 @@ function usePongProvider() : IPongContext
 			console.log("switching")
 			navigate(`/game/${room?.room_id}`, { replace: true });
         }
-    }, [inGame, navigate])
+    }, [inGame, navigate, room?.room_id])
 
 	const reconnect = useCallback(() => {
 		if (needReconect)
@@ -292,7 +289,6 @@ function usePongProvider() : IPongContext
         fx,
 		searchRoom,
 		stopSearchRoom,
-		isRender,
 		requestRoom,
 		needReconect,
 		reconnect,

@@ -4,7 +4,6 @@ import { InfoNotification, InviteNotification, NewFriendNotification } from "./N
 import "./Friends.css";
 import { INotif, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import useInterval from "../../hooks/useInterval";
-import { info } from "console";
 
 
 enum ENotification

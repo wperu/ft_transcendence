@@ -15,8 +15,6 @@ function ChangeableUsername(props: userProps)
 	const {user, setUser} = useAuth();
 	const notif = useNotifyContext();
 
-	
-	
 	const getUserName = useCallback(() => {
 		return user?.username
 	}, [user])
@@ -42,7 +40,6 @@ function ChangeableUsername(props: userProps)
 			data: data,
 		})
 		.then(res => {
-			//console.log(res);
 			if (user === null)
 				return ;
 			const newUser : IUser = {
@@ -64,7 +61,7 @@ function ChangeableUsername(props: userProps)
 		})
 
 		
-	}, [user, setUser, props.user.reference_id, props.user.accessCode])
+	}, [user, setUser, props.user.reference_id, props.user.accessCode, notif])
 
 	return (
 		<form id="current_profile_username" onSubmit={updateUsername}>

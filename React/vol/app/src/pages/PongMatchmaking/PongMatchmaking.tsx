@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
-import Reconnect from "../../components/Reconnect/Reconnect";
 import { Link } from "react-router-dom"
 import BackToMainMenuButton from "../../components/FooterButton/BackToMainMenuButton";
 import Spinner from "../../components/Spinner/Spinner";
@@ -12,7 +11,7 @@ import "./PongMatchmaking.css";
 function PongMatchmaking()
 {
 	const [isSearching, setIsSearching] = useState<boolean>(false);
-	const { searchRoom, stopSearchRoom, isAuth, socket, needReconect } = usePongContext();
+	const { searchRoom, stopSearchRoom, socket } = usePongContext();
 
 	const changeSearchStatut = useCallback(() => {
 		if (!isSearching)
@@ -32,7 +31,7 @@ function PongMatchmaking()
 			setIsSearching(isSearching);
 		})
 		return (() => stopSearchRoom());
-	}, [socket])
+	}, [socket, stopSearchRoom])
 
 	useEffect(() => {
 		if (isSearching)
@@ -44,8 +43,6 @@ function PongMatchmaking()
 		}
 	}, [isSearching])
 
-	// <div>Auth : {(isAuth) ? "True" : "False"}</div>
-	// <div>Searching : {(isSearching) ? "True" : "False"}</div>
 	return (
 		<div id="matchmaking_page">
 			

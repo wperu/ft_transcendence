@@ -1,7 +1,8 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
-import {ELevelInRoom, useChatContext} from "../Sidebar/ChatContext/ProvideChat"
+import { UserDataDto } from "../../Common/Dto/chat/room";
+import {ELevelInRoom, chatContext, useChatContext} from "../Sidebar/ChatContext/ProvideChat"
 import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
 	PromoteUserButton, AddFriendButton, DirectMessage} from "../UserBarButtons/UserBarButtons"
 import "./ChatUser.css"
@@ -16,21 +17,43 @@ interface	props
 	isMuted: boolean;
 	isDm: boolean;
 	isBanned: boolean;
-	isFriend: boolean;
 }
 
-const ChatUser = memo((data: props) =>
+
+interface propsWithCtx extends props
+{
+	friendsList : UserDataDto[]
+}
+
+const ChatUser = (prop: props) =>
+{
+	return (
+		<chatContext.Consumer>
+			{value => (<ChatUserConsumer 	friendsList={value.friendsList}
+											currentUserLvl={prop.currentUserLvl}
+											targetUserLvl={prop.targetUserLvl}
+											refId={prop.refId}
+											targetUsername={prop.targetUsername}
+											isBlockedByCurrentUser={prop.isBlockedByCurrentUser}
+											isMuted={prop.isMuted}
+											isDm={prop.isDm}
+											isBanned={prop.isBanned} />)}
+		</chatContext.Consumer>
+	)
+}
+
+const ChatUserConsumer = memo((data: propsWithCtx) =>
 {
 	const { user } = useAuth();
-	const { friendsList } = useChatContext();
+//	const { friendsList } = useChatContext();
 	const [isFriend, setIsFriend] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (friendsList.find((f) => (f.reference_id === data.refId)))
+		if (data.friendsList.find((f) => (f.reference_id === data.refId)))
 			setIsFriend(true);
 		else
 			setIsFriend(false);
-	}, [friendsList, user, data.refId])
+	}, [data.friendsList, user, data.refId])
 
 	const Buttons = useCallback(() =>
 	{

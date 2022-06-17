@@ -68,8 +68,6 @@ function ChatTab()
 
 	useEffect( () =>
 	{
-		//if (currentRoom)
-		//	currentRoom.nb_notifs = 0;
 		if (msg_list_ref.current && updated === true)
 		{
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;

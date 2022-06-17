@@ -8,10 +8,10 @@ import AddFriendLogo from "../../ressources/images/add-friend.png";
 import AcceptInvitationLogo from "../../ressources/images/accept.png";
 import ChatLogo from "../../ressources/images/chatting.png";
 import CloseLogo from "../../ressources/images/close.png";
-import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+import { chatContext, useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import { RoomMuteDto, RoomPromoteDto, RoomBanDto, CreateRoomDTO } from "../../Common/Dto/chat/room";
 import Popup from "reactjs-popup";
-import React, { useCallback, useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface Prop
@@ -23,11 +23,6 @@ interface Prop
 interface muteProp extends Prop
 {
 	isMuted: boolean;
-}
-
-interface banProp extends Prop
-{
-	isBanned: boolean;
 }
 
 interface promoteProp
@@ -90,9 +85,29 @@ export function InviteUserButton(prop: gameInvitationProp)
 	);
 }
 
-export function BanUserButton(prop: banProp)
+interface banProp extends Prop
 {
-	const chtCtx = useChatContext();
+	isBanned: boolean;
+}
+
+interface banWithContextProp extends banProp
+{
+	currentRoom: any
+	socket: any
+}
+
+export const BanUserButton = (prop: banProp) =>
+{
+	return (
+		<chatContext.Consumer>
+			{value => (<BanUserButtonConsumer user_name={prop.user_name} refId={prop.refId} isBanned={prop.isBanned} currentRoom={value.currentRoom} socket={value.socket} />)}
+		</chatContext.Consumer>
+	)
+}
+
+
+const BanUserButtonConsumer = memo((prop: banWithContextProp) =>
+{
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [duration, setDuration] = useState<number>(0);
 
@@ -107,32 +122,32 @@ export function BanUserButton(prop: banProp)
 	}
 
 	const ban = useCallback(() => {
-		if (chtCtx.currentRoom !== undefined)
+		if (prop.currentRoom !== undefined)
 		{
 			const dto : RoomBanDto =
 			{
-				id: chtCtx.currentRoom.id,
+				id: prop.currentRoom.id,
 				refId: prop.refId,
 				expires_in: duration,
 				isBan: true,
 			}
-			chtCtx.socket.emit('ROOM_BAN', dto);
+			prop.socket.emit('ROOM_BAN', dto);
 		}
 		close();
-	}, [duration, chtCtx.currentRoom, chtCtx.socket, prop.refId])
+	}, [duration, prop.currentRoom, prop.socket, prop.refId])
 
 	function unban()
 	{
-		if (chtCtx.currentRoom !== undefined)
+		if (prop.currentRoom !== undefined)
 		{
 			const dto : RoomBanDto =
 			{
-				id: chtCtx.currentRoom.id,
+				id: prop.currentRoom.id,
 				refId: prop.refId,
 				expires_in: -1,
 				isBan: false,
 			}
-			chtCtx.socket.emit('ROOM_BAN', dto);
+			prop.socket.emit('ROOM_BAN', dto);
 		}
 		close();
 	}
@@ -186,7 +201,7 @@ export function BanUserButton(prop: banProp)
 			</Popup>
 		</React.Fragment>
 	);
-}
+})
 
 export function MuteUserButton(prop: muteProp)
 {

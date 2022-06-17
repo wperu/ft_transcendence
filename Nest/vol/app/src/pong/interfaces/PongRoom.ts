@@ -33,3 +33,9 @@ export interface PongRoom
 
     endScore: number,
 }
+
+export enum RoomOptions
+{
+	DEFAULT,
+	DOUBLE_BALL,
+}

@@ -1,5 +1,5 @@
 import { IPongContext } from "./PongContext/ProvidePong";
-import { center_emitter, clear_particles, defaultParticleEmitter, draw_particles, Particle, ParticleSystem, summon_particles } from "./PongParticleSystem";
+import { center_emitter, clear_particles, draw_particles, ParticleSystem, summon_particles } from "./PongParticleSystem";
 import { PongRenderingContext } from "./PongRenderer";
 
 export function clear_trail(pong_ctx: IPongContext)

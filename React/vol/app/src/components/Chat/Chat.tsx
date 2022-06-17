@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { chatContext ,useChatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
+import { chatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import ChatTab from "../ChatTab/ChatTab";
 import OwnerChannelSettings from "../OwnerChannelSettings/OwnerChannelSettings";
 import ChannelSettings from "../ChannelSettings/ChannelSettings";
@@ -17,7 +17,6 @@ const Chat = () =>
 
 const ChatConsumer = memo((prop: { currentRoom: any }) =>
 {
-	//const prop = useChatContext();
 	const [currentTab, setCurrentTab] = useState<string>("chat");
 
 

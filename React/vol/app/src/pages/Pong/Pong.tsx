@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PongEndGame } from "../../components/PongEndGame/PongEndGame";
-import { RoomState, usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
+import { usePongContext } from "../../components/PongGame/PongContext/ProvidePong";
 import { PongGame } from "../../components/PongGame/PongGame";
 import "./Pong.css"
 
