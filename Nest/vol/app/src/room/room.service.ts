@@ -127,7 +127,7 @@ export class RoomService
 			}
 		})
 
-		if (!ret)
+		if (ret)
 			return true;
 		return false;
 	}

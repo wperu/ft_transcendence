@@ -37,7 +37,6 @@ const ChannelUserListTest = memo((prop: {currentRoom: any, socket: any}) =>
 	}, [prop.socket]);
 
 	useEffect(() => {
-		console.log("CALL USERLIST")
 		prop.socket.emit("USER_LIST", prop.currentRoom?.id);
 	}, [prop.socket, prop.currentRoom, prop.currentRoom?.id])
 
