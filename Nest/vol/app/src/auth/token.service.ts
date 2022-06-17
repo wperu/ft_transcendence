@@ -33,7 +33,7 @@ export class TokenService
                 code: In([access_token]),
             }
         });
-        if (double_check !== undefined)
+        if (double_check)
             this.tokenRepository.delete(double_check);
 
         let jwt = new TokenValidatorEntity();
@@ -87,7 +87,7 @@ export class TokenService
             }
         });
         
-        if (access_token === undefined)
+        if (!access_token)
             return (undefined);
         return (access_token.token);
     }
@@ -102,7 +102,7 @@ export class TokenService
             }
         });
         
-        if (access_token !== undefined)
+        if (access_token)
             this.tokenRepository.delete(access_token);
     }
 }

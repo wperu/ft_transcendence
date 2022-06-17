@@ -14,19 +14,24 @@ import { TwoFactorService } from './auth.twoFactor.service';
 @Controller('auth')
 export class AuthController
 {
+	
     constructor (
         private readonly authService: AuthService,
         private readonly configService: ConfigService,
         private readonly usersService: UsersService,
 		private readonly twoFactorService: TwoFactorService,
     )
-    {}
-
-    @Get('/login')
-    @Redirect('https://api.intra.42.fr/oauth/authorize?client_id=c55b161b105ca533c4973f12ee73ccfba2b2dd584a4bdad361e6317ac8811d92&redirect_uri=https%3A%2F%2F10.3.10.1%2Fapi%2Fauth%2Fintra42%2Fcallback&response_type=code', 301)
-    async   login()
     {
-        console.log("login redirection");
+		
+	}
+
+	private readonly redirect_url: string = process.env.REDIRECT_URL;
+	
+    @Get('/login')
+   // @Redirect(this.redirect_url || "", 301)
+    async   login(@Res() res : Response)
+    {
+		await res.redirect(301, this.redirect_url);
     }
 
 
