@@ -102,7 +102,7 @@ export class UsersService
 			},
 		});
 
-		if (user !== undefined)
+		if (user)
 			return user
 		return (undefined)
 	}
@@ -115,7 +115,7 @@ export class UsersService
 			},
 		});
 
-		if (user !== undefined)
+		if (user)
 			return user
 		return (undefined)
 	}
