@@ -293,6 +293,8 @@ export class PongService {
             room.player_1.in_game = undefined;
             room.player_2.in_game = undefined;
             room.state = RoomState.FINISHED;
+
+			//FIX rm user fron userlist /!\
             //if (room.job_id !== "")
             //    this.boss.offWork(room.job_id);
             //console.log("room ended by disconnection")
