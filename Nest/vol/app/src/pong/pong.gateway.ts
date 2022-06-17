@@ -12,7 +12,7 @@ import { UpdateCustomRoomDTO } from '../Common/Dto/pong/UpdateCustomRoomDTO'
 	path: "/socket.io/",
 	namespace: "/pong",
 	cors: {
-		origin: '*',
+		origin: process.env.ORIGIN_URL || 'https://localhost',
 	},
 	transports: ['websocket'] 
 })

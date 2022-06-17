@@ -16,7 +16,7 @@ import { RoomService } from 'src/room/room.service';
 	path: "/socket.io/",
 	namespace: "/chat",
 	cors: {
-		origin: '*',
+		origin: process.env.ORIGIN_URL || 'https://localhost',
 	},
 	transports: ['websocket']
 })
@@ -55,32 +55,32 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	{
 		let user: ChatUser | undefined = await this.chatService.getUserFromSocket(client);
 
-		if (!await this.roomService.isMute(payload.room_id, user.reference_id))
+		if (user && !await this.roomService.isMute(payload.room_id, user.reference_id))
 		{
 			let msg_obj : RcvMessageDto;
 
 			msg_obj = {
 				message:	payload.message,
-				sender:		user.username,
+				sender:		await this.chatService.getUsernameFromID(user.reference_id),
 				refId:		user.reference_id,
 				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
 				room_id:	payload.room_id
 			};
-
-			// TODO check if user is actually in room
-			// TODO maybe store in DB if we want chat history ?
-
-			this.logger.log("[Socket io] new message: " + msg_obj.message);
-			this.server.to(payload.room_id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+			
+			if (client.rooms.has(payload.room_id.toString()))
+			{
+				this.logger.log("[Socket io] new message: " + msg_obj.message);
+				this.server.to(payload.room_id.toString()).emit("RECEIVE_MSG", msg_obj); /* catch RECEIVE_MSG in client */
+			}
 		}
 		else
 		{
-			let dto : NoticeDTO =
+			/*let dto : NoticeDTO =
 			{
 				level: ELevel.error,
 				content: "stfu, you are not allowed to talk in this room",
 			};
-			client.emit('NOTIFICATION', dto);
+			client.emit('NOTIFICATION', dto);*/
 		}
 	}
 
