@@ -36,7 +36,10 @@ export class FriendsService
 					status: EStatus.FRIEND,
 				},
 			});
-			return ret;
+			if (ret)
+				return ret;
+			else
+				return [];
 		}
 		catch(e)
 		{
@@ -61,7 +64,10 @@ export class FriendsService
 				},
 			});
 
-			return ret;
+			if (ret)
+				return ret;
+			else
+				return [];
 		}
 		catch(e)
 		{
@@ -84,7 +90,9 @@ export class FriendsService
 				status: EStatus.REQUEST
 			},
 			});
-			return ret;
+			if (ret)
+				return ret;
+			return [];
 		}
 		catch (e)
 		{
@@ -101,8 +109,10 @@ export class FriendsService
 					id: In([id])
 				},
 			});
-
-			return rel;
+			if (rel)
+				return rel;
+			else
+				return undefined
 		}
 		catch (e)
 		{
@@ -154,8 +164,10 @@ export class FriendsService
 					id_two: userIdTwo
 				},
 			});
-
-			return ret;
+			if (ret)
+				return ret;
+			else
+				return undefined;
 		}
 		catch (e)
 		{

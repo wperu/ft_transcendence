@@ -6,7 +6,7 @@ import { ChatRoomEntity } from 'src/entities/room.entity';
 import { ChatRoomRelationEntity } from 'src/entities/roomRelation.entity';
 import { User } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
-import { ChatMessageService } from './room.message.service';
+//import { ChatMessageService } from './room.message.service';
 
 @Injectable()
 export class RoomService
@@ -14,8 +14,8 @@ export class RoomService
 	constructor(
 
 
-		@Inject(ChatMessageService)
-		private readonly msgService: ChatMessageService,
+	//	@Inject(ChatMessageService)
+	//	private readonly msgService: ChatMessageService,
 
 		@Inject(ChatPasswordService)
 		private readonly passwordService: ChatPasswordService,
@@ -41,7 +41,7 @@ export class RoomService
 			}
 		})
 
-		if (ret === undefined)
+		if (ret === undefined || ret !== null)
 			return undefined;
 
 		return ret;
@@ -55,7 +55,7 @@ export class RoomService
 			}
 		})
 
-		if (ret.length === 0)
+		if (ret.length === 0 || !ret)
 			return undefined
 
 		return ret[0];
@@ -70,6 +70,9 @@ export class RoomService
 				user : { reference_id : refId}
 			}
 		})
+
+		if (!ret)
+			return undefined;
 
 		return ret;
 	}
@@ -124,7 +127,7 @@ export class RoomService
 			}
 		})
 
-		if (ret !== undefined)
+		if (!ret)
 			return true;
 		return false;
 	}

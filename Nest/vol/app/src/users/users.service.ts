@@ -53,6 +53,10 @@ export class UsersService
 				id: In([id])
 			},
 		});
+
+		if (user === null)
+			return undefined;
+
 		return (user);
 	}
 
@@ -124,7 +128,7 @@ export class UsersService
 			},
 		});
 
-		if (user !== undefined)
+		if (user !== undefined && user !== null)
 			return user
 		return (undefined)
 	}
@@ -140,7 +144,7 @@ export class UsersService
 			},
 		});
 
-		if (user !== undefined)
+		if (user !== undefined && user !== null)
 			return user;
 		return (undefined)
 	}
@@ -188,11 +192,11 @@ export class UsersService
 		const u = await this.usersRepository.findOne({
 			where: {
 				id: user.id,
-				token_expiration_date_42: MoreThan(format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
+				token_expiration_date_42: MoreThan<Date>(new Date()/*format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")*/)
 			},
 		});
 
-		if (u === undefined)
+		if (u === undefined || u === null)
 			return (false);
 		return (true);
 	}
