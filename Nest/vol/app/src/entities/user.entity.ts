@@ -15,20 +15,9 @@ export class User
 
 	@Column({nullable: true, default: null})
 	username: string;
-
-	// all tokens are nullable because we dont want to keep an expired token
+ 
 	@Column({nullable: true})
-	access_token_42?: string;
-
-	@Column({nullable: true})
-	refresh_token_42?: string;
-
-	// created at actual date then adds the expiration time
-	@CreateDateColumn({type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP'})
-	token_expiration_date_42?: Date;
-
-	@Column({nullable: true})
-	access_token_google?: string;
+	access_token?: string;
 
 	@Column({nullable: false, default: false})
 	setTwoFA: boolean;

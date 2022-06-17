@@ -69,7 +69,7 @@ export class UsersService
 			id: user.id,
 			reference_id: user.reference_id,
 			username: user.username,
-			accessCode: user.access_token_42,
+			accessCode: user.access_token,
 			creation_date: user.creation_date,
 			useTwoFa: user.setTwoFA,
 		}
@@ -140,7 +140,7 @@ export class UsersService
 	{
 		const user = await this.usersRepository.findOne({
 			where: {
-				access_token_42: access_token
+				access_token: access_token
 			},
 		});
 
@@ -166,8 +166,6 @@ export class UsersService
 		let user: User = new User();
 		user.reference_id = reference_id;
 		user.username = username;
-		user.refresh_token_42 = token.refresh_token;
-		user.token_expiration_date_42 = new Date(Date.now() + token.expires_in * 1000);
 		user.avatar_file = "avatars/defaults/user-icon-" + avatar_choice + ".png";
 		user.SecretCode = this.twoFactorService.generateSecret();
 
@@ -177,40 +175,17 @@ export class UsersService
 		};
 
 		let hash = this.tokenService.generateToken(user_data);
-		user.access_token_42 = hash;
+		user.access_token = hash;
 
 		await this.usersRepository.create(user);
 		let newUser = await this.usersRepository.save(user);
 		return newUser;
 	}
 
-
-
-
-	async checkAccessTokenExpiration(user: User) : Promise<boolean>
-	{
-		const u = await this.usersRepository.findOne({
-			where: {
-				id: user.id,
-				token_expiration_date_42: MoreThan<Date>(new Date()/*format(Date.now(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")*/)
-			},
-		});
-
-		if (u === undefined || u === null)
-			return (false);
-		return (true);
-	}
-
-
-
-
 	async remove(id: string): Promise<void>
 	{
 		await this.usersRepository.delete(id);
 	}
-
-
-
 
 	async saveUser(user: User): Promise<User>
 	{

@@ -44,7 +44,7 @@ export class AuthController
         
         let user = await this.authService.login(token);
 
-        let react_code: string = await this.authService.generateAuthorizationCode(user.access_token_42);
+        let react_code: string = await this.authService.generateAuthorizationCode(user.access_token);
 
         await res.redirect(301, `${this.configService.get<string>("REACT_REDIRECT_URL")}?code=${react_code}&register=${user.username === null}&useTwoFactor=${user.setTwoFA}`);
     }
