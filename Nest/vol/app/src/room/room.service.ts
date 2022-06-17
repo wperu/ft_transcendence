@@ -41,7 +41,7 @@ export class RoomService
 			}
 		})
 
-		if (ret === undefined || ret !== null)
+		if (ret === undefined || ret === null)
 			return undefined;
 
 		return ret;
