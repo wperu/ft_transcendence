@@ -135,7 +135,7 @@ export class GameService {
         let ball = {
             pos_x: 1,
             pos_y: 0.5,
-            vel_x: randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
+            vel_x: randomInt(10) > 5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
             vel_y: randomInt(-100, 100) / 1000
         } as PongBall;
 
@@ -193,7 +193,7 @@ export class GameService {
         {
             room.ball.pos_x = 1;
             room.ball.pos_y = 0.5;
-            room.ball.vel_x = randomInt(1) > 0.5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
+            room.ball.vel_x = randomInt(10) > 5 ? -GameConfig.BALL_SPEED : GameConfig.BALL_SPEED,
             room.ball.vel_y = randomInt(-100, 100) / 1000
             room.player_1.position = 0.5;
             room.player_2.position = 0.5;
