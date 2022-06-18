@@ -69,7 +69,7 @@ export class PongService {
 
 		if (data === null)
         {
-            console.log("[PONG] unable to decode user token data");
+            this.logger.warn("[PONG] unable to decode user token data");
 			return (undefined);
         }
 		
@@ -79,7 +79,7 @@ export class PongService {
 
         if (user_info === undefined)
         {
-            console.log(`[PONG] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`);
+            this.logger.warn(`[PONG] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`);
             socket.disconnect();
             return (undefined);
         }
@@ -118,8 +118,7 @@ export class PongService {
 
             if (ret === undefined)
             {
-                console.log(`Could not retrieve pong user from database user infos`);
-                return undefined;
+				return undefined;
             }
 			return (ret);
 		}
@@ -143,7 +142,7 @@ export class PongService {
 
         if (user === undefined)
         {
-            return console.log("cannot remove user from waiting list: undefined user")
+            return this.logger.error("cannot remove user from waiting list: undefined user")
         }
         if (this.waitingPool !== undefined)
         {
@@ -151,12 +150,12 @@ export class PongService {
             this.waitingPool.forEach((u) => {
                 if (u.user === undefined)
                 {
-                    return console.log("cannot cycle through waiting pool: undefined user")
+                    return this.logger.error("cannot cycle through waiting pool: undefined user")
                 }
 
                 if (u.user.username === user.username)
                 {
-                    console.log(`removed user ${user.username} from waiting list`);
+					this.logger.log(`${user.username} was removed from waiting list`);
                     this.waitingPool.splice(i, 1);
                 }
                 i++;
@@ -170,13 +169,13 @@ export class PongService {
 
         if (user === undefined)
         {
-            return console.log("cannot remove user from waiting list: undefined user")
+            return this.logger.error("cannot remove user from waiting list: undefined user")
         }
         if (this.waitingPool !== undefined)
         {
 			const idx = this.users.findIndex((u) => { return u === user})
 			this.users.splice(idx, 1);
-			console.log(`removed user ${user.username} from users list`);
+			this.logger.log(`${user.username} was removed from waiting list`);
         }
     }
 
@@ -215,7 +214,6 @@ export class PongService {
             return ;
         }
 
-        console.log("found opponent")
         this.waitingPool.splice(this.waitingPool.indexOf(other), 1);
 		this.initPlayer(other.user);
 		this.initPlayer(user);
@@ -282,7 +280,7 @@ export class PongService {
 
         if (room === undefined)
         {
-            console.log("disconnection from unknown room");
+			this.logger.warn(`${user.username} disconnected from unknown room`)
 			user.in_game = undefined;
             return ;
         }
@@ -297,7 +295,6 @@ export class PongService {
 			//FIX rm user fron userlist /!\
             //if (room.job_id !== "")
             //    this.boss.offWork(room.job_id);
-            //console.log("room ended by disconnection")
             // TODO push room in history
         }
         else if (room !== undefined && room.state !== RoomState.PAUSED
@@ -330,7 +327,7 @@ export class PongService {
 
             //this.boss.cancel(room.job_id);
             this.server.to(room.id).emit("PLAYER_DISCONNECT");
-            console.log("player disconnected")
+            this.logger.log(`${user.username} disconnected`)
         }
     }
 
@@ -380,7 +377,7 @@ export class PongService {
                 } : undefined
             } as ReconnectPlayerDTO);
 
-            console.log("player reconnected")
+            this.logger.log(`${user.username} reconnected to the game`)
 
             new Promise(async () => setTimeout(async () => {
 				if (!room.player_1.socket.connected || !room.player_2.socket.connected)
@@ -388,7 +385,6 @@ export class PongService {
 					this.server.to(room.id).emit("PLAYER_DISCONNECT");
 					return ;
 				}
-                console.log("starting");
                 room.state = RoomState.PLAYING;
                 this.gameService.sendBallUpdate(room);
                 this.gameService.sendPlayerUpdate(room);
@@ -559,9 +555,9 @@ export class PongService {
 
 		if (room.users.length === 0)
 		{
+			this.logger.log(`destroyed room ${room.id}`);
 			const i = this.customRooms.indexOf(room);
 			this.customRooms.splice(i, 1);
-			console.log('Room destroy');
 		}
 		
 		return ;
@@ -593,8 +589,6 @@ export class PongService {
 		if (room === undefined)
 			return ;//	throw new Error("Room doesn\'t exist");
 		
-		console.log(room.users.length);
-
 		const dto = toDto(room.users);
 		this.server.to(id).emit("USERS_CUSTOM_ROOM", dto);
 		return ;
@@ -636,8 +630,8 @@ export class PongService {
 		this.rooms.push(room);
 		this.gameService.startRoom(room);
 
+		this.logger.log(`destroyed room ${room.id}`);
 		const i = this.customRooms.indexOf(croom);
 		this.customRooms.splice(i, 1);
-		console.log('Room destroy');
 	}
 }

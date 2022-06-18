@@ -38,9 +38,9 @@ export class GameService {
 
     )
     {
-        console.log("init pgboss on : postgress://" + process.env.DB_USERNAME + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST + "/" + process.env.DB_NAME);
+        this.logger.log("init pgboss on : postgress://" + process.env.DB_USERNAME + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST + "/" + process.env.DB_NAME);
         this.boss = new PgBoss("postgress://" + process.env.DB_USERNAME + ":" + process.env.DB_PASS + "@" + process.env.DB_HOST + "/" + process.env.DB_NAME)
-        this.boss.on('error', (err) => { return console.log("[pg-boss][error] " + err) })
+        this.boss.on('error', (err) => { return this.logger.error("[pg-boss][error] " + err) })
         this.boss.start();
     }
 
@@ -54,10 +54,6 @@ export class GameService {
 
     async startBoss(room: PongRoom)
     {
-        console.log("[boss] start");
-      //  room.interval = setInterval(() => this.runRoom(room), this.GAME_RATE);
-        
-        console.log("[boss] waiting");
         while (room.player_1.in_game !== undefined
             && room.player_2.in_game !== undefined)
         {
@@ -66,26 +62,22 @@ export class GameService {
             let t = performance.now();
             if (this.GAME_RATE > t - room.lastTime)
             {
-               // console.log("sleeping: ", this.GAME_RATE - room.deltaTime * 1000); 
 			   	await new Promise(res => {
                     return setTimeout(res, this.GAME_RATE - (t - room.lastTime))
                 })
             }
         }
 
-        console.log("[boss] ended");
         room.state = RoomState.FINISHED;
 
 		const job_id	= room.job_id;
     
-		this.logger.log(`Room ${room.id} ended ${room.player_1.username} vs ${room.player_2.username}`);
 
 		this.pongService.removeRoom(room);
 		if (job_id !== "")
 			this.boss.offWork(job_id);
 
-        this.logger.log("Room ended");
-        // TODO push room in history 
+        this.logger.log(`Room ${room.id} ended (${room.player_1.username} vs ${room.player_2.username})`);
 
         this.historyService.addGameToHistory({
             ref_id_one: room.player_1.reference_id,
@@ -142,7 +134,6 @@ export class GameService {
         let ball2: PongBall | undefined = undefined
         if (options & RoomOptions.DOUBLE_BALL)
         {
-            console.log("intantiated double ball room")
             ball2 = {
                 pos_x: 1,
                 pos_y: 0.5,
@@ -151,6 +142,7 @@ export class GameService {
             } as PongBall 
         }
 
+        this.logger.log(`Created room with id : ${room_id}`);
         return ({
             id: room_id,
             job_id: "",
@@ -177,7 +169,6 @@ export class GameService {
     async reloadRoom(room: PongRoom)
     {
         this.server.to(room.id).emit("END_GAME");
-        console.log("ending");
 
         const sleep = async () => {
             return new Promise(resolve => {
@@ -187,7 +178,6 @@ export class GameService {
             })
         }
 
-        // FIX disconnection here
         await sleep();
         if (room.state === RoomState.PLAYING)
         {
@@ -212,7 +202,6 @@ export class GameService {
         if (room.state === RoomState.PLAYING)
         {
             this.server.to(room.id).emit("LOAD_GAME");
-            console.log("[reload] loading");
             this.sendBallUpdate(room);
             this.sendPlayerUpdate(room);
             await sleep();
@@ -220,12 +209,10 @@ export class GameService {
         // is still playing ?
         if (room.state === RoomState.PLAYING)
         {
-            console.log("[reload] starting");
             this.server.to(room.id).emit("START_GAME");
         }
 
         room.lastTime = 0;
-        console.log("RELOAD ENDED");
     }
 
 
@@ -249,22 +236,17 @@ export class GameService {
 
         room.state = RoomState.PLAYING;
         this.server.to(room.id).emit('STARTING_ROOM', starting_obj);
-
-        console.log("STARTING_ROOM -> sent room start request");
+        this.logger.log(`Starting room ${room.id} (${room.player_1.username} vs ${room.player_2.username})`);
 
         new Promise(async () => setTimeout(async () => {
             this.server.to(room.id).emit("LOAD_GAME");
-            console.log("LOAD -> sent load request");
             await new Promise(async () => setTimeout(async () => {
-                console.log("starting");
                 this.sendBallUpdate(room);
                 this.sendPlayerUpdate(room);
-                console.log("START -> sent start request");
                 this.server.to(room.id).emit("START_GAME");
                 room.lastTime = 0;
 
                 room.job_id = await this.boss.send(room.id, {});
-                console.log("[boss] starting job: " + room.job_id);
                 this.boss.work(room.id, {
                     teamSize: 10,
                     teamConcurrency: 10,
@@ -278,14 +260,12 @@ export class GameService {
 
     async runRoom(room: PongRoom) : Promise<void>
     {
-      //  console.log("updating");
         if (room.state !== RoomState.PAUSED && room.state !== RoomState.FINISHED)
             await this.updateRoom(room);
         else if (room.state === RoomState.PAUSED)
         {
             while (room.state === RoomState.PAUSED)
             {
-                console.log("awaiting player")
                 await new Promise(res => {
                     return (setTimeout(res, 200));
                 })
@@ -319,7 +299,6 @@ export class GameService {
     {
         if (room.options & RoomOptions.DOUBLE_BALL && room.ball2 !== undefined)
         {
-            console.log("updating double ball");
             let ball_infos: UpdatePongBallDTO = {
                 ball_x: room.ball.pos_x,
                 ball_y: room.ball.pos_y,
@@ -375,13 +354,13 @@ export class GameService {
 
         if (room === undefined)
         {
-            console.log(`cannot update undefined room with id: ${data.room_id}`);
+            this.logger.error(`cannot update undefined room with id: ${data.room_id}`);
             return ;
         }
 
         if (user === undefined)
         {
-            console.log(`cannot update undefined user`);
+            this.logger.error(`cannot update undefined user`);
             return ;
         }
 

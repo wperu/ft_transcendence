@@ -44,7 +44,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 	
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
-		console.log(`CONNECTION -> ${client.id}`)
 		let user : PongUser | undefined = this.pongService.getUserFromSocket(client);
 		
 		if (user === undefined)
@@ -53,7 +52,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			
 			if(user === undefined)
 			{
-				console.log("Unknown user tried to join the pong");
+				this.logger.warn("Unknown user tried to join the pong");
 				client.disconnect();
 			}
 			else
@@ -63,7 +62,6 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		
 		if (user.in_game && user.socket.connected === false) //In room
 		{
-			console.log("reconnected user");
 			this.pongService.reconnectUser(user, client);
 		}
 		else if (!user.in_game && user.socket.connected === false)
@@ -82,13 +80,12 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
 	async handleDisconnect(client: Socket)
 	{
-		this.logger.log("Rcv DISCONNECT");
 		let usr = this.pongService.getUserFromSocket(client);
 		if (!usr || !usr.in_game)
 			this.pongService.removeFromWaitingList(client);
 		else
 		{
-			console.log("disconnecting from game")
+			this.logger.log(`${usr.username} disconnected from game`)
 			this.pongService.disconnectUser(usr);		
 		}
 		if (usr && usr.in_room !== undefined)
@@ -97,27 +94,41 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		{
 			this.pongService.removeFromUserList(client);
 		}
-		console.log(`DISCONNECT <- ${client.id}`)
 	}
 
 	@SubscribeMessage('SEARCH_ROOM')
 	async searchRoom(client: Socket)
 	{
-		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		const user : PongUser = this.pongService.getUserFromSocket(client)
+		if (user === undefined)
+		{
+			this.logger.warn(`undefined user tried to search room`)
+			return ;
+		}
 		this.pongService.searchRoom(user);
 	}
 
 	@SubscribeMessage('STOP_SEARCH_ROOM')
 	async stopSearchRoom(client: Socket)
 	{
-		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		const user : PongUser = this.pongService.getUserFromSocket(client)
+		if (user === undefined)
+		{
+			this.logger.warn(`undefined user tried to stop search room`)
+			return ;
+		}
 		this.pongService.stopSearchRoom(user);
 	}
 
 	@SubscribeMessage('JOIN_ROOM')
 	async joinRoom(client: Socket, id: string)
 	{
-		const user : PongUser = await this.pongService.getUserFromSocket(client)
+		const user : PongUser = this.pongService.getUserFromSocket(client)
+		if (user === undefined)
+		{
+			this.logger.warn(`undefined user tried to join room`)
+			return ;
+		}
 		this.pongService.joinRoom(user, id);
 	}
 
@@ -153,7 +164,7 @@ export class PongGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			client.emit("UP_CUSTOM_ROOM", usr.in_room);
 		else
 			client.emit("UP_CUSTOM_ROOM", id);
-		console.log('roomcreated ', id);
+		this.logger.log(`Created Custom room with id : ${id}`);
 	}
 
 	@SubscribeMessage("JOIN_CUSTOM_ROOM")

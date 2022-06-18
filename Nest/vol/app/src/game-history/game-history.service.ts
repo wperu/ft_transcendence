@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FinishedGame } from 'src/entities/finishedGame.entity';
 import { User } from 'src/entities/user.entity';
@@ -8,6 +8,9 @@ import { PostFinishedGameDto } from 'src/Common/Dto/pong/FinishedGameDto';
 
 @Injectable()
 export class GameHistoryService {
+
+	private logger: Logger = new Logger('GameHistoryService');
+
 	constructor (
 		@InjectRepository(FinishedGame)
 		private finishedGames: Repository<FinishedGame>,
@@ -59,7 +62,7 @@ export class GameHistoryService {
 		try
 		{
 			ret = await this.finishedGames.save(new_game);
-			console.log("added game to history");
+			this.logger.log("added game to history");
 		} catch (error)
 		{
 			console.error(error);
