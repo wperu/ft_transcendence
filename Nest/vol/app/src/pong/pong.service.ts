@@ -288,9 +288,16 @@ export class PongService {
         if (room !== undefined && room.state === RoomState.PAUSED 
 			&& (!room.player_1.socket.connected && !room.player_2.socket.connected))
         {
+			if (room.reconnectTimeout !== undefined)
+				clearTimeout(room.reconnectTimeout);
             room.player_1.in_game = undefined;
             room.player_2.in_game = undefined;
             room.state = RoomState.FINISHED;
+			this.server.to(room.id).emit("ROOM_FINISHED", {
+				player_1_score: room.player_1.points,
+				player_2_score: room.player_2.points,
+				withdrawal: true,
+			} as UpdatePongPointsDTO);
 
 			//FIX rm user fron userlist /!\
             //if (room.job_id !== "")
