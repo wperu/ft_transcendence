@@ -29,7 +29,15 @@ const PongEndGame = () => {
 
         if (player && opponent)
         {
-            if (pongCtx.room?.withdrawal === true)
+            if (user.username !== player.username && user.username !== opponent.username)
+            {
+                if (player.points > opponent.points)
+                    message = `${player.username} wins !`;
+                else
+                    message = `${opponent.username} wins !`;
+            }
+
+            else if (pongCtx.room?.withdrawal === true)
                 message = "You won by withdrawal";
             else if (player.points < GameConfig.DEFAULT_MAX_SCORE)
                 message = 'You suck...';

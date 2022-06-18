@@ -7,6 +7,7 @@ import { IPongContext, IPongUser, RoomOptions, RoomState, usePongContext } from 
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
+import { useNavigate } from "react-router-dom";
 
 
 interface CanvasProps
@@ -48,6 +49,7 @@ const PongGame = (props: CanvasProps) => {
     const canvasRef	= useRef<HTMLCanvasElement>(null);
     const { user }	= useAuth();
     const pongCtx: IPongContext = usePongContext();
+    const navigate = useNavigate();
 
 	console.log("/game rerender !");
 
