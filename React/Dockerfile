@@ -1,9 +1,11 @@
 FROM alpine:3.15.0
 
 RUN apk update; apk add nodejs npm;
+RUN apk add nginx ;\
+mkdir -p /run/nginx ;
 
+COPY ./srcs/default.conf /etc/nginx/http.d/
+COPY ./srcs/start.sh .
 EXPOSE 3000
 
-CMD npm install --prefix /vol/app; npm run start --prefix /vol/app
-
-#Installing react, react-dom, and react-scripts with cra-template-typescript...
+CMD ./start.sh

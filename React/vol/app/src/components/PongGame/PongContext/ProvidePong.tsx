@@ -244,8 +244,8 @@ function usePongProvider() : IPongContext
 
                 player_2: {
                     username: data.player_2.username,
-                    points: data.player_1.points,
-                    position: data.player_1.position,
+                    points: data.player_2.points,
+                    position: data.player_2.position,
                     velocity: 0,
                     key: 0,
                 } as IPongUser,

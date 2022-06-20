@@ -21,6 +21,8 @@ services:
       - ./Common:/vol/Common
     depends_on:
       - "nest"
+    environment:
+      BUILD: "prod"
     
   nest:
     build: ./Nest
