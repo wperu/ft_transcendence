@@ -28,7 +28,7 @@ export class GameHistoryController
 		}
 		catch (error)
 		{
-			console.log(error);
+			// console.log(error);
 			throw (new BadRequestException(error));
 		}
 		

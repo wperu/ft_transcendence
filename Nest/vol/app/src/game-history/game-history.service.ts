@@ -69,7 +69,7 @@ export class GameHistoryService {
 			return ;
 		}
 
-		if (game.custom)
+		if (!game.custom)
 		{
 			if ((game.score_one > game.score_two && game.withdrew === 0)
 				|| game.withdrew === 2)

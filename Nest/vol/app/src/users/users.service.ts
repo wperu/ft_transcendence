@@ -214,7 +214,7 @@ export class UsersService
 						.set({avatar_file: new_avatar_file})
 						.where("reference_id = :reference_id", {reference_id})
 						.execute();
-				console.log("Avatar of " + user.username + " updated");
+				// console.log("Avatar of " + user.username + " updated");
 			}
 		}
 		catch(e)
@@ -263,7 +263,7 @@ export class UsersService
 	{
 		const user = await this.findUserByAccessToken(access);
 
-		console.log(user + ' ' + set);
+		// console.log(user + ' ' + set);
 		if (user === undefined)
 			return ;
 
@@ -273,15 +273,15 @@ export class UsersService
 		{
 			if (user.SecretCode === null)
 			{
-				console.log("Generating SecretCode...");
+				// console.log("Generating SecretCode...");
 				user.SecretCode = this.twoFactorService.generateSecret();
 			}
-			console.log("turn ON 2FA");
+			// console.log("turn ON 2FA");
 			user.setTwoFA = set;
 		}
 		else
 		{
-			console.log("turn OFF 2FA");
+			// console.log("turn OFF 2FA");
 			user.setTwoFA = set;
 		}
 		await this.saveUser(user);
@@ -291,7 +291,7 @@ export class UsersService
 	{
 		let ret = this.twoFactorService.isValide(token, secret);
 
-		console.log(ret);
+		// console.log(ret);
 		if (typeof ret === 'boolean')
 		{
 			return ret;

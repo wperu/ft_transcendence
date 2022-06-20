@@ -175,7 +175,7 @@ export class UsersController
 					if (err)
 						console.error("Failed deleting received file: " + err);
 				});
-				console.log("Changing avatar path to : [" + filename + "]");
+				//console.log("Changing avatar path to : [" + filename + "]");
 				old_avatar = await this.userService.updateAvatar(refId, filename);
 				if (old_avatar !== undefined && old_avatar !== null)
 				{
@@ -184,12 +184,12 @@ export class UsersController
 						unlink(old_avatar, (err) => {
 							if (err)
 								console.error("Old avatar didn't exist");
-							else
-								console.log('Old avatar deleted');
+							// else
+								//console.log('Old avatar deleted');
 						});
 					}
-					else
-						console.log("Old avatar was a default one");
+					// else
+						//console.log("Old avatar was a default one");
 				}
 			})
 			.catch(error => {

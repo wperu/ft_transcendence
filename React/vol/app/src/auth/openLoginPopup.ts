@@ -17,22 +17,22 @@ function openLoginPopup(cb: () => void)
 
 	function messageListener(event : any)
 	{
-		console.log('Messeng recv from ' + event.origin);
-		console.log(event.data);
+		// console.log('Messeng recv from ' + event.origin);
+		// console.log(event.data);
 
 
 		if (event.origin !== process.env.REACT_APP_ORIGIN_URL)
 		{
-			console.log("event.origin" + event.origin);
+			// console.log("event.origin" + event.origin);
 			return ;
 		}
 
-		console.log("Get IUser");
+		// console.log("Get IUser");
 		//if (event.data !== undefined)
 		
 		const user : IUser = event.data;
 
-		console.log(user);
+		// console.log(user);
 
 		//todo
 		//do stuff with user
@@ -41,7 +41,7 @@ function openLoginPopup(cb: () => void)
 	}
 
 
-	console.log("Window open");
+	// console.log("Window open");
 	let loginInterval = window.setInterval(function() {
 		if (winPopupRef !== null)
 		{

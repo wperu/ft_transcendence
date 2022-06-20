@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { UserDataDto } from "../../Common/Dto/chat/room";
-import {ELevelInRoom, chatContext, useChatContext} from "../Sidebar/ChatContext/ProvideChat"
+import { ELevelInRoom, chatContext } from "../Sidebar/ChatContext/ProvideChat"
 import {InviteUserButton, BanUserButton, MuteUserButton, BlockUserButton,
 	PromoteUserButton, AddFriendButton, DirectMessage} from "../UserBarButtons/UserBarButtons"
 import "./ChatUser.css"

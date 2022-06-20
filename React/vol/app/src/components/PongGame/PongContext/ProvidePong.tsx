@@ -95,7 +95,7 @@ function usePongProvider() : IPongContext
 	const [isAuth, setIsAuth]			= useState<boolean>(false);
 	const [needReconect, setNeedReconnect]	= useState<boolean>(false);
 
-	console.log("Create Pong ctx");
+	// console.log("Create Pong ctx");
 
 	/**
 	 * Start Matchmaking
@@ -121,7 +121,7 @@ function usePongProvider() : IPongContext
 
 	useEffect(() => {
 		socket.on("UP_CUSTOM_ROOM", (id: string) => {
-			console.log(id);
+			// console.log(id);
 			navigate(`/matchmaking/custom/${id}`, {replace: true});
 		})
 	}, [socket, navigate])
@@ -129,7 +129,7 @@ function usePongProvider() : IPongContext
 	
     useEffect(() => {
         socket.on('STARTING_ROOM', (data: StartPongRoomDTO) => {
-            console.log("Room is starting");
+            // console.log("Room is starting");
             setRoom({
                 room_id: data.room_id,
                 player_1: {
@@ -187,7 +187,7 @@ function usePongProvider() : IPongContext
     useEffect(() => {
         if (inGame === true)
         {
-			console.log("switching")
+			// console.log("switching")
 			navigate(`/game/${room?.room_id}`, { replace: true });
         }
     }, [inGame, navigate, room?.room_id])
@@ -200,11 +200,11 @@ function usePongProvider() : IPongContext
 	useEffect(() => {
 		socket.on("disconnect", () => {
 			setNeedReconnect(true);
-			console.log("Disconnected !");
+			// console.log("Disconnected !");
 		})
 
 		socket.on("connect", () => {
-			console.log("connected !");
+			// console.log("connected !");
 			setNeedReconnect(false);
 		})
 	}, [socket])
@@ -231,7 +231,7 @@ function usePongProvider() : IPongContext
 
     useEffect(() => {
         socket.on("RECONNECT_YOU", (data: ReconnectPlayerDTO) => {
-            console.log("getting reconnected");
+            // console.log("getting reconnected");
             setRoom({
                 room_id: data.room_id,
                 player_1: {

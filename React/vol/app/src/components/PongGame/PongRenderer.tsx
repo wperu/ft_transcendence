@@ -23,7 +23,7 @@ function update(pong_ctx: IPongContext, deltaTime: number, user: IUser)
 
         if (room.options & RoomOptions.DOUBLE_BALL && room.ball2)
         {
-            console.log("updating double ball : ", room.ball2.vel_x, " ; ", room.ball2.vel_y);
+            // console.log("updating double ball : ", room.ball2.vel_x, " ; ", room.ball2.vel_y);
             room.ball2.pos_x += room.ball2.vel_x * deltaTime;
             room.ball2.pos_y += room.ball2.vel_y * deltaTime;
         }
@@ -182,10 +182,10 @@ const useRender = (canvasRef: React.RefObject<HTMLCanvasElement>, user: IUser, l
 			/* Background */
 			ctx = canvas.getContext('2d');
 			if (!ctx)
-				return (console.log("null cnv"));
+				return ;
 			if (pong_ctx === null || pong_ctx.room === null)
 			{
-				console.log("ctx is null");
+				// console.log("ctx is null");
 				return ;
 			}
 		

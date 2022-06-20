@@ -31,7 +31,7 @@ export function ProvideNotify({children}: {children: JSX.Element} ): JSX.Element
 	const [msgNotify, setMsgNotify] = useState<INotice[]>([]);
 	//const [id, setId] = useState<number>(0);
 
-	console.log("[Notify CTX] : rerender !");
+	// console.log("[Notify CTX] : rerender !");
 
 	const onDelete = useCallback((id : string) => {
 		setMsgNotify(msgNotify.filter((o) => { return o.idx !== id}));

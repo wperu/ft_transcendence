@@ -27,7 +27,7 @@ function SignInButton ()
 							&&	typeof location.state.from.pathname === 'string'
 					   		?	location.state.from.pathname
 					   		:	"/";
-		console.log(redirectTo);
+		// console.log(redirectTo);
 
 		let rawUser : string | null = sessionStorage.getItem('user');
 

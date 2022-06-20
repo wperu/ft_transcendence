@@ -174,7 +174,7 @@ function MatchHistory(props: historyProps)
 			return ([]);
 		})
 		.then(result => {
-			console.log(result);
+			// console.log(result);
 			setHistory(result);
 		})
 	}, [props.ref_id, props.access_code, notify]);

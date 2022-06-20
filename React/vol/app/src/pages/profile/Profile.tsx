@@ -101,7 +101,7 @@ function Profile() {
 				setQrUri(res.data.url);
 			})
 			.catch(res => {
-				console.log(res); //fix parseme pls /!\
+				// console.log(res); //fix parseme pls /!\
 				//setIsTwoFactor(isTwoFactor);
 				return "";
 			});

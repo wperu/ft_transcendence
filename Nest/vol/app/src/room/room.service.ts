@@ -152,7 +152,7 @@ export class RoomService
 			if (resp.length === 2)
 			{
 
-				console.log (resp)
+				// console.log (resp);
 				return true
 			}
 		}
@@ -514,7 +514,7 @@ export class RoomService
 
 		rel.ban_expire = expires_in;
 
-		console.log(expires_in);
+		// console.log(expires_in);
 		await this.roomRelRepo.save(rel);
 
 		return room;
