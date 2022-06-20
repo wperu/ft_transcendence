@@ -7,6 +7,7 @@ import { IPongContext, IPongUser, RoomOptions, RoomState, usePongContext } from 
 import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
+import './PongGame.css'
 
 
 interface CanvasProps
@@ -56,16 +57,17 @@ const PongGame = (props: CanvasProps) => {
     /* Keypress */
 
 	useEffect(() => {
-		window.addEventListener('keypress', (event: KeyboardEvent) => {
+		window.addEventListener('keydown', (event: KeyboardEvent) => {
 			if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
 			{
-				if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
+                console.log(event.code);
+                if (event.code === "ArrowUp" || event.code === "ArrowDown")
 				{
-					pongCtx.room.player_1.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
-					pongCtx.room.player_2.key = (event.key === "z" || event.key === "Z") ? -1 : 1;
+					pongCtx.room.player_1.key = (event.code === "ArrowUp") ? -1 : 1;
+					pongCtx.room.player_2.key = (event.code === "ArrowUp") ? -1 : 1;
 					pongCtx.room.socket.emit("SEND_PLAYER_KEYSTROKE", {
 						room_id: pongCtx.room.room_id,
-						key: (event.key === "z" || event.key === "Z") ? 1 : 0,
+						key: (event.code === "ArrowUp") ? 1 : 0,
 						state: 1,
 					} as SendPlayerKeystrokeDTO)
 				}
@@ -76,13 +78,13 @@ const PongGame = (props: CanvasProps) => {
 		window.addEventListener('keyup', (event: KeyboardEvent) => {
 			if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
 			{
-				if (event.key === "z" || event.key === "Z" || event.key === "s" || event.key === 'S')
+                if (event.code === "ArrowUp" || event.code === "ArrowDown")
 				{
 					let player = getPongPlayer(pongCtx, user);
 					if (player !== undefined)
 					{
-						if (((event.key === "z" || event.key === "Z")
-						&& player.key === -1) || ((event.key === "s" || event.key === "S")
+						if ((event.code === "ArrowUp"
+						&& player.key === -1) || (event.code === "ArrowDown"
 						&& player.key === 1))
 						{
 							player.key = 0;
