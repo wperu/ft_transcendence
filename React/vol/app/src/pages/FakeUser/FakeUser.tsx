@@ -21,7 +21,7 @@ function FakeUser()
 	                username: username,
 	            }
 	        }).then((rep) => {
-	            console.log(`sent request for creating dev user ${username}`);
+	            // console.log(`sent request for creating dev user ${username}`);
 
 				const user = rep.data as IUser;
 				auth.setUser(user);

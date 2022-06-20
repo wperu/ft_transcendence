@@ -50,10 +50,10 @@ export class AuthService {
             );
 			if(!response.data["access_token"] || !response.data["refresh_token"] || !response.data["expires_in"])
 			{
-				console.log("no access token");
+				// console.log("no access token");
 				throw new UnauthorizedException("api response did not contain access_token or refresh_token or expires_in fields");
 			}
-            console.log("got access token");
+            // console.log("got access token");
             return (response.data);
         }
         catch (e)
@@ -85,7 +85,7 @@ export class AuthService {
         let user: User = await this.usersService.findUserByReferenceID(info.data.id)
         if (user === undefined)
         {
-            console.log("Unknown user, creating it...");
+            // console.log("Unknown user, creating it...");
             user = await this.usersService.createUser(info.data.id, null, token);
         }
         else
@@ -93,7 +93,7 @@ export class AuthService {
 			//FIX rehash if accesToken change
             user.access_token ;//= token.access_token;
             this.usersService.saveUser(user);
-            console.log("User " + user.username + " logged in");
+            // console.log("User " + user.username + " logged in");
         }
         return (user);
     }

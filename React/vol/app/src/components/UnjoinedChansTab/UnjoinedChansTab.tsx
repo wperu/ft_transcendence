@@ -48,7 +48,7 @@ function UnjoinedChansTab()
 			var data: JoinRoomDto;
 			if (target.password.value.length > 0)
 			{
-				console.log("protected by pass: " + target.password.value);
+				// console.log("protected by pass: " + target.password.value);
 				data =
 				{
 					roomName: target.name.value,

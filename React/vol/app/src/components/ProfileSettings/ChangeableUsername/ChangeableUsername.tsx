@@ -32,7 +32,7 @@ function ChangeableUsername(props: userProps)
 		const data = {
 			'username' : target.username.value,
 		}
-		console.log(user?.accessCode);
+		// console.log(user?.accessCode);
 		axios({
 			method: 'put',
 			url: url,

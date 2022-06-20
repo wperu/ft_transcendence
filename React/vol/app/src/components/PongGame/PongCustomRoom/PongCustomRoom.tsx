@@ -56,7 +56,7 @@ export function PongCustomRoom() : JSX.Element
 	useEffect(() => {
 		if (isAuth && inRoom === false)
 		{
-			console.log("Sent !");
+			// console.log("Sent !");
 			socket.emit("JOIN_CUSTOM_ROOM", id)
 		}
 	}, [socket, id, isAuth, inRoom])
@@ -103,17 +103,17 @@ export function PongCustomRoom() : JSX.Element
 	useEffect(() => {
 			socket.on("JOINED_CUSTOM_ROOM", () => {
 				setInRoom(true);
-				console.log("Room joined");
+				// console.log("Room joined");
 			})
 
 			socket.on("LEFT_CUSTOM_ROOM", () => {
 				setInRoom(false);
-				console.log("Room left");
+				// console.log("Room left");
 			})
 
 			socket.on("USERS_CUSTOM_ROOM", (users : Array<UserCustomRoomDTO>) => {
 				setUsers(users);
-				console.log(users);
+				// console.log(users);
 			})
 
 			socket.on("CUSTOM_ROOM_UPDATE_MODE", (data: { options: number, mode: number }) => {

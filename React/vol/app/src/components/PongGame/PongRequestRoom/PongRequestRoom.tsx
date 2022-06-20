@@ -12,12 +12,12 @@ function PongRequestRoom() : JSX.Element
 		if (needReconect)
 		{
 				navigate("/matchmaking");
-				console.log("need to reconnect !");
+				// console.log("need to reconnect !");
 		}
 	}, [needReconect, navigate])
 	
 	useEffect(() => {
-		console.log('render');
+		// console.log('render');
 		if (isAuth)
 			requestRoom();
 	}, [isAuth, requestRoom]);

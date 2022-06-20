@@ -356,7 +356,7 @@ export function PromoteUserButton(prop: promoteProp)
 			}
 			chtCtx.socket.emit('ROOM_PROMOTE', dto);
 		}
-		console.log("user promoted");
+		// console.log("user promoted");
 	}
 
 	function demote()
@@ -434,7 +434,7 @@ export function DeleteNotification(prop: refuseProp)
 	{
 		rmNotif(prop.id);
 
-		console.log("refuse invitation");
+		// console.log("refuse invitation");
 
 		if (prop.isRequestFriend === true)
 		{

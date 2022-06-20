@@ -270,7 +270,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 			user = await this.chatService.connectUserFromSocket(client);
 			if(user === undefined)
 			{
-				console.log("Unknown user tried to join the chat");
+				// console.log("Unknown user tried to join the chat");
 				client.disconnect();
 				return ;
 			}

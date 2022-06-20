@@ -1,4 +1,4 @@
-import React, {KeyboardEvent, useState, useEffect, useCallback, memo, ChangeEventHandler, ChangeEvent} from "react";
+import React, {KeyboardEvent, useState, useEffect, useCallback } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
@@ -16,7 +16,6 @@ function ChatTab()
 	
 	const [messages, setMessages] = useState<RcvMessageDto[]>([]);
 	const [updated, setUpdated] = useState<Boolean>(false);
-	const [msg, setMsg] = useState<string>("");
 
 	let msg_list_ref = React.createRef<HTMLDivElement>();
 

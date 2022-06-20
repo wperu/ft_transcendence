@@ -52,7 +52,7 @@ export class ChatService {
 
 		if (data === null)
 		{
-			console.log("[PONG] unable to decode user token data");
+			// console.log("[PONG] unable to decode user token data");
 			return (undefined);
 		}
 
@@ -60,7 +60,7 @@ export class ChatService {
 
 		if (user_info === undefined)
 		{
-			console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
+			// console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
 			socket.disconnect();
 			return (undefined);
 		}
@@ -93,7 +93,7 @@ export class ChatService {
 
 			if (user_info === undefined)
 			{
-				console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
+				// console.log(`[CHAT] Unregistered user in database had access to a valid token : ${socket.id} aborting connection`)
 				socket.disconnect();
 				return (undefined);
 			}

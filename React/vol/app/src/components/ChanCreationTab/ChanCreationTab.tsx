@@ -30,7 +30,7 @@ function ChanCreationTab()
 			password: {value: string};
 			password_confirmation: {value: string};
 		};
-		console.log(is_protected);
+		// console.log(is_protected);
 		if (target.channel_name.value.length === 0)
 		{
 			notify.addNotice(ELevel.error, "The new channel needs a name", 3000);

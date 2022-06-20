@@ -17,7 +17,7 @@ function JoinedChan(props: chan_props)
 	useEffect(() =>
 	{
 		setRoom(chatCtx.findRoomById(props.id));
-		console.log("a");
+		// console.log("a");
 	}, [chatCtx.rooms, chatCtx, props.id, chatCtx.findRoomById]);
 
 	if (chatCtx.currentRoom?.room_name === props.name)
