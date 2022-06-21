@@ -20,13 +20,14 @@ export class GameHistoryService {
 
 	async getUserGameHistory(user: User): Promise<FinishedGame []>
 	{
-		return (await this.finishedGames.find({
-			relations: ["player_one", "player_two"],
+		let ret = await this.finishedGames.find({
+			relations: {player_one: true, player_two: true},
 			where: [
-				{ player_one: user},
-				{ player_two: user},
+				{ player_one : {id : user.id} }, 
+				{ player_two : {id : user.id} }
 			],
-		}));
+		});
+		return (ret);
 	}
 
 	async addGameToHistory(game: PostFinishedGameDto)

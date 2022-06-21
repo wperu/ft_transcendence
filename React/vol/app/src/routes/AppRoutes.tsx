@@ -8,7 +8,7 @@ import Callback from '../pages/Callback/Callback';
 import SidebarWithContext from '../components/Sidebar/SidebarWithContext';
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
-import { FakeUser } from '../pages/FakeUser/FakeUser';
+// import { FakeUser } from '../pages/FakeUser/FakeUser';
 import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 import PongRequestRoom from '../components/PongGame/PongRequestRoom/PongRequestRoom';

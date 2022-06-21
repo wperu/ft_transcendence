@@ -31,7 +31,6 @@ export class GameHistoryController
 			// console.log(error);
 			throw (new BadRequestException(error));
 		}
-		
 		entity.map(({
 			player_one,
 			player_two,
