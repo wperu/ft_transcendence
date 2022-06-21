@@ -17,6 +17,8 @@ import QuatreCentQuatre from "../pages/404/404";
 
 function AppRoute() : JSX.Element
 {
+	// <Route path="/dev_user" element={<FakeUser/>}/>
+
 	const element =
 	<ProvideNotify>
 		<ProvideAuth>
@@ -24,7 +26,6 @@ function AppRoute() : JSX.Element
 				<Routes>
 					<Route path="/login" element={<HomeLoggedOut />}/>
 					<Route path="/login/callback" element={<Callback />}/>
-					<Route path="/dev_user" element={<FakeUser/>}/>
 					<Route path="*" element={<QuatreCentQuatre/>}/>
 					<Route element={<RequireAuth/>}>
 						<Route element={<>

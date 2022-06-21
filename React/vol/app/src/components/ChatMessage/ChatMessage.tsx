@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
+// import { useEffect } from "react";
+// import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChatMessage.css";
 
 interface MessageProps
