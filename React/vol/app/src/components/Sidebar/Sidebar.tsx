@@ -56,7 +56,7 @@ const Sidebar = (() =>
 							checked={chatCtx.currentTab === ECurrentTab.channels}
 							name="tab" id="channels" value={ECurrentTab.channels}
 							onChange={handleChange}/>
-						<label htmlFor="channels">Channels {chatCtx.havePendingMsg() ? " X" : ""} </label>
+						<label htmlFor="channels">Channels {chatCtx.havePendingMsg() ? " ඞ" : ""} </label>
 						<input className="tab_button" type="radio"
 							checked={chatCtx.currentTab === ECurrentTab.chat}
 							name="tab" id="chats" value={ECurrentTab.chat}

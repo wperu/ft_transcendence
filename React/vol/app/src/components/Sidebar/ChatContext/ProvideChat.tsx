@@ -272,6 +272,8 @@ function useChatProvider() : IChatContext
 				let add = 1;
 				if (currentRoom !== undefined && data.room_id === currentRoom?.id && currentTab === ECurrentTab.chat)
 					add = 0;
+				else if (blockList.find(b => (b.reference_id === data.refId)) !== undefined)
+					add = 0;
 				const room = [...prev]
 
 				room[id] = { ...room[id], room_message: [...room[id].room_message, data], nb_notifs: room[id].nb_notifs + add }
