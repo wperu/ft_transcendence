@@ -19,7 +19,7 @@ function getDateFormat(date: Date) : string
 {
 	const in_date = new Date(date);
 	const curr_date = new Date();
-	let out_string = in_date.getDate() + "/" + addZero(in_date.getMonth());
+	let out_string = in_date.getDate() + "/" + addZero(in_date.getMonth() + 1);
 
 	if (in_date.getFullYear() !== curr_date.getFullYear())
 		out_string += "/" + in_date.getFullYear();
