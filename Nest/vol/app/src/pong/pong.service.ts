@@ -214,6 +214,13 @@ export class PongService {
             return ;
         }
 
+		let duplicate = await this.waitingPool.find((u) => u.user.reference_id === user.reference_id)
+		if (duplicate !== undefined && duplicate !== null)
+		{
+			this.logger.warn("user tried to join waiting list twice");
+			return ;
+		}
+
         this.waitingPool.splice(this.waitingPool.indexOf(other), 1);
 		this.initPlayer(other.user);
 		this.initPlayer(user);
