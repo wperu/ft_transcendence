@@ -256,7 +256,7 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
 
     /* Terrain */
     ctx.strokeStyle = '#FFFFFF'
-    ctx.lineWidth = 10;
+    ctx.lineWidth = render_ctx.terrain_w * 0.017;
     ctx.strokeRect(render_ctx.terrain_x, render_ctx.terrain_y, render_ctx.terrain_w, render_ctx.terrain_h);
 
     /* Player names & points */
@@ -277,7 +277,7 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
         //if (player !== undefined )
         //{        
             ctx.save();
-            ctx.translate(render_ctx.terrain_x - 10, render_ctx.terrain_y + render_ctx.terrain_h);
+            ctx.translate(render_ctx.terrain_x - render_ctx.terrain_w * 0.017, render_ctx.terrain_y + render_ctx.terrain_h);
             ctx.rotate(Math.PI + Math.PI * 0.5);
             ctx.fillStyle = "#FFFFFF";
             ctx.font = names_text_size.toString() + "px NonFiction"
@@ -295,7 +295,7 @@ function renderBackground(ctx : CanvasRenderingContext2D, render_ctx: PongRender
         //if (opponent !== undefined)
        // { 
             ctx.save();
-            ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + 10, render_ctx.terrain_y);
+            ctx.translate(render_ctx.terrain_x + render_ctx.terrain_w + render_ctx.terrain_w * 0.017, render_ctx.terrain_y);
             ctx.rotate(Math.PI * 0.5);
             ctx.fillStyle = "#FFFFFF";
             ctx.font = names_text_size.toString() + "px NonFiction"
