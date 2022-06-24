@@ -39,6 +39,7 @@ const Pong = () => {
 		}
 	}, [socket, navigate, isAuth])
 
+
     if (finished)
     {
         return (

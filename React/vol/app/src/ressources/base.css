@@ -52,4 +52,9 @@ a
 {
 	color: inherit;
 	text-decoration: none;
-} 
+}
+
+.invisible
+{
+	display: none;
+}

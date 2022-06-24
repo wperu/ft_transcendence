@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { RoomJoinedDTO } from "../../../Common/Dto/chat/RoomJoined";
 import { useAuth } from "../../../auth/useAuth";
@@ -73,10 +73,10 @@ interface IChatContext
 	isConnected:	boolean;
 	currentRoom?:	IRoom;
 
-	setCurrentRoom:			(room: IRoom | undefined) => void;
-	setCurrentRoomById:		(id: number) => void;
-	findRoomById:			(id: number) => IRoom | undefined;
-	havePendingMsg: 		() => boolean;
+	setCurrentRoom:				(room: IRoom | undefined) => void;
+	setCurrentRoomById:			(id: number) => void;
+	findRoomById:				(id: number) => IRoom | undefined;
+	havePendingMsg: 			() => boolean;
 
 	rooms: IRoom[];
 
@@ -288,7 +288,7 @@ function useChatProvider() : IChatContext
 				socket.off('RECEIVE_MSG');
 			}
 		};
-	}, [rooms, currentRoom, socket, currentTab]);
+	}, [rooms, currentRoom, socket, currentTab, blockList]);
 
 	useEffect(() => {
 		if (currentTab === ECurrentTab.chat && currentRoom && currentRoom.nb_notifs !== 0)
