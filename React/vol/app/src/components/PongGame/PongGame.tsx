@@ -60,7 +60,7 @@ const PongGame = (props: CanvasProps) => {
 		window.addEventListener('keydown', (event: KeyboardEvent) => {
 			if (pongCtx.room !== null && user !== null && pongCtx.room.state === RoomState.PLAYING)
 			{
-                console.log(event.code);
+                // console.log(event.code);
                 if (event.code === "ArrowUp" || event.code === "ArrowDown")
 				{
 					pongCtx.room.player_1.key = (event.code === "ArrowUp") ? -1 : 1;

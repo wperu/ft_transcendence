@@ -7,12 +7,10 @@ import './PongEndGame.css'
 
 const PlayerScore = (props: { player: IPongUser} ) => {
     return (
-       // <div>
-            <aside className="player-score">
-                <h3>{props.player.points}</h3>
-                <h4>{props.player.username}</h4>
-            </aside> 
-        //</div> 
+        <aside className="player-score">
+            <h3>{props.player.points}</h3>
+            <h4>{props.player.username}</h4>
+        </aside> 
     );
 }
 
