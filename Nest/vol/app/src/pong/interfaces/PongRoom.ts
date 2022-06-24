@@ -30,6 +30,7 @@ export interface PongRoom
     
     custom: boolean,
     options: number, // use binary or ( | ) to chain options
+	withdrawal: number, // 0 for none or 1 for player 1 or 2 for player 2 or 3 for both withdrew
 
     endScore: number,
 }

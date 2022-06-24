@@ -290,6 +290,7 @@ export class PongService {
         {
 			if (room.reconnectTimeout !== undefined)
 				clearTimeout(room.reconnectTimeout);
+			room.withdrawal = 3;
             room.player_1.in_game = undefined;
             room.player_2.in_game = undefined;
             room.state = RoomState.FINISHED;
@@ -300,17 +301,17 @@ export class PongService {
 			} as UpdatePongPointsDTO);
 
 			//FIX rm user fron userlist /!\
-            //if (room.job_id !== "")
-            //    this.boss.offWork(room.job_id);
-            // TODO push room in history
         }
         else if (room !== undefined && room.state !== RoomState.PAUSED
 		 && (room.player_1.socket.connected || room.player_2.socket.connected))
         {
             room.state = RoomState.PAUSED;
+			if (!room.player_1.socket.connected)
+				room.withdrawal = 1;
+			else
+				room.withdrawal = 2;
 			if (room.reconnectTimeout !== undefined)
 				clearTimeout(room.reconnectTimeout);
-
 			room.reconnectTimeout = setTimeout(() => {
 				room.player_1.in_game = undefined;
 				room.player_2.in_game = undefined;
@@ -320,16 +321,6 @@ export class PongService {
                     player_2_score: room.player_2.points,
 					withdrawal: true,
                 } as UpdatePongPointsDTO);
-				/*this.historyService.addGameToHistory({
-					ref_id_one: room.player_1.reference_id,
-					ref_id_two: room.player_2.reference_id,
-					score_one: room.player_1.points,
-					score_two: room.player_2.points,
-					game_modes: room.options,
-					custom: room.custom,
-					withdrew: (user.reference_id === room.player_1.reference_id)
-						? 1 : 2,
-				} as PostFinishedGameDto);*/
 			}, 10000);
 
             //this.boss.cancel(room.job_id);
@@ -384,8 +375,8 @@ export class PongService {
                 } : undefined
             } as ReconnectPlayerDTO);
 
-            this.logger.log(`${user.username} reconnected to the game`)
-
+			room.withdrawal = 0;
+            this.logger.log(`${user.username} reconnected to the game`);
             new Promise(async () => setTimeout(async () => {
 				if (!room.player_1.socket.connected || !room.player_2.socket.connected)
 				{

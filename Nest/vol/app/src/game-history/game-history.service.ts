@@ -23,8 +23,8 @@ export class GameHistoryService {
 		return (await this.finishedGames.find({
 			relations: ["player_one", "player_two"],
 			where: [
-				{ player_one: user},
-				{ player_two: user},
+				{ player_one : {id : user.id} }, 
+				{ player_two : {id : user.id} }
 			],
 		}));
 	}
