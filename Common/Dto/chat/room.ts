@@ -83,7 +83,7 @@ export interface RcvMessageDto
 	message: string,
 	sender: string,
 	refId: number,
-	send_date: string,
+	send_date: Date,
 	room_id: number,
 }
 
