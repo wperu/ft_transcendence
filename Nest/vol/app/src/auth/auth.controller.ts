@@ -1,11 +1,7 @@
-import { Controller, Redirect, Get, Query, UnauthorizedException, Res, UseGuards, Req, ForbiddenException, BadRequestException, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, UnauthorizedException, Res, Req, ForbiddenException, BadRequestException, Post, Body } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { randomInt } from 'crypto';
-import { resolveSoa } from 'dns';
-import { User } from 'src/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import IUser from 'src/Common/Dto/User/User';
@@ -31,7 +27,7 @@ export class AuthController
    // @Redirect(this.redirect_url || "", 301)
     async   login(@Res() res : Response)
     {
-		await res.redirect(301, this.redirect_url);
+		res.redirect(301, this.redirect_url);
     }
 
 
@@ -46,7 +42,7 @@ export class AuthController
 
         let react_code: string = await this.authService.generateAuthorizationCode(user.access_token);
 
-        await res.redirect(301, `${this.configService.get<string>("REACT_REDIRECT_URL")}?code=${react_code}&register=${user.username === null}&useTwoFactor=${user.setTwoFA}`);
+        res.redirect(301, `${this.configService.get<string>("REACT_REDIRECT_URL")}?code=${react_code}&register=${user.username === null}&useTwoFactor=${user.setTwoFA}`);
     }
 
     @Post('/token')
@@ -90,13 +86,15 @@ export class AuthController
 		if (user === undefined)
 			throw new ForbiddenException("wrong access code");
 		if (user.username !== null)
-			throw new ForbiddenException("Already register !");
+			throw new ForbiddenException("Already registered !");
 
 		const username = req.body['username'];
 		if (username === undefined)
 			throw new BadRequestException('no username in body !');
 		if (this.usersService.isValideUsername(username) === false)
 			throw new BadRequestException('Username bad format !');
+        if (await this.usersService.findUserByName(username) !== undefined)
+			throw new ForbiddenException("Username already in use");
 
 		user.username = username;
 		await this.usersService.saveUser(user);

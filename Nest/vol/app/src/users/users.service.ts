@@ -128,6 +128,9 @@ export class UsersService
 			},
 		});
 
+		console.log("found user: ")
+		console.log(user);
+
 		if (user !== undefined && user !== null)
 			return user
 		return (undefined)
