@@ -421,7 +421,6 @@ export class RoomService
 			relations : ["user", "room"],
 			where : {
 				user : { reference_id : refId},
-				ban_expire: null
 			}
 		})
 
@@ -434,6 +433,7 @@ export class RoomService
 
 		for (let rel of rooms_list)
 		{
+			console.log(rel);
 			let room = rel.room;
 			/**
 			 * create room dto
@@ -457,13 +457,16 @@ export class RoomService
 				});
 			}
 
-			ret.push({
-				id:				room.id,
-				name:			room.name,
-				owner:			room.owner,
-				has_password:	room.password_key !== null,
-				isDm:			room.isDm,
-			})
+			if (rel.ban_expire === null)
+			{
+				ret.push({
+					id:				room.id,
+					name:			room.name,
+					owner:			room.owner,
+					has_password:	room.password_key !== null,
+					isDm:			room.isDm,
+				});
+			}
 		};
 
 		return ret;
