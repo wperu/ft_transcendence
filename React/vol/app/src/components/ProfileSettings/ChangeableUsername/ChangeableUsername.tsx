@@ -52,6 +52,7 @@ function ChangeableUsername(props: userProps)
 				avatar_last_update: 		user.avatar_last_update,
 			}
 			setUser(newUser);
+			sessionStorage.setItem("user", JSON.stringify(newUser));
 			target.username.value = '';
 			notif.addNotice(ELevel.info, 'Username changed', 3000);
 		})

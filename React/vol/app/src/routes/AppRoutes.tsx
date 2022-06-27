@@ -8,7 +8,7 @@ import Callback from '../pages/Callback/Callback';
 import SidebarWithContext from '../components/Sidebar/SidebarWithContext';
 import { ProvideNotify } from '../components/NotifyContext/NotifyContext';
 import { Pong } from '../pages/Pong/Pong';
-import { FakeUser } from '../pages/FakeUser/FakeUser';
+// import { FakeUser } from '../pages/FakeUser/FakeUser';
 import { PongMatchmaking } from '../pages/PongMatchmaking/PongMatchmaking';
 import { ProvidePong } from '../components/PongGame/PongContext/ProvidePong';
 import PongRequestRoom from '../components/PongGame/PongRequestRoom/PongRequestRoom';
@@ -17,6 +17,8 @@ import QuatreCentQuatre from "../pages/404/404";
 
 function AppRoute() : JSX.Element
 {
+	// <Route path="/dev_user" element={<FakeUser/>}/>
+
 	const element =
 	<ProvideNotify>
 		<ProvideAuth>
@@ -24,7 +26,6 @@ function AppRoute() : JSX.Element
 				<Routes>
 					<Route path="/login" element={<HomeLoggedOut />}/>
 					<Route path="/login/callback" element={<Callback />}/>
-					<Route path="/dev_user" element={<FakeUser/>}/>
 					<Route path="*" element={<QuatreCentQuatre/>}/>
 					<Route element={<RequireAuth/>}>
 						<Route element={<>

@@ -1,69 +1,72 @@
-import React, {KeyboardEvent, useState, useEffect, useCallback } from "react";
+import React, {KeyboardEvent, useState, useEffect, useCallback, memo  } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
-import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
-import { RcvMessageDto, SendMessageDTO } from "../../Common/Dto/chat/room";
+import { chatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
+import { RcvMessageDto, SendMessageDTO, UserDataDto } from "../../Common/Dto/chat/room";
 import "./ChatTab.css";
 
-function ChatTab() 
+
+interface Prop
 {
-	const {
-		socket,
-		currentRoom,
-		setCurrentTab,
-		invitePlayer,
-		blockList,
-	} = useChatContext();
-	
+	socket:  any,
+	currentRoom:  any,
+	setCurrentTab:  any,
+	invitePlayer:  any,
+	blockList:  UserDataDto[],
+}
+
+const ChatTab = memo(() => 
+{
+	return (
+		<React.Fragment> 
+			<chatContext.Consumer>
+				{value => (<ChatTabConsumer socket={value.socket} currentRoom={value.currentRoom} setCurrentTab={value.setCurrentTab} invitePlayer={value.invitePlayer} blockList={value.blockList}></ChatTabConsumer>)}
+				 
+			</chatContext.Consumer>
+			<chatContext.Consumer>
+				{value => (<SendMessageBar socket={value.socket} id={value.currentRoom?.id} desc={"message"}></SendMessageBar>)}
+				 
+			</chatContext.Consumer>
+		</ React.Fragment> 
+	)
+});
+
+const ChatTabConsumer = memo((prop : Prop) =>  
+{
 	const [messages, setMessages] = useState<RcvMessageDto[]>([]);
 	const [updated, setUpdated] = useState<Boolean>(false);
 
 	let msg_list_ref = React.createRef<HTMLDivElement>();
 
-	const pressedSend = useCallback((event: KeyboardEvent<HTMLInputElement>) =>	{
-		if (socket !== undefined && currentRoom !== undefined
-			&& event.key === "Enter" && event.currentTarget.value.length > 0)
-		{
-			let data : SendMessageDTO =
-			{
-				message: event.currentTarget.value,
-				room_id: currentRoom.id,
-			};
-			socket.emit('SEND_MESSAGE', data);
-			event.currentTarget.value = '';
-		}
-	}, [socket, currentRoom]);
-
-
 	const pressedQuit = useCallback(() => {
-		if (currentRoom !== undefined)
+		if (prop.currentRoom !== undefined)
 		{
 			let dto = {
-				id:		currentRoom.id,
-				name:	currentRoom.room_name,
+				id:		prop.currentRoom.id,
+				name:	prop.currentRoom.room_name,
 			}
-			socket.emit("LEAVE_ROOM", dto);
+			prop.socket.emit("LEAVE_ROOM", dto);
 			setMessages([]);
-			setCurrentTab(ECurrentTab.channels);
+			prop.setCurrentTab(ECurrentTab.channels);
 		}
-	}, [currentRoom, setCurrentTab, socket])
+	}, [prop])
 
 	const sendInvite = useCallback(() => 
 	{
-		if (currentRoom !== undefined)
+		if (prop.currentRoom !== undefined)
 		{
-			invitePlayer(undefined, currentRoom.id);
+			prop.invitePlayer(undefined, prop.currentRoom.id);
 		}
-	}, [invitePlayer, currentRoom])
+	}, [prop])
 
 	useEffect(() =>
 	{
-		if (currentRoom !== undefined
-			&& currentRoom.room_message.length !== messages.length)
+		if (prop.currentRoom !== undefined
+			&& prop.currentRoom.room_message.length !== messages.length)
 		{
-			setMessages([...currentRoom.room_message]);
+			setMessages([...prop.currentRoom.room_message]);
 			setUpdated(true);
 		}
-	}, [currentRoom, messages.length]);
+	}, [prop.currentRoom, messages.length]);
 
 	useEffect( () =>
 	{
@@ -72,7 +75,7 @@ function ChatTab()
 			msg_list_ref.current.scrollTop = msg_list_ref.current.scrollHeight;
 			setUpdated(false);
 		}
-	}, [updated, msg_list_ref, currentRoom]);
+	}, [updated, msg_list_ref, prop.currentRoom]);
 
 	return (
 		<div id="ChatTab">
@@ -88,26 +91,52 @@ function ChatTab()
 				<ul>
 				{
 					messages.map(({message, sender, send_date, refId} , index) => {
-						if (blockList.find(b => (b.reference_id === refId)) === undefined)
+						if (prop.blockList.find(b => (b.reference_id === refId)) === undefined)
 							return <li key={index}><ChatMessage src_name={sender} content={message} time={send_date} refId={refId} /></li>
 						return (null);
 						})}
 				</ul>
 			</div>
-				<SendMessageBar onKeyPress={pressedSend} desc={"message"} />
+				
 			
 		</div>
 	);
+})
+
+interface ISendMsg 
+{ id: number | undefined, socket: any, desc : string }
+
+const areEqual = (prev: ISendMsg, next: ISendMsg) => {
+	console.log(prev.id === next.id, prev.socket === next.socket);
+	return (prev.id === next.id && prev.socket === next.socket);
 }
 
-const SendMessageBar = React.memo((prop : { onKeyPress : (event: KeyboardEvent<HTMLInputElement>) => void, desc : string }) => 
+const SendMessageBar = React.memo((prop : ISendMsg) => 
 {
+
+	console.log('reload');
+	const [msg, setMsg] = useState<string>('');
+
+	const pressedSend = useCallback((event: KeyboardEvent<HTMLInputElement>) =>	{
+		if( event.key === "Enter" && event.currentTarget.value.length > 0 && prop.id)
+		{
+			let data : SendMessageDTO =
+			{
+				message: msg,
+				room_id: prop.id,
+			};
+			prop.socket.emit('SEND_MESSAGE', data);
+			setMsg('');
+		}
+	}, [prop.socket, prop.id, msg]);
+
+
 	return (
 		<footer id="msg_footer">
-				<input type="text" id="message_input" onKeyPress={prop.onKeyPress} maxLength={300}
+				<input type="text" id="message_input" value={msg} onChange={(text) => { setMsg(text.currentTarget.value) }} onKeyPress={pressedSend} maxLength={300}
 					placeholder={prop.desc}/>
 		</footer>
 	)
-})
+}, areEqual)
 
 export default ChatTab;
