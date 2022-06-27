@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { GameConfig } from "../../Common/Game/GameConfig";
-import { IPongUser, usePongContext } from "../PongGame/PongContext/ProvidePong";
+import { IPongUser, RoomOptions, usePongContext } from "../PongGame/PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "../PongGame/PongGame";
 import './PongEndGame.css'
 
@@ -29,7 +29,9 @@ const PongEndGame = () => {
         {
             if (user.username !== player.username && user.username !== opponent.username)
             {
-                if (player.points > opponent.points)
+                if (pongCtx.room?.withdrawal)
+                    message = 'players withdrawed'
+                else if (player.points > opponent.points)
                     message = `${player.username} wins !`;
                 else
                     message = `${opponent.username} wins !`;
