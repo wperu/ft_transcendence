@@ -1,4 +1,4 @@
-import React, {KeyboardEvent, useState, useEffect, useCallback, memo, Fragment, useMemo } from "react";
+import React, {KeyboardEvent, useState, useEffect, useCallback, memo  } from "react";
 import ChatMessage from "../ChatMessage/ChatMessage";
 import { chatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
 import { RcvMessageDto, SendMessageDTO, UserDataDto } from "../../Common/Dto/chat/room";
@@ -48,7 +48,7 @@ const ChatTabConsumer = memo((prop : Prop) =>
 			setMessages([]);
 			prop.setCurrentTab(ECurrentTab.channels);
 		}
-	}, [prop.currentRoom, prop.setCurrentTab, prop.socket])
+	}, [prop])
 
 	const sendInvite = useCallback(() => 
 	{
@@ -56,7 +56,7 @@ const ChatTabConsumer = memo((prop : Prop) =>
 		{
 			prop.invitePlayer(undefined, prop.currentRoom.id);
 		}
-	}, [prop.invitePlayer, prop.currentRoom])
+	}, [prop])
 
 	useEffect(() =>
 	{
