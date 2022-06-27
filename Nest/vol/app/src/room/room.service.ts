@@ -433,7 +433,7 @@ export class RoomService
 
 		for (let rel of rooms_list)
 		{
-			console.log(rel);
+			// console.log(rel);
 			let room = rel.room;
 			/**
 			 * create room dto

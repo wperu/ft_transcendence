@@ -24,7 +24,7 @@ const areEqual = (prev: { currentRoom: any }, next: { currentRoom: any }) =>
 
 const ChatConsumer = memo((prop: { currentRoom: any }) =>
 {
-	console.log('Je suis le parent !')
+	// console.log('Je suis le parent !')
 	const [currentTab, setCurrentTab] = useState<string>("chat");
 
 

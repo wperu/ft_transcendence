@@ -421,7 +421,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 		}
 		else
 		{
-			client.emit("NOTIFICATION", { level: ELevel.error, content: "Unknow User" })
+			client.emit("NOTIFICATION", { level: ELevel.error, content: "Unknown User" })
 			return ;
 		}
 	  }

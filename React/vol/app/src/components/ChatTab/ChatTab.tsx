@@ -107,14 +107,14 @@ interface ISendMsg
 { id: number | undefined, socket: any, desc : string }
 
 const areEqual = (prev: ISendMsg, next: ISendMsg) => {
-	console.log(prev.id === next.id, prev.socket === next.socket);
+	// console.log(prev.id === next.id, prev.socket === next.socket);
 	return (prev.id === next.id && prev.socket === next.socket);
 }
 
 const SendMessageBar = React.memo((prop : ISendMsg) => 
 {
 
-	console.log('reload');
+	// console.log('reload');
 	const [msg, setMsg] = useState<string>('');
 
 	const pressedSend = useCallback((event: KeyboardEvent<HTMLInputElement>) =>	{
