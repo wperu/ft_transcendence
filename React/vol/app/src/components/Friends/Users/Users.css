@@ -19,6 +19,7 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow:ellipsis;
+	max-width: 60%;
 }
 
 .friends_user_profile_pic
@@ -40,7 +41,7 @@
 
 .online_friend_status
 {
-	margin-left: 1em;
+	margin-left: 0.7em;
 	font-size: 0.7em;
 	color: lightgrey;
 }

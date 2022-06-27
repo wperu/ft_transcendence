@@ -58,8 +58,8 @@ export function Friend(props: user_props)
 					src={process.env.REACT_APP_API_USER + '/' + props.ref_id + '/avatar'} alt="42" />
 				<div className="friends_user_username">
 						<Link to={"/profile/" + props.ref_id}  replace={false} >{props.name}</Link>
-						<span className="online_friend_status" > {status} </span>
 				</div>
+				<span className="online_friend_status" > {status} </span>
 			</div>
 			<div className="chat_user_button_div">
 				<InviteUserButton refId={props.ref_id}/>
