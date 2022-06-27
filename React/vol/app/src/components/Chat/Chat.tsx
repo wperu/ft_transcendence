@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import { chatContext, ELevelInRoom } from "../Sidebar/ChatContext/ProvideChat";
 import ChatTab from "../ChatTab/ChatTab";
 import OwnerChannelSettings from "../OwnerChannelSettings/OwnerChannelSettings";
@@ -15,12 +15,20 @@ const Chat = () =>
 	)
 }
 
+const areEqual = (prev: { currentRoom: any }, next: { currentRoom: any }) => 
+{
+	return prev.currentRoom.isDm === next.currentRoom.isDm
+		&& prev.currentRoom.user_level === next.currentRoom.user_level
+		&& next !== undefined;
+}
+
 const ChatConsumer = memo((prop: { currentRoom: any }) =>
 {
+	console.log('Je suis le parent !')
 	const [currentTab, setCurrentTab] = useState<string>("chat");
 
 
-	function Content() : JSX.Element
+	const Content = useCallback(() : JSX.Element => 
 	{
 		if (prop.currentRoom !== undefined)
 		{
@@ -36,7 +44,8 @@ const ChatConsumer = memo((prop: { currentRoom: any }) =>
 		}
 		else
 			return (<ThisListIsEmpty text="Tu n'es pas dans un channel" />);
-	}
+
+	}, [prop.currentRoom, currentTab])
 
 	function handleChange(event: React.ChangeEvent<HTMLInputElement>)
 	{
@@ -58,6 +67,6 @@ const ChatConsumer = memo((prop: { currentRoom: any }) =>
 			<Content />
 		</div>
 	);
-})
+}, areEqual)
 
 export default Chat;
