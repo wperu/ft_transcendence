@@ -45,7 +45,6 @@ const ChatUser = (prop: props) =>
 const ChatUserConsumer = memo((data: propsWithCtx) =>
 {
 	const { user } = useAuth();
-//	const { friendsList } = useChatContext();
 	const [isFriend, setIsFriend] = useState<boolean>(false);
 
 	useEffect(() => {

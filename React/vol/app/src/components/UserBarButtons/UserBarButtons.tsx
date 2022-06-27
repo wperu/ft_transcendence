@@ -186,7 +186,7 @@ const BanUserButtonConsumer = memo((prop: banWithContextProp) =>
 		<React.Fragment>
 			<button className="user_bar_button positive_user_button" onClick={open}>
 				<img alt="" src={BanLogo}/>
-				ban
+				unban
 			</button>
 			<Popup open={isOpen} onClose={close} modal>
 				{<div className="mute_ban_popup">

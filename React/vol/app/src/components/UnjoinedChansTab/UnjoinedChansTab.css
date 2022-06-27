@@ -6,6 +6,7 @@
 	overflow-x: hidden;
 	overflow-y: auto;
 	height: calc(100vh - (var(--tab_button_height) * 5));
+	list-style: none;
 }
 
 #join_chan_by_name

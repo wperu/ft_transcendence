@@ -4,6 +4,7 @@ import Chat from "../Chat/Chat";
 import Channels from "../Channels/Channels";
 import Friends from "../Friends/Friends";
 import { useChatContext, ECurrentTab } from "../Sidebar/ChatContext/ProvideChat";
+import { useLocation } from "react-router-dom";
 
 interface prop
 {
@@ -23,6 +24,7 @@ const Content = memo((props: prop) =>
 const Sidebar = (() => 
 {
 	const chatCtx = useChatContext();
+	const location = useLocation();
 
 	function handleChange(event: React.ChangeEvent<HTMLInputElement>)
 	{
@@ -33,7 +35,6 @@ const Sidebar = (() =>
 
 		chatCtx.setCurrentTab(tmp);
 	};
-
 	useEffect(() =>
 	{
 		if(chatCtx.currentRoom === undefined && chatCtx.currentTab === ECurrentTab.chat)
@@ -42,7 +43,7 @@ const Sidebar = (() =>
 
 	if (chatCtx.isConnected)
 		return (
-			<div id="sidebar">
+			<div id="sidebar" className={location.pathname.indexOf("/game/") === 0 ? "invisible" : ""}>
 				<input id="toggle" type="checkbox" />
 				<label htmlFor="toggle"></label>
 				<div id="actual_bar">
@@ -56,7 +57,7 @@ const Sidebar = (() =>
 							checked={chatCtx.currentTab === ECurrentTab.channels}
 							name="tab" id="channels" value={ECurrentTab.channels}
 							onChange={handleChange}/>
-						<label htmlFor="channels">Channels {chatCtx.havePendingMsg() ? " X" : ""} </label>
+						<label htmlFor="channels">Channels {chatCtx.havePendingMsg() ? " ඞ" : ""} </label>
 						<input className="tab_button" type="radio"
 							checked={chatCtx.currentTab === ECurrentTab.chat}
 							name="tab" id="chats" value={ECurrentTab.chat}
@@ -69,7 +70,7 @@ const Sidebar = (() =>
 		);
 	else
 		return (
-			<div id="sidebar">
+			<div id="sidebar" className={location.pathname.indexOf("/game/") === 0 ? "invisible" : ""}>
 				<input id="toggle" type="checkbox" />
 				<label htmlFor="toggle"></label>
 				<div id="actual_bar">

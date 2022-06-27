@@ -1,39 +1,39 @@
-// import { useEffect } from "react";
-// import { useChatContext } from "../Sidebar/ChatContext/ProvideChat";
 import "./ChatMessage.css";
 
 interface MessageProps
 {
-	time: string;
+	time: Date;
 	src_name: string;
 	content: string;
 	refId: number;
 }
 
-//todo block user
+function addZero(value: number) : string
+{
+	if (value < 10)
+		return ("0" + value);
+	return (value.toString());
+}
+
+function getDateFormat(date: Date) : string
+{
+	const in_date = new Date(date);
+	const curr_date = new Date();
+	let out_string = in_date.getDate() + "/" + addZero(in_date.getMonth() + 1);
+
+	if (in_date.getFullYear() !== curr_date.getFullYear())
+		out_string += "/" + in_date.getFullYear();
+	out_string += " " + in_date.getHours() + ":" + addZero(in_date.getMinutes()); 
+	return (out_string);
+}
+
 function ChatMessage(props: MessageProps)
 {
-	/*const { blockList } = useChatContext();
-
-
-	if (blockList.find(({reference_id}) => {  return (reference_id === props.refId)}))
-	{
-		return (
-			<div className="message">
-				<header>
-					<div className="msg_src">{'blocked'}</div>
-					<div className="msg_time">{props.time}</div>
-				</header>
-				<div className="msg_content">{'*********'}</div>
-			</div>
-		);
-	}
-	else */
 		return (
 			<div className="message">
 				<header>
 					<div className="msg_src">{props.src_name}</div>
-					<div className="msg_time">{props.time}</div>
+					<div className="msg_time">{getDateFormat(props.time)}</div>
 				</header>
 				<div className="msg_content">{props.content}</div>
 			</div>

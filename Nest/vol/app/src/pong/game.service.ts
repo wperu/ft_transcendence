@@ -79,15 +79,18 @@ export class GameService {
 
         this.logger.log(`Room ${room.id} ended (${room.player_1.username} vs ${room.player_2.username})`);
 
-        this.historyService.addGameToHistory({
-            ref_id_one: room.player_1.reference_id,
-            ref_id_two: room.player_2.reference_id,
-            score_one: room.player_1.points,
-            score_two: room.player_2.points,
-            game_modes: room.options,
-            custom: room.custom,
-            withdrew: 0
-        } as PostFinishedGameDto);
+		if (room.withdrawal < 3)
+		{
+			this.historyService.addGameToHistory({
+				ref_id_one: room.player_1.reference_id,
+				ref_id_two: room.player_2.reference_id,
+				score_one: room.player_1.points,
+				score_two: room.player_2.points,
+				game_modes: room.options,
+				custom: room.custom,
+				withdrew: room.withdrawal,
+			} as PostFinishedGameDto);
+		}
 
         return ;
     }
@@ -161,6 +164,7 @@ export class GameService {
             lastTime: 0,
             frameCount: 0,
             endScore: GameConfig.DEFAULT_MAX_SCORE,
+			withdrawal: 0,
         });
     }
 

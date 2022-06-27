@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Logger, OnModuleInit } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer, WsResponse } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { format } from 'date-fns';
 import { Server, Socket } from 'socket.io';
 import { ChatUser } from 'src/chat/interface/ChatUser';
@@ -63,7 +63,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				message:	payload.message,
 				sender:		await this.chatService.getUsernameFromID(user.reference_id),
 				refId:		user.reference_id,
-				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				send_date:	new Date(),
 				room_id:	payload.room_id
 			};
 			
@@ -121,7 +121,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				message:	"User " + user.username + " has joined the channel",
 				sender:		"Server",
 				refId:		user.reference_id,
-				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				send_date:	new Date(),
 				room_id:	id
 			};	
 
@@ -151,7 +151,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 				message:	"User " + user.username + " has left the channel",
 				sender:		"Server",
 				refId:		user.reference_id,
-				send_date:	format(Date.now(), "yyyy-MM-dd HH:mm:ss"),
+				send_date:	new Date(),
 				room_id:	payload.id
 			};
 

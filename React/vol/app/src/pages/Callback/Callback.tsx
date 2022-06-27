@@ -56,7 +56,7 @@ function Callback()
 		}
 		else
 		{
-			console.log('no code in query');
+			// console.log('no code in query');
 		}
 	}, [notif, search])
 
