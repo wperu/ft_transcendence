@@ -1,2 +1,3 @@
 # ft_transcendence
-web site for pong with NESTjs, react, postgres, docker-compose
+
+un bo pong joli avec le chat et tu peu metre deu bales le jeu
