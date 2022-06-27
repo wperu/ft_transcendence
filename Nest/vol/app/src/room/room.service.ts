@@ -103,7 +103,7 @@ export class RoomService
 		const ret = await this.findRelOf(room.id, refId);
 
 
-		if (ret === undefined)
+		if (ret === undefined || ret === null)
 			return false;
 		if (ret.ban_expire !== null)
 			false
@@ -174,7 +174,7 @@ export class RoomService
 		let room	: ChatRoomEntity 			= new ChatRoomEntity();
 		let roomRel	: ChatRoomRelationEntity	= new ChatRoomRelationEntity();
 
-		if (isDm !== true && await this.findRoomByName(name) !== undefined) //useless check if is Dm
+		if (isDm !== true && await this.findRoomByName(name)) //useless check if is Dm
 			return "Room already exists";
 		if (isDm && user2 === undefined)
 			return "User doesn't exist";
@@ -218,7 +218,7 @@ export class RoomService
 
 	async joinRoom(room: ChatRoomEntity, user: User, password_key: string | null) : Promise<ChatRoomEntity | string>
 	{
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("no room exist !");
 		if(room.isDm === true)
 			return ("You can't join dm room");
@@ -272,7 +272,7 @@ export class RoomService
 	{
 		const room = await this.findRoomByName(chanName);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return false;
 
 		const ret = await this.roomRelRepo.findOne({
@@ -282,10 +282,8 @@ export class RoomService
 				user : { reference_id : refId}
 			}
 		})
-		if (ret  !== undefined)
+		if (ret)
 			this.roomRelRepo.remove(ret);
-
-
 
 		return (true);
 	}
@@ -301,7 +299,7 @@ export class RoomService
 	 {
 		const room = await this.findRoomById(chanId);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			 return "no room !";
 		if (room.isDm === true)
 			return ("You can't leave dm room !");
@@ -313,7 +311,7 @@ export class RoomService
 				 user : { reference_id : refId}
 			 }
 		 })
-		 if (ret === undefined)
+		 if (ret === undefined || ret === null)
 		 	return ("your are not in room");
 
 		await this.roomRelRepo.remove(ret);
@@ -345,7 +343,7 @@ export class RoomService
 					isAdmin: true,
 				}
 			})
-			if (rel !== undefined)
+			if (rel)
 			{
 				newOwner = rel.user.reference_id;
 			}
@@ -381,7 +379,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("no room exist");
 
 		if (await this.isInRoom(room, refId) === false)
@@ -431,7 +429,7 @@ export class RoomService
 
 		ret = [];
 
-		if (rooms_list === [])
+		if (rooms_list === [] || rooms_list === null || rooms_list === undefined)
 			return [];
 
 		for (let rel of rooms_list)
@@ -481,7 +479,7 @@ export class RoomService
 	{
 		let rel = await this.findRelOf(id, refId);
 
-		if (rel === undefined)
+		if (rel === undefined || rel === null)
 			return false;
 		if (rel.ban_expire === null)
 			return (false);
@@ -499,7 +497,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
@@ -509,7 +507,7 @@ export class RoomService
 			return "You can't mute room operator !";
 
 		const rel = await this.findRelOf(id, refId);
-		if (rel === undefined)
+		if (rel === undefined || rel === null)
 			return "User not in room !";
 
 		rel.ban_expire = expires_in;
@@ -524,7 +522,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
@@ -534,7 +532,7 @@ export class RoomService
 			return "You can't mute room operator !";
 
 		const rel = await this.findRelOf(id, refId);
-		if (rel === undefined)
+		if (rel === undefined || rel === null)
 			return "User not in room !";
 		if (rel.ban_expire === null)
 			return "User is not Banned !";
@@ -554,7 +552,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
@@ -597,7 +595,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
@@ -607,7 +605,7 @@ export class RoomService
 			return "You can't mute room operator !";
 
 		const rel = await this.findRelOf(id, refId);
-		if (rel === undefined)
+		if (rel === undefined || rel === null)
 			return "User not in room !";
 		rel.mute_expire = mute_expire;
 
@@ -619,7 +617,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return ("Room doesn't exist !")
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
@@ -629,7 +627,7 @@ export class RoomService
 			return "You can't unmute room operator !";
 
 		const rel = await this.findRelOf(id, refId);
-		if (rel === undefined)
+		if (rel === undefined || rel === null)
 			return "User not in room !";
 		rel.mute_expire = null;
 
@@ -641,7 +639,7 @@ export class RoomService
 	{
 		const room = await this.findRoomById(id);
 
-		if (room === undefined)
+		if (room === undefined || room === null)
 			return "Unknown room";
 		if (room.isDm === true)
 			return ("You can't do that in dm room !");
@@ -652,7 +650,7 @@ export class RoomService
 			return "Owner can't be demote !"
 		const ret = await this.findRelOf(id, refId);
 
-		if (ret === undefined)
+		if (ret === undefined || ret === null)
 			return "User need to be in room !";
 
 		ret.isAdmin = isAdmin;
@@ -676,7 +674,7 @@ export class RoomService
 
 		ret = [];
 
-		if (rooms_list === undefined)
+		if (!rooms_list)
 			return [];
 
 		rooms_list.forEach((room) => {
