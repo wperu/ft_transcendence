@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { GameConfig } from "../../Common/Game/GameConfig";
-import { IPongUser, RoomOptions, usePongContext } from "../PongGame/PongContext/ProvidePong";
+import { IPongUser, usePongContext } from "../PongGame/PongContext/ProvidePong";
 import { getPongOpponent, getPongPlayer } from "../PongGame/PongGame";
 import './PongEndGame.css'
 

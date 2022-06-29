@@ -164,7 +164,7 @@ const BanUserButtonConsumer = memo((prop: banWithContextProp) =>
 				{<div className="mute_ban_popup">
 					<div className="header"> Ban duration </div>
 					<div className="content">
-						<input type="number" min="1" placeholder="duration"
+						<input type="number" min="1" max="99999" placeholder="duration"
 							value={duration} onChange={(e) => {
 								setDuration(parseInt(e.target.value))
 								}}
@@ -270,7 +270,7 @@ export function MuteUserButton(prop: muteProp)
 				{<div className="mute_ban_popup">
 					<div className="header"> Mute duration </div>
 					<div className="content">
-						<input type="number" min="1" placeholder="duration"
+						<input type="number" min="1" max="99999" placeholder="duration"
 							value={duration} onChange={(e) => {
 								setDuration(parseInt(e.target.value))
 								}}
