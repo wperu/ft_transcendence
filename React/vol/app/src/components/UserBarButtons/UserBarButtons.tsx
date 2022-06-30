@@ -124,13 +124,15 @@ const BanUserButtonConsumer = memo((prop: banWithContextProp) =>
 	const ban = useCallback(() => {
 		if (prop.currentRoom !== undefined)
 		{
-			const dto : RoomBanDto =
+			let dto : RoomBanDto =
 			{
 				id: prop.currentRoom.id,
 				refId: prop.refId,
 				expires_in: duration,
 				isBan: true,
 			}
+			if (duration > 99999)
+				dto.expires_in = 99999;
 			prop.socket.emit('ROOM_BAN', dto);
 		}
 		close();
@@ -232,13 +234,15 @@ export function MuteUserButton(prop: muteProp)
 	{
 		if (chtCtx.currentRoom !== undefined)
 		{
-			const dto : RoomMuteDto =
+			let dto : RoomMuteDto =
 			{
 				roomId: chtCtx.currentRoom.id,
 				refId: prop.refId,
 				isMute: true,
 				expires_in: duration,
 			}
+			if (duration > 99999)
+				dto.expires_in = 99999;
 			chtCtx.socket.emit('ROOM_MUTE', dto);
 		}
 	}
