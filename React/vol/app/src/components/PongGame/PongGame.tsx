@@ -8,8 +8,6 @@ import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
 import './PongGame.css'
-import { Socket } from "socket.io-client";
-
 
 interface CanvasProps
 {
