@@ -185,7 +185,7 @@ function usePongProvider() : IPongContext
         return () => {
             socket.off('STARTING_ROOM');
         };
-     }, [inGame, socket]);
+     }, [inGame, socket, navigate]);
 
 
 
@@ -286,7 +286,7 @@ function usePongProvider() : IPongContext
         return (() => {
             socket.off("RECONNECT_YOU")
         })
-    }, [room, socket])
+    }, [room, socket, navigate])
 
     return ({
 		socket,

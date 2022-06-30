@@ -254,7 +254,7 @@ const PongGame = (props: CanvasProps) => {
 				pongCtx.setRoom(null);
 			}
 		}
-	}, [pongCtx.room, pongCtx.socket, pongCtx.setNeedReconnect, pongCtx.setRoom, user])
+	}, [pongCtx.room, pongCtx.socket, pongCtx.setNeedReconnect, pongCtx.setRoom, user, pongCtx])
 
 
 
