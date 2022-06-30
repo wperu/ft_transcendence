@@ -128,6 +128,9 @@ function usePongProvider() : IPongContext
 			// console.log(id);
 			navigate(`/matchmaking/custom/${id}`, {replace: true});
 		})
+		return (() => { 
+			socket.off("UP_CUSTOM_ROOM");
+		})
 	}, [socket, navigate])
 
 	
@@ -211,6 +214,11 @@ function usePongProvider() : IPongContext
 		socket.on("connect", () => {
 			// console.log("connected !");
 			setNeedReconnect(false);
+		})
+		return (() => 
+		{
+			socket.off("disconnect");
+			socket.off("connect");
 		})
 	}, [socket])
 

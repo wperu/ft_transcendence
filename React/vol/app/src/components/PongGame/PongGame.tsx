@@ -8,6 +8,7 @@ import { useAuth } from "../../auth/useAuth";
 import IUser from "../../Common/Dto/User/User";
 import { useRender } from "./PongRenderer";
 import './PongGame.css'
+import { Socket } from "socket.io-client";
 
 
 interface CanvasProps
@@ -135,14 +136,8 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.ball.vel_x = data.vel_x;
                     pongCtx.room.ball.vel_y = data.vel_y;
 
-                    // console.log("update ball");
-                    // console.log(pongCtx.room.ball2);
-                    // console.log(data.ball2);
-
                     if (pongCtx.room.options & RoomOptions.DOUBLE_BALL && pongCtx.room.ball2 !== undefined && data.ball2 !== undefined)
                     {
-                        // console.log("recv double ball update");
-                        // console.log(data.ball2);
                         pongCtx.room.ball2.pos_x = data.ball2.ball_x;
                         pongCtx.room.ball2.pos_y = data.ball2.ball_y;
                         pongCtx.room.ball2.vel_x = data.ball2.vel_x;
@@ -180,6 +175,15 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.player_2.points = data.player_2_score;
                 }
             })
+
+			return (() => {
+				if (pongCtx.room)
+				{
+					pongCtx.room.socket.off("UPDATE_PONG_BALL");
+					pongCtx.room.socket.off("UPDATE_PONG_PLAYER");
+					pongCtx.room.socket.off("UPDATE_POINTS");
+				}
+			})
         }
     }, [pongCtx.room, user])
 
@@ -233,6 +237,18 @@ const PongGame = (props: CanvasProps) => {
                     pongCtx.room.withdrawal = data.withdrawal;
                 }
             });
+
+			return (() => {
+				if (pongCtx.room)
+				{
+					pongCtx.room.socket.off("START_GAME");
+					pongCtx.room.socket.off("LOAD_GAME");
+					pongCtx.room.socket.off("END_GAME");
+					pongCtx.room.socket.off("PLAYER_DISCONNECT");
+					pongCtx.room.socket.off("PLAYER_RECONNECT");
+					pongCtx.room.socket.off("ROOM_FINISHED");
+				}
+			})
         }
     }, [pongCtx])
 
