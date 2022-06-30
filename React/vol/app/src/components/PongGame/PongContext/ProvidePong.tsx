@@ -72,9 +72,12 @@ export interface IPongContext
     fx: FX,
 	searchRoom: () => void,
 	stopSearchRoom: () => void,
+	setRoom: (value: IPongRoom | null) => void,
 	requestRoom: () => void,
 	needReconect : boolean,
 	reconnect: () => void,
+	setNeedReconnect: (value: boolean) => void,
+	setInGame: (value: boolean) => void,
 }
 
 
@@ -86,7 +89,8 @@ function usePongProvider() : IPongContext
 	const [socket]				= useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/pong", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth: {
 			token: user?.accessCode,
-		}
+		},
+		reconnectionDelay: 1000,
 	}));
 
 	const [room, setRoom]				= useState<IPongRoom | null>(null);
@@ -173,6 +177,7 @@ function usePongProvider() : IPongContext
                 withdrawal: false,
             } as IPongRoom);
 
+			navigate(`/game/${data.room_id}`, { replace: true })
 
             setInGame(true);
         });
@@ -184,13 +189,13 @@ function usePongProvider() : IPongContext
 
 
 
-    useEffect(() => {
-        if (inGame === true)
+  /*  useEffect(() => {
+        if (inGame === true && room)
         {
 			// console.log("switching")
 			navigate(`/game/${room?.room_id}`, { replace: true });
         }
-    }, [inGame, navigate, room?.room_id])
+    }, [inGame, navigate, room?.room_id, room])*/
 
 	const reconnect = useCallback(() => {
 		if (needReconect)
@@ -212,7 +217,7 @@ function usePongProvider() : IPongContext
     useEffect(() => {
 		if (socket.connected === false)
 		{
-        	socket.connect();
+        	setTimeout(() => { socket.connect(); }, 350);
 		}
         //console.log(socket);
         return (() => {
@@ -274,6 +279,7 @@ function usePongProvider() : IPongContext
                 setAsFinished: () => {},
                 withdrawal: false,
             });
+			navigate(`/game/${data.room_id}`, { replace: true })
             setInGame(true);
         });
 
@@ -286,12 +292,15 @@ function usePongProvider() : IPongContext
 		socket,
 		isAuth,
         room,
+		setRoom,
         fx,
 		searchRoom,
 		stopSearchRoom,
 		requestRoom,
 		needReconect,
 		reconnect,
+		setNeedReconnect,
+		setInGame
     });
 }
 

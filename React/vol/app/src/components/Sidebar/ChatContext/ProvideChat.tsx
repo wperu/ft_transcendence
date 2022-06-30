@@ -105,7 +105,8 @@ function useChatProvider() : IChatContext
 	const [socket] = useState(io(process.env.REACT_APP_WS_SCHEME + "://" + process.env.REACT_APP_ORIGIN + "/chat", { path: "/api/socket.io/", transports: ['websocket'], autoConnect: false,
 		auth:{
 			token: useAuth().user?.accessCode,
-		}
+		},
+		reconnectionDelay: 1000,
 	}));
 	const [isConnected, setIsConnected]		= useState<boolean>(false);
 	const [currentRoom, setCurrentRoom]		= useState<IRoom | undefined>();
@@ -324,7 +325,7 @@ function useChatProvider() : IChatContext
 
 	useEffect(() => {
 		if (socket.connected === false)
-			socket.connect();
+			setTimeout(() => { socket.connect(); }, 350);
 
 		socket.on("disconnect", () => {
 			setRooms([]);

@@ -238,6 +238,24 @@ const PongGame = (props: CanvasProps) => {
 
 	useRender(canvasRef, user!);
 
+	useEffect(() => {
+		return function cleanup() {
+			if (pongCtx.room)
+			{
+				if (pongCtx.room.player_1.username === user?.username || pongCtx.room.player_2.username === user?.username)
+				{
+					if (pongCtx.room.state !== RoomState.FINISHED)
+					{
+						pongCtx.socket.disconnect();
+						pongCtx.setNeedReconnect(true);
+					}
+				}
+				pongCtx.setInGame(false);
+				pongCtx.setRoom(null);
+			}
+		}
+	}, [pongCtx.room, pongCtx.socket, pongCtx.setNeedReconnect, pongCtx.setRoom, user])
+
 
 
     return (
