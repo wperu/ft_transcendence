@@ -265,7 +265,7 @@ const PongGame = (props: CanvasProps) => {
 					}
 				}
 				pongCtx.setInGame(false);
-				pongCtx.setRoom(null);
+				//pongCtx.setRoom(null);
 			}
 		}
 	}, [pongCtx.room, pongCtx.socket, pongCtx.setNeedReconnect, pongCtx.setRoom, user, pongCtx])
